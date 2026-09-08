@@ -1,0 +1,2745 @@
+import { CONFIG as LOCAL_CONFIG } from "../config.js";
+import {
+  translations,
+  DEFAULT_LANGUAGE,
+  formatTemplate,
+  matchLanguage,
+  resolveLocale,
+} from "../i18n/translations.js";
+import {
+  DEFAULT_PLATFORM,
+  buildProfileUrl,
+  formatHandleForDisplay,
+  getHandleComparisonKey,
+  getPlatformIcon,
+  getPlatformLabelKey,
+  normalizePlatform,
+  platformSupportsLiveStatus,
+  sanitizeHandle,
+} from "./platforms.js";
+
+const STORAGE_KEYS = {
+  STREAMERS: "betaGeneralStreamers",
+  STATUSES: "betaGeneralStatuses",
+  STATS: "betaGeneralStats",
+  WATCH_TIME: "betaWatchTimeData",
+  // Dedicated key for live-state notification dedup. Separate from STATUSES
+  // (which is the popup display data) so it survives even if statuses are
+  // wiped/reset. This is critical for MV3: every SW restart wipes the
+  // in-memory `streamerLiveState` Map, so we MUST restore from storage.
+  LIVE_STATE: "streamPulseLiveState",
+};
+
+// ─── Remote config (credentials hosted on Vercel, never in the zip) ──────────
+const REMOTE_CONFIG_URL = "https://alexisamz.fr/api/streampulse-config";
+const REMOTE_CONFIG_CACHE_KEY = "streampulse:remoteConfig";
+const REMOTE_CONFIG_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+let CONFIG = { ...LOCAL_CONFIG };
+let _configReady = null;
+
+async function fetchRemoteConfig() {
+  try {
+    const stored = await chrome.storage.local.get(REMOTE_CONFIG_CACHE_KEY);
+    const cached = stored[REMOTE_CONFIG_CACHE_KEY];
+    // Always hydrate from cache FIRST — even if stale — so credentials are
+    // available immediately after an MV3 service-worker restart (which wipes
+    // the in-memory CONFIG back to the token-less LOCAL_CONFIG). Without this,
+    // an alarm-triggered poll fires before any network fetch and Twitch
+    // rejects the token-less request with 401.
+    if (cached?.data?.clientId) {
+      CONFIG = { ...LOCAL_CONFIG, ...cached.data };
+    }
+    // Cache fresh → nothing more to do.
+    if (cached && Date.now() - cached.fetchedAt < REMOTE_CONFIG_TTL_MS) return;
+    // Cache missing or stale → refresh from the network.
+    const res = await fetch(REMOTE_CONFIG_URL, { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data?.clientId) {
+      CONFIG = { ...LOCAL_CONFIG, ...data };
+      await chrome.storage.local.set({
+        [REMOTE_CONFIG_CACHE_KEY]: { data, fetchedAt: Date.now() },
+      });
+    }
+  } catch {
+    // Network error — keep whatever we hydrated from cache (or local fallback)
+  }
+}
+
+// Gate every Twitch API call behind this. Returns instantly once credentials
+// are loaded for this service-worker lifetime; otherwise re-hydrates from the
+// storage cache (and refreshes from network). Deduped so a burst of callers
+// triggers a single load.
+function ensureConfig() {
+  if (CONFIG.accessToken) return Promise.resolve();
+  if (!_configReady) {
+    _configReady = fetchRemoteConfig().finally(() => {
+      _configReady = null;
+    });
+  }
+  return _configReady;
+}
+
+const WATCHER_ALARM = "streampulseWatcher";
+const KEEP_ALIVE_ALARM = "streampulseKeepAlive";
+const AUTO_OPEN_INVENTORY_ALARM = "streamPulseAutoOpenInventoryAlarm";
+
+async function setupAutoOpenInventoryAlarm(prefs = {}) {
+  if (prefs.autoOpenInventory && Number(prefs.autoOpenInventoryIntervalHours) > 0) {
+    const minutes = Number(prefs.autoOpenInventoryIntervalHours) * 60;
+    chrome.alarms.create(AUTO_OPEN_INVENTORY_ALARM, {
+      periodInMinutes: minutes,
+    });
+  } else {
+    chrome.alarms.clear(AUTO_OPEN_INVENTORY_ALARM);
+  }
+}
+
+const streamerStates = new Map();
+const streamerCache = new Map();
+const streamerLiveState = new Map();
+const NOTIFICATION_NAMESPACE = "streampulse";
+
+const BADGE_COLOR_LIVE = "#f7f4e3";
+const BADGE_COLOR_IDLE = "#6C5CE7";
+
+const PREFERENCES_KEY = "betaGeneralPreferences";
+const DEFAULT_PREFERENCES = {
+  liveNotifications: true,
+  gameNotifications: false,
+  dropAlerts: true,
+  predictionAlerts: true,
+  raidAlerts: true,
+  soundsEnabled: true,
+  autoClaimChannelPoints: true,
+  autoClaimDrops: true,
+  autoClaimMoments: true,
+  autoOpenInventory: false,
+  autoOpenInventoryIntervalHours: 4,
+  hideTwitchExtensions: false,
+  autoCancelRaids: true,
+  preventTabDiscard: true,
+  enablePredictionsPopup: true,
+  enableTabLiveIcon: true,
+  enableStreamerFavicon: true,
+  autoRefreshPlayerErrors: true,
+  enableFastForwardButton: true,
+  watchTimeTracker: true,
+  chatKeywords: "",
+  chatBlockedUsers: "",
+  language: DEFAULT_LANGUAGE,
+  sortOrder: "live",
+  previewsEnabled: true,
+  previewsMode: "image",
+  previewsSurfaceDirectory: true,
+  previewsSurfaceSidebar: true,
+  previewsSurfaceClips: true,
+  previewsSurfaceSearch: true,
+  previewsSize: "m",
+  previewsAudio: false,
+  previewsShowDelayMs: 200,
+  previewsAnimations: true,
+  zeventFeatures: true,
+  communityBadge: true,
+};
+
+const DEFAULT_STATS = {
+  channelPointsClaimed: 0,
+  dropsClaimed: 0,
+  momentsClaimed: 0,
+  raidsCancelled: 0,
+};
+
+const DEFAULT_POLL_INTERVAL =
+  Number(CONFIG.pollIntervalMinutes) > 0 ? CONFIG.pollIntervalMinutes : 1;
+
+
+function sanitizeLogin(value = "") {
+  return sanitizeHandle("twitch", value);
+}
+
+// ─── Kick Official API — App Access Token ─────────────────────────────────────
+
+const _kickToken = { value: null, expiresAt: 0 };
+
+async function getKickCredentials() {
+  const data = await chrome.storage.local.get("streampulse:kickCreds");
+  return data["streampulse:kickCreds"] || null;
+}
+
+async function getKickAppToken() {
+  const creds = await getKickCredentials();
+  if (!creds?.clientId || !creds?.clientSecret) return null;
+
+  // Use in-memory cache
+  if (_kickToken.value && Date.now() < _kickToken.expiresAt - 120_000) {
+    return _kickToken.value;
+  }
+
+  // Check persistent cache
+  const stored = await chrome.storage.local.get("streampulse:kickToken");
+  const cached = stored["streampulse:kickToken"];
+  if (cached?.value && Date.now() < cached.expiresAt - 120_000) {
+    _kickToken.value = cached.value;
+    _kickToken.expiresAt = cached.expiresAt;
+    return _kickToken.value;
+  }
+
+  // Fetch fresh token
+  try {
+    const resp = await fetch("https://id.kick.com/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: creds.clientId,
+        client_secret: creds.clientSecret,
+      }),
+    });
+    if (!resp.ok) return null;
+    const json = await resp.json();
+    if (!json.access_token) return null;
+    const expiresAt = Date.now() + (json.expires_in ?? 3600) * 1000;
+    _kickToken.value = json.access_token;
+    _kickToken.expiresAt = expiresAt;
+    await chrome.storage.local.set({
+      "streampulse:kickToken": { value: json.access_token, expiresAt },
+    });
+    return json.access_token;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchKickOfficial(slug, token) {
+  const resp = await fetch(
+    `https://api.kick.com/public/v1/channels?slug=${encodeURIComponent(slug)}`,
+    { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }
+  );
+  if (!resp.ok) throw new Error(`${resp.status}`);
+  const json = await resp.json();
+  return json?.data?.[0] ?? null;
+}
+
+async function fetchJson(url, options = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return await response.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function normalizeSocialLinks(rawSocials) {
+  if (!rawSocials || typeof rawSocials !== "object") {
+    return {};
+  }
+  const socials = {};
+  for (const [rawKey, value] of Object.entries(rawSocials)) {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) {
+        const key = String(rawKey).toLowerCase();
+        socials[key] = trimmed;
+      }
+    }
+  }
+  return socials;
+}
+
+function normalizeStreamer(raw) {
+  const platform = normalizePlatform(
+    raw.platform ||
+      (raw.twitch ? "twitch" : DEFAULT_PLATFORM)
+  );
+  const baseHandle =
+    raw.handle ??
+    raw.twitch ??
+    raw.login ??
+    raw.username ??
+    raw.id ??
+    "";
+  const sanitizedHandle = sanitizeHandle(platform, baseHandle);
+  const twitchLogin =
+    platform === "twitch"
+      ? sanitizeHandle("twitch", raw.twitch || sanitizedHandle)
+      : "";
+  const derivedId =
+    raw.id ||
+    (platform === "twitch" && twitchLogin
+      ? twitchLogin
+      : sanitizedHandle
+      ? `${platform}:${sanitizedHandle}`
+      : null);
+  const id = derivedId || `streamer_${Date.now()}`;
+  const displayName =
+    raw.displayName ||
+    raw.name ||
+    raw.twitch ||
+    (sanitizedHandle
+      ? formatHandleForDisplay(platform, sanitizedHandle)
+      : id);
+
+  return {
+    id,
+    platform,
+    handle: sanitizedHandle,
+    twitch: twitchLogin,
+    displayName,
+    notificationsEnabled:
+      typeof raw.notificationsEnabled === "boolean"
+        ? raw.notificationsEnabled
+        : true,
+    avatarUrl: raw.avatarUrl || "",
+    twitchId: platform === "twitch" ? raw.twitchId || "" : "",
+    createdAt: raw.createdAt || Date.now(),
+    socials: normalizeSocialLinks(raw.socials),
+  };
+}
+
+function normalizeLanguage(value) {
+  return matchLanguage(value) || DEFAULT_LANGUAGE;
+}
+
+function resolveExternalUrl(rawValue, defaultOrigin = "") {
+  if (!rawValue) {
+    return "";
+  }
+  if (typeof rawValue === "object") {
+    const candidate = rawValue.url || rawValue.src || rawValue.path || rawValue.location;
+    if (!candidate && typeof rawValue.toString === "function") {
+      return resolveExternalUrl(rawValue.toString(), defaultOrigin);
+    }
+    return resolveExternalUrl(candidate, defaultOrigin);
+  }
+
+  const value = String(rawValue).trim();
+  if (!value) {
+    return "";
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  if (value.startsWith("//")) {
+    return `https:${value}`;
+  }
+
+  if (defaultOrigin) {
+    const origin = String(defaultOrigin).trim().replace(/\/+$/g, "");
+    const path = value.replace(/^\/+/g, "");
+    if (origin) {
+      return `${origin}/${path}`;
+    }
+  }
+
+  return value;
+}
+
+function fillDimensions(url, width = 1280, height = 720) {
+  if (!url || typeof url !== "string") return url;
+  return url
+    .replace("{width}", String(width))
+    .replace("{height}", String(height))
+    .replace("%{width}", String(width))
+    .replace("%{height}", String(height));
+}
+
+function resolveKickAsset(value, { prefix = "https://files.kick.com" } = {}) {
+  if (!value) return "";
+
+  let raw = "";
+  if (typeof value === "string") {
+    raw = value;
+  } else if (typeof value === "object") {
+    raw = value?.url || value?.src || value?.href || "";
+    // Handle toString for some edge case objects if needed, but usually safe to skip
+    if (!raw && typeof value.toString === "function") {
+      const text = value.toString();
+      if (text && text !== "[object Object]") raw = text;
+    }
+  }
+
+  if (!raw) return "";
+
+  let normalized = fillDimensions(raw);
+  if (!normalized) return "";
+
+  if (/^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+  if (normalized.startsWith("//")) {
+    return `https:${normalized}`;
+  }
+
+  const cleanPrefix = prefix.replace(/\/$/, "");
+  const cleanPath = normalized.replace(/^\//, "");
+  return `${cleanPrefix}/${cleanPath}`;
+}
+
+function resolveTranslationValue(lang, key) {
+  if (!key) return null;
+  const segments = key.split(".");
+  let current = translations[lang] || translations[DEFAULT_LANGUAGE] || {};
+  for (const segment of segments) {
+    if (current && Object.prototype.hasOwnProperty.call(current, segment)) {
+      current = current[segment];
+    } else {
+      current = null;
+      break;
+    }
+  }
+  if (current == null && lang !== DEFAULT_LANGUAGE) {
+    return resolveTranslationValue(DEFAULT_LANGUAGE, key);
+  }
+  return current;
+}
+
+function translate(lang, key, params = {}) {
+  const value = resolveTranslationValue(lang, key);
+  if (typeof value === "string") {
+    return formatTemplate(value, params);
+  }
+  if (typeof value === "function") {
+    return value(params, { lang });
+  }
+  if (value == null) {
+    return key;
+  }
+  return value;
+}
+
+function translateWithPrefs(preferences, key, params = {}) {
+  const lang = normalizeLanguage(preferences?.language);
+  return translate(lang, key, params);
+}
+
+function formatNumberForLanguage(lang, value) {
+  try {
+    return new Intl.NumberFormat(resolveLocale(lang)).format(value);
+  } catch {
+    return String(value);
+  }
+}
+
+class DataStore {
+  static async getStreamers() {
+    const stored = await chrome.storage.local.get(STORAGE_KEYS.STREAMERS);
+    const streamers = stored[STORAGE_KEYS.STREAMERS] || [];
+    return streamers.map(normalizeStreamer);
+  }
+
+  static async saveStreamers(streamers) {
+    const normalized = streamers.map(normalizeStreamer);
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.STREAMERS]: normalized,
+    });
+    return normalized;
+  }
+
+  static async getStatuses() {
+    const stored = await chrome.storage.local.get(STORAGE_KEYS.STATUSES);
+    return stored[STORAGE_KEYS.STATUSES] || {};
+  }
+
+  static async saveStatuses(statuses) {
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.STATUSES]: statuses,
+    });
+  }
+
+  // Live-state dedicated key: persistent across SW restarts. Used ONLY for
+  // notification dedup (was-live / session-id tracking). Never wiped by the
+  // poll loop, even if streamers list is transiently empty.
+  static async getLiveState() {
+    const stored = await chrome.storage.local.get(STORAGE_KEYS.LIVE_STATE);
+    return stored[STORAGE_KEYS.LIVE_STATE] || {};
+  }
+
+  static async saveLiveState(stateObject) {
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.LIVE_STATE]: stateObject,
+    });
+  }
+
+  static async ensureDefaults() {
+    const existing = await this.getStreamers();
+    if (existing.length > 0) {
+      return existing;
+    }
+    const defaults = (CONFIG.defaultStreamers || []).map(normalizeStreamer);
+    await this.saveStreamers(defaults);
+    return defaults;
+  }
+
+  static async updateStreamer(updatedStreamer) {
+    const streamers = await this.getStreamers();
+    const idx = streamers.findIndex((s) => s.id === updatedStreamer.id);
+    if (idx === -1) {
+      streamers.push(updatedStreamer);
+    } else {
+      streamers[idx] = normalizeStreamer({
+        ...streamers[idx],
+        ...updatedStreamer,
+      });
+    }
+    await this.saveStreamers(streamers);
+    return streamers[idx] || updatedStreamer;
+  }
+}
+
+class PreferenceStore {
+  static sanitize(preferences = {}) {
+    const SORT_ORDER_VALUES = ["live", "name-asc", "name-desc", "custom"];
+    const PREVIEWS_SIZES = ["s", "m", "l"];
+    const previewsDelay = Number(preferences.previewsShowDelayMs);
+    return {
+      liveNotifications: preferences.liveNotifications !== false,
+      gameNotifications: Boolean(preferences.gameNotifications),
+      // Ces trois cles etaient absentes de sanitize() : elles etaient acceptees
+      // par le handler updatePreferences puis perdues a l'ecriture, et le spread
+      // de DEFAULT_PREFERENCES dans set() les remettait a true. Impossible de les
+      // desactiver. La parite DEFAULT_PREFERENCES / sanitize() est desormais
+      // verifiee par scripts/verify.mjs.
+      dropAlerts: preferences.dropAlerts !== false,
+      predictionAlerts: preferences.predictionAlerts !== false,
+      raidAlerts: preferences.raidAlerts !== false,
+      soundsEnabled: preferences.soundsEnabled !== false,
+      autoClaimChannelPoints: preferences.autoClaimChannelPoints !== false,
+      autoClaimDrops: preferences.autoClaimDrops !== false,
+      autoClaimMoments: preferences.autoClaimMoments !== false,
+      autoOpenInventory: Boolean(preferences.autoOpenInventory),
+      autoOpenInventoryIntervalHours: Number(preferences.autoOpenInventoryIntervalHours) > 0 ? Number(preferences.autoOpenInventoryIntervalHours) : 4,
+      hideTwitchExtensions: Boolean(preferences.hideTwitchExtensions),
+      autoCancelRaids: preferences.autoCancelRaids !== false,
+      preventTabDiscard: preferences.preventTabDiscard !== false,
+      enablePredictionsPopup: preferences.enablePredictionsPopup !== false,
+      enableTabLiveIcon: preferences.enableTabLiveIcon !== false,
+      enableStreamerFavicon: preferences.enableStreamerFavicon !== false,
+      autoRefreshPlayerErrors: preferences.autoRefreshPlayerErrors !== false,
+      enableFastForwardButton: preferences.enableFastForwardButton !== false,
+      watchTimeTracker: preferences.watchTimeTracker !== false,
+      chatKeywords: typeof preferences.chatKeywords === "string" ? preferences.chatKeywords : "",
+      chatBlockedUsers: typeof preferences.chatBlockedUsers === "string" ? preferences.chatBlockedUsers : "",
+      language: normalizeLanguage(preferences.language),
+      sortOrder: SORT_ORDER_VALUES.includes(preferences.sortOrder) ? preferences.sortOrder : "live",
+      previewsEnabled: preferences.previewsEnabled !== false,
+      previewsMode: preferences.previewsMode === "video" ? "video" : "image",
+      previewsSurfaceDirectory: preferences.previewsSurfaceDirectory !== false,
+      previewsSurfaceSidebar: preferences.previewsSurfaceSidebar !== false,
+      previewsSurfaceClips: preferences.previewsSurfaceClips !== false,
+      previewsSurfaceSearch: preferences.previewsSurfaceSearch !== false,
+      previewsSize: PREVIEWS_SIZES.includes(preferences.previewsSize) ? preferences.previewsSize : "m",
+      previewsAudio: preferences.previewsAudio === true,
+      previewsShowDelayMs: Number.isFinite(previewsDelay)
+        ? Math.min(2000, Math.max(0, previewsDelay))
+        : 200,
+      previewsAnimations: preferences.previewsAnimations !== false,
+      zeventFeatures: preferences.zeventFeatures !== false,
+      communityBadge: preferences.communityBadge !== false,
+    };
+  }
+
+  static async get() {
+    try {
+      const stored = await chrome.storage.local.get(PREFERENCES_KEY);
+      return {
+        ...DEFAULT_PREFERENCES,
+        ...this.sanitize(stored[PREFERENCES_KEY] || {}),
+      };
+    } catch (error) {
+      console.warn("Preference load error:", error.message);
+      return { ...DEFAULT_PREFERENCES };
+    }
+  }
+
+  static async set(preferences) {
+    const sanitized = {
+      ...DEFAULT_PREFERENCES,
+      ...this.sanitize(preferences),
+    };
+    await chrome.storage.local.set({
+      [PREFERENCES_KEY]: sanitized,
+    });
+    setupAutoOpenInventoryAlarm(sanitized);
+    return sanitized;
+  }
+
+  static async update(updates) {
+    const current = await this.get();
+    const merged = { ...current, ...updates };
+    return this.set(merged);
+  }
+
+  static async ensureDefaults() {
+    const stored = await chrome.storage.local.get(PREFERENCES_KEY);
+    if (!stored[PREFERENCES_KEY]) {
+      await this.set(DEFAULT_PREFERENCES);
+      return { ...DEFAULT_PREFERENCES };
+    }
+    return {
+      ...DEFAULT_PREFERENCES,
+      ...this.sanitize(stored[PREFERENCES_KEY]),
+    };
+  }
+}
+
+class StatsStore {
+  static async get() {
+    try {
+      const stored = await chrome.storage.local.get(STORAGE_KEYS.STATS);
+      return {
+        ...DEFAULT_STATS,
+        ...(stored[STORAGE_KEYS.STATS] || {}),
+      };
+    } catch (error) {
+      console.warn("Stats load error:", error);
+      return { ...DEFAULT_STATS };
+    }
+  }
+
+  static async update(updates) {
+    const current = await this.get();
+    const merged = { ...current, ...updates };
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.STATS]: merged,
+    });
+    return merged;
+  }
+
+  static async increment(stat, value = 1) {
+    const current = await this.get();
+    const newValue = (current[stat] || 0) + value;
+    return this.update({ [stat]: newValue });
+  }
+}
+
+class EventLogStore {
+  static async getLogs() {
+    try {
+      const stored = await chrome.storage.local.get(STORAGE_KEYS.EVENT_LOGS);
+      return stored[STORAGE_KEYS.EVENT_LOGS] || [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static async addLog(entry = {}) {
+    try {
+      const logs = await this.getLogs();
+      const newLog = {
+        id: `log_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: Date.now(),
+        type: entry.type || "info", // "drop", "moment", "raid", "prediction", "points"
+        channel: entry.channel || "",
+        text: entry.text || "",
+        value: entry.value || 0,
+      };
+      logs.unshift(newLog);
+      if (logs.length > 100) logs.pop();
+      await chrome.storage.local.set({ [STORAGE_KEYS.EVENT_LOGS]: logs });
+      return newLog;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static async clearLogs() {
+    await chrome.storage.local.set({ [STORAGE_KEYS.EVENT_LOGS]: [] });
+    return [];
+  }
+}
+
+// Avatar cache for watch time (avoids repeated API calls)
+const wtAvatarCache = new Map();
+
+async function resolveChannelAvatar(platform, channel) {
+  const cacheKey = `${platform}:${channel}`;
+
+  // 1. Memory cache
+  if (wtAvatarCache.has(cacheKey)) return wtAvatarCache.get(cacheKey);
+
+  // 2. Check followed streamers (streamerStates has statuses with avatarUrl)
+  for (const [id, status] of streamerStates) {
+    if (status?.handle === channel || id === channel) {
+      const url = status?.avatarUrl || "";
+      if (url) {
+        wtAvatarCache.set(cacheKey, url);
+        return url;
+      }
+    }
+  }
+
+  // 3. Check streamerCache
+  for (const [, s] of streamerCache) {
+    const sp = s.platform || "twitch";
+    const handle = (s.handle || s.twitch || s.id || "").toLowerCase();
+    if (sp === platform && handle === channel.toLowerCase()) {
+      if (s.avatarUrl) {
+        wtAvatarCache.set(cacheKey, s.avatarUrl);
+        return s.avatarUrl;
+      }
+    }
+  }
+
+  // 4. API lookup (one-shot, cached)
+  try {
+    if (platform === "twitch") {
+      await ensureConfig();
+      const data = await fetchJson(
+        `https://api.twitch.tv/helix/users?login=${encodeURIComponent(channel)}`,
+        { headers: twitchHeaders() }
+      );
+      const url = data?.data?.[0]?.profile_image_url || "";
+      wtAvatarCache.set(cacheKey, url);
+      return url;
+    }
+    if (platform === "kick") {
+      const data = await fetchJson(
+        `https://kick.com/api/v2/channels/${encodeURIComponent(channel)}`
+      );
+      const url = data?.user?.profile_pic || "";
+      wtAvatarCache.set(cacheKey, url);
+      return url;
+    }
+  } catch {
+    // API failed — cache empty string to avoid retrying every heartbeat
+    wtAvatarCache.set(cacheKey, "");
+  }
+
+  return "";
+}
+
+class WatchTimeStore {
+  static _getMonthKey() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    return `${y}-${m}`;
+  }
+
+  static async _getData() {
+    const stored = await chrome.storage.local.get(STORAGE_KEYS.WATCH_TIME);
+    return stored[STORAGE_KEYS.WATCH_TIME] || {};
+  }
+
+  static async _saveData(data) {
+    await chrome.storage.local.set({ [STORAGE_KEYS.WATCH_TIME]: data });
+  }
+
+  static async record(platform, channel, seconds, avatarUrl = "") {
+    // Skip pure presence pings (no actual data to record)
+    if (seconds <= 0) return;
+
+    const month = this._getMonthKey();
+    const data = await this._getData();
+
+    if (!data[month]) data[month] = {};
+    const key = `${platform}:${channel}`;
+    if (!data[month][key]) {
+      data[month][key] = { watchSeconds: 0, platform, channel, avatarUrl: "" };
+    }
+
+    data[month][key].watchSeconds += seconds;
+    // Update avatar if we got a fresher one
+    if (avatarUrl) data[month][key].avatarUrl = avatarUrl;
+
+    // Prune months older than 3 months to save storage
+    const months = Object.keys(data).sort();
+    while (months.length > 3) {
+      delete data[months.shift()];
+    }
+
+    await this._saveData(data);
+  }
+
+  static async getSummary(monthKey = null) {
+    const data = await this._getData();
+    const key = monthKey || this._getMonthKey();
+    const monthData = data[key] || {};
+
+    const entries = Object.values(monthData);
+    entries.sort((a, b) => b.watchSeconds - a.watchSeconds);
+
+    const topWatchedRaw = entries.slice(0, 10);
+
+    // Resolve missing avatars before returning
+    const topWatched = await Promise.all(
+      topWatchedRaw.map(async (e) => {
+        let avatarUrl = e.avatarUrl || "";
+        if (!avatarUrl) {
+          avatarUrl = await resolveChannelAvatar(e.platform, e.channel);
+          // Persist resolved avatar for next time
+          if (avatarUrl && monthData[`${e.platform}:${e.channel}`]) {
+            monthData[`${e.platform}:${e.channel}`].avatarUrl = avatarUrl;
+          }
+        }
+        return {
+          platform: e.platform,
+          channel: e.channel,
+          watchSeconds: e.watchSeconds,
+          avatarUrl,
+        };
+      })
+    );
+
+    // Save back any newly resolved avatars
+    if (data[key]) {
+      data[key] = monthData;
+      await this._saveData(data);
+    }
+
+    const totalSeconds = entries.reduce((s, e) => s + e.watchSeconds, 0);
+    const availableMonths = Object.keys(data).sort().reverse();
+
+    return {
+      month: key,
+      availableMonths,
+      totalSeconds,
+      channelCount: entries.length,
+      topWatched,
+    };
+  }
+}
+
+function twitchHeaders() {
+  const headers = {
+    "Client-ID": CONFIG.clientId,
+    Accept: "application/json",
+  };
+  if (CONFIG.accessToken) {
+    headers.Authorization = `Bearer ${CONFIG.accessToken}`;
+  }
+  return headers;
+}
+
+class PlatformChecker {
+  static async getTwitchUser(login) {
+    const sanitized = sanitizeLogin(login);
+    if (!sanitized) return null;
+    await ensureConfig();
+    try {
+      const data = await fetchJson(
+        `https://api.twitch.tv/helix/users?login=${sanitized}`,
+        { headers: twitchHeaders() }
+      );
+      return data.data?.[0] || null;
+    } catch (error) {
+      console.warn("Twitch user fetch error:", error.message);
+      return { _apiError: true, status: error.message, isError: true };
+    }
+  }
+
+  static async getTwitchStatus(login) {
+    const sanitized = sanitizeLogin(login);
+    if (!sanitized) return { isLive: false };
+    await ensureConfig();
+    try {
+      const data = await fetchJson(
+        `https://api.twitch.tv/helix/streams?user_login=${sanitized}`,
+        { headers: twitchHeaders() }
+      );
+      const stream = data.data?.[0];
+      if (!stream) {
+        return { isLive: false };
+      }
+      return {
+        isLive: true,
+        platform: "twitch",
+        game: stream.game_name || "",
+        viewers: stream.viewer_count || 0,
+        title: stream.title || "",
+        startedAt: stream.started_at,
+        sessionId: stream.id,
+        thumbnailUrl: stream.thumbnail_url,
+      };
+    } catch (error) {
+      console.warn("Twitch status error:", error.message);
+      return { isLive: false, error: error.message, isError: true };
+    }
+  }
+
+  static async getKickChannel(handle) {
+    const sanitized = sanitizeHandle("kick", handle);
+    if (!sanitized) return null;
+
+    // Try official API first (needs credentials)
+    try {
+      const token = await getKickAppToken();
+      if (token) {
+        const official = await fetchKickOfficial(sanitized, token);
+        if (official) return { _source: "official", ...official };
+      }
+    } catch { /* fall through to V2 */ }
+
+    // Fallback: unofficial V2 API
+    try {
+      const data = await fetchJson(
+        `https://kick.com/api/v2/channels/${encodeURIComponent(sanitized)}`
+      );
+      if (!data || data.error) return null;
+      return data;
+    } catch (error) {
+      if (error?.message?.includes?.("404")) return null;
+      console.warn("Kick channel fetch error:", error.message);
+      return { _apiError: true, status: error.message, isError: true };
+    }
+  }
+
+  // Extract status from official api.kick.com/public/v1/channels response
+  static extractKickStatusOfficial(channel, handle) {
+    const stream = channel?.stream;
+    const slug = channel?.slug || handle;
+    const base = {
+      platform: "kick",
+      url: buildProfileUrl("kick", slug),
+      displayName: slug,
+      avatarUrl: channel?.banner_picture || "",
+    };
+
+    if (!stream?.is_live) return { isLive: false, ...base };
+
+    const thumb = stream.thumbnail || "";
+    return {
+      isLive: true,
+      ...base,
+      title: channel.stream_title || "",
+      game: channel.category?.name || "",
+      viewers: stream.viewer_count || 0,
+      startedAt: stream.start_time || null,
+      thumbnailUrl: thumb,
+      thumbnailCandidates: thumb ? [thumb] : [],
+      supportsLiveStatus: true,
+    };
+  }
+
+  static extractKickStatus(channel, handle) {
+    if (!channel) {
+      return {
+        isLive: false,
+        platform: "kick",
+        url: buildProfileUrl("kick", handle),
+      };
+    }
+
+    const stream = channel?.livestream;
+    const base = {
+      platform: "kick",
+      url: buildProfileUrl("kick", channel.slug || handle),
+      avatarUrl:
+        resolveKickAsset(channel?.user?.profile_pic) ||
+        resolveKickAsset(channel?.profile_pic) ||
+        "",
+      displayName:
+        channel?.user?.display_name ||
+        channel?.user?.username ||
+        channel?.slug ||
+        handle,
+    };
+
+    const streamStatus = String(stream?.status || "").toLowerCase();
+    // Some API responses use is_live boolean, others context.
+    const isLive =
+      Boolean(stream) &&
+      (stream?.is_live === true || stream?.is_live === undefined) && // If undefined, rely on status
+      (!streamStatus || streamStatus === "live");
+
+    if (!isLive) {
+      return {
+        isLive: false,
+        ...base,
+      };
+    }
+
+    const category =
+      stream?.category?.name ||
+      stream?.category?.slug ||
+      stream?.category?.title ||
+      "";
+
+    const preferredSize = { width: 1280, height: 720 };
+    const dimensionSuffix = `${preferredSize.width}x${preferredSize.height}`;
+    // Optimize: Cache for 60 seconds to prevent flickering on every popup open
+    const cb = Math.floor(Date.now() / 60000); // 1-minute cache bucket
+
+    const slug = channel?.slug || channel?.user?.username || stream?.slug;
+    const channelId = channel?.id || stream?.channel_id || stream?.id;
+
+    // API-provided URLs first (most reliable), then constructed fallbacks
+    const apiRaw = [
+      stream?.thumbnail?.url,
+      stream?.thumbnail?.src,
+      stream?.thumbnail_url,
+      stream?.thumbnail,
+    ];
+
+    const constructedRaw = [];
+    if (channelId) {
+      constructedRaw.push(
+        `https://images.kick.com/v2/stream-thumbnails/${channelId}/live-${dimensionSuffix}.webp`,
+        `https://images.kick.com/v2/stream-thumbnails/${channelId}/live-${dimensionSuffix}.jpg`,
+        `https://files.kick.com/stream-thumbnails/${channelId}/livestream-${dimensionSuffix}.webp`,
+        `https://files.kick.com/stream-thumbnails/${channelId}/livestream-${dimensionSuffix}.jpg`,
+        `https://files.kick.com/stream-thumbnails/${channelId}/livestream.jpg`
+      );
+    }
+    if (slug) {
+      constructedRaw.push(
+        `https://files.kick.com/stream-thumbnails/${slug}/livestream-${dimensionSuffix}.webp`,
+        `https://files.kick.com/stream-thumbnails/${slug}/livestream-${dimensionSuffix}.jpg`,
+        `https://files.kick.com/stream-thumbnails/${slug}/livestream.jpg`
+      );
+    }
+
+    const distinctUrls = new Set();
+    const allCandidates = [];
+    for (const raw of [...apiRaw, ...constructedRaw]) {
+      const resolved = resolveKickAsset(raw);
+      if (resolved && !resolved.includes("null") && !resolved.includes("undefined")) {
+        if (!distinctUrls.has(resolved)) {
+          distinctUrls.add(resolved);
+          allCandidates.push(resolved);
+        }
+      }
+    }
+
+    // Cache bust, keep top 5
+    const thumbnailCandidates = allCandidates.slice(0, 5).map(url => {
+      if (url.includes("cb=")) return url;
+      const separator = url.includes("?") ? "&" : "?";
+      return `${url}${separator}cb=${cb}`;
+    });
+
+    const thumbnail = thumbnailCandidates[0] || "";
+    
+    const viewerCount =
+      Number(stream?.viewer_count ?? stream?.viewers ?? stream?.view_count) ||
+      0;
+
+    return {
+      isLive: true,
+      ...base,
+      game: category,
+      viewers: viewerCount,
+      title: stream?.session_title || stream?.title || "",
+      startedAt: stream?.start_time || stream?.created_at || null,
+      sessionId: stream?.id || null,
+      thumbnailUrl: thumbnail,
+      thumbnailCandidates,
+    };
+  }
+
+  static async getKickStatus(handle) {
+    const channel = await this.getKickChannel(handle);
+    if (channel?._apiError) {
+      return { isLive: false, platform: "kick", error: channel.status, isError: true };
+    }
+    if (channel?._source === "official") {
+      return this.extractKickStatusOfficial(channel, handle);
+    }
+    return this.extractKickStatus(channel, handle);
+  }
+
+  static async getStatus(streamer) {
+    const platform = normalizePlatform(streamer?.platform);
+    const supportsLive = platformSupportsLiveStatus(platform);
+    if (platform === "twitch") {
+      const login = streamer.twitch || streamer.handle;
+      const status = await this.getTwitchStatus(login);
+      return {
+        ...status,
+        platform,
+        supportsLiveStatus: supportsLive,
+        url: buildProfileUrl(platform, login),
+      };
+    }
+    if (platform === "kick") {
+      const status = await this.getKickStatus(streamer.handle || streamer.id);
+      return {
+        ...status,
+        platform,
+        supportsLiveStatus: supportsLive,
+      };
+    }
+    return {
+      isLive: false,
+      platform,
+      supportsLiveStatus: supportsLive,
+      url: buildProfileUrl(platform, streamer?.handle || ""),
+    };
+  }
+
+  static async refreshAll() {
+    return pollStreamers({ forceNotification: false });
+  }
+}
+
+class NotificationCenter {
+  static storageKey = `${NOTIFICATION_NAMESPACE}:scheduled`;
+  static alarmPrefix = `${NOTIFICATION_NAMESPACE}:alarm:`;
+  static clickMap = new Map();
+  static initialized = false;
+
+  static getDefaultIcon() {
+    return chrome.runtime.getURL("images/photos/logo.png");
+  }
+
+  static resolveIcon(icon) {
+    if (typeof icon === "string") {
+      const trimmed = icon.trim();
+      if (!trimmed) {
+        return this.getDefaultIcon();
+      }
+      if (trimmed.startsWith("http://")) {
+        return `https://${trimmed.slice(7)}`;
+      }
+      return trimmed;
+    }
+    return this.getDefaultIcon();
+  }
+
+  static async init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    chrome.notifications.onClicked.addListener((notificationId) => {
+      const info = this.clickMap.get(notificationId);
+      if (!info) return;
+      this.clickMap.delete(notificationId);
+      chrome.notifications.clear(notificationId);
+      if (info.streamerId) {
+        openStreamerFromNotification(info.streamerId);
+      } else if (info.url) {
+        chrome.tabs.create({ url: info.url });
+      }
+    });
+
+    chrome.notifications.onClosed.addListener((notificationId) => {
+      if (this.clickMap.has(notificationId)) {
+        this.clickMap.delete(notificationId);
+      }
+    });
+
+    const entries = await this.getScheduled();
+    entries.forEach((entry) => {
+      chrome.alarms.create(entry.alarmName, {
+        delayInMinutes: 0.1,
+        periodInMinutes: entry.intervalMinutes,
+      });
+    });
+  }
+
+  /**
+   * Create a notification, retrying with the bundled icon if the remote one
+   * cannot be fetched.
+   *
+   * Chrome rejects the WHOLE notification with "Unable to download all
+   * specified images" when `iconUrl` points at a remote avatar it can't load
+   * (CDN hiccup, offline, or a content blocker intercepting the request). The
+   * notification is the actual feature here and the avatar is decorative, so a
+   * failed image must never cost the user the alert.
+   */
+  static async createWithIconFallback(id, notificationOptions) {
+    const create = (options) =>
+      new Promise((resolve, reject) => {
+        try {
+          chrome.notifications.create(id, options, () => {
+            const err = chrome.runtime.lastError;
+            if (err) reject(new Error(err.message));
+            else resolve(true);
+          });
+        } catch (e) {
+          reject(e);
+        }
+      });
+
+    try {
+      return await create(notificationOptions);
+    } catch (_e) {
+      const fallback = this.getDefaultIcon();
+      if (notificationOptions.iconUrl === fallback) return false;
+      try {
+        return await create({ ...notificationOptions, iconUrl: fallback });
+      } catch (_e2) {
+        // Never let a cosmetic image failure reject into an unhandled promise.
+        return false;
+      }
+    }
+  }
+
+  static async show(options = {}) {
+    await this.init();
+    const id = `${NOTIFICATION_NAMESPACE}-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 10)}`;
+    // Cap clickMap to prevent unbounded growth
+    if (this.clickMap.size > 50) {
+      const oldest = this.clickMap.keys().next().value;
+      this.clickMap.delete(oldest);
+    }
+    this.clickMap.set(id, {
+      url: options.url || null,
+      streamerId: options.streamerId || null,
+      platform: options.platform || null,
+    });
+    await this.createWithIconFallback(id, {
+      type: "basic",
+      iconUrl: this.resolveIcon(options.iconUrl),
+      title: options.title || translate(DEFAULT_LANGUAGE, "common.appName"),
+      message: options.message || "",
+      requireInteraction: Boolean(options.requireInteraction),
+      priority:
+        typeof options.priority === "number"
+          ? options.priority
+          : options.requireInteraction
+          ? 2
+          : 0,
+    });
+    if (options.playSound) {
+      await SoundManager.play(CONFIG.notifications?.soundFile);
+    }
+    return id;
+  }
+
+  static async schedule(options = {}) {
+    await this.init();
+    const entries = await this.getScheduled();
+    const alarmName = options.name
+      ? `${this.alarmPrefix}${options.name}`
+      : `${this.alarmPrefix}${Date.now()}`;
+    const interval = Math.max(
+      Number(options.intervalMinutes) || DEFAULT_POLL_INTERVAL,
+      0.1
+    );
+    const updated = entries.filter((entry) => entry.alarmName !== alarmName);
+    updated.push({
+      alarmName,
+      title: options.title || translate(DEFAULT_LANGUAGE, "common.appName"),
+      message: options.message || "",
+      url: options.url || null,
+      streamerId: options.streamerId || null,
+      platform: options.platform || null,
+      intervalMinutes: interval,
+      requireInteraction: Boolean(options.requireInteraction),
+      priority:
+        typeof options.priority === "number"
+          ? options.priority
+          : options.requireInteraction
+          ? 2
+          : 0,
+      playSound: options.playSound !== false,
+      iconUrl: this.resolveIcon(options.iconUrl),
+    });
+    await this.saveScheduled(updated);
+    chrome.alarms.create(alarmName, {
+      delayInMinutes: 0.1,
+      periodInMinutes: interval,
+    });
+    return alarmName;
+  }
+
+  static async cancel(name) {
+    const entries = await this.getScheduled();
+    const alarmName = `${this.alarmPrefix}${name}`;
+    const filtered = entries.filter((entry) => entry.alarmName !== alarmName);
+    await this.saveScheduled(filtered);
+    chrome.alarms.clear(alarmName);
+  }
+
+  static async handleAlarm(alarmName) {
+    await this.init();
+    if (!alarmName.startsWith(this.alarmPrefix)) return false;
+    const entries = await this.getScheduled();
+    const entry = entries.find((item) => item.alarmName === alarmName);
+    if (!entry) return false;
+    await this.show(entry);
+    return true;
+  }
+
+  static async getScheduled() {
+    const stored = await chrome.storage.local.get(this.storageKey);
+    return stored[this.storageKey] || [];
+  }
+
+  static async saveScheduled(entries) {
+    await chrome.storage.local.set({ [this.storageKey]: entries });
+  }
+}
+
+class NotificationSystem {
+  static async notifyLive(streamer, status, preferences = DEFAULT_PREFERENCES) {
+    if (preferences.liveNotifications === false) {
+      return;
+    }
+
+    const lang = normalizeLanguage(preferences?.language);
+    const platform = status.platform || streamer.platform || "twitch";
+    const name =
+      streamer.displayName ||
+      formatHandleForDisplay(platform, streamer.handle || streamer.twitch);
+    const title = translate(lang, "background.notifications.liveTitle", {
+      name,
+    });
+
+    const detailParts = [];
+    if (status.title) {
+      detailParts.push(status.title);
+    }
+    if (status.game && Number.isFinite(status.viewers)) {
+      detailParts.push(
+        translate(lang, "background.notifications.liveMessage", {
+          game: status.game,
+          viewers: formatNumberForLanguage(lang, status.viewers),
+        })
+      );
+    } else if (status.game) {
+      detailParts.push(
+        translate(lang, "background.notifications.liveMessageNoViewers", {
+          game: status.game,
+        })
+      );
+    } else if (Number.isFinite(status.viewers)) {
+      detailParts.push(
+        translate(lang, "background.notifications.liveMessageNoGame", {
+          viewers: formatNumberForLanguage(lang, status.viewers),
+        })
+      );
+    }
+
+    const platformLabel = translate(lang, getPlatformLabelKey(platform));
+    detailParts.push(platformLabel);
+    const message = detailParts.filter(Boolean).join(" • ");
+
+    const targetUrl = buildProfileUrl(
+      platform,
+      streamer.handle || streamer.twitch || streamer.id
+    );
+    const streamerStatus = streamerStates.get(streamer.id);
+    const fallbackIcon =
+      (chrome?.runtime && getPlatformIcon(platform)
+        ? chrome.runtime.getURL(getPlatformIcon(platform))
+        : null) || NotificationCenter.getDefaultIcon();
+    const iconCandidate =
+      streamerStatus?.avatarUrl || streamer.avatarUrl || fallbackIcon;
+    const iconUrl = NotificationCenter.resolveIcon(iconCandidate);
+
+    await NotificationCenter.show({
+      title,
+      message,
+      streamerId: streamer.id,
+      platform: status.platform,
+      url: status.url || targetUrl,
+      iconUrl,
+      requireInteraction: true,
+      priority: 2,
+      playSound: preferences?.soundsEnabled !== false,
+    });
+  }
+
+  static async notifyGameChange(
+    streamer,
+    fromGame,
+    toGame,
+    preferences = DEFAULT_PREFERENCES,
+    platform = null
+  ) {
+    if (
+      preferences.liveNotifications === false ||
+      !preferences.gameNotifications
+    ) {
+      return;
+    }
+
+    const lang = normalizeLanguage(preferences?.language);
+    const platformKey = platform || streamer.platform || "twitch";
+    if (!platformSupportsLiveStatus(platformKey)) {
+      return;
+    }
+    const title = translate(
+      lang,
+      "background.notifications.categoryChangeTitle",
+      {
+        name:
+          streamer.displayName ||
+          formatHandleForDisplay(
+            platformKey,
+            streamer.handle || streamer.twitch
+          ),
+      }
+    );
+    const message = translate(
+      lang,
+      "background.notifications.categoryChangeMessage",
+      {
+        from:
+          fromGame ||
+          translate(lang, "background.notifications.unknownCategory"),
+        to: toGame || translate(lang, "background.notifications.newCategory"),
+      }
+    );
+
+    const targetUrl = buildProfileUrl(
+      platformKey,
+      streamer.handle || streamer.twitch || streamer.id
+    );
+    const streamerStatus = streamerStates.get(streamer.id);
+    const fallbackIcon =
+      (chrome?.runtime && getPlatformIcon(platformKey)
+        ? chrome.runtime.getURL(getPlatformIcon(platformKey))
+        : null) || NotificationCenter.getDefaultIcon();
+    const iconCandidate =
+      streamerStatus?.avatarUrl || streamer.avatarUrl || fallbackIcon;
+    const iconUrl = NotificationCenter.resolveIcon(iconCandidate);
+
+    await NotificationCenter.show({
+      title,
+      message,
+      streamerId: streamer.id,
+      platform: platformKey,
+      url: targetUrl,
+      iconUrl,
+      requireInteraction: false,
+      priority: 1,
+      playSound: preferences?.soundsEnabled !== false,
+    });
+  }
+
+  static async sendTest(preferences = DEFAULT_PREFERENCES) {
+    if (preferences.liveNotifications === false) {
+      throw new Error(
+        translateWithPrefs(
+          preferences,
+          "background.errors.notificationsDisabled"
+        )
+      );
+    }
+
+    const lang = normalizeLanguage(preferences?.language);
+
+    await NotificationCenter.show({
+      title: translate(lang, "common.appName"),
+      message: translate(lang, "background.notifications.testSimpleMessage"),
+      requireInteraction: true,
+      priority: 2,
+      playSound: preferences?.soundsEnabled !== false,
+    });
+  }
+}
+
+class SoundManager {
+  static async play(filePath = "sons/notification.mp3") {
+    if (!filePath) return;
+    try {
+      await chrome.offscreen.createDocument({
+        url: "html/audio-handler.html",
+        reasons: ["AUDIO_PLAYBACK"],
+        justification: "Lecture d'une notification audio",
+      });
+    } catch (creationError) {
+      if (
+        !creationError?.message?.includes("Only a single offscreen") &&
+        !creationError?.message?.includes("already created")
+      ) {
+        console.warn("Offscreen creation error:", creationError.message);
+      }
+    }
+
+    try {
+      await chrome.runtime.sendMessage({
+        audioCommand: {
+          action: "play",
+          file: filePath,
+          volume: 1.0,
+        },
+      });
+    } catch (error) {
+      console.warn("Audio playback error:", error.message);
+    }
+  }
+}
+
+class ActionBadge {
+  static formatBadgeCount(count) {
+    if (!Number.isFinite(count) || count <= 0) {
+      return "";
+    }
+    if (count >= 100) {
+      return "99+";
+    }
+    return String(count);
+  }
+
+  static async setLive(count, preferences = null) {
+    const prefs = preferences || (await PreferenceStore.get());
+    try {
+      await chrome.action.setBadgeText({ text: this.formatBadgeCount(count) });
+      await chrome.action.setBadgeBackgroundColor({ color: BADGE_COLOR_LIVE });
+      await chrome.action.setTitle({
+        title: translateWithPrefs(prefs, "background.badge.live", {
+          count,
+        }),
+      });
+    } catch (error) {
+      console.warn("Badge live update failed:", error.message);
+    }
+  }
+
+  static async clear(preferences = null) {
+    const prefs = preferences || (await PreferenceStore.get());
+    try {
+      await chrome.action.setBadgeText({ text: "" });
+      await chrome.action.setBadgeBackgroundColor({ color: BADGE_COLOR_IDLE });
+      await chrome.action.setTitle({
+        title: translateWithPrefs(prefs, "background.badge.idle"),
+      });
+    } catch (error) {
+      console.warn("Badge clear failed:", error.message);
+    }
+  }
+
+  static async update(liveCount, preferences = null) {
+    const prefs = preferences || (await PreferenceStore.get());
+    if (liveCount > 0) {
+      await this.setLive(liveCount, prefs);
+    } else {
+      await this.clear(prefs);
+    }
+  }
+}
+
+async function buildStreamerStatus(streamer) {
+  const platform = streamer.platform || "twitch";
+  const status = await PlatformChecker.getStatus(streamer);
+  const activeStatus = status.isLive
+    ? { ...status, platform, supportsLiveStatus: status.supportsLiveStatus }
+    : {
+        isLive: false,
+        platform,
+        supportsLiveStatus: status.supportsLiveStatus,
+        url: status.url || buildProfileUrl(platform, streamer.handle),
+        avatarUrl: status.avatarUrl || "",
+        error: status.error,
+        isError: status.isError,
+      };
+
+  let avatarUrl = streamer.avatarUrl || status.avatarUrl || "";
+  if (!avatarUrl && platform === "twitch") {
+    const login = streamer.twitch || streamer.handle;
+    if (status?.login) {
+      avatarUrl = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${status.login}-128x128.jpg`;
+    } else if (login) {
+      avatarUrl = `https://static-cdn.jtvnw.net/jtv_user_pictures/${login}-profile_image-70x70.png`;
+    }
+  }
+  if (!avatarUrl) {
+    const fallbackIcon =
+      (chrome?.runtime
+        ? chrome.runtime.getURL(getPlatformIcon(platform))
+        : null) || null;
+    avatarUrl = fallbackIcon || "";
+  }
+
+  const displayName =
+    streamer.displayName ||
+    status.displayName ||
+    formatHandleForDisplay(platform, streamer.handle || streamer.twitch);
+
+  return {
+    id: streamer.id,
+    platform,
+    handle: streamer.handle,
+    displayName,
+    avatarUrl,
+    active: activeStatus,
+    updatedAt: Date.now(),
+  };
+}
+
+let _pollInFlight = null;
+let _lastPollAt = 0;
+
+async function pollStreamers({ forceNotification = false } = {}) {
+  // Re-entrancy guard: dedupe concurrent calls
+  if (_pollInFlight) return _pollInFlight;
+
+  _pollInFlight = (async () => {
+    try {
+      return await _pollStreamersImpl({ forceNotification });
+    } finally {
+      _lastPollAt = Date.now();
+      _pollInFlight = null;
+    }
+  })();
+  return _pollInFlight;
+}
+
+async function _pollStreamersImpl({ forceNotification = false } = {}) {
+  await ensureConfig(); // hydrate credentials before any Twitch API call (MV3 SW restart safety)
+  const streamers = await DataStore.getStreamers();
+  const preferences = await PreferenceStore.get();
+  if (streamers.length === 0) {
+    // Don't wipe statuses/live-state here. A transient empty read from
+    // chrome.storage (or a single-poll race) shouldn't destroy the dedup state
+    // for genuinely-followed streamers — it would cause every previously-live
+    // streamer to re-fire its "now live" notification on the next poll.
+    await ActionBadge.update(0, preferences);
+    return [];
+  }
+
+  // ALWAYS restore from the dedicated LIVE_STATE storage key (not just when
+  // size === 0). MV3 service workers can be terminated between any two polls,
+  // and this Map is module-level (lost on every restart). Without restoring
+  // from storage, every poll on a fresh SW would see `wasLive = false` and
+  // re-fire the "live" notification — i.e. one notification per poll interval.
+  // Using a dedicated key (vs. piggybacking on STATUSES) means notification
+  // dedup survives even if the statuses object is transiently wiped.
+  try {
+    const savedLiveState = await DataStore.getLiveState();
+    Object.entries(savedLiveState || {}).forEach(([id, entry]) => {
+      if (!streamerLiveState.has(id) && entry && typeof entry === "object") {
+        streamerLiveState.set(id, {
+          isLive: Boolean(entry.isLive),
+          platform: entry.platform || null,
+          game: entry.game || "",
+          sessionId: entry.sessionId || null,
+          title: entry.title || "",
+          avatarUrl: entry.avatarUrl || "",
+          supportsLiveStatus: entry.supportsLiveStatus !== false,
+        });
+      }
+    });
+  } catch (err) {
+    console.warn("Failed to restore live state:", err?.message || err);
+  }
+
+  const streamerById = new Map();
+  streamers.forEach((streamer) => {
+    streamerCache.set(streamer.id, streamer);
+    streamerById.set(streamer.id, streamer);
+  });
+
+  // Cap concurrency to 3 parallel fetches — lighter on RAM & network
+  const statuses = [];
+  const CONCURRENCY = 3;
+  for (let i = 0; i < streamers.length; i += CONCURRENCY) {
+    const batch = streamers.slice(i, i + CONCURRENCY);
+    const results = await Promise.all(batch.map(buildStreamerStatus));
+    statuses.push(...results);
+  }
+
+  for (const status of statuses) {
+    const streamer = streamerById.get(status.id);
+    const previousLiveState = streamerLiveState.get(streamer.id) || {
+      isLive: false,
+      platform: null,
+      game: "",
+      sessionId: null,
+      title: "",
+      supportsLiveStatus: false,
+    };
+
+    const nextLiveState = {
+      isLive: Boolean(status.active?.isLive),
+      platform: status.active?.platform || null,
+      game: status.active?.game || "",
+      sessionId: status.active?.sessionId || null,
+      title: status.active?.title || "",
+      avatarUrl: status.avatarUrl || streamer.avatarUrl || null,
+      supportsLiveStatus: status.active?.supportsLiveStatus !== false,
+      isError: Boolean(status.active?.isError),
+    };
+
+    // If there was an API error, preserve the previous live state to prevent offline/online flapping
+    if (nextLiveState.isError) {
+      nextLiveState.isLive = previousLiveState.isLive;
+      nextLiveState.sessionId = previousLiveState.sessionId;
+      nextLiveState.game = previousLiveState.game;
+      nextLiveState.title = previousLiveState.title;
+    }
+
+    const notificationsEnabled =
+      preferences.liveNotifications !== false &&
+      streamer.notificationsEnabled !== false;
+
+    if (forceNotification && notificationsEnabled && nextLiveState.isLive) {
+      await NotificationSystem.notifyLive(streamer, status.active, preferences);
+    } else if (notificationsEnabled && nextLiveState.isLive) {
+      const wasLive = previousLiveState.isLive;
+      const sessionChanged =
+        previousLiveState.sessionId &&
+        nextLiveState.sessionId &&
+        previousLiveState.sessionId !== nextLiveState.sessionId;
+
+      if (!wasLive || sessionChanged) {
+        await NotificationSystem.notifyLive(
+          streamer,
+          status.active,
+          preferences
+        );
+      } else {
+        const gameNotificationsEnabled = streamer.gameNotificationsEnabled !== false;
+        const shouldNotifyGame =
+          preferences.gameNotifications &&
+          gameNotificationsEnabled &&
+          preferences.liveNotifications !== false &&
+          previousLiveState.isLive &&
+          previousLiveState.game &&
+          nextLiveState.game &&
+          previousLiveState.game !== nextLiveState.game &&
+          (!previousLiveState.sessionId ||
+            !nextLiveState.sessionId ||
+            previousLiveState.sessionId === nextLiveState.sessionId);
+
+        if (shouldNotifyGame) {
+          await NotificationSystem.notifyGameChange(
+            streamer,
+            previousLiveState.game,
+            nextLiveState.game,
+            preferences,
+            nextLiveState.platform
+          );
+        }
+      }
+    }
+
+    streamerStates.set(status.id, status);
+    streamerLiveState.set(streamer.id, nextLiveState);
+  }
+
+  const statusesObject = {};
+  statuses.forEach((status) => {
+    statusesObject[status.id] = status;
+  });
+  await DataStore.saveStatuses(statusesObject);
+
+  // Persist live-state separately so notification dedup survives SW restarts.
+  // Storing as a plain object (Map serialization) keyed by streamer.id.
+  try {
+    const liveStateObject = {};
+    streamerLiveState.forEach((value, key) => {
+      liveStateObject[key] = value;
+    });
+    await DataStore.saveLiveState(liveStateObject);
+  } catch (err) {
+    console.warn("Failed to persist live state:", err?.message || err);
+  }
+
+  const liveCount = statuses.reduce((total, status) => {
+    return total + (status.active?.isLive ? 1 : 0);
+  }, 0);
+  await ActionBadge.update(liveCount, preferences);
+
+  // Pre-cache thumbnails for live streamers (background)
+  precacheThumbnails(statuses).catch(() => {});
+
+  return statuses;
+}
+
+async function precacheThumbnails(statuses) {
+  const CACHE_KEY = "streampulse:thumbCache";
+  let cache = {};
+  try {
+    const stored = await chrome.storage.local.get(CACHE_KEY);
+    cache = stored[CACHE_KEY] || {};
+  } catch { /* ignore */ }
+
+  let changed = false;
+
+  for (const status of statuses) {
+    if (!status.active?.isLive) continue;
+
+    // Pick the best thumbnail URL (no fetch — CORS blocks HEAD from SW)
+    const candidates = status.active.thumbnailCandidates || [];
+    const mainThumb = status.active.thumbnailUrl;
+    const url = candidates[0] || mainThumb;
+    if (!url) continue;
+
+    if (cache[status.id] !== url) {
+      cache[status.id] = url;
+      changed = true;
+    }
+  }
+
+  // Clean cache: remove entries for streamers no longer followed
+  const statusIds = new Set(statuses.map((s) => s.id));
+  for (const id of Object.keys(cache)) {
+    if (!statusIds.has(id)) {
+      delete cache[id];
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    await chrome.storage.local.set({ [CACHE_KEY]: cache }).catch(() => {});
+  }
+}
+
+// Idempotent: only create the alarm if it doesn't already exist. Otherwise
+// every SW restart would call chrome.alarms.create() with the same name,
+// CANCELLING the existing periodic alarm and replacing it with a fresh one
+// using delayInMinutes: 0.1 (clamped to 1 min in production). This means the
+// alarm phase keeps shifting forward by 1 min on every wake-up — the period
+// is no longer the configured 10 min, polls bunch up, and notifications can
+// re-fire on every wake if state restoration lags.
+function scheduleWatcherAlarm() {
+  chrome.alarms.get(WATCHER_ALARM, (existing) => {
+    if (existing) return;
+    chrome.alarms.create(WATCHER_ALARM, {
+      periodInMinutes: DEFAULT_POLL_INTERVAL,
+      delayInMinutes: 0.1,
+    });
+  });
+}
+
+function scheduleKeepAliveAlarm() {
+  chrome.alarms.get(KEEP_ALIVE_ALARM, (existing) => {
+    if (existing) return;
+    chrome.alarms.create(KEEP_ALIVE_ALARM, {
+      periodInMinutes: Math.max(DEFAULT_POLL_INTERVAL / 2, 0.5),
+      delayInMinutes: 0.1,
+    });
+  });
+}
+
+// Keep-alive heartbeat removed: the KEEP_ALIVE_ALARM is sufficient in MV3.
+// setInterval doesn't persist across SW termination anyway.
+
+let initDone = false;
+
+async function openOnboarding(mode = "") {
+  const query = mode ? `?mode=${encodeURIComponent(mode)}` : "";
+  const url = chrome.runtime.getURL(`html/onboarding.html${query}`);
+  try {
+    await chrome.tabs.create({ url });
+  } catch (error) {
+    console.warn("Failed to open onboarding:", error.message);
+  }
+}
+
+async function openPatchNotes() {
+  const url = chrome.runtime.getURL("html/changelog.html");
+  try {
+    await chrome.tabs.create({ url });
+  } catch (error) {
+    console.warn("Failed to open patch notes:", error.message);
+  }
+}
+
+chrome.runtime.onInstalled.addListener(async (details) => {
+  initDone = true;
+  await fetchRemoteConfig(); // load credentials before first poll
+  const streamers = await DataStore.ensureDefaults();
+  await PreferenceStore.ensureDefaults();
+  await NotificationCenter.init();
+  scheduleWatcherAlarm();
+  scheduleKeepAliveAlarm();
+
+  await pollStreamers({ forceNotification: false });
+  const installReason = details?.reason || "install";
+  const currentVersion = chrome.runtime.getManifest().version;
+
+  const { onboardingShown, seenPatchNotesVersion } = await chrome.storage.local.get([
+    "onboardingShown",
+    "seenPatchNotesVersion",
+  ]);
+
+  if (
+    installReason === chrome.runtime.OnInstalledReason?.INSTALL ||
+    installReason === "install"
+  ) {
+    // Fresh install: onboarding covers the feature tour, so patch notes would be
+    // redundant. Mark this version seen to avoid showing them on the next update.
+    if (!onboardingShown && !streamers.length) {
+      await chrome.storage.local.set({
+        onboardingShown: true,
+        seenPatchNotesVersion: currentVersion,
+      });
+      await openOnboarding();
+    } else {
+      await chrome.storage.local.set({ seenPatchNotesVersion: currentVersion });
+    }
+  } else if (
+    installReason === chrome.runtime.OnInstalledReason?.UPDATE ||
+    installReason === "update"
+  ) {
+    // Compare against the manifest version rather than a hand-bumped counter, so
+    // shipping a release is enough to trigger the notes. The guard also means a
+    // service-worker restart on the same version won't reopen the tab.
+    if (seenPatchNotesVersion !== currentVersion) {
+      await chrome.storage.local.set({ seenPatchNotesVersion: currentVersion });
+      await openPatchNotes();
+    }
+  }
+});
+
+chrome.runtime.onStartup.addListener(async () => {
+  initDone = true;
+  await fetchRemoteConfig(); // refresh credentials on browser startup
+  scheduleWatcherAlarm();
+  scheduleKeepAliveAlarm();
+
+  const prefs = await PreferenceStore.ensureDefaults();
+  setupAutoOpenInventoryAlarm(prefs);
+  await NotificationCenter.init();
+  await pollStreamers({ forceNotification: false });
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === WATCHER_ALARM) {
+    pollStreamers({ forceNotification: false }).catch((error) => {
+      console.warn("Polling error:", error.message);
+    });
+  } else if (alarm.name === KEEP_ALIVE_ALARM) {
+    chrome.runtime.getPlatformInfo(() => {
+      if (chrome.runtime.lastError) {
+        console.debug(
+          "KeepAlive alarm ping error:",
+          chrome.runtime.lastError.message
+        );
+      }
+    });
+  } else if (alarm.name === AUTO_OPEN_INVENTORY_ALARM) {
+    chrome.tabs.query({ url: "*://www.twitch.tv/drops/inventory*" }, (tabs) => {
+      if (tabs && tabs.length > 0) {
+        chrome.tabs.reload(tabs[0].id);
+      } else {
+        chrome.tabs.create({
+          url: "https://www.twitch.tv/drops/inventory",
+          active: false,
+        });
+      }
+    });
+  } else if (alarm.name.startsWith(NotificationCenter.alarmPrefix)) {
+    NotificationCenter.handleAlarm(alarm.name).catch((error) => {
+      console.warn("Scheduled alarm error:", error?.message || error);
+    });
+  }
+});
+
+async function openStreamerFromNotification(streamerId) {
+  if (!streamerId) return;
+  const streamer = streamerCache.get(streamerId);
+  const states = streamerStates.get(streamerId);
+
+  const platform = normalizePlatform(
+    streamer?.platform || states?.active?.platform || DEFAULT_PLATFORM
+  );
+  const handle =
+    streamer?.handle ||
+    streamer?.twitch ||
+    states?.active?.login ||
+    (platform === "twitch"
+      ? sanitizeHandle("twitch", streamerId)
+      : streamerId);
+  const targetUrl = buildProfileUrl(platform, handle);
+
+  try {
+    await chrome.tabs.create({
+      url: targetUrl,
+    });
+  } catch (error) {
+    console.warn("Failed to open streamer page:", error?.message || error);
+  }
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  switch (request?.type) {
+    case "notify":
+      (async () => {
+        await NotificationCenter.show({
+          title: request.title,
+          message: request.message,
+          url: request.url || null,
+          streamerId: request.streamerId || null,
+          platform: request.platform || null,
+          requireInteraction: Boolean(request.requireInteraction),
+          priority:
+            typeof request.priority === "number"
+              ? request.priority
+              : request.requireInteraction
+              ? 2
+              : 0,
+          playSound: request.playSound !== false,
+        });
+        sendResponse({ success: true });
+      })();
+      return true;
+
+    case "schedule":
+      (async () => {
+        await NotificationCenter.schedule(request);
+        sendResponse({ success: true });
+      })();
+      return true;
+
+    case "openSettings":
+      try {
+        chrome.tabs.create({ url: chrome.runtime.getURL("html/popup.html") });
+        sendResponse({ success: true });
+      } catch (e) {
+        sendResponse({ success: false, error: e?.message });
+      }
+      return true;
+
+    case "getConfig":
+      // Content scripts can no longer import config.js directly (it was removed
+      // from web_accessible_resources for CWS compliance). They request the
+      // resolved config here instead — which also gives them the live Vercel
+      // credentials rather than the empty local fallback.
+      (async () => {
+        try {
+          await ensureConfig();
+          sendResponse({
+            clientId: CONFIG.clientId || "",
+            accessToken: CONFIG.accessToken || "",
+            features: CONFIG.features || {},
+          });
+        } catch {
+          sendResponse({ clientId: "", accessToken: "", features: {} });
+        }
+      })();
+      return true;
+
+    case "diagnosticTests":
+      (async () => {
+        const preferences = await PreferenceStore.get();
+        const lang = normalizeLanguage(preferences.language);
+        await NotificationCenter.show({
+          title: translate(lang, "background.notifications.test1Title"),
+          message: translate(lang, "background.notifications.test1Message"),
+          url: "https://www.twitch.tv/",
+          playSound: true,
+        });
+        await delay(400);
+        await NotificationCenter.show({
+          title: translate(lang, "background.notifications.test2Title"),
+          message: translate(lang, "background.notifications.test2Message"),
+          url: "https://www.youtube.com/",
+          requireInteraction: true,
+          priority: 2,
+          playSound: true,
+        });
+        await NotificationCenter.schedule({
+          name: translate(lang, "background.diagnostics.scheduleName", {
+            id: 3,
+          }),
+          title: translate(lang, "background.notifications.test3Title"),
+          message: translate(lang, "background.notifications.test3Message"),
+          url: "https://www.twitch.tv/directory/following/live",
+          intervalMinutes: 1,
+          requireInteraction: false,
+          playSound: true,
+        });
+        await NotificationCenter.schedule({
+          name: translate(lang, "background.diagnostics.scheduleName", {
+            id: 4,
+          }),
+          title: translate(lang, "background.notifications.test4Title"),
+          message: translate(lang, "background.notifications.test4Message"),
+          url: "https://www.twitch.tv/directory",
+          intervalMinutes: 0.5,
+          requireInteraction: true,
+          priority: 2,
+          playSound: true,
+        });
+        await delay(400);
+        await NotificationCenter.show({
+          title: translate(lang, "background.notifications.test5Title"),
+          message: translate(lang, "background.notifications.test5Message"),
+          playSound: false,
+        });
+        sendResponse({ success: true });
+      })();
+      return true;
+
+    case "streampulse:saveKickCreds":
+      (async () => {
+        const { clientId, clientSecret } = request;
+        if (!clientId || !clientSecret) {
+          // Clear credentials
+          await chrome.storage.local.remove(["streampulse:kickCreds", "streampulse:kickToken"]);
+          _kickToken.value = null;
+          _kickToken.expiresAt = 0;
+          sendResponse({ success: true });
+          return;
+        }
+        await chrome.storage.local.set({
+          "streampulse:kickCreds": { clientId, clientSecret },
+        });
+        // Invalidate cached token
+        _kickToken.value = null;
+        _kickToken.expiresAt = 0;
+        await chrome.storage.local.remove("streampulse:kickToken");
+        // Test token immediately
+        const token = await getKickAppToken();
+        sendResponse({ success: !!token });
+      })();
+      return true;
+
+    case "streampulse:getKickCreds":
+      (async () => {
+        const creds = await getKickCredentials();
+        const stored = await chrome.storage.local.get("streampulse:kickToken");
+        const hasToken = !!(stored["streampulse:kickToken"]?.value);
+        sendResponse({ clientId: creds?.clientId || "", hasToken });
+      })();
+      return true;
+
+    case "streampulse:fetchJson":
+      (async () => {
+        try {
+          const data = await fetchJson(
+            request.url,
+            request.options || {},
+            request.timeoutMs || 15000
+          );
+          sendResponse({ success: true, data });
+        } catch (error) {
+          sendResponse({
+            success: false,
+            error: error?.message || String(error),
+          });
+        }
+      })();
+      return true;
+
+    case "streampulse:fetchImage":
+      // Fetch an image URL via the background (has proper credentials/cookies)
+      // and return it as a base64 data URL so the popup can display it.
+      (async () => {
+        const { url } = request;
+        if (!url) { sendResponse({ success: false }); return; }
+        try {
+          const response = await fetch(url, {
+            credentials: "include",
+            headers: {
+              "Referer": "https://kick.com/",
+              "Accept": "image/webp,image/avif,image/*,*/*",
+            },
+          });
+          if (!response.ok) { sendResponse({ success: false, status: response.status }); return; }
+          const mimeType = response.headers.get("content-type")?.split(";")[0] || "image/webp";
+          const buffer = await response.arrayBuffer();
+          const bytes = new Uint8Array(buffer);
+          let binary = "";
+          const CHUNK = 8192;
+          for (let i = 0; i < bytes.length; i += CHUNK) {
+            binary += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+          }
+          const dataUrl = `data:${mimeType};base64,${btoa(binary)}`;
+          sendResponse({ success: true, dataUrl });
+        } catch (e) {
+          sendResponse({ success: false, error: e?.message });
+        }
+      })();
+      return true;
+
+    case "getStreamers":
+      (async () => {
+        const [streamers, statuses, preferences, profileData] = await Promise.all([
+          DataStore.getStreamers(),
+          DataStore.getStatuses(),
+          PreferenceStore.get(),
+          chrome.storage.local.get("userProfile")
+        ]);
+        sendResponse({ streamers, statuses, preferences, userProfile: profileData.userProfile || null });
+      })();
+      return true;
+
+    case "lookupTwitchUser": {
+      const handle = sanitizeHandle("twitch", request.handle || "");
+      if (!handle) { sendResponse({ error: "invalid" }); return true; }
+      PlatformChecker.getTwitchUser(handle)
+        .then(user => {
+          if (!user || user._apiError) {
+            sendResponse({ user: null });
+          } else {
+            sendResponse({ user: { display_name: user.display_name, profile_image_url: user.profile_image_url, id: user.id } });
+          }
+        })
+        .catch(() => sendResponse({ user: null }));
+      return true;
+    }
+
+    case "updateUserProfile": {
+      const profile = request.profile || {};
+      chrome.storage.local.set({ userProfile: profile })
+        .then(() => sendResponse({ success: true }))
+        .catch(err => sendResponse({ error: err.message }));
+      return true;
+    }
+
+    case "addStreamer":
+      (async () => {
+        const preferences = await PreferenceStore.get();
+        const requestedPlatform = request.platform || "twitch";
+        const platform = normalizePlatform(
+          requestedPlatform || DEFAULT_PLATFORM
+        );
+        const rawHandle =
+          request.handle ??
+          request.twitch ??
+          request.login ??
+          request.url ??
+          "";
+        const handle = sanitizeHandle(platform, rawHandle);
+
+        if (!handle) {
+          const platformLabel = translateWithPrefs(
+            preferences,
+            getPlatformLabelKey(platform)
+          );
+          sendResponse({
+            error: translateWithPrefs(
+              preferences,
+              "background.errors.invalidHandle",
+              { platform: platformLabel }
+            ),
+          });
+          return;
+        }
+
+        const streamers = await DataStore.getStreamers();
+        const incomingKey = getHandleComparisonKey(platform, handle);
+        const alreadyExists = streamers.some((streamer) => {
+          const existingKey = getHandleComparisonKey(
+            streamer.platform || "twitch",
+            streamer.handle || streamer.twitch || streamer.id
+          );
+          return existingKey === incomingKey;
+        });
+
+        if (alreadyExists) {
+          const platformLabel = translateWithPrefs(
+            preferences,
+            getPlatformLabelKey(platform)
+          );
+          sendResponse({
+            error: translateWithPrefs(
+              preferences,
+              "background.errors.streamerExistsPlatform",
+              { platform: platformLabel }
+            ),
+          });
+          return;
+        }
+
+        let sourceData = {
+          id: `${platform}:${handle}`,
+          platform,
+          handle,
+          notificationsEnabled: true,
+          socials: {},
+        };
+
+        if (platform === "twitch") {
+          const user = await PlatformChecker.getTwitchUser(handle);
+          if (!user || user._apiError) {
+            const errorKey = user?._apiError
+              ? "background.errors.apiError"
+              : "background.errors.streamerNotFound";
+            sendResponse({
+              error: translateWithPrefs(
+                preferences,
+                errorKey,
+                {
+                  platform: translateWithPrefs(
+                    preferences,
+                    getPlatformLabelKey(platform)
+                  ),
+                }
+              ),
+            });
+            return;
+          }
+
+          sourceData = {
+            ...sourceData,
+            id: handle,
+            twitch: handle,
+            displayName: user.display_name || handle,
+            avatarUrl: user.profile_image_url || "",
+            twitchId: user.id,
+          };
+        } else if (platform === "kick") {
+          const channel = await PlatformChecker.getKickChannel(handle);
+          if (!channel || channel._apiError) {
+            const errorKey = channel?._apiError
+              ? "background.errors.apiError"
+              : "background.errors.streamerNotFound";
+            sendResponse({
+              error: translateWithPrefs(
+                preferences,
+                errorKey,
+                {
+                  platform: translateWithPrefs(
+                    preferences,
+                    getPlatformLabelKey(platform)
+                  ),
+                }
+              ),
+            });
+            return;
+          }
+
+          sourceData = {
+            ...sourceData,
+            displayName:
+              channel?.user?.display_name ||
+              channel?.user?.username ||
+              channel?.slug ||
+              formatHandleForDisplay(platform, handle),
+            avatarUrl: resolveExternalUrl(
+              channel?.user?.profile_pic,
+              "https://files.kick.com"
+            ),
+            handle: channel?.slug || handle,
+          };
+        } else {
+          sourceData = {
+            ...sourceData,
+            displayName:
+              request.displayName ||
+              formatHandleForDisplay(platform, handle),
+            avatarUrl: request.avatarUrl || "",
+          };
+        }
+
+        if (platform === "twitch") {
+          sourceData.id = sourceData.twitch;
+        } else {
+          sourceData.id = `${platform}:${sanitizeHandle(
+            platform,
+            sourceData.handle
+          )}`;
+        }
+
+        const newStreamer = normalizeStreamer(sourceData);
+
+        const updated = await DataStore.saveStreamers([
+          ...streamers,
+          newStreamer,
+        ]);
+
+        await pollStreamers({ forceNotification: false });
+
+        sendResponse({
+          success: true,
+          streamers: updated,
+        });
+      })();
+      return true;
+
+    case "removeStreamer":
+      (async () => {
+        const targetId = request.id;
+        const streamers = await DataStore.getStreamers();
+        const filtered = streamers.filter((s) => s.id !== targetId);
+        await DataStore.saveStreamers(filtered);
+        streamerStates.delete(targetId);
+        streamerCache.delete(targetId);
+        streamerLiveState.delete(targetId);
+        await pollStreamers({ forceNotification: false });
+        sendResponse({ success: true, streamers: filtered });
+      })();
+      return true;
+
+    case "toggleNotifications":
+      (async () => {
+        const preferences = await PreferenceStore.get();
+        const streamers = await DataStore.getStreamers();
+        const idx = streamers.findIndex((s) => s.id === request.id);
+        if (idx === -1) {
+          sendResponse({ error: translateWithPrefs(preferences, "background.errors.streamerNotFound", { platform: "" }) });
+          return;
+        }
+        streamers[idx].notificationsEnabled = Boolean(request.enabled);
+        await DataStore.saveStreamers(streamers);
+        sendResponse({ success: true });
+      })();
+      return true;
+
+    case "toggleGameNotifications":
+      (async () => {
+        const preferences = await PreferenceStore.get();
+        const streamers = await DataStore.getStreamers();
+        const idx = streamers.findIndex((s) => s.id === request.id);
+        if (idx === -1) {
+          sendResponse({ error: translateWithPrefs(preferences, "background.errors.streamerNotFound", { platform: "" }) });
+          return;
+        }
+        streamers[idx].gameNotificationsEnabled = Boolean(request.enabled);
+        await DataStore.saveStreamers(streamers);
+        sendResponse({ success: true });
+      })();
+      return true;
+
+    case "refreshStatuses":
+      PlatformChecker.refreshAll().then(() => {
+        sendResponse({ success: true });
+      });
+      return true;
+
+
+    case "trackWatchTime":
+      (async () => {
+        try {
+          const { channel, platform, seconds } = request;
+          if (channel && platform) {
+            const secs = Number(seconds) || 0;
+            // Record immediately — never block on avatar resolution
+            await WatchTimeStore.record(platform, channel, secs, "");
+            // Best-effort avatar update (fire-and-forget, doesn't block response)
+            if (secs > 0) {
+              resolveChannelAvatar(platform, channel)
+                .then(async (avatar) => {
+                  if (avatar) {
+                    const data = await WatchTimeStore._getData();
+                    const month = WatchTimeStore._getMonthKey();
+                    const key = `${platform}:${channel}`;
+                    if (data[month]?.[key] && !data[month][key].avatarUrl) {
+                      data[month][key].avatarUrl = avatar;
+                      await WatchTimeStore._saveData(data);
+                    }
+                  }
+                })
+                .catch(() => {});
+            }
+          }
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({ error: error.message });
+        }
+      })();
+      return true;
+
+    case "getWatchTimeSummary":
+      (async () => {
+        try {
+          const summary = await WatchTimeStore.getSummary(request.month || null);
+          sendResponse({ success: true, summary });
+        } catch (error) {
+          sendResponse({ error: error.message });
+        }
+      })();
+      return true;
+
+    case "getStats":
+      StatsStore.get().then((stats) => {
+        sendResponse({ success: true, stats });
+      });
+      return true;
+
+    case "incrementStat":
+      (async () => {
+        const { stat, value, channel, text, raidTarget } = request;
+        if (stat) {
+          await StatsStore.increment(stat, Number(value) || 1);
+          let type = "info";
+          if (stat === "dropsClaimed") type = "drop";
+          else if (stat === "momentsClaimed") type = "moment";
+          else if (stat === "raidsCancelled") type = "raid";
+          else if (stat === "channelPointsClaimed") type = "points";
+
+          let logText = text || `${stat} (+${value || 1})`;
+          if (!text && type === "raid" && raidTarget) {
+            logText = `Raid → ${raidTarget} (annulé)`;
+          }
+
+          await EventLogStore.addLog({
+            type,
+            channel: channel || "",
+            text: logText,
+            value: value || 1,
+          });
+
+          // Event alerts notification check
+          const prefs = await PreferenceStore.get();
+          if (type === "drop" && prefs.dropAlerts) {
+            chrome.notifications?.create?.({
+              type: "basic",
+              iconUrl: "images/photos/128px.png",
+              title: "StreamPulse · Drop réclamé !",
+              message: text || "Un Drop Twitch a été réclamé automatiquement.",
+            });
+          } else if (type === "raid" && prefs.raidAlerts) {
+            chrome.notifications?.create?.({
+              type: "basic",
+              iconUrl: "images/photos/128px.png",
+              title: "StreamPulse · Raid annulé",
+              message: text || "Le transfert vers la chaîne raidée a été annulé.",
+            });
+          }
+        }
+        sendResponse({ success: true });
+      })();
+      return true;
+
+    case "getEventLogs":
+      EventLogStore.getLogs().then((logs) => {
+        sendResponse({ success: true, logs });
+      });
+      return true;
+
+    case "clearEventLogs":
+      EventLogStore.clearLogs().then((logs) => {
+        sendResponse({ success: true, logs });
+      });
+      return true;
+    
+    case "resetStat":
+      (async () => {
+        const { stat } = request;
+        if (stat) {
+
+          const current = await StatsStore.get();
+          current[stat] = 0;
+          await chrome.storage.local.set({ [STORAGE_KEYS.STATS]: current });
+        }
+        sendResponse({ success: true });
+      })();
+      return true;
+
+    case "updatePreferences":
+      (async () => {
+        const incomingUpdates = request.updates || {};
+        const updates = {};
+        if ("liveNotifications" in incomingUpdates) {
+          updates.liveNotifications =
+            incomingUpdates.liveNotifications !== false;
+        }
+        if ("gameNotifications" in incomingUpdates) {
+          updates.gameNotifications =
+            incomingUpdates.gameNotifications === true;
+        }
+        if ("soundsEnabled" in incomingUpdates) {
+          updates.soundsEnabled = incomingUpdates.soundsEnabled !== false;
+        }
+        if ("autoClaimChannelPoints" in incomingUpdates) {
+          updates.autoClaimChannelPoints =
+            incomingUpdates.autoClaimChannelPoints !== false;
+        }
+        if ("autoRefreshPlayerErrors" in incomingUpdates) {
+          updates.autoRefreshPlayerErrors =
+            incomingUpdates.autoRefreshPlayerErrors !== false;
+        }
+        // Default-true toggles: any value other than an explicit `false` keeps them on.
+        if ("autoClaimDrops" in incomingUpdates) {
+          updates.autoClaimDrops = incomingUpdates.autoClaimDrops !== false;
+        }
+        if ("autoClaimMoments" in incomingUpdates) {
+          updates.autoClaimMoments = incomingUpdates.autoClaimMoments !== false;
+        }
+        if ("autoCancelRaids" in incomingUpdates) {
+          updates.autoCancelRaids = incomingUpdates.autoCancelRaids !== false;
+        }
+        if ("preventTabDiscard" in incomingUpdates) {
+          updates.preventTabDiscard =
+            incomingUpdates.preventTabDiscard !== false;
+        }
+        if ("enableTabLiveIcon" in incomingUpdates) {
+          updates.enableTabLiveIcon =
+            incomingUpdates.enableTabLiveIcon !== false;
+        }
+        if ("enableStreamerFavicon" in incomingUpdates) {
+          updates.enableStreamerFavicon =
+            incomingUpdates.enableStreamerFavicon !== false;
+        }
+        if ("enablePredictionsPopup" in incomingUpdates) {
+          updates.enablePredictionsPopup =
+            incomingUpdates.enablePredictionsPopup !== false;
+        }
+        if ("dropAlerts" in incomingUpdates) {
+          updates.dropAlerts = incomingUpdates.dropAlerts !== false;
+        }
+        if ("predictionAlerts" in incomingUpdates) {
+          updates.predictionAlerts = incomingUpdates.predictionAlerts !== false;
+        }
+        if ("raidAlerts" in incomingUpdates) {
+          updates.raidAlerts = incomingUpdates.raidAlerts !== false;
+        }
+        // Default-false toggle: requires an explicit `true` to enable.
+        if ("autoOpenInventory" in incomingUpdates) {
+          updates.autoOpenInventory =
+            incomingUpdates.autoOpenInventory === true;
+        }
+        if ("autoOpenInventoryIntervalHours" in incomingUpdates) {
+          const hours = Number(incomingUpdates.autoOpenInventoryIntervalHours);
+          updates.autoOpenInventoryIntervalHours = Number.isFinite(hours)
+            ? Math.min(24, Math.max(1, Math.round(hours)))
+            : DEFAULT_PREFERENCES.autoOpenInventoryIntervalHours;
+        }
+        if ("hideTwitchExtensions" in incomingUpdates) {
+          updates.hideTwitchExtensions =
+            incomingUpdates.hideTwitchExtensions === true;
+        }
+        if ("enableFastForwardButton" in incomingUpdates) {
+          updates.enableFastForwardButton =
+            incomingUpdates.enableFastForwardButton !== false;
+        }
+        if ("chatKeywords" in incomingUpdates) {
+          updates.chatKeywords =
+            typeof incomingUpdates.chatKeywords === "string"
+              ? incomingUpdates.chatKeywords
+              : "";
+        }
+        if ("chatBlockedUsers" in incomingUpdates) {
+          updates.chatBlockedUsers =
+            typeof incomingUpdates.chatBlockedUsers === "string"
+              ? incomingUpdates.chatBlockedUsers
+              : "";
+        }
+        if ("watchTimeTracker" in incomingUpdates) {
+          updates.watchTimeTracker =
+            incomingUpdates.watchTimeTracker !== false;
+        }
+        if ("language" in incomingUpdates) {
+          updates.language = normalizeLanguage(incomingUpdates.language);
+        }
+        if ("sortOrder" in incomingUpdates) {
+          const allowed = ["live", "name-asc", "name-desc", "custom"];
+          const val = incomingUpdates.sortOrder;
+          updates.sortOrder = allowed.includes(val) ? val : "live";
+        }
+        if ("previewsEnabled" in incomingUpdates) {
+          updates.previewsEnabled = incomingUpdates.previewsEnabled !== false;
+        }
+        if ("previewsMode" in incomingUpdates) {
+          updates.previewsMode =
+            incomingUpdates.previewsMode === "video" ? "video" : "image";
+        }
+        if ("previewsSurfaceDirectory" in incomingUpdates) {
+          updates.previewsSurfaceDirectory =
+            incomingUpdates.previewsSurfaceDirectory !== false;
+        }
+        if ("previewsSurfaceSidebar" in incomingUpdates) {
+          updates.previewsSurfaceSidebar =
+            incomingUpdates.previewsSurfaceSidebar !== false;
+        }
+        if ("previewsSurfaceClips" in incomingUpdates) {
+          updates.previewsSurfaceClips =
+            incomingUpdates.previewsSurfaceClips !== false;
+        }
+        if ("previewsSurfaceSearch" in incomingUpdates) {
+          updates.previewsSurfaceSearch =
+            incomingUpdates.previewsSurfaceSearch !== false;
+        }
+        if ("previewsSize" in incomingUpdates) {
+          const allowedSizes = ["s", "m", "l"];
+          updates.previewsSize = allowedSizes.includes(incomingUpdates.previewsSize)
+            ? incomingUpdates.previewsSize
+            : "m";
+        }
+        if ("previewsAudio" in incomingUpdates) {
+          updates.previewsAudio = incomingUpdates.previewsAudio === true;
+        }
+        if ("previewsShowDelayMs" in incomingUpdates) {
+          const d = Number(incomingUpdates.previewsShowDelayMs);
+          updates.previewsShowDelayMs = Number.isFinite(d)
+            ? Math.min(2000, Math.max(0, d))
+            : 200;
+        }
+        if ("previewsAnimations" in incomingUpdates) {
+          updates.previewsAnimations =
+            incomingUpdates.previewsAnimations !== false;
+        }
+
+        if (Object.keys(updates).length === 0) {
+          const preferences = await PreferenceStore.get();
+          sendResponse({
+            error: translateWithPrefs(
+              preferences,
+              "background.errors.noPreferencesUpdate"
+            ),
+          });
+          return;
+        }
+
+        const preferences = await PreferenceStore.update(updates);
+        sendResponse({ success: true, preferences });
+      })();
+      return true;
+
+    case "testNotification":
+      (async () => {
+        const preferences = await PreferenceStore.get();
+        try {
+          await NotificationSystem.sendTest(preferences);
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({
+            error:
+              error?.message ||
+              translateWithPrefs(
+                preferences,
+                "background.errors.testNotificationFailed"
+              ),
+          });
+        }
+      })();
+      return true;
+
+    default:
+      if (request?.audioCommand) {
+        return false;
+      }
+      break;
+  }
+
+  return false;
+});
+
+scheduleWatcherAlarm();
+scheduleKeepAliveAlarm();
+
+(async () => {
+  if (initDone) return;
+  initDone = true;
+  await PreferenceStore.ensureDefaults();
+  await NotificationCenter.init();
+
+  // Only poll on SW wake if cached statuses are stale (>60s old).
+  // Avoids triggering a full poll every time the popup is reopened.
+  try {
+    const statuses = await DataStore.getStatuses();
+    const updatedAts = Object.values(statuses || {})
+      .map((s) => s?.updatedAt || 0)
+      .filter(Boolean);
+    const newest = updatedAts.length ? Math.max(...updatedAts) : 0;
+    const staleness = Date.now() - newest;
+    if (newest === 0 || staleness > 60_000) {
+      pollStreamers({ forceNotification: false }).catch((err) => {
+        console.warn("Initial poll failed:", err?.message || err);
+      });
+    }
+  } catch (err) {
+    console.warn("Init staleness check failed:", err?.message || err);
+  }
+})();
+
+if (chrome.tabs?.onUpdated?.addListener) {
+  chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (tab?.url && (tab.url.includes("twitch.tv") || tab.url.includes("kick.com"))) {
+      try {
+        const prefs = await PreferenceStore.get();
+        if (prefs.preventTabDiscard && tab.autoDiscardable !== false) {
+          await chrome.tabs.update(tabId, { autoDiscardable: false });
+        }
+      } catch (_) {}
+    }
+  });
+}

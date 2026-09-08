@@ -1,0 +1,8 @@
+{
+  "appName": {
+    "message": "StreamPulse: Уведомления, баллы и drops Twitch и Kick"
+  },
+  "appDesc": {
+    "message": "Автоматический сбор Баллов канала и Drops, уведомления, превью и фильтры чата для Twitch и Kick."
+  }
+}

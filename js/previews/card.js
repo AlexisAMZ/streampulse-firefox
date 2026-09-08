@@ -1,0 +1,389 @@
+/**
+ * StreamPulse — hover previews: the single floating preview card.
+ *
+ * Exposes a pure `computePosition` helper (unit-tested) plus a `createPreviewCard`
+ * factory that owns ONE reused DOM node (mount / show / hide / destroy). Attaches
+ * to `self.__SP_PREVIEWS__`. Depends on `__SP_PREVIEWS__.sources` at call time.
+ */
+(function () {
+  "use strict";
+
+  const NS = typeof self !== "undefined" ? self : globalThis;
+  const store = NS.__SP_PREVIEWS__ || (NS.__SP_PREVIEWS__ = {});
+
+  const IMAGE_REFRESH_MS = 3000;
+
+  // Opt-in diagnostics: set `window.__SP_PREVIEWS_DEBUG__ = true` in the Twitch
+  // tab console, then hover a live channel to trace the video pipeline.
+  // Conserve volontairement sans appelant : outil de debug a rebrancher au
+  // besoin dans le pipeline video.
+  // eslint-disable-next-line no-unused-vars
+  function dbg() {
+    try {
+      if (NS.__SP_PREVIEWS_DEBUG__ && typeof console !== "undefined") {
+        console.debug.apply(console, ["[SP previews]"].concat([].slice.call(arguments)));
+      }
+    } catch (_e) {}
+  }
+
+  /**
+   * Pure, viewport-aware placement. Prefers below the anchor, flips above when it
+   * would overflow the bottom, centers horizontally, and clamps to the viewport.
+   * @param {{top:number,left:number,right:number,bottom:number,width:number,height:number}} anchor
+   * @param {{width:number,height:number}} card
+   * @param {{width:number,height:number}} viewport
+   * @param {number} [gap=8]
+   * @returns {{top:number,left:number,placement:"below"|"above"|"clamped"}}
+   */
+  function computePosition(anchor, card, viewport, gap) {
+    gap = gap == null ? 8 : gap;
+    const vw = viewport.width;
+    const vh = viewport.height;
+
+    // Horizontal: prefer the right of the anchor, flip left if it would overflow.
+    let placement = "right";
+    let left = anchor.right + gap;
+    if (left + card.width + gap > vw) {
+      const leftSide = anchor.left - gap - card.width;
+      if (leftSide >= gap) {
+        left = leftSide;
+        placement = "left";
+      } else {
+        left = Math.max(gap, Math.min(left, vw - card.width - gap));
+        placement = "clamped";
+      }
+    }
+
+    // Vertical: center on the anchor, clamped to the viewport.
+    let top = anchor.top + anchor.height / 2 - card.height / 2;
+    top = Math.max(gap, Math.min(top, vh - card.height - gap));
+
+    return { top: Math.round(top), left: Math.round(left), placement };
+  }
+
+  function el(tag, className) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    return node;
+  }
+
+  /**
+   * Creates one reusable floating card. Instantiate a single card per page.
+   * @returns {{mount:Function, show:Function, hide:Function, destroy:Function, isVisible:Function}}
+   */
+  function createPreviewCard() {
+    let root = null;
+    let mediaEl, imgEl, iframeEl, videoEl, fallbackEl, fbAvatarEl, fbGameEl, titleEl, categoryEl;
+    let refreshTimer = null;
+    let visible = false;
+    // Live HLS playback state. `playbackToken` guards against races: an async
+    // playlist fetch that resolves after the user moved to another card must not
+    // attach its stream to the now-recycled node.
+    let hls = null;
+    let playbackToken = 0;
+
+    function mount() {
+      if (root) return;
+      root = el("div", "sp-preview");
+      root.setAttribute("data-platform", "twitch");
+      root.hidden = true;
+
+      mediaEl = el("div", "sp-preview__media");
+
+      imgEl = el("img", "sp-preview__img");
+      imgEl.alt = "";
+
+      iframeEl = el("iframe", "sp-preview__iframe");
+      iframeEl.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture");
+      iframeEl.setAttribute("scrolling", "no");
+      iframeEl.hidden = true;
+
+      videoEl = el("video", "sp-preview__video");
+      videoEl.muted = true;
+      videoEl.autoplay = true;
+      videoEl.playsInline = true;
+      videoEl.setAttribute("playsinline", "");
+      videoEl.setAttribute("preload", "none");
+      videoEl.hidden = true;
+
+      fallbackEl = el("div", "sp-preview__fallback");
+      fbAvatarEl = el("img", "sp-preview__fallback-avatar");
+      fbAvatarEl.alt = "";
+      
+      const fbLoadingEl = el("span", "sp-preview__fallback-loading");
+      const lang = (document.documentElement.lang || navigator.language || "en").toLowerCase();
+      fbLoadingEl.textContent = lang.startsWith("fr") ? "Chargement..." : "Loading...";
+      
+      fbGameEl = el("span", "sp-preview__fallback-game");
+      fallbackEl.append(fbAvatarEl, fbLoadingEl, fbGameEl);
+
+      const overlay = el("div", "sp-preview__overlay");
+      titleEl = el("p", "sp-preview__title");
+      categoryEl = el("p", "sp-preview__category");
+      overlay.append(titleEl, categoryEl);
+
+      const badge = el("span", "sp-preview__badge");
+      badge.textContent = "LIVE";
+
+      mediaEl.append(videoEl, imgEl, iframeEl, fallbackEl, overlay, badge);
+      root.append(mediaEl);
+      document.body.appendChild(root);
+    }
+
+    function stopRefresh() {
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+      }
+    }
+
+    function showFallback(descriptor) {
+      fallbackEl.hidden = false;
+      if (descriptor.avatarUrl) {
+        fbAvatarEl.src = descriptor.avatarUrl;
+        fbAvatarEl.hidden = false;
+      } else {
+        fbAvatarEl.hidden = true;
+      }
+      fbGameEl.textContent = descriptor.category || "";
+    }
+
+    function clearFallback() {
+      fallbackEl.hidden = true;
+    }
+
+    function applyImageMode(descriptor, size) {
+      teardownPlayback();
+      imgEl.hidden = true;
+      imgEl.removeAttribute("src");
+      const sources = store.sources;
+      let firstLoad = true;
+      const load = () => {
+        // First paint reuses the browser/CDN cache (no cache-bust) → instant when
+        // Twitch already loaded this thumbnail in the grid; refreshes bust cache.
+        imgEl.src = sources.twitchPreviewImageUrl(
+          descriptor.login,
+          size.width,
+          size.height,
+          firstLoad ? undefined : Date.now()
+        );
+        firstLoad = false;
+      };
+      imgEl.onload = () => {
+        imgEl.hidden = false;
+        clearFallback();
+      };
+      imgEl.onerror = () => {
+        imgEl.hidden = true;
+        showFallback(descriptor);
+      };
+      load();
+      stopRefresh();
+      refreshTimer = setInterval(load, IMAGE_REFRESH_MS);
+    }
+
+    function teardownPlayback() {
+      // Invalidate any in-flight playlist fetch before tearing down.
+      playbackToken += 1;
+
+      if (iframeEl) {
+        iframeEl.src = "";
+        iframeEl.hidden = true;
+      }
+      if (hls) {
+        try {
+          hls.destroy();
+        } catch (_e) {}
+        hls = null;
+      }
+      if (videoEl) {
+        videoEl.hidden = true;
+        try {
+          videoEl.pause();
+        } catch (_e) {}
+        // Detach the source so Chrome actually releases the network connection;
+        // leaving `src` set keeps the segment fetches alive in the background.
+        videoEl.removeAttribute("src");
+        try {
+          videoEl.load();
+        } catch (_e) {}
+      }
+    }
+
+    /**
+     * Live channel video mode: resolve the HLS variant for `login` and play it
+     * behind the still image, swapping the poster out once frames arrive.
+     * Falls back to the refreshing thumbnail on any failure (sub-only gate,
+     * geo-block, ad-roll, missing MSE) so the card is never left blank.
+     */
+    function applyVideoMode(descriptor, size, opts) {
+      // Keep the still image running underneath: it paints immediately and acts
+      // as the fallback if playback never starts.
+      applyImageMode(descriptor, size);
+
+      const stream = store.stream;
+      if (!stream || typeof stream.fetchPlaylist !== "function") return;
+
+      const token = ++playbackToken;
+      const wanted = Math.max(160, Math.min(1080, size.height * 2));
+
+      Promise.resolve()
+        // `fetchPlaylist` already resolves the master playlist AND picks a
+        // variant, so it hands back a ready-to-play .m3u8 URL. Re-parsing it
+        // here would yield null (an URL has no #EXT-X-STREAM-INF lines) and
+        // silently kill playback.
+        .then(() => stream.fetchPlaylist(descriptor.login, { maxHeight: wanted }))
+        .then((variantUrl) => {
+          if (token !== playbackToken) return;
+          if (!variantUrl || typeof variantUrl !== "string") return;
+          startPlayback(variantUrl, token, opts);
+        })
+        .catch(() => {
+          /* keep the image fallback */
+        });
+    }
+
+    function startPlayback(variantUrl, token, opts) {
+      if (token !== playbackToken || !videoEl) return;
+
+      videoEl.muted = !(opts && opts.audio === true);
+      videoEl.volume = videoEl.muted ? 0 : 0.5;
+
+      const onPlaying = () => {
+        if (token !== playbackToken) return;
+        // Frames are flowing: reveal the video and drop the still poster.
+        videoEl.hidden = false;
+        stopRefresh();
+        imgEl.hidden = true;
+        imgEl.removeAttribute("src");
+        clearFallback();
+      };
+      videoEl.addEventListener("playing", onPlaying, { once: true });
+
+      const Hls = NS.Hls;
+      const canNative =
+        typeof videoEl.canPlayType === "function" &&
+        videoEl.canPlayType("application/vnd.apple.mpegurl") !== "";
+
+      if (Hls && Hls.isSupported && Hls.isSupported()) {
+        try {
+          hls = new Hls({ enableWorker: false, lowLatencyMode: true, backBufferLength: 0 });
+          hls.on(Hls.Events.ERROR, (_evt, data) => {
+            // Only fatal errors are unrecoverable; hls.js retries the rest itself.
+            if (data && data.fatal) {
+              teardownPlayback();
+            }
+          });
+          hls.loadSource(variantUrl);
+          hls.attachMedia(videoEl);
+          const p = videoEl.play();
+          if (p && typeof p.catch === "function") p.catch(() => {});
+          return;
+        } catch (_e) {
+          hls = null;
+        }
+      }
+
+      if (canNative) {
+        try {
+          videoEl.src = variantUrl;
+          const p = videoEl.play();
+          if (p && typeof p.catch === "function") p.catch(() => {});
+        } catch (_e) {
+          /* keep the image fallback */
+        }
+      }
+    }
+
+    function applyClipEmbed(descriptor, opts) {
+      const parent = (typeof location !== "undefined" && location.hostname) || "twitch.tv";
+      imgEl.hidden = true;
+      imgEl.removeAttribute("src");
+      iframeEl.hidden = false;
+      iframeEl.src = store.sources.clipEmbedUrl(descriptor.slug, { parent, muted: !opts.audio });
+    }
+
+    function show(anchorEl, descriptor, opts) {
+      if (!root) mount();
+      opts = opts || {};
+      const presets = store.sources.SIZE_PRESETS;
+      const size = presets[opts.size] || presets.m;
+
+      root.style.width = size.width + "px";
+      mediaEl.style.height = size.height + "px";
+
+      // Video mode only applies to live channels; clips always use the embed.
+      const wantsVideo = opts.mode === "video" && descriptor.kind !== "clip";
+      root.setAttribute("data-mode", wantsVideo ? "video" : "image");
+
+      titleEl.textContent = descriptor.title || "";
+      categoryEl.textContent = descriptor.category || "";
+      titleEl.hidden = !descriptor.title;
+      categoryEl.hidden = !descriptor.category;
+
+      // Show fallback (avatar + game) until the real media loads.
+      showFallback(descriptor);
+
+      if (descriptor.kind === "clip" && descriptor.slug) {
+        teardownPlayback();
+        applyClipEmbed(descriptor, opts);
+      } else if (wantsVideo) {
+        teardownPlayback();
+        applyVideoMode(descriptor, size, opts);
+      } else {
+        applyImageMode(descriptor, size);
+      }
+
+      root.hidden = false;
+      const rect = anchorEl.getBoundingClientRect();
+      const pos = computePosition(
+        {
+          top: rect.top,
+          left: rect.left,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        },
+        size,
+        { width: window.innerWidth, height: window.innerHeight }
+      );
+      root.style.top = pos.top + "px";
+      root.style.left = pos.left + "px";
+      root.setAttribute("data-placement", pos.placement);
+
+      root.classList.toggle("sp-preview--animated", opts.animations !== false);
+      void root.offsetWidth; // reflow so the transition runs
+      root.classList.add("sp-preview--in");
+      visible = true;
+    }
+
+    function hide() {
+      if (!root) return;
+      visible = false;
+      stopRefresh();
+      teardownPlayback();
+      root.classList.remove("sp-preview--in");
+      root.hidden = true;
+      imgEl.removeAttribute("src");
+    }
+
+    function destroy() {
+      stopRefresh();
+      teardownPlayback();
+      if (root && root.parentNode) root.parentNode.removeChild(root);
+      root = null;
+    }
+
+    function updateTitle(title) {
+      if (!root) return;
+      titleEl.textContent = title || "";
+      titleEl.hidden = !title;
+    }
+
+    return { mount, show, hide, destroy, isVisible: () => visible, updateTitle };
+  }
+
+  store.computePosition = computePosition;
+  store.createPreviewCard = createPreviewCard;
+})();

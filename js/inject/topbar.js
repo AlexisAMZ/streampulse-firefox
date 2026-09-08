@@ -1,0 +1,466 @@
+/**
+ * StreamPulse — Twitch top-bar button + control panel (isolated world).
+ *
+ * Injects a StreamPulse button into the Twitch top-nav icon row (next to bits /
+ * whispers / notifications, the way 7TV does), re-injecting on SPA re-renders via a
+ * MutationObserver. Clicking it opens a control panel: ads-blocked / points / watch
+ * time stats, quick toggles (ad blocker, hover previews), a Bubble Tea donation
+ * button, and a link to the full settings.
+ *
+ * The icon row is located by the lowest common ancestor of stable anchors
+ * (data-a-target on bits/whispers), never by Twitch's hashed CSS classes.
+ */
+(function () {
+  "use strict";
+
+  // ---- pure helpers (exposed for unit tests) -------------------------------
+  function fmtNum(n) {
+    try {
+      return Number(n || 0).toLocaleString();
+    } catch (_e) {
+      return String(n || 0);
+    }
+  }
+  function fmtDur(totalSeconds) {
+    var s = Number(totalSeconds) || 0;
+    var h = Math.floor(s / 3600);
+    var m = Math.floor((s % 3600) / 60);
+    if (h > 0) return h + "h" + (m > 0 ? String(m).padStart(2, "0") : "");
+    return m + "min";
+  }
+  // Sum the current month's watchSeconds from betaWatchTimeData.
+  function currentMonthWatch(data, now) {
+    try {
+      var d = now || new Date();
+      var key = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+      var month = (data && data[key]) || {};
+      var total = 0;
+      for (var k in month) {
+        if (month[k] && typeof month[k].watchSeconds === "number") total += month[k].watchSeconds;
+      }
+      return total;
+    } catch (_e) {
+      return 0;
+    }
+  }
+
+  // Les chaînes vivent dans i18n/translations.js (clés inject.topbar.*) et sont
+  // exposées ici par js/inject/i18n-inline.js, chargé avant ce script. Les
+  // content scripts étant injectés en scripts classiques, ils ne peuvent pas
+  // importer le module ES directement.
+  function i18n() {
+    return typeof window !== "undefined" ? window.__SP_I18N__ : null;
+  }
+
+  function langKey(l) {
+    var api = i18n();
+    return api ? api.resolve(l) : "en";
+  }
+
+  /**
+   * Lit une clé inject.topbar.*, avec repli sur l'anglais puis sur la clé.
+   * Nommée `tr` et non `t` : ce fichier utilise déjà `var t` pour des noeuds
+   * DOM (onDocClick), et le var local masquerait la fonction.
+   */
+  function tr(lang, key) {
+    var api = i18n();
+    if (!api) return key;
+    return api.get(api.resolve(lang), "topbar." + key);
+  }
+
+  try {
+    var NS = typeof self !== "undefined" ? self : globalThis;
+    NS.__SP_TOPBAR_API__ = { fmtNum: fmtNum, fmtDur: fmtDur, currentMonthWatch: currentMonthWatch, langKey: langKey };
+  } catch (_e) {}
+
+  // ---- browser-only from here ----------------------------------------------
+  if (
+    typeof window === "undefined" ||
+    typeof document === "undefined" ||
+    typeof chrome === "undefined" ||
+    !chrome.runtime ||
+    !chrome.runtime.getURL
+  )
+    return;
+  if (window.top !== window) return;
+  if (window.__SP_TOPBAR_INSTALLED__) return;
+  window.__SP_TOPBAR_INSTALLED__ = true;
+
+  var LOGO_URL = chrome.runtime.getURL("images/photos/logosp.png");
+  var TIP_URL = "https://revolut.me/alexisamz";
+  var PREFERENCES_KEY = "betaGeneralPreferences";
+
+  // Inline SVG icons (Feather style, inherit color via currentColor).
+  function svg(body) {
+    return (
+      '<svg class="sp-tb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + body + "</svg>"
+    );
+  }
+  var ICON = {
+    gem: svg('<polygon points="12 2 19 9 12 22 5 9"/><line x1="5" y1="9" x2="19" y2="9"/>'),
+    clock: svg('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
+    coffee: svg(
+      '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>' +
+        '<line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>'
+    ),
+    gear: svg(
+      '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'
+    ),
+  };
+
+  // ---- locate the top-nav icon row -----------------------------------------
+  function lca(a, b) {
+    if (!a || !b) return null;
+    var set = new Set();
+    var n = b;
+    while (n) {
+      set.add(n);
+      n = n.parentElement;
+    }
+    n = a;
+    while (n) {
+      if (set.has(n)) return n;
+      n = n.parentElement;
+    }
+    return null;
+  }
+  // direct child of `row` that contains `el` (or null)
+  function directChildOf(row, el) {
+    if (!row || !el) return null;
+    var x = el;
+    while (x && x.parentElement && x.parentElement !== row) x = x.parentElement;
+    return x && x.parentElement === row ? x : null;
+  }
+  function findRow() {
+    var bits = document.querySelector('[data-a-target="top-nav-get-bits-button"]');
+    var whisp = document.querySelector('[data-a-target="threads-box-closed"]');
+    var notif =
+      document.querySelector('[data-a-target="top-nav-notifications-toggle"]') ||
+      document.querySelector('[aria-label="Open Notifications"]');
+    var profile = document.querySelector('[data-a-target="user-menu-toggle"]');
+    var a = profile || notif || bits;
+    var b = bits || notif || whisp;
+    var row = a && b && a !== b ? lca(a, b) : null;
+    if (!row) {
+      var any = profile || notif || bits || whisp;
+      if (any) {
+        var w = any;
+        // climb to a parent that holds several icon wrappers
+        for (var i = 0; i < 6 && w && w.parentElement; i++) {
+          if (w.parentElement.children.length >= 3) {
+            row = w.parentElement;
+            break;
+          }
+          w = w.parentElement;
+        }
+      }
+    }
+    // Anchor to the LEFT of the profile avatar: insert before the profile's
+    // direct-child wrapper. Fall back to the notifications wrapper. We never
+    // append at the end — that lands the button to the RIGHT of the profile
+    // (the intermittent bug being fixed).
+    var ref = directChildOf(row, profile) || directChildOf(row, notif);
+    return { row: row, ref: ref };
+  }
+
+  // ---- state ---------------------------------------------------------------
+  function loadState(cb) {
+    try {
+      chrome.storage.local.get(
+        [PREFERENCES_KEY, "betaGeneralStats", "betaWatchTimeData"],
+        function (r) {
+          r = r || {};
+          var prefs = r[PREFERENCES_KEY] || {};
+          var stats = r.betaGeneralStats || {};
+          cb({
+            points: stats.channelPointsClaimed || 0,
+            watchSeconds: currentMonthWatch(r.betaWatchTimeData || {}),
+            previewsEnabled: prefs.previewsEnabled !== false,
+            lang: langKey(prefs.language),
+          });
+        }
+      );
+    } catch (_e) {
+      cb(null);
+    }
+  }
+  function updatePref(key, val) {
+    try {
+      var u = {};
+      u[key] = val;
+      chrome.runtime.sendMessage({ type: "updatePreferences", updates: u });
+    } catch (_e) {}
+  }
+
+  // ---- panel ---------------------------------------------------------------
+  var panelEl = null;
+
+  function closePanel() {
+    if (panelEl) {
+      try {
+        panelEl.remove();
+      } catch (_e) {}
+      panelEl = null;
+    }
+    document.removeEventListener("click", onDocClick, true);
+    document.removeEventListener("keydown", onKey, true);
+    window.removeEventListener("resize", closePanel);
+  }
+  function onDocClick(e) {
+    if (!panelEl) return;
+    var t = e.target;
+    if (panelEl.contains(t)) return;
+    if (t && t.closest && t.closest("#sp-topbar-btn")) return;
+    closePanel();
+  }
+  function onKey(e) {
+    if (e.key === "Escape") closePanel();
+  }
+  function positionPanel(p, btn) {
+    var r = btn.getBoundingClientRect();
+    p.style.top = r.bottom + 8 + "px";
+    p.style.right = Math.max(8, window.innerWidth - r.right) + "px";
+  }
+
+  function buildPanel(st) {
+    st = st || {};
+    var lang = langKey(st.lang);
+    var p = document.createElement("div");
+    p.className = "sp-topbar-panel";
+    p.id = "sp-topbar-panel";
+    p.innerHTML =
+      '<div class="sp-tb-head"><img class="sp-tb-logo" alt="" src="' + LOGO_URL + '"><span>StreamPulse</span></div>' +
+      '<div class="sp-tb-stats">' +
+      '<div class="sp-tb-stat" title="Points">' + ICON.gem + "<b>" + fmtNum(st.points) + "</b></div>" +
+      '<div class="sp-tb-stat" title="Watch time">' + ICON.clock + "<b>" + fmtDur(st.watchSeconds) + "</b></div>" +
+      "</div>" +
+      '<button class="sp-tb-row" type="button" data-sp-toggle="previewsEnabled"><span>' +
+      tr(lang, "previews") + '</span><span class="sp-tb-sw' + (st.previewsEnabled ? " on" : "") + '"></span></button>' +
+      '<a class="sp-tb-tip" href="' + TIP_URL + '" target="_blank" rel="noopener noreferrer">' +
+      ICON.coffee + "<span>" + tr(lang, "tip") + "</span></a>" +
+      '<a class="sp-tb-settings" href="#" id="sp-tb-settings-link">' +
+      ICON.gear + "<span>" + tr(lang, "settings") + "</span></a>";
+
+    var toggles = p.querySelectorAll("[data-sp-toggle]");
+    Array.prototype.forEach.call(toggles, function (rowEl) {
+      rowEl.addEventListener("click", function () {
+        var key = rowEl.getAttribute("data-sp-toggle");
+        var sw = rowEl.querySelector(".sp-tb-sw");
+        var newVal = !sw.classList.contains("on");
+        sw.classList.toggle("on", newVal);
+        updatePref(key, newVal);
+      });
+    });
+    var settingsLink = p.querySelector("#sp-tb-settings-link");
+    if (settingsLink) {
+      settingsLink.addEventListener("click", function (e) {
+        e.preventDefault();
+        try {
+          chrome.runtime.sendMessage({ type: "openSettings" });
+        } catch (_e) {}
+        closePanel();
+      });
+    }
+    return p;
+  }
+
+  function togglePanel(btn) {
+    if (panelEl) {
+      closePanel();
+      return;
+    }
+    loadState(function (st) {
+      panelEl = buildPanel(st);
+      document.body.appendChild(panelEl);
+      positionPanel(panelEl, btn);
+      setTimeout(function () {
+        document.addEventListener("click", onDocClick, true);
+        document.addEventListener("keydown", onKey, true);
+        window.addEventListener("resize", closePanel);
+      }, 0);
+    });
+  }
+
+  // ---- button injection ----------------------------------------------------
+  function injectButton() {
+    var f = findRow();
+    // Require a valid left-of-profile anchor before inserting. If it's not in
+    // the DOM yet (Twitch still rendering), bail and let the observer retry —
+    // never insert without a ref, which would land the button at the far right.
+    if (!f.row || !f.ref) return false;
+    if (f.row.querySelector("#sp-topbar-btn")) return true;
+    var wrap = document.createElement("div");
+    wrap.className = "sp-topbar-wrap";
+    var btn = document.createElement("button");
+    btn.id = "sp-topbar-btn";
+    btn.className = "sp-topbar-btn";
+    btn.type = "button";
+    btn.title = "StreamPulse";
+    btn.setAttribute("aria-label", "StreamPulse");
+    var img = document.createElement("img");
+    img.className = "sp-topbar-logo";
+    img.alt = "StreamPulse";
+    img.src = LOGO_URL;
+    btn.appendChild(img);
+    wrap.appendChild(btn);
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      togglePanel(btn);
+    });
+    f.row.insertBefore(wrap, f.ref);
+    return true;
+  }
+
+  function ensure() {
+    try {
+      if (!document.getElementById("sp-topbar-btn")) injectButton();
+    } catch (_e) {}
+  }
+
+  // Re-inject on Twitch's SPA re-renders (debounced).
+  var moTimer = null;
+  var mo = new MutationObserver(function () {
+    if (moTimer) return;
+    moTimer = setTimeout(function () {
+      moTimer = null;
+      if (!document.getElementById("sp-topbar-btn")) {
+        if (panelEl) closePanel();
+        ensure();
+      }
+      highlightZEventSidebarChannels();
+    }, 500);
+  });
+  try {
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  } catch (_e) {}
+
+  ensure();
+
+  // ── ZEvent 2026 : Sidebar Twitch Highlights ──
+  var ZEVENT_END_TIMESTAMP = 1788742800000;
+  function isZEventActive() {
+    return Date.now() < ZEVENT_END_TIMESTAMP;
+  }
+
+  var ZEVENT_PARTICIPANTS_LIST = ["aducine","adyce_","aesmodia","airka_off","alderiate","alinea_","alphacast","amixem","amo_ergo_sum__","anaee","anariake","antistar","antoinedaniel","anyme023","areliann","arlaya","arnaquemoisitupeux","artemize","aspig","avamind","aypierre","bagherajones","barbe___douce","bartchi","bastiui","bclv4","behop_veek","bestmarmotte","bibou_lol","bichard","bidaltv","blanche_omenka","bluestardust","bmsjoel","boomnasty_","brickmitri","brybry","bulledop","byilhann","bytell2","captainfracas","chap_gg","chaton_sauvage_","chezbubulle","chitai","chloe","chowh1","chrisklippel","citronviolet","clara__cmoi","clara_jones","clemovitch","clotho","clubpingouin_trash","coffee","crocodyletv","damdamlive","dart0is","david_kyden","dedefion_tv","deejaymakina","did0us","doigby","domingo","drakeoz_","dramatictac","drazonia","dreamschannelive","drfeelgood","drfrenesy","echorosen","ekylibre","ellbana","emilien","encremecanique","eneaxy","enjoyphoenix","eoscall__","eskc","esliane","etoile_ow","etoiles","eymryc","eziogdsp","f_bardino","fabdcolson","fantabobshow","farodgames","fausthea","fds_fallen","fefegg","feywee","flamby","flonflon","florence","fm_guru","foxlo_","geekfabula","general_mass","gius","gom4rt","grimvalth","guimauseterrier","hammerkick","harumate","haskouil_x_krousti","hctuan","helydia","hexotik00","himala_dofus","hiwamariri","hortyunderscore","hosarny","hugoauperchoir","humility","huzounet","hyp_tv","iamfandol","ibra","impactx_","ittledew","jackplaypz","jardistream","jaunerougebleu","jeanbaptisteshow","jengo_m","jessbond","jidun","jirayalecochon","jjetgames","jltomy","joueur_du_grenier","joyca","juliettearz","kammy64","kaosvmd","kapslockart","katchanvt","kejinn","kemist_c10h15n","kenbogard","kennystream","keola","khalamite_live","koala_cosy","koripeluche","kungitto","kwikwiii","kyuness_","la_capitainerie","la_golinval","lagameuseelle","laink","lalain","lalou_pissenlit","laniyelle","lapi","latavernedepatatus","leboldhistoire","lechatencostume","lege","lemwakast","lepotomat","les_archives","lexitvz","linca","littlebigwhale","lodeeey","lofimaria_","low4n","lu_k","lunae","lunium","lutti","lydia__am","lynkus_","m4fgaming","mahyars","maitrearmand","maitreleee","makse_tv","malariatv","malganyr","malm","manaryuujin","mandhyne","manglouste","maricanne","marieandthesapphics","mastu","masumorph","mathox","mcflyetcarlito","medalinya","melibellule","mellumine","meloka","menou","meteorann","michaelbielli","mielcrapouille","miiorca","minaravel","misscliick_","mistermv","misterpacothai","mlle_heloise","mokappan","moman","monkyjv","monsieurfoxx","morrigh4n","mrclubprotv","mrderiv","mrdrywiz","mynthos","nanie_nao","narkuss_lol","natoo","natsuko","necotho","neeq0xr","nejda","nellynessa","nia_c","nico_la","niioor","nimea_rl","notseriou_s","nykho","okanyaan_","oliarius","olithinoa","onest1_","onutrem","papy_grant","papyblade","paramiaasmr","peachypiwie","petitours","pomelyne","ponce","poncho_dlv","pressea","priscillaliaud","proteam","purpleofficiel","rasmelthor","raumane","ravencross","rayakuzaa","recalbox","recharging","rekriot","rhobalas_lol","rivenzi","ryuuna_vt","saab_","sakor_","salistoire","salma_","samueletienne","sawpalin","scok","scorpio","seaofthieves_france","sebjdg","seroths","sgauth","sheiyah","shinya_nia","shisheyu","shyroboy","siha_art","skerax","skydarc","skylissfr","skyrroztv","skyzio_","slyders","sneaze_","sol_hms","solaryhs","sparkly","splinter","stanrenart","streamdatabase","sturry316","sundae","sweetlullabytv","sylvainlyve","tamaroush_","tarkan_____","tartiine__","ter0pod","thecreepereb","thegreatreview","theguill84","theholomovement","tipstevens","tomtom","toneeuw","toutsecomprend","tpk_live","traytonlol","trinity","tsunadida","tweekz","ultia","uncleskarzi","unname_live","v3lia_","valeskatwitch","verveine_","virudi","volpoune","vulvyqueen","wakzlol","walkyrip","will_boss_gamer","willongshow","wingo","xanaa","xari","xillow__","xo_trixy","xynthiaa_","yodahkiin_","yohann_harth","yoona","yumi_ktv","yunaly_yt","zaelite","zerator","zevent","zeventplays","zoltan","zoraeli"];
+  var ZEVENT_MAP = {};
+  for (var k = 0; k < ZEVENT_PARTICIPANTS_LIST.length; k++) {
+    ZEVENT_MAP[ZEVENT_PARTICIPANTS_LIST[k]] = true;
+  }
+
+  var zeventEnabled = true;
+  function updateZEventPref() {
+    try {
+      chrome.storage.local.get("betaGeneralPreferences", function (res) {
+        var p = (res && res.betaGeneralPreferences) || {};
+        zeventEnabled = p.zeventFeatures !== false;
+        highlightZEventSidebarChannels();
+      });
+    } catch (_e) {}
+  }
+  try {
+    chrome.storage.onChanged.addListener(function (changes, area) {
+      if (area === "local" && changes.betaGeneralPreferences) {
+        updateZEventPref();
+      }
+    });
+  } catch (_e) {}
+
+  function extractSidebarHandle(row) {
+    var anchors = row.querySelectorAll ? row.querySelectorAll("a[href]") : [];
+    if (row.tagName === "A" && row.href) {
+      anchors = [row];
+    }
+    for (var a = 0; a < anchors.length; a++) {
+      var raw = anchors[a].getAttribute("href") || anchors[a].href || "";
+      var clean = raw.replace(/^https?:\/\/(?:www\.)?twitch\.tv/i, "").split(/[?#]/)[0].replace(/^\/+|\/+$/g, "");
+      var parts = clean.split("/");
+      if (parts.length === 1 && parts[0]) {
+        var h = parts[0].toLowerCase();
+        var blocked = ["directory", "videos", "downloads", "prime", "turbo", "subscriptions", "inventory", "wallet", "settings", "friends", "messages", "search", "p"];
+        if (blocked.indexOf(h) === -1) return h;
+      }
+    }
+    var titleEl = row.querySelector ? row.querySelector('[data-a-target="side-nav-title"], .side-nav-card__title, p[title], span[title]') : null;
+    if (titleEl) {
+      var titleName = (titleEl.getAttribute("title") || titleEl.textContent || "").trim().toLowerCase();
+      if (titleName && ZEVENT_MAP[titleName]) return titleName;
+    }
+    var img = row.querySelector ? row.querySelector("img[alt]") : null;
+    if (img) {
+      var alt = (img.getAttribute("alt") || "").trim().toLowerCase();
+      if (alt && ZEVENT_MAP[alt]) return alt;
+    }
+    return "";
+  }
+
+  function isSidebarRowLive(row) {
+    var text = (row.textContent || "").toLowerCase();
+    if (text.indexOf("hors ligne") !== -1 || text.indexOf("offline") !== -1) {
+      return false;
+    }
+    if (row.querySelector('.tw-channel-status-indicator--live, [data-a-target="side-nav-live-status"], .side-nav-card__live-status, [data-a-target="side-nav-card-metadata-viewers"], .tw-channel-status-indicator')) {
+      return true;
+    }
+    var aria = (row.getAttribute("aria-label") || (row.querySelector("a") && row.querySelector("a").getAttribute("aria-label")) || "").toLowerCase();
+    if (aria && (aria.indexOf("spectateur") !== -1 || aria.indexOf("viewer") !== -1 || aria.indexOf("diffuse") !== -1 || aria.indexOf("streaming") !== -1 || aria.indexOf("en direct") !== -1 || aria.indexOf("live") !== -1)) {
+      return true;
+    }
+    if (/\b\d+([,.]\d+)?\s*(k|kilo|m)?\b/i.test(text)) {
+      return true;
+    }
+    return false;
+  }
+
+  function highlightZEventSidebarChannels() {
+    if (!isZEventActive() || !zeventEnabled) return;
+    try {
+      var cards = document.querySelectorAll(
+        '.side-nav-card, a[data-test-selector="followed-channel"], a.side-nav-card__link, [data-a-target="side-nav-card"], [data-a-target="side-nav-card-link"]'
+      );
+      if (!cards || !cards.length) return;
+
+      // Une carte et son lien renvoient la meme ligne : on ne la traite qu'une fois.
+      var processedRows = new Set();
+
+      for (var i = 0; i < cards.length; i++) {
+        var el = cards[i];
+        var row = el.closest(".side-nav-card, [data-a-target='side-nav-card'], li") || el;
+        if (processedRows.has(row)) continue;
+        processedRows.add(row);
+
+        var handle = extractSidebarHandle(row);
+        var isZEvent = false;
+
+        if (handle && ZEVENT_MAP[handle]) {
+          if (isSidebarRowLive(row)) {
+            isZEvent = true;
+          }
+        }
+
+        var link = row.querySelector("a[href]") || (row.tagName === "A" ? row : null);
+
+        if (isZEvent) {
+          if (!row.classList.contains("sp-zevent-highlight")) {
+            row.classList.add("sp-zevent-highlight");
+          }
+          if (link && !link.classList.contains("sp-zevent-highlight")) {
+            link.classList.add("sp-zevent-highlight");
+          }
+        } else {
+          if (row.classList.contains("sp-zevent-highlight")) {
+            row.classList.remove("sp-zevent-highlight");
+          }
+          if (link && link.classList.contains("sp-zevent-highlight")) {
+            link.classList.remove("sp-zevent-highlight");
+          }
+        }
+      }
+    } catch (_e) {}
+  }
+
+  updateZEventPref();
+  highlightZEventSidebarChannels();
+  setInterval(highlightZEventSidebarChannels, 3000);
+})();

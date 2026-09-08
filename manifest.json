@@ -1,0 +1,157 @@
+{
+  "manifest_version": 3,
+  "default_locale": "en",
+  "name": "__MSG_appName__",
+  "description": "__MSG_appDesc__",
+  "version": "26.9.8",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "streampulse@alexisamz.fr",
+      "strict_min_version": "115.0",
+      "data_collection_permissions": {
+        "required": [
+          "personallyIdentifyingInfo"
+        ]
+      }
+    }
+  },
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://alexisamz.fr/*",
+    "https://api.twitch.tv/*",
+    "https://tmi.twitch.tv/*",
+    "https://gql.twitch.tv/*",
+    "https://www.twitch.tv/*",
+    "https://clips.twitch.tv/*",
+    "https://kick.com/*",
+    "https://*.kick.com/*",
+    "https://files.kick.com/*",
+    "https://images.kick.com/*",
+    "https://stream.kick.com/*",
+    "https://id.kick.com/*",
+    "https://api.kick.com/*"
+  ],
+  "author": "AlexisAMZ",
+  "background": {
+    "scripts": [
+      "js/background.js"
+    ],
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "js/inject/preventPause.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "js/inject/i18n-inline.js",
+        "js/inject/topbar.js",
+        "js/inject/quickFollow.js",
+        "js/inject/twitch-badge.js"
+      ],
+      "css": [
+        "css/topbar.css",
+        "css/inject/twitch-badge.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.twitch.tv/*",
+        "https://clips.twitch.tv/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "js/vendor/hls.light.min.js",
+        "js/previews/sources.js",
+        "js/previews/card.js",
+        "js/previews/targets-twitch.js",
+        "js/previews/observer.js",
+        "js/previews/stream.js",
+        "js/twitchPreviews.js"
+      ],
+      "css": [
+        "css/previews.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "js/inject/i18n-inline.js",
+        "js/channelPointsClaimer.js",
+        "js/twitchPlayerEnhancer.js",
+        "js/chatFilter.js",
+        "js/watchTimeTracker.js",
+        "js/tabEnhancer.js",
+        "js/inject/predictionsOverlay.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://kick.com/*",
+        "https://*.kick.com/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "js/inject/i18n-inline.js",
+        "js/kickPlayerEnhancer.js",
+        "js/kickChannelPoints.js",
+        "js/chatFilter.js",
+        "js/watchTimeTracker.js",
+        "js/tabEnhancer.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "html/popup.html",
+    "default_icon": {
+      "16": "images/photos/16px.png",
+      "32": "images/photos/32px.png",
+      "48": "images/photos/48px.png",
+      "128": "images/photos/128px.png"
+    }
+  },
+  "icons": {
+    "16": "images/photos/16px.png",
+    "32": "images/photos/32px.png",
+    "48": "images/photos/48px.png",
+    "128": "images/photos/128px.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "html/audio-handler.html",
+        "html/changelog.html",
+        "sons/notification.mp3",
+        "images/photos/128px.png",
+        "images/photos/logosp.png",
+        "images/zevent26.png"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

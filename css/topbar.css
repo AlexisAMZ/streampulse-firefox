@@ -1,0 +1,369 @@
+/* StreamPulse — Twitch top-bar button + control panel (injected by topbar.js). */
+
+/* logosp.png est un glyphe #6200EA sur fond transparent. Toutes les surfaces ou
+   on le pose sont sombres ou violettes, et le violet ne s'en detache sur aucune :
+   2,28:1 sur le #18181b de la nav Twitch (et 1,42:1 au survol, le fond
+   s'eclaircissant vers la luminance du glyphe), 1,68:1 sur le #9147ff du bouton
+   d'ajout, 1,65:1 sur le gris de l'etat suivi. Les trois sont sous le seuil
+   WCAG de 3:1 pour un element d'interface.
+
+   brightness(0) ecrase le RGB a zero, invert(1) le remonte a blanc ; le canal
+   alpha n'est touche par aucun des deux, donc l'antialiasing du glyphe survit.
+   Le logo s'aligne ainsi sur les icones de Twitch et sur nos propres libelles,
+   deja en #fff / #efeff1. */
+.sp-topbar-logo,
+.sp-tb-head .sp-tb-logo,
+.sp-qf-logo,
+.sp-qf-toast-logo {
+  filter: brightness(0) invert(1);
+}
+
+.sp-topbar-wrap {
+  display: flex;
+  align-items: center;
+  margin: 0 5px;
+}
+.sp-topbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.sp-topbar-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.sp-topbar-logo {
+  width: 21px;
+  height: 21px;
+  border-radius: 5px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Dropdown control panel */
+.sp-topbar-panel {
+  position: fixed;
+  z-index: 2147483647;
+  width: 268px;
+  background: #18181b;
+  color: #efeff1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  padding: 12px;
+  font: 13px/1.3 Inter, -apple-system, system-ui, "Segoe UI", sans-serif;
+  animation: sp-tb-in 0.12s ease;
+}
+@keyframes sp-tb-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sp-tb-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.sp-tb-head .sp-tb-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.sp-tb-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.sp-tb-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 9px 4px;
+  color: #adadb8;
+}
+.sp-tb-stat b {
+  color: #efeff1;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.sp-tb-ic {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.sp-tb-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 4px;
+  margin: 0;
+  background: none;
+  border: none;
+  color: #efeff1;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.sp-tb-row:hover {
+  color: #fff;
+}
+.sp-tb-sw {
+  position: relative;
+  width: 34px;
+  height: 19px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+.sp-tb-sw::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+.sp-tb-sw.on {
+  background: #9147ff;
+}
+.sp-tb-sw.on::after {
+  transform: translateX(15px);
+}
+
+.sp-tb-tip,
+.sp-tb-settings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  text-decoration: none;
+  border-radius: 8px;
+}
+.sp-tb-tip {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(255, 211, 0, 0.12);
+  border: 1px solid rgba(255, 211, 0, 0.35);
+  color: #efeff1;
+  font-weight: 600;
+}
+.sp-tb-tip:hover {
+  background: rgba(255, 211, 0, 0.2);
+}
+.sp-tb-settings {
+  margin-top: 8px;
+  padding: 8px;
+  color: #adadb8;
+  font-size: 12px;
+}
+.sp-tb-settings:hover {
+  color: #efeff1;
+}
+
+/* ── "Add to StreamPulse" button on channel pages (quickFollow.js) ───────── */
+/* Sits to the LEFT of Twitch's Follow / Subscribe control, so the gap is on
+   the right. Scoped tightly to avoid clashing with 7TV / FFZ injections. */
+.sp-qf-wrap {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+/* Etat par defaut, chaine pas encore ajoutee : violet Twitch plein, pour que le
+   bouton se lise comme une action primaire a cote de « S'abonner ».
+
+   La geometrie est relevee sur les boutons natifs de la barre d'actions de
+   chaine — follow-button, subscribe-button, gift-button, share-button — qui
+   partagent tous exactement : border-radius 9000px, height 32px, font-size 14px,
+   font-weight 600. Un commentaire precedent affirmait ici que Twitch etait en
+   4px et justifiait un 8px « volontairement plus rond » ; c'est caduc, leur
+   design system est passe aux pilules pleines, et notre rectangle arrondi de
+   30px se repererait au premier coup d'oeil au milieu d'elles.
+
+   9000px est le jeton de Twitch lui-meme, repris tel quel plutot qu'un 9999px
+   equivalent, pour que la filiation reste lisible si leur design bouge. */
+.sp-qf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 9000px;
+  background: #9147ff;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+/* Darker purple on hover, the same shade Twitch uses for Subscribe. */
+.sp-qf-btn:hover:not(:disabled) {
+  background: #772ce8;
+}
+.sp-qf-btn:focus-visible {
+  outline: 2px solid #efeff1;
+  outline-offset: 2px;
+}
+.sp-qf-btn:disabled {
+  cursor: default;
+}
+.sp-qf-btn.is-busy {
+  opacity: 0.6;
+}
+.sp-qf-logo {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+/* Longer locales ("Adicionar ao StreamPulse") must not stretch the action row. */
+.sp-qf-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 190px;
+}
+/* Place contrainte : le libellé disparaît, le logo suffit à identifier le
+   bouton. Le texte complet reste dans title/aria-label, donc rien n'est perdu
+   pour le survol ni pour un lecteur d'écran. Bascule pilotée par fitButton()
+   dans quickFollow.js, qui mesure le débordement réel plutôt que de parier sur
+   un point de rupture fixe. */
+.sp-qf-btn.is-compact {
+  gap: 0;
+  padding: 0 8px;
+  width: 32px;
+  justify-content: center;
+}
+.sp-qf-btn.is-compact .sp-qf-label {
+  display: none;
+}
+/* Already added: drop to the neutral grey fill. The job is done, so it steps
+   back and stops competing with Twitch's own Follow / Subscribe buttons. */
+.sp-qf-btn.is-tracked {
+  background: rgba(83, 83, 95, 0.38);
+  color: #efeff1;
+}
+/* Hover on the tracked state hints at removal without shouting: slightly
+   lighter, no red, since this sits next to Twitch's own controls. */
+.sp-qf-btn.is-tracked:hover:not(:disabled) {
+  background: rgba(83, 83, 95, 0.58);
+  color: #fff;
+}
+
+.sp-qf-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 340px;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #efeff1;
+  font: 13px/1.3 Inter, -apple-system, system-ui, "Segoe UI", sans-serif;
+  font-weight: 600;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+.sp-qf-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.sp-qf-toast-logo {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ── Twitch Left Sidebar ZEvent Highlight ── */
+.side-nav-card.sp-zevent-highlight,
+.side-nav-card.sp-zevent-highlight .side-nav-card__link,
+.side-nav-card__link.sp-zevent-highlight,
+a[data-test-selector="followed-channel"].sp-zevent-highlight,
+.sp-zevent-highlight {
+  position: relative !important;
+  background: linear-gradient(90deg, rgba(0, 230, 118, 0.16) 0%, rgba(0, 230, 118, 0.04) 75%, transparent 100%) !important;
+  border-left: 3px solid #00e676 !important;
+  border-radius: 4px !important;
+  transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+
+.side-nav-card.sp-zevent-highlight:hover,
+.side-nav-card.sp-zevent-highlight .side-nav-card__link:hover,
+.side-nav-card__link.sp-zevent-highlight:hover,
+a[data-test-selector="followed-channel"].sp-zevent-highlight:hover,
+.sp-zevent-highlight:hover {
+  background: linear-gradient(90deg, rgba(0, 230, 118, 0.25) 0%, rgba(0, 230, 118, 0.08) 100%) !important;
+  border-left-color: #53fc18 !important;
+}
+
+/* Category / Game label inside highlighted sidebar channel */
+.side-nav-card.sp-zevent-highlight [data-a-target="side-nav-game-title"],
+.side-nav-card.sp-zevent-highlight .side-nav-card__metadata p:last-child,
+.sp-zevent-highlight [data-a-target="side-nav-game-title"] {
+  color: #00e676 !important;
+  font-weight: 600 !important;
+}
+
+/* Live dot indicator tint (ONLY the dot, never the viewer count container!) */
+.side-nav-card.sp-zevent-highlight .tw-channel-status-indicator--live,
+.sp-zevent-highlight .tw-channel-status-indicator--live {
+  background-color: #00e676 !important;
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.8) !important;
+}
+
+/* Avatar subtle green ring (works in both expanded and collapsed sidebar) */
+.sp-zevent-highlight .side-nav-card__avatar img,
+.sp-zevent-highlight .tw-avatar img,
+.side-nav-card.sp-zevent-highlight .tw-avatar img {
+  box-shadow: 0 0 0 2px #00e676, 0 0 8px rgba(0, 230, 118, 0.5) !important;
+  border-radius: 50% !important;
+}
