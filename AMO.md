@@ -10,7 +10,7 @@
 `streampulse@alexisamz.fr`
 
 ### Version
-`26.8.12`
+`26.9.9`
 
 ### Nom du module (FR)
 `StreamPulse : Alertes, Points & Drops Twitch & Kick`
