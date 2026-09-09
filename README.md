@@ -1,9 +1,9 @@
 <h1 align="center">
-  <img src="https://www.streampulse.fr/assets/icons/icon128.png" alt="StreamPulse Icon" width="128"><br>
-  StreamPulse — Twitch &amp; Kick Firefox Extension
+  <img src="images/photos/128px.png" alt="StreamPulse" width="128"><br>
+  StreamPulse: Twitch &amp; Kick Firefox Extension
 </h1>
 
-<h4 align="center">Live alerts, Channel Points, Drops and viewing comfort — without touching your chat.</h4>
+<h4 align="center">Live alerts, Channel Points, Drops and viewing comfort, without touching your chat.</h4>
 
 <p align="center">
   <a href="#-features">Features</a> •
@@ -22,7 +22,7 @@
 ---
 
 **StreamPulse** is a browser extension for Twitch and Kick viewers. It automates repetitive
-tasks — clicking Channel Points, claiming Drops — and keeps you up to date on your streamers,
+tasks (clicking Channel Points, claiming Drops) and keeps you up to date on your streamers,
 without altering the chat itself.
 
 It sits alongside **BetterTTV**, **FrankerFaceZ** and **7TV** rather than competing with them:
@@ -44,7 +44,7 @@ they handle emotes and chat, StreamPulse handles rewards, alerts and player comf
 **On the Twitch page**
 - **Top-bar panel**: time spent on the channel you are watching, a one-click follow, quick
   toggles, and your streamers currently live
-- **Hover previews** on the sidebar, directory, clips and search — image or live video,
+- **Hover previews** on the sidebar, directory, clips and search: image or live video,
   in three sizes
 - **Community badge**: a StreamPulse mark next to fellow users in chat, tinted to the
   username colour, the Twitch theme, or a colour of your choice
@@ -57,7 +57,7 @@ they handle emotes and chat, StreamPulse handles rewards, alerts and player comf
 
 ## 🚀 Installation
 
-Firefox 115 or later. Install from **[addons.mozilla.org](https://addons.mozilla.org/)** —
+Firefox 115 or later. Install from **[addons.mozilla.org](https://addons.mozilla.org/)**,
 no account, no sign-in.
 
 Chrome, Brave, Opera and other Chromium browsers use a separate build:
@@ -71,13 +71,13 @@ uploaded.
 Two exchanges leave your machine:
 
 1. Calls to the **public Twitch and Kick APIs**, to know who is live.
-2. If the **community badge** is enabled, a fingerprint of your Twitch username — a salted,
+2. If the **community badge** is enabled, a fingerprint of your Twitch username (a salted,
    truncated SHA-256 computed locally. The username itself is never transmitted, and the
    public list contains no readable names.
 
 We do not present that fingerprint as anonymous: the salt ships inside the extension, so a
 third party who already suspects a specific username can compute its fingerprint and check
-whether it is present. It is **pseudonymous data**, handled as personal data — which is why
+whether it is present. It is **pseudonymous data**, handled as personal data, which is why
 the manifest declares `personallyIdentifyingInfo`. The badge can be turned off at any time in
 **Settings → Chat → Community badge**.
 
@@ -121,7 +121,7 @@ worker, which is why the background section and audio handling differ from the C
 
 ## 🔗 Links
 
-- Website — [streampulse.fr](https://www.streampulse.fr/)
-- Chrome build — [Chrome Web Store](https://chromewebstore.google.com/detail/streampulse-multi-streame/ipfhbfabadbpkjimhdcjadopnahdpddh)
-- Support — [streampulse.fr/support](https://www.streampulse.fr/support)
-- Developer — AlexisAMZ
+- Website: [streampulse.fr](https://www.streampulse.fr/)
+- Chrome build: [Chrome Web Store](https://chromewebstore.google.com/detail/streampulse-multi-streame/ipfhbfabadbpkjimhdcjadopnahdpddh)
+- Support: [streampulse.fr/support](https://www.streampulse.fr/support)
+- Developer: AlexisAMZ

@@ -5,10 +5,10 @@ Chiffres mesurés sur le dépôt, pas estimés.
 
 ---
 
-## 1. Traduire les 12 nouvelles langues — reporté, ne bloque pas la publication
+## 1. Traduire les 12 nouvelles langues : reporté, ne bloque pas la publication
 
 Décision : on publie avec les 4 langues déjà traduites (`fr`, `en`, `es`,
-`pt-BR`). Les 12 autres restent en `ready: false`, donc absentes du sélecteur —
+`pt-BR`). Les 12 autres restent en `ready: false`, donc absentes du sélecteur :
 un Chrome en allemand tombe sur `de` et voit de l'anglais, exactement comme
 avant leur ajout. Rien de cassé côté utilisateur, rien qui bloque la soumission.
 
@@ -26,7 +26,7 @@ Part de chaînes identiques à l'anglais, sur 289 :
 | `ru` Русский | 99 % | | `ja` 日本語 | 99 % |
 | `ko` 한국어 | 99 % | | `hi` हिन्दी | 99 % |
 
-Les 4 langues d'origine sont saines : `fr` 11 %, `es` 7 %, `pt-BR` 7 % — et ce
+Les 4 langues d'origine sont saines : `fr` 11 %, `es` 7 %, `pt-BR` 7 %, et ce
 résidu est normal (« StreamPulse », « Twitch », « OFFLINE », les termes qu'on ne
 traduit pas).
 
@@ -39,7 +39,7 @@ Points de vigilance vérifiés en amont :
 - **39 chaînes contiennent des placeholders** `{{count}}`, `{{name}}`,
   `{{platform}}`. DeepL les préserve avec `tag_handling: html`, mais ça doit être
   revalidé après coup.
-- **5 chaînes contiennent du HTML** (`<strong>`, `<a href>`) — même paramètre.
+- **5 chaînes contiennent du HTML** (`<strong>`, `<a href>`) : même paramètre.
 - **9 chaînes font 3 caractères ou moins** (`Add`, `Yes`, `No`, `all`, `--`).
   Sans contexte, une traduction automatique se trompe facilement.
 - `background.badge.live` est une **fonction** de pluralisation, pas une chaîne.
@@ -63,11 +63,11 @@ source, donc un reformatage ne produit pas de faux positif.
 
 ---
 
-## 2. Page de notes de version — fait
+## 2. Page de notes de version : fait
 
 **Le cadre** (`js/changelog.js`, `html/changelog.html`) : les libellés passent par
 un bloc `changelog.*` dans `translations.js`, et la date suit
-`resolveLocale(getCurrentLanguage())` — donc la langue choisie dans StreamPulse,
+`resolveLocale(getCurrentLanguage())` : donc la langue choisie dans StreamPulse,
 pas celle du navigateur.
 
 **Le contenu** (`js/changelog-data.js`) : question tranchée, chaque texte est une
@@ -79,7 +79,7 @@ title: { fr: "...", en: "...", es: "...", "pt-BR": "..." }
 
 Concerne `title`, `subtitle`, `changes[].text` et `thanks[].for`. La lecture passe
 par `pickLocalized(value, lang)`, qui retombe sur l'anglais quand la langue
-demandée manque — c'est ce que voit un Chrome en allemand, qui résout vers `de`.
+demandée manque : c'est ce que voit un Chrome en allemand, qui résout vers `de`.
 
 Un contrôle `verify.mjs` refuse désormais une release dont un texte ne couvre pas
 les 4 langues publiées, ou qui serait restée en chaîne simple :
@@ -102,7 +102,7 @@ incomplètes tant qu'elles ne sont pas complétées.
 `appName` et `appDesc`. Ce sont le **nom et la description de la fiche Chrome Web
 Store**, pas l'interface.
 
-Rien ne casse — `default_locale: "en"` assure le repli — mais la fiche Store
+Rien ne casse (`default_locale: "en"` assure le repli), mais la fiche Store
 s'affiche en anglais pour les 12 nouvelles langues, alors que l'extension se
 présentera comme localisée.
 
@@ -115,8 +115,8 @@ marketing, donc il vaut mieux le soigner ou le reprendre du site.
 
 Résolu sur le plan technique. `i18n/translations.js` expose deux listes :
 
-- `ALL_LANGUAGES` — les 16, chacune avec un drapeau `ready`
-- `AVAILABLE_LANGUAGES` — les seules `ready: true`, c'est ce que lit le sélecteur
+- `ALL_LANGUAGES` : les 16, chacune avec un drapeau `ready`
+- `AVAILABLE_LANGUAGES` : les seules `ready: true`, c'est ce que lit le sélecteur
 
 Aujourd'hui seules `fr`, `en`, `es`, `pt-BR` sont publiées. Les 12 autres restent
 résolvables (un Chrome en allemand tombe bien sur `de`, qui affiche l'anglais),
@@ -133,7 +133,7 @@ de 50 % des chaînes sont encore identiques à l'anglais :
 
 ```
 FAIL  translations.js "de" is marked ready but 100% of its strings
-      are identical to English — set ready:false until it is translated
+      are identical to English: set ready:false until it is translated
 ```
 
 Rien d'autre à toucher : popup et onboarding lisent `getAvailableLanguages()`.
@@ -145,13 +145,13 @@ Rien d'autre à toucher : popup et onboarding lisent `getAvailableLanguages()`.
 Ces choses sont codées et passent les contrôles automatiques, mais n'ont **jamais
 été observées en fonctionnement** :
 
-- **Page de notes de version** — jamais vue s'afficher. Elle s'ouvre après une
+- **Page de notes de version** : jamais vue s'afficher. Elle s'ouvre après une
   mise à jour. Pour la tester directement, relever l'ID sur `chrome://extensions`
   puis ouvrir `chrome-extension://<ID>/html/changelog.html`.
-- **Correctif des notifications** — `createWithIconFallback` dans
+- **Correctif des notifications** : `createWithIconFallback` dans
   `js/background.js` doit supprimer l'erreur `Unable to download all specified
   images` quand l'avatar distant est bloqué. Non confirmé de ton côté.
-- **Rendu dans les langues non latines** — `ja`, `ko`, `hi`, `ru` n'ont pas été
+- **Rendu dans les langues non latines** : `ja`, `ko`, `hi`, `ru` n'ont pas été
   regardées visuellement. Les libellés longs en allemand et les scripts non
   latins peuvent déborder dans le popup et la topbar.
 
