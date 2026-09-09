@@ -690,7 +690,7 @@ function renderPreferences() {
     autoOpenInventoryToggle.checked = Boolean(prefs.autoOpenInventory);
   }
   if (autoOpenInventoryIntervalSelect) {
-    autoOpenInventoryIntervalSelect.value = String(prefs.autoOpenInventoryIntervalHours || 4);
+    autoOpenInventoryIntervalSelect.value = String(prefs.autoOpenInventoryIntervalHours || 24);
   }
   if (hideTwitchExtensionsToggle) {
     hideTwitchExtensionsToggle.checked = Boolean(prefs.hideTwitchExtensions);
