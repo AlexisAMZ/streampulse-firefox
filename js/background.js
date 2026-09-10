@@ -108,6 +108,7 @@ const PREFERENCES_KEY = "betaGeneralPreferences";
 const DEFAULT_PREFERENCES = {
   liveNotifications: true,
   gameNotifications: false,
+  titleNotifications: false,
   dropAlerts: true,
   predictionAlerts: true,
   raidAlerts: true,
@@ -171,7 +172,18 @@ async function getKickCredentials() {
   return data["streampulse:kickCreds"] || null;
 }
 
-async function getKickAppToken() {
+// Vol unique : sans lui, deux sondages concurrents demandent chacun un jeton
+// a id.kick.com et le second ecrase le premier, pour rien.
+let _kickTokenInFlight = null;
+
+function getKickAppToken() {
+  _kickTokenInFlight ||= fetchKickAppToken().finally(() => {
+    _kickTokenInFlight = null;
+  });
+  return _kickTokenInFlight;
+}
+
+async function fetchKickAppToken() {
   const creds = await getKickCredentials();
   if (!creds?.clientId || !creds?.clientSecret) return null;
 
@@ -184,8 +196,12 @@ async function getKickAppToken() {
   const stored = await chrome.storage.local.get("streampulse:kickToken");
   const cached = stored["streampulse:kickToken"];
   if (cached?.value && Date.now() < cached.expiresAt - 120_000) {
+    /* eslint-disable require-atomic-updates -- getKickAppToken() serialise les
+       appels concurrents par une promesse partagee, aucun entrelacement
+       possible ici. La regle ne voit pas ce garde, place dans l'appelant. */
     _kickToken.value = cached.value;
     _kickToken.expiresAt = cached.expiresAt;
+    /* eslint-enable require-atomic-updates */
     return _kickToken.value;
   }
 
@@ -204,8 +220,10 @@ async function getKickAppToken() {
     const json = await resp.json();
     if (!json.access_token) return null;
     const expiresAt = Date.now() + (json.expires_in ?? 3600) * 1000;
+    /* eslint-disable require-atomic-updates -- meme raison : appel serialise. */
     _kickToken.value = json.access_token;
     _kickToken.expiresAt = expiresAt;
+    /* eslint-enable require-atomic-updates */
     await chrome.storage.local.set({
       "streampulse:kickToken": { value: json.access_token, expiresAt },
     });
@@ -521,6 +539,7 @@ class PreferenceStore {
     return {
       liveNotifications: preferences.liveNotifications !== false,
       gameNotifications: Boolean(preferences.gameNotifications),
+      titleNotifications: Boolean(preferences.titleNotifications),
       // Ces trois cles etaient absentes de sanitize() : elles etaient acceptees
       // par le handler updatePreferences puis perdues a l'ecriture, et le spread
       // de DEFAULT_PREFERENCES dans set() les remettait a true. Impossible de les
@@ -1430,6 +1449,75 @@ class NotificationSystem {
     });
   }
 
+  static async notifyTitleChange(
+    streamer,
+    fromTitle,
+    toTitle,
+    preferences = DEFAULT_PREFERENCES,
+    platform = null
+  ) {
+    if (
+      preferences.liveNotifications === false ||
+      !preferences.titleNotifications
+    ) {
+      return;
+    }
+
+    const lang = normalizeLanguage(preferences?.language);
+    const platformKey = platform || streamer.platform || "twitch";
+    if (!platformSupportsLiveStatus(platformKey)) {
+      return;
+    }
+    const title = translate(
+      lang,
+      "background.notifications.titleChangeTitle",
+      {
+        name:
+          streamer.displayName ||
+          formatHandleForDisplay(
+            platformKey,
+            streamer.handle || streamer.twitch
+          ),
+      }
+    );
+    // Le corps ne montre que le nouveau titre : un flux Twitch en fait souvent
+    // plusieurs par session et le « avant apres » deborde de la notification.
+    const message = translate(
+      lang,
+      "background.notifications.titleChangeMessage",
+      {
+        to:
+          toTitle ||
+          translate(lang, "background.notifications.unknownTitle"),
+      }
+    );
+
+    const targetUrl = buildProfileUrl(
+      platformKey,
+      streamer.handle || streamer.twitch || streamer.id
+    );
+    const streamerStatus = streamerStates.get(streamer.id);
+    const fallbackIcon =
+      (chrome?.runtime && getPlatformIcon(platformKey)
+        ? chrome.runtime.getURL(getPlatformIcon(platformKey))
+        : null) || NotificationCenter.getDefaultIcon();
+    const iconCandidate =
+      streamerStatus?.avatarUrl || streamer.avatarUrl || fallbackIcon;
+    const iconUrl = NotificationCenter.resolveIcon(iconCandidate);
+
+    await NotificationCenter.show({
+      title,
+      message,
+      streamerId: streamer.id,
+      platform: platformKey,
+      url: targetUrl,
+      iconUrl,
+      requireInteraction: false,
+      priority: 1,
+      playSound: preferences?.soundsEnabled !== false,
+    });
+  }
+
   static async sendTest(preferences = DEFAULT_PREFERENCES) {
     if (preferences.liveNotifications === false) {
       throw new Error(
@@ -1533,6 +1621,22 @@ class ActionBadge {
   }
 }
 
+/**
+ * Dernier titre et derniere categorie vus en direct pour ce streamer.
+ * Se lit avant que le sondage en cours n'ecrase l'etat, donc renvoie bien
+ * l'avant-dernier passage en direct et non celui d'aujourd'hui.
+ */
+function lastSeenOf(streamerId) {
+  const previous = streamerLiveState.get(streamerId);
+  if (!previous) return {};
+  const lastTitle = previous.title || previous.lastTitle || "";
+  const lastGame = previous.game || previous.lastGame || "";
+  return {
+    ...(lastTitle ? { lastTitle } : {}),
+    ...(lastGame ? { lastGame } : {}),
+  };
+}
+
 async function buildStreamerStatus(streamer) {
   const platform = streamer.platform || "twitch";
   const status = await PlatformChecker.getStatus(streamer);
@@ -1546,6 +1650,11 @@ async function buildStreamerStatus(streamer) {
         avatarUrl: status.avatarUrl || "",
         error: status.error,
         isError: status.isError,
+        // L'API Twitch ne renvoie rien pour une chaine hors ligne : ni titre,
+        // ni categorie. On ressert donc ce qui a ete vu au dernier passage en
+        // direct, conserve dans l'etat live, lui-meme restaure du stockage
+        // juste au-dessus de la boucle de sondage.
+        ...lastSeenOf(streamer.id),
       };
 
   let avatarUrl = streamer.avatarUrl || status.avatarUrl || "";
@@ -1629,6 +1738,8 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
           game: entry.game || "",
           sessionId: entry.sessionId || null,
           title: entry.title || "",
+          lastTitle: entry.lastTitle || "",
+          lastGame: entry.lastGame || "",
           avatarUrl: entry.avatarUrl || "",
           supportsLiveStatus: entry.supportsLiveStatus !== false,
         });
@@ -1670,6 +1781,10 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
       game: status.active?.game || "",
       sessionId: status.active?.sessionId || null,
       title: status.active?.title || "",
+      // Persistes pour survivre aux sondages hors ligne successifs : `title`
+      // et `game` repassent a vide des que la chaine n'est plus en direct.
+      lastTitle: status.active?.title || status.active?.lastTitle || "",
+      lastGame: status.active?.game || status.active?.lastGame || "",
       avatarUrl: status.avatarUrl || streamer.avatarUrl || null,
       supportsLiveStatus: status.active?.supportsLiveStatus !== false,
       isError: Boolean(status.active?.isError),
@@ -1721,6 +1836,29 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
             streamer,
             previousLiveState.game,
             nextLiveState.game,
+            preferences,
+            nextLiveState.platform
+          );
+        }
+
+        const titleNotificationsEnabled = streamer.titleNotificationsEnabled !== false;
+        const shouldNotifyTitle =
+          preferences.titleNotifications &&
+          titleNotificationsEnabled &&
+          preferences.liveNotifications !== false &&
+          previousLiveState.isLive &&
+          previousLiveState.title &&
+          nextLiveState.title &&
+          previousLiveState.title !== nextLiveState.title &&
+          (!previousLiveState.sessionId ||
+            !nextLiveState.sessionId ||
+            previousLiveState.sessionId === nextLiveState.sessionId);
+
+        if (shouldNotifyTitle) {
+          await NotificationSystem.notifyTitleChange(
+            streamer,
+            previousLiveState.title,
+            nextLiveState.title,
             preferences,
             nextLiveState.platform
           );
@@ -2444,6 +2582,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })();
       return true;
 
+    case "toggleTitleNotifications":
+      (async () => {
+        const preferences = await PreferenceStore.get();
+        const streamers = await DataStore.getStreamers();
+        const idx = streamers.findIndex((s) => s.id === request.id);
+        if (idx === -1) {
+          sendResponse({ error: translateWithPrefs(preferences, "background.errors.streamerNotFound", { platform: "" }) });
+          return;
+        }
+        streamers[idx].titleNotificationsEnabled = Boolean(request.enabled);
+        await DataStore.saveStreamers(streamers);
+        sendResponse({ success: true });
+      })();
+      return true;
+
     case "refreshStatuses":
       PlatformChecker.refreshAll().then(() => {
         sendResponse({ success: true });
@@ -2586,6 +2739,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if ("gameNotifications" in incomingUpdates) {
           updates.gameNotifications =
             incomingUpdates.gameNotifications === true;
+        }
+        if ("titleNotifications" in incomingUpdates) {
+          updates.titleNotifications =
+            incomingUpdates.titleNotifications === true;
         }
         if ("soundsEnabled" in incomingUpdates) {
           updates.soundsEnabled = incomingUpdates.soundsEnabled !== false;
@@ -2732,6 +2889,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         if (Object.keys(updates).length === 0) {
           const preferences = await PreferenceStore.get();
+          const incomingKeys = Object.keys(incomingUpdates);
+
+          // Charge utile vide : il n'y a rien a faire, ce n'est pas une erreur.
+          // Le bandeau rouge sortait ici, sans qu'aucun reglage n'ait echoue.
+          // La serialisation de sendMessage supprime les proprietes valant
+          // undefined, donc un appelant peut envoyer un objet qui arrive vide.
+          if (incomingKeys.length === 0) {
+            sendResponse({ success: true, preferences });
+            return;
+          }
+
+          // Des cles sont bien arrivees mais aucune n'est reconnue : la, c'est
+          // un vrai defaut. On les nomme dans la console du service worker,
+          // faute de quoi le bandeau ne dit pas laquelle est en cause.
+          console.warn(
+            "[SP] updatePreferences: aucune cle reconnue parmi",
+            incomingKeys
+          );
           sendResponse({
             error: translateWithPrefs(
               preferences,
@@ -2811,7 +2986,9 @@ if (chrome.tabs?.onUpdated?.addListener) {
         if (prefs.preventTabDiscard && tab.autoDiscardable !== false) {
           await chrome.tabs.update(tabId, { autoDiscardable: false });
         }
-      } catch (_) {}
+      } catch (_) {
+        // L'onglet peut avoir ete ferme entre la lecture des preferences et l'ecriture.
+      }
     }
   });
 }

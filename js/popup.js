@@ -58,6 +58,7 @@ const refreshButton = document.getElementById("refresh-button");
 const template = document.getElementById("streamer-item-template");
 const liveNotificationsToggle = document.getElementById("pref-live-notifications");
 const gameAlertsToggle = document.getElementById("pref-game-alerts");
+const titleAlertsToggle = document.getElementById("pref-title-alerts");
 const soundsToggle = document.getElementById("pref-sounds");
 const autoClaimToggle = document.getElementById("pref-auto-claim");
 const autoClaimDropsToggle = document.getElementById("pref-auto-claim-drops");
@@ -556,6 +557,26 @@ function renderStreamers() {
         return true;
       }
     },
+    onToggleTitleNotify: async (id, enabled) => {
+      const result = await sendMessage({
+        type: "toggleTitleNotifications",
+        id,
+        enabled,
+      });
+
+      if (result?.error) {
+        showFeedback(result.error, "error");
+        return false;
+      }
+      const s = state.streamers.find((x) => x.id === id);
+      const messageKey = enabled ? "popup.toast.titleNotifyEnabled" : "popup.toast.titleNotifyDisabled";
+      if (s) {
+        const platformId = s.platform || DEFAULT_PLATFORM;
+        const name = s.displayName || formatHandleForDisplay(platformId, s.handle || s.twitch);
+        showFeedback(t(messageKey, { name }), "success");
+      }
+      return true;
+    },
     onOpen: (url) => {
       chrome.tabs.create({ url }, () => window.close());
     },
@@ -625,6 +646,7 @@ function renderStreamers() {
 
   initDragAndDrop();
   observeLazyIframes();
+  syncStatsAvatarHeight();
 }
 
 function renderGreeting() {
@@ -640,6 +662,51 @@ function renderGreeting() {
   sub.className = "greeting-sub";
   sub.textContent = greetingSub;
   greetingTitleEl.replaceChildren(line1, br, sub);
+  applyStatsAvatar();
+}
+
+/**
+ * Pose l'avatar Twitch de l'utilisateur en filigrane derriere la ligne
+ * Points / Watch time. L'URL vient de l'API Twitch via l'onboarding, mais elle
+ * transite par chrome.storage : on la revalide avant de l'injecter dans une
+ * propriete CSS, une url() n'etant pas un contexte sur.
+ */
+function applyStatsAvatar() {
+  const view = document.getElementById("streamers-view");
+  if (!view) return;
+  const url = safeAvatarUrl(state.userProfile?.avatarUrl);
+  if (!url) {
+    view.style.removeProperty("--stats-avatar");
+    return;
+  }
+  view.style.setProperty("--stats-avatar", `url("${url}")`);
+  syncStatsAvatarHeight();
+}
+
+/**
+ * Hauteur du filigrane : du haut de la vue jusqu'au bas de la ligne de filtres.
+ * Elle est mesuree et non figee, parce qu'elle bouge avec la longueur des
+ * textes traduits et avec la banniere d'evenement, qui s'intercale entre les
+ * deux rangees quand elle est visible.
+ */
+function syncStatsAvatarHeight() {
+  const view = document.getElementById("streamers-view");
+  const lastRow = view?.querySelector(".section-row");
+  if (!view || !lastRow) return;
+  const height = lastRow.getBoundingClientRect().bottom - view.getBoundingClientRect().top;
+  if (height > 0) view.style.setProperty("--stats-photo-height", `${Math.round(height)}px`);
+}
+
+/** Renvoie l'URL si c'est bien du https, sinon une chaine vide. */
+function safeAvatarUrl(raw) {
+  if (typeof raw !== "string" || !raw) return "";
+  try {
+    const parsed = new URL(raw);
+    // new URL() normalise et encode les guillemets : sortie sure dans une url().
+    return parsed.protocol === "https:" ? parsed.href : "";
+  } catch {
+    return "";
+  }
 }
 
 async function handleSavePseudo() {
@@ -650,13 +717,29 @@ async function handleSavePseudo() {
     return;
   }
   const previous = state.userProfile || {};
-  const next = { ...previous, handle: raw, displayName: raw };
 
   pseudoSaveButton.disabled = true;
+
+  // L'avatar doit suivre le pseudo. Sans ce lookup, le spread de l'ancien
+  // profil conservait la photo posee a l'onboarding : apres un changement de
+  // pseudo, le filigrane des statistiques montrait encore l'ancien compte.
+  const lookup = await sendMessage({ type: "lookupTwitchUser", handle: raw });
+  const user = lookup?.user || null;
+  const next = {
+    ...previous,
+    handle: raw,
+    displayName: user?.display_name || raw,
+    // Compte introuvable ou hors ligne : pas de photo vaut mieux que celle
+    // de quelqu'un d'autre.
+    avatarUrl: user?.profile_image_url || "",
+  };
+
   const result = await sendMessage({ type: "updateUserProfile", profile: next });
+  // eslint-disable-next-line require-atomic-updates -- reactivation du bouton apres le geste qui l'a desactive.
   pseudoSaveButton.disabled = false;
 
   if (result?.success) {
+    // eslint-disable-next-line require-atomic-updates -- profil ecrit par une seule action utilisateur a la fois.
     state.userProfile = next;
     renderGreeting();
     markButtonSuccess(pseudoSaveButton);
@@ -673,6 +756,9 @@ function renderPreferences() {
   }
   if (gameAlertsToggle) {
     gameAlertsToggle.checked = Boolean(prefs.gameNotifications);
+  }
+  if (titleAlertsToggle) {
+    titleAlertsToggle.checked = Boolean(prefs.titleNotifications);
   }
   if (soundsToggle) {
     soundsToggle.checked = prefs.soundsEnabled !== false;
@@ -1325,6 +1411,7 @@ async function handleAddStreamer(event) {
   // Track for slide-in animation
   lastAddedId = getHandleComparisonKey(state.selectedPlatform, sanitized);
 
+  // eslint-disable-next-line require-atomic-updates -- vidage du champ apres l'ajout qui vient d'aboutir.
   streamerInput.value = "";
   showFeedback(
     t("popup.feedback.addSuccessPlatform", {
@@ -1337,9 +1424,22 @@ async function handleAddStreamer(event) {
 }
 
 async function updatePreferences(updates) {
+  // Une valeur undefined disparait a la serialisation de sendMessage : la
+  // charge utile arrivait vide au service worker, qui repondait « Aucune
+  // preference a mettre a jour ». On filtre ici et on nomme la cle, pour que
+  // le prochain cas soit lisible dans la console au lieu d'un bandeau muet.
+  const dropped = Object.keys(updates).filter((k) => updates[k] === undefined);
+  if (dropped.length) {
+    console.warn("[SP] updatePreferences: valeur undefined ignoree pour", dropped);
+  }
+  const payload = Object.fromEntries(
+    Object.entries(updates).filter(([, v]) => v !== undefined)
+  );
+  if (Object.keys(payload).length === 0) return false;
+
   const result = await sendMessage({
     type: "updatePreferences",
-    updates,
+    updates: payload,
   });
 
   if (result?.error) {
@@ -1350,7 +1450,7 @@ async function updatePreferences(updates) {
 
   state.preferences = {
     ...state.preferences,
-    ...(result?.preferences || updates),
+    ...(result?.preferences || payload),
   };
   renderPreferences();
   showFeedback(t("popup.settings.saved"));
@@ -1599,6 +1699,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       await sendMessage({ type: "refreshStatuses" });
       await loadStreamers();
       icon.classList.remove("spin");
+      // eslint-disable-next-line require-atomic-updates -- reactivation du bouton apres le rafraichissement qu'il a lance.
       refreshButton.disabled = false;
     });
 
@@ -1608,6 +1709,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     gameAlertsToggle?.addEventListener("change", (e) => {
       updatePreferences({ gameNotifications: e.target.checked });
+    });
+    titleAlertsToggle?.addEventListener("change", (e) => {
+      updatePreferences({ titleNotifications: e.target.checked });
     });
     soundsToggle?.addEventListener("change", (e) => {
       updatePreferences({ soundsEnabled: e.target.checked });
