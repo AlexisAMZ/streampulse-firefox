@@ -3,11 +3,11 @@
   "default_locale": "en",
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "26.9.10",
+  "version": "26.9.16",
   "browser_specific_settings": {
     "gecko": {
       "id": "streampulse@alexisamz.fr",
-      "strict_min_version": "115.0",
+      "strict_min_version": "128.0",
       "data_collection_permissions": {
         "required": [
           "personallyIdentifyingInfo"
@@ -22,7 +22,6 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://alexisamz.fr/*",
     "https://api.twitch.tv/*",
     "https://tmi.twitch.tv/*",
     "https://gql.twitch.tv/*",
@@ -60,15 +59,30 @@
       ],
       "all_frames": false,
       "js": [
+        "js/inject/predictions-bridge.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "all_frames": false,
+      "js": [
         "js/inject/i18n-inline.js",
         "js/inject/topbar-panel.js",
+        "js/inject/settings-drawer.js",
         "js/inject/topbar.js",
         "js/inject/quickFollow.js",
-        "js/inject/twitch-badge.js"
+        "js/inject/twitch-badge.js",
+        "js/inject/chat-plus.js",
+        "js/inject/sidebar-favorites.js"
       ],
       "css": [
         "css/topbar.css",
-        "css/inject/twitch-badge.css"
+        "css/inject/twitch-badge.css",
+        "css/inject/twitch-ui.css"
       ],
       "run_at": "document_idle"
     },
@@ -104,9 +118,13 @@
         "js/chatFilter.js",
         "js/watchTimeTracker.js",
         "js/tabEnhancer.js",
-        "js/inject/predictionsOverlay.js"
+        "js/inject/predictionsOverlay.js",
+        "js/inject/predictionsAssist.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "css": [
+        "css/inject/predictions.css"
+      ]
     },
     {
       "matches": [
@@ -147,11 +165,30 @@
         "html/changelog.html",
         "sons/notification.mp3",
         "images/photos/128px.png",
-        "images/photos/logosp.png",
-        "images/zevent26.png"
+        "images/photos/logosp.png"
       ],
       "matches": [
         "<all_urls>"
+      ]
+    },
+    {
+      "resources": [
+        "font/unbounded-latin-10.woff2",
+        "font/unbounded-latin-ext-9.woff2",
+        "font/onest-latin-6.woff2",
+        "font/onest-latin-ext-5.woff2"
+      ],
+      "matches": [
+        "https://www.twitch.tv/*",
+        "https://clips.twitch.tv/*"
+      ]
+    },
+    {
+      "resources": [
+        "js/predictions-data.js"
+      ],
+      "matches": [
+        "https://www.twitch.tv/*"
       ]
     }
   ]

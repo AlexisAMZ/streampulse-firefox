@@ -1,125 +1,84 @@
-/* Page de recapitulatif ZEvent : francais uniquement, hors systeme i18n. */
-:root {
-  --ink: #efeff1;
-  --muted: #b9b6c4;
-  --faint: #8a8697;
-  --green: #00e676;
-  --purple: #a970ff;
-  --panel: #16151c;
-  --border: #2c2a36;
-}
+/* Recap page: controls on the left, the image being generated on the right. */
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+.recap { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 56px; align-items: start; margin-top: 44px; }
+.recap-side { position: sticky; top: 28px; display: grid; gap: 26px; }
+.recap-intro { display: grid; gap: 16px; }
+.page-title { font-size: clamp(44px, 5vw, 68px); }
 
-/* Les regles de mise en page (display: flex) l'emportent sinon sur le
-   display: none que le navigateur applique a [hidden]. */
-[hidden] { display: none !important; }
-
-body {
-  min-height: 100vh;
-  background: radial-gradient(1200px 700px at 15% 0%, #2a1352 0%, #14101c 55%, #0a0a0e 100%);
-  color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  display: flex;
-  justify-content: center;
-  padding: 48px 24px 64px;
-}
-
-.page { width: 100%; max-width: 1120px; }
-
-.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
-.brand img { width: 34px; height: 34px; }
-.brand span { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
-
-.page-title { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; }
-.page-sub { margin-top: 10px; font-size: 17px; color: var(--muted); max-width: 640px; }
-
-.formats {
-  display: flex;
-  gap: 8px;
-  margin-top: 30px;
-  padding: 4px;
-  background: #16151c;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  width: fit-content;
-}
-
-.format-btn {
+.controls { display: grid; gap: 18px; padding: 22px; }
+.control { display: grid; gap: 8px; }
+.control-label { color: var(--text-2); font-size: 13px; font-weight: 600; }
+.select {
+  appearance: none;
+  height: 46px;
+  padding: 0 40px 0 14px;
   border: 0;
-  background: transparent;
-  color: var(--faint);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 9px 16px;
-  border-radius: 7px;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.format-btn:hover { color: var(--ink); }
-
-.format-btn.active {
-  background: #2a2833;
-  color: var(--ink);
-}
-
-.stage {
-  margin-top: 18px;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
-}
-.stage { width: fit-content; }
-.stage canvas { display: block; width: 100%; height: auto; }
-
-/* En portrait, contraindre par la hauteur : sinon la story deborde l'ecran. */
-.stage canvas[data-format="story"] {
-  width: auto;
-  max-height: 78vh;
-}
-
-.state, .empty, .actions { margin-top: 28px; }
-.state { color: var(--faint); font-size: 16px; }
-
-.empty {
-  background: var(--panel);
-  border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 22px 24px;
-  max-width: 640px;
-}
-.empty-title { font-size: 18px; font-weight: 700; }
-.empty-body { margin-top: 8px; font-size: 15px; color: var(--muted); line-height: 1.5; }
-
-.actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-
-.btn {
-  border: 1px solid var(--border);
-  background: #1e1d25;
-  color: var(--ink);
-  font: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 12px 20px;
-  border-radius: 8px;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a8fb0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center / 12px;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--text);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
-.btn:hover { background: #26252f; border-color: #3b3947; }
-.btn:active { transform: translateY(1px); }
+.select:hover { box-shadow: inset 0 0 0 1px var(--violet-line); }
+.select option { background: var(--surface); color: var(--text); }
+.segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 13px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
+.seg-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; border: 0; border-radius: 10px; background: transparent; color: var(--text-2); font-size: 13px; font-weight: 600; cursor: pointer; }
+.seg-btn svg { width: 16px; height: 16px; }
+.seg-btn:hover { color: var(--text); }
+.seg-btn.active { background: var(--violet); color: #ffffff; }
 
-.btn-primary { background: var(--purple); border-color: var(--purple); color: #12091f; }
-.btn-primary:hover { background: #bb8dff; border-color: #bb8dff; }
+.actions { display: grid; gap: 10px; }
+.actions .btn { width: 100%; }
+.hint,
+.disclaimer { color: var(--text-3); font-size: 13px; line-height: 1.5; }
 
-.hint { flex-basis: 100%; font-size: 13.5px; color: var(--faint); }
-
-.disclaimer {
-  margin-top: 36px;
-  font-size: 13px;
-  color: var(--faint);
-  line-height: 1.6;
-  max-width: 680px;
+.recap-preview { display: grid; gap: 16px; min-width: 0; }
+.state { padding: 18px 0; color: var(--text-2); }
+.stage {
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  border-radius: 26px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line), 0 50px 80px -50px rgba(0, 0, 0, 0.85);
 }
+.stage canvas { width: auto; height: auto; max-width: 100%; max-height: 80vh; border-radius: 14px; }
+.empty { display: grid; gap: 8px; padding: 36px; }
+.empty-title { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.empty-body { max-width: 52ch; color: var(--text-2); }
+
+/* Recap avance (StreamPulse+) */
+.insights { display: grid; gap: 22px; padding: 26px; }
+.insights-head { display: flex; align-items: center; gap: 10px; }
+.insights-title { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.plus-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--lcd); color: var(--lcd-ink); font-family: var(--body); font-size: 12px; font-weight: 700; letter-spacing: 0; vertical-align: 3px; }
+.insights-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; }
+.insight { display: grid; align-content: start; gap: 12px; min-width: 0; }
+.insight-title { color: var(--text-2); font-family: var(--body); font-size: 13px; font-weight: 600; }
+.cat-list { display: grid; gap: 12px; padding: 0; list-style: none; }
+.cat-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
+.cat-name { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.cat-time { color: var(--text-2); font-variant-numeric: tabular-nums; }
+.cat-bar { grid-column: 1 / -1; height: 6px; overflow: hidden; border-radius: 999px; background: var(--line); }
+.cat-bar i { display: block; height: 100%; border-radius: inherit; background: var(--lcd); }
+.cat-list .cat-empty { display: block; color: var(--text-3); font-size: 13px; }
+.timeline { display: flex; align-items: flex-end; gap: 3px; height: 150px; box-shadow: inset 0 -1px 0 var(--line-2); }
+.tl-bar { flex: 1; min-width: 2px; border-radius: 3px 3px 0 0; background: var(--violet); }
+.tl-bar.is-empty { background: var(--line-2); }
+.timeline-axis { display: flex; justify-content: space-between; color: var(--text-3); font-size: 12px; }
+.timeline-peak { color: var(--text-2); font-size: 13px; }
+.insights-locked { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 22px 26px; }
+.insights-locked-text { display: grid; gap: 6px; }
+.insights-locked .btn { flex: none; }
+
+@media (max-width: 1100px) {
+  .insights-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 920px) {
+  .recap { grid-template-columns: 1fr; gap: 32px; }
+  .recap-side { position: static; }
+}
+
+/* StreamPulse+ : le « + » du logo, plus grand que le nom. */
+.brand-plus { display: inline-block; margin-left: 3px; color: #ffffff; font-size: 1.35em; line-height: 0; vertical-align: -0.06em; }

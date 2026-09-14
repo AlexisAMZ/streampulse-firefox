@@ -17,12 +17,18 @@ import {
   platformSupportsLiveStatus,
   sanitizeHandle,
 } from "./platforms.js";
+import { HISTORY_KEY, addSession, emptyHistory, markSeen, patchSession } from "./history-data.js";
+import { SMART_ALERTS_KEY, normalizeRules, decideSmartAlert } from "./smart-alerts.js";
+import { PLUS_KEY, getDeviceId, isPlusActive, needsRecheck, verifyLicense } from "./plus.js";
 
 const STORAGE_KEYS = {
   STREAMERS: "betaGeneralStreamers",
   STATUSES: "betaGeneralStatuses",
   STATS: "betaGeneralStats",
   WATCH_TIME: "betaWatchTimeData",
+  // Meme forme que WATCH_TIME, mais par jour ("AAAA-MM-JJ") : alimente les
+  // periodes glissantes de la page de recap (7 et 30 jours).
+  WATCH_TIME_DAILY: "streamPulseWatchTimeDaily",
   // Dedicated key for live-state notification dedup. Separate from STATUSES
   // (which is the popup display data) so it survives even if statuses are
   // wiped/reset. This is critical for MV3: every SW restart wipes the
@@ -31,7 +37,7 @@ const STORAGE_KEYS = {
 };
 
 // ─── Remote config (credentials hosted on Vercel, never in the zip) ──────────
-const REMOTE_CONFIG_URL = "https://alexisamz.fr/api/streampulse-config";
+const REMOTE_CONFIG_URL = "https://www.streampulse.fr/api/streampulse-config";
 const REMOTE_CONFIG_CACHE_KEY = "streampulse:remoteConfig";
 const REMOTE_CONFIG_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
@@ -141,7 +147,6 @@ const DEFAULT_PREFERENCES = {
   previewsAudio: false,
   previewsShowDelayMs: 200,
   previewsAnimations: true,
-  zeventFeatures: true,
   communityBadge: true,
   // "author" = couleur du pseudo, "theme" = blanc/noir selon Twitch,
   // ou une couleur hexadecimale fixe.
@@ -579,7 +584,6 @@ class PreferenceStore {
         ? Math.min(2000, Math.max(0, previewsDelay))
         : 200,
       previewsAnimations: preferences.previewsAnimations !== false,
-      zeventFeatures: preferences.zeventFeatures !== false,
       communityBadge: preferences.communityBadge !== false,
       communityBadgeColor: sanitizeBadgeColor(preferences.communityBadgeColor),
     };
@@ -755,6 +759,158 @@ async function resolveChannelAvatar(platform, channel) {
   return "";
 }
 
+// ─── Historique des lives ─────────────────────────────────────────────────────
+// Chaque fin de live d'un streamer suivi devient une entree d'historique. Une
+// session est « regardee » si le tracker de temps de visionnage a vu la chaine
+// ouverte pendant qu'elle etait en direct.
+const LAST_WATCHED_KEY = "streamPulseLastWatched";
+
+class HistoryStore {
+  static _queue = Promise.resolve();
+
+  /** Serialise les ecritures : plusieurs lives peuvent finir dans le meme sondage. */
+  static _enqueue(task) {
+    const run = this._queue.then(task, task);
+    this._queue = run.catch(() => {});
+    return run;
+  }
+
+  static async get() {
+    const stored = await chrome.storage.local.get(HISTORY_KEY);
+    return stored[HISTORY_KEY] || emptyHistory();
+  }
+
+  static async save(history) {
+    await chrome.storage.local.set({ [HISTORY_KEY]: history });
+  }
+
+  static watchKey(platform, channel) {
+    return `${normalizePlatform(platform)}:${String(channel || "").toLowerCase()}`;
+  }
+
+  static markWatched(platform, channel) {
+    if (!platform || !channel) return Promise.resolve();
+    return this._enqueue(async () => {
+      const stored = await chrome.storage.local.get(LAST_WATCHED_KEY);
+      const map = stored[LAST_WATCHED_KEY] || {};
+      map[this.watchKey(platform, channel)] = Date.now();
+      await chrome.storage.local.set({ [LAST_WATCHED_KEY]: map });
+    });
+  }
+
+  static markSeen(id) {
+    return this._enqueue(async () => this.save(markSeen(await this.get(), id)));
+  }
+
+  static recordEnded(streamer, liveState) {
+    return this._enqueue(async () => {
+      const platform = normalizePlatform(streamer.platform);
+      const handle = streamer.handle || streamer.twitch || "";
+      const endedAt = Date.now();
+      const startedAtTime = Date.parse(liveState.startedAt || "") || null;
+      const stored = await chrome.storage.local.get(LAST_WATCHED_KEY);
+      const lastWatched = (stored[LAST_WATCHED_KEY] || {})[this.watchKey(platform, handle)] || 0;
+      const watched = startedAtTime ? lastWatched >= startedAtTime : false;
+
+      const session = {
+        streamerId: streamer.id,
+        platform,
+        handle,
+        displayName: streamer.displayName || formatHandleForDisplay(platform, handle),
+        avatarUrl: liveState.avatarUrl || streamer.avatarUrl || "",
+        title: liveState.title || liveState.lastTitle || "",
+        game: liveState.game || liveState.lastGame || "",
+        startedAt: liveState.startedAt || null,
+        endedAt,
+        thumbnailUrl: sizeThumbnail(liveState.thumbnailUrl || ""),
+        vodUrl: platform === "twitch"
+          ? `https://www.twitch.tv/${encodeURIComponent(handle)}/videos?filter=archives`
+          : `https://kick.com/${encodeURIComponent(handle)}/videos`,
+        hasVod: false,
+        watched,
+      };
+      const history = addSession(await this.get(), session, endedAt);
+      await this.save(history);
+      const saved = history.entries.find((entry) => entry.streamerId === streamer.id && entry.endedAt === endedAt);
+      return saved || null;
+    }).then((saved) => {
+      if (saved && saved.platform === "twitch" && !saved.watched) {
+        this.attachTwitchVod(saved).catch((error) => console.warn("VOD lookup failed:", error?.message || error));
+      }
+    });
+  }
+
+  /** La rediffusion Twitch n'existe qu'apres coup : on la cherche une fois le live fini. */
+  static async attachTwitchVod(entry) {
+    const user = await PlatformChecker.getTwitchUser(entry.handle);
+    if (!user?.id) return;
+    const data = await fetchJson(
+      `https://api.twitch.tv/helix/videos?user_id=${encodeURIComponent(user.id)}&type=archive&first=1`,
+      { headers: twitchHeaders() }
+    );
+    const video = data?.data?.[0];
+    if (!video?.url) return;
+    const startedAt = Date.parse(entry.startedAt || "");
+    const createdAt = Date.parse(video.created_at || "");
+    // Une VOD plus ancienne que ce live appartient a une autre session.
+    if (Number.isFinite(startedAt) && Number.isFinite(createdAt) && Math.abs(createdAt - startedAt) > 2 * 60 * 60 * 1000) return;
+    const thumbnailUrl = sizeThumbnail(video.thumbnail_url || "");
+    await this._enqueue(async () =>
+      this.save(
+        patchSession(await this.get(), entry.id, {
+          vodUrl: video.url,
+          hasVod: true,
+          ...(thumbnailUrl ? { thumbnailUrl } : {}),
+        })
+      )
+    );
+  }
+}
+
+/**
+ * Revérifie la licence StreamPulse+ une fois par jour. Clé refusée (abonnement
+ * résilié, remboursement) : la licence est retirée. Erreur réseau : on garde
+ * la licence, isPlusActive applique alors le délai de grâce hors ligne.
+ */
+async function recheckPlusLicense(record) {
+  if (!needsRecheck(record)) return;
+  const now = Date.now();
+  const device = await getDeviceId(chrome.storage.local);
+  const result = await verifyLicense(record.licenseKey, fetch, now, device);
+  if (result.ok) {
+    await chrome.storage.local.set({ [PLUS_KEY]: { ...result.record, checkedAt: now } });
+  } else if (["invalid", "format", "device_limit"].includes(result.error)) {
+    await chrome.storage.local.remove(PLUS_KEY);
+  } else {
+    await chrome.storage.local.set({ [PLUS_KEY]: { ...record, checkedAt: now } });
+  }
+}
+
+/** Les vignettes Twitch portent un gabarit de taille ({width}x{height} ou %{width}x%{height}). */
+function sizeThumbnail(url) {
+  return String(url || "")
+    .replace(/%?\{width\}/g, "440")
+    .replace(/%?\{height\}/g, "248");
+}
+
+/**
+ * Categorie en cours d'une chaine suivie, d'apres le dernier etat live connu.
+ * Repli quand la page n'a pas pu lire le jeu elle-meme.
+ */
+async function currentGameOf(platform, channel) {
+  try {
+    const [streamers, liveState] = await Promise.all([DataStore.getStreamers(), DataStore.getLiveState()]);
+    const handle = String(channel).toLowerCase();
+    const streamer = streamers.find(
+      (item) => normalizePlatform(item.platform) === platform && String(item.handle || item.twitch || "").toLowerCase() === handle,
+    );
+    const state = streamer && liveState[streamer.id];
+    return state ? String(state.game || state.lastGame || "") : "";
+  } catch {
+    return "";
+  }
+}
+
 class WatchTimeStore {
   static _getMonthKey() {
     const now = new Date();
@@ -772,7 +928,49 @@ class WatchTimeStore {
     await chrome.storage.local.set({ [STORAGE_KEYS.WATCH_TIME]: data });
   }
 
-  static async record(platform, channel, seconds, avatarUrl = "") {
+  static _getDayKey() {
+    const now = new Date();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${now.getFullYear()}-${m}-${d}`;
+  }
+
+  /** Ajoute la duree au jour courant et ne garde que les DAILY_RETENTION derniers jours. */
+  /** Secondes par categorie (recap avance) : { "Just Chatting": 1200 }. */
+  static _addGame(games, game, seconds) {
+    const name = String(game || "").trim().slice(0, 80);
+    if (!name) return games || {};
+    return { ...(games || {}), [name]: ((games || {})[name] || 0) + seconds };
+  }
+
+  static async _recordDaily(platform, channel, seconds, avatarUrl, game = "") {
+    const DAILY_RETENTION = 400;
+    const stored = await chrome.storage.local.get(STORAGE_KEYS.WATCH_TIME_DAILY);
+    const daily = stored[STORAGE_KEYS.WATCH_TIME_DAILY] || {};
+    const day = this._getDayKey();
+    const key = `${platform}:${channel}`;
+    const bucket = daily[day] || {};
+    const previous = bucket[key] || { watchSeconds: 0, platform, channel, avatarUrl: "" };
+    const next = {
+      ...daily,
+      [day]: {
+        ...bucket,
+        [key]: {
+          ...previous,
+          watchSeconds: previous.watchSeconds + seconds,
+          avatarUrl: avatarUrl || previous.avatarUrl,
+          games: this._addGame(previous.games, game, seconds),
+        },
+      },
+    };
+    const days = Object.keys(next).sort();
+    for (const old of days.slice(0, Math.max(0, days.length - DAILY_RETENTION))) {
+      delete next[old];
+    }
+    await chrome.storage.local.set({ [STORAGE_KEYS.WATCH_TIME_DAILY]: next });
+  }
+
+  static async record(platform, channel, seconds, avatarUrl = "", game = "") {
     // Skip pure presence pings (no actual data to record)
     if (seconds <= 0) return;
 
@@ -786,6 +984,7 @@ class WatchTimeStore {
     }
 
     data[month][key].watchSeconds += seconds;
+    data[month][key].games = this._addGame(data[month][key].games, game, seconds);
     // Update avatar if we got a fresher one
     if (avatarUrl) data[month][key].avatarUrl = avatarUrl;
 
@@ -796,6 +995,12 @@ class WatchTimeStore {
     }
 
     await this._saveData(data);
+    try {
+      await this._recordDaily(platform, channel, seconds, avatarUrl, game);
+    } catch (error) {
+      // Le suivi mensuel est deja enregistre : un echec ici ne prive que les periodes glissantes du recap.
+      console.warn("[WatchTime] daily record failed:", error);
+    }
   }
 
   static async getSummary(monthKey = null) {
@@ -1741,6 +1946,9 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
           lastTitle: entry.lastTitle || "",
           lastGame: entry.lastGame || "",
           avatarUrl: entry.avatarUrl || "",
+          startedAt: entry.startedAt || null,
+          thumbnailUrl: entry.thumbnailUrl || "",
+          matchedRuleIds: Array.isArray(entry.matchedRuleIds) ? entry.matchedRuleIds : [],
           supportsLiveStatus: entry.supportsLiveStatus !== false,
         });
       }
@@ -1748,6 +1956,12 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
   } catch (err) {
     console.warn("Failed to restore live state:", err?.message || err);
   }
+
+  // Alertes intelligentes : actives seulement avec StreamPulse+.
+  const plusStored = await chrome.storage.local.get([PLUS_KEY, SMART_ALERTS_KEY]);
+  await recheckPlusLicense(plusStored[PLUS_KEY]);
+  const plusActive = isPlusActive((await chrome.storage.local.get(PLUS_KEY))[PLUS_KEY]);
+  const smartRules = plusActive ? normalizeRules(plusStored[SMART_ALERTS_KEY]) : {};
 
   const streamerById = new Map();
   streamers.forEach((streamer) => {
@@ -1786,6 +2000,9 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
       lastTitle: status.active?.title || status.active?.lastTitle || "",
       lastGame: status.active?.game || status.active?.lastGame || "",
       avatarUrl: status.avatarUrl || streamer.avatarUrl || null,
+      startedAt: status.active?.isLive ? status.active?.startedAt || previousLiveState.startedAt || null : null,
+      thumbnailUrl: status.active?.isLive ? status.active?.thumbnailUrl || previousLiveState.thumbnailUrl || "" : "",
+      matchedRuleIds: [],
       supportsLiveStatus: status.active?.supportsLiveStatus !== false,
       isError: Boolean(status.active?.isError),
     };
@@ -1796,13 +2013,37 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
       nextLiveState.sessionId = previousLiveState.sessionId;
       nextLiveState.game = previousLiveState.game;
       nextLiveState.title = previousLiveState.title;
+      nextLiveState.startedAt = previousLiveState.startedAt || null;
+      nextLiveState.thumbnailUrl = previousLiveState.thumbnailUrl || "";
+      nextLiveState.matchedRuleIds = previousLiveState.matchedRuleIds || [];
+    }
+
+    // Fin de live : entree d'historique (la VOD Twitch est cherchee ensuite).
+    if (previousLiveState.isLive && !nextLiveState.isLive && !nextLiveState.isError) {
+      HistoryStore.recordEnded(streamer, previousLiveState).catch((error) =>
+        console.warn("History record failed:", error?.message || error)
+      );
     }
 
     const notificationsEnabled =
       preferences.liveNotifications !== false &&
       streamer.notificationsEnabled !== false;
 
-    if (forceNotification && notificationsEnabled && nextLiveState.isLive) {
+    // Regles d'alerte du streamer : elles remplacent l'alerte classique.
+    const smartDecision = nextLiveState.isError
+      ? null
+      : decideSmartAlert(
+          smartRules[streamer.id],
+          status.active,
+          previousLiveState.isLive ? previousLiveState.matchedRuleIds || [] : []
+        );
+    if (smartDecision) nextLiveState.matchedRuleIds = smartDecision.matchedIds;
+
+    if (smartDecision) {
+      if (notificationsEnabled && smartDecision.notifyRule) {
+        await NotificationSystem.notifyLive(streamer, status.active, preferences);
+      }
+    } else if (forceNotification && notificationsEnabled && nextLiveState.isLive) {
       await NotificationSystem.notifyLive(streamer, status.active, preferences);
     } else if (notificationsEnabled && nextLiveState.isLive) {
       const wasLive = previousLiveState.isLive;
@@ -2610,8 +2851,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           const { channel, platform, seconds } = request;
           if (channel && platform) {
             const secs = Number(seconds) || 0;
+            const game = secs > 0 ? String(request.game || "") || (await currentGameOf(platform, channel)) : "";
             // Record immediately: never block on avatar resolution
-            await WatchTimeStore.record(platform, channel, secs, "");
+            await WatchTimeStore.record(platform, channel, secs, "", game);
+            HistoryStore.markWatched(platform, channel).catch(() => {});
             // Best-effort avatar update (fire-and-forget, doesn't block response)
             if (secs > 0) {
               resolveChannelAvatar(platform, channel)
@@ -2634,6 +2877,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           sendResponse({ error: error.message });
         }
       })();
+      return true;
+
+    case "markHistorySeen":
+      HistoryStore.markSeen(String(request.id || ""))
+        .then(() => sendResponse({ success: true }))
+        .catch((error) => sendResponse({ error: error.message }));
+      return true;
+
+    case "activatePlus":
+      (async () => {
+        const result = await verifyLicense(request.key, fetch, Date.now(), await getDeviceId(chrome.storage.local));
+        if (result.ok) await chrome.storage.local.set({ [PLUS_KEY]: result.record });
+        sendResponse(result);
+        if (result.ok) pollStreamers().catch(() => {});
+      })();
+      return true;
+
+    case "deactivatePlus":
+      chrome.storage.local.remove(PLUS_KEY).then(() => sendResponse({ success: true }));
       return true;
 
     case "getWatchTimeSummary":
@@ -2874,9 +3136,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if ("previewsAnimations" in incomingUpdates) {
           updates.previewsAnimations =
             incomingUpdates.previewsAnimations !== false;
-        }
-        if ("zeventFeatures" in incomingUpdates) {
-          updates.zeventFeatures = incomingUpdates.zeventFeatures !== false;
         }
         if ("communityBadge" in incomingUpdates) {
           updates.communityBadge = incomingUpdates.communityBadge !== false;

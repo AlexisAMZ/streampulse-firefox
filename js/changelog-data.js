@@ -48,8 +48,488 @@ export const FALLBACK_LANGUAGE = "en";
 
 export const RELEASES = [
   {
-    version: "26.9.10",
-    date: "2026-09-09",
+    version: "26.9.16",
+    date: "2026-09-14",
+    title: {
+      fr: "Favoris sur Twitch et réglages intégrés",
+      en: "Favorites on Twitch and built-in settings",
+      es: "Favoritos en Twitch y ajustes integrados",
+      "pt-BR": "Favoritos na Twitch e configurações integradas",
+      de: "Favoriten auf Twitch und integrierte Einstellungen",
+      it: "Preferiti su Twitch e impostazioni integrate",
+      pl: "Ulubione na Twitchu i wbudowane ustawienia",
+      tr: "Twitch'te favoriler ve yerleşik ayarlar",
+      ru: "Избранное на Twitch и встроенные настройки",
+      ja: "Twitch のお気に入りと内蔵設定",
+      ko: "트위치 즐겨찾기와 내장 설정",
+      id: "Favorit di Twitch dan pengaturan bawaan",
+      nl: "Favorieten op Twitch en ingebouwde instellingen",
+      sv: "Favoriter på Twitch och inbyggda inställningar",
+      cs: "Oblíbené na Twitchi a vestavěná nastavení"
+    },
+    subtitle: {
+      fr: "Ton badge et tes effets s'affichent de nouveau dans le tchat Twitch.",
+      en: "Your badge and effects show up in Twitch chat again.",
+      es: "Tu insignia y tus efectos vuelven a verse en el chat de Twitch.",
+      "pt-BR": "Seu emblema e seus efeitos voltam a aparecer no chat da Twitch.",
+      de: "Dein Abzeichen und deine Effekte erscheinen wieder im Twitch-Chat.",
+      it: "Il tuo badge e i tuoi effetti tornano visibili nella chat di Twitch.",
+      pl: "Twoja odznaka i efekty znów widać na czacie Twitcha.",
+      tr: "Rozetin ve efektlerin Twitch sohbetinde yeniden görünüyor.",
+      ru: "Ваш значок и эффекты снова видны в чате Twitch.",
+      ja: "バッジとエフェクトが Twitch チャットに再び表示されます。",
+      ko: "배지와 효과가 다시 트위치 채팅에 표시됩니다.",
+      id: "Lencana dan efekmu kembali tampil di chat Twitch.",
+      nl: "Je badge en effecten zijn weer zichtbaar in de Twitch-chat.",
+      sv: "Ditt märke och dina effekter syns i Twitch-chatten igen.",
+      cs: "Tvůj odznak a efekty se znovu zobrazují v chatu Twitche."
+    },
+    changes: [
+      {
+        type: "fix",
+        text: {
+          fr: "Le badge, sa couleur, ses effets et le pseudo spécial manquaient sur les messages déjà affichés au chargement de Twitch : ils apparaissent maintenant tout de suite.",
+          en: "The badge, its color, its effects and the special name were missing on messages already on screen when Twitch loaded: they now appear right away.",
+          es: "La insignia, su color, sus efectos y el nombre especial faltaban en los mensajes ya visibles al cargar Twitch: ahora aparecen al instante.",
+          "pt-BR": "O emblema, a cor, os efeitos e o nome especial faltavam nas mensagens já exibidas ao carregar a Twitch: agora aparecem na hora.",
+          de: "Abzeichen, Farbe, Effekte und spezieller Name fehlten bei Nachrichten, die beim Laden von Twitch schon da waren: Sie erscheinen jetzt sofort.",
+          it: "Badge, colore, effetti e nome speciale mancavano sui messaggi già presenti al caricamento di Twitch: ora compaiono subito.",
+          pl: "Odznaka, jej kolor, efekty i specjalna nazwa nie pojawiały się przy wiadomościach widocznych w chwili ładowania Twitcha: teraz są od razu.",
+          tr: "Twitch yüklenirken ekranda olan mesajlarda rozet, rengi, efektleri ve özel ad görünmüyordu: artık hemen görünüyor.",
+          ru: "Значок, его цвет, эффекты и особый ник не отображались у сообщений, уже видимых при загрузке Twitch: теперь они появляются сразу.",
+          ja: "Twitch 読み込み時にすでに表示されていたメッセージで、バッジ、色、エフェクト、スペシャルネームが出ていませんでした。今はすぐに表示されます。",
+          ko: "트위치를 불러올 때 이미 보이던 메시지에 배지, 색상, 효과, 특별 닉네임이 빠져 있었습니다. 이제 바로 표시됩니다.",
+          id: "Lencana, warnanya, efeknya, dan nama spesial tidak muncul pada pesan yang sudah tampil saat Twitch dimuat: kini langsung muncul.",
+          nl: "Badge, kleur, effecten en speciale naam ontbraken bij berichten die al zichtbaar waren bij het laden van Twitch: ze verschijnen nu meteen.",
+          sv: "Märket, färgen, effekterna och specialnamnet saknades på meddelanden som redan syntes när Twitch laddades: nu visas de direkt.",
+          cs: "Odznak, jeho barva, efekty a speciální jméno chyběly u zpráv zobrazených při načtení Twitche: teď se objeví hned."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "Favoris StreamPulse dans la liste de gauche de Twitch : une étoile au survol d'une chaîne suivie, et tes favoris en direct remontent en haut. C'est la même liste que les favoris de la pop-up. Elles n'apparaissent plus en double dans la liste en dessous.",
+          en: "StreamPulse favorites in Twitch's left sidebar: a star appears when you hover a followed channel, and your live favorites move to the top. It's the same list as the popup favorites. They no longer show up twice in the list below.",
+          es: "Favoritos de StreamPulse en la barra izquierda de Twitch: una estrella al pasar el ratón por un canal seguido, y tus favoritos en directo suben arriba. Es la misma lista que los favoritos del popup. Ya no aparecen repetidos en la lista de abajo.",
+          "pt-BR": "Favoritos do StreamPulse na barra esquerda da Twitch: uma estrela aparece ao passar o mouse num canal seguido, e seus favoritos ao vivo sobem para o topo. É a mesma lista dos favoritos do popup. Eles não aparecem mais duplicados na lista abaixo.",
+          de: "StreamPulse-Favoriten in der linken Twitch-Leiste: Ein Stern erscheint beim Überfahren eines gefolgten Kanals, und deine Live-Favoriten stehen oben. Es ist dieselbe Liste wie im Popup. Sie erscheinen nicht mehr doppelt in der Liste darunter.",
+          it: "Preferiti StreamPulse nella barra sinistra di Twitch: una stella appare passando su un canale seguito, e i tuoi preferiti in diretta salgono in cima. È la stessa lista dei preferiti del popup. Non compaiono più doppi nella lista sottostante.",
+          pl: "Ulubione StreamPulse w lewym pasku Twitcha: gwiazdka pojawia się po najechaniu na obserwowany kanał, a ulubione na żywo trafiają na górę. To ta sama lista co w oknie rozszerzenia. Nie pojawiają się już podwójnie na liście poniżej.",
+          tr: "Twitch sol menüsünde StreamPulse favorileri: takip ettiğin bir kanalın üzerine gelince yıldız çıkar, canlı favorilerin en üste çıkar. Açılır penceredeki favorilerle aynı liste. Artık alttaki listede iki kez görünmüyorlar.",
+          ru: "Избранное StreamPulse в левой панели Twitch: при наведении на отслеживаемый канал появляется звезда, а избранные в эфире поднимаются наверх. Это тот же список, что и во всплывающем окне. Они больше не дублируются в списке ниже.",
+          ja: "Twitch 左サイドバーに StreamPulse お気に入り：フォロー中のチャンネルにカーソルを合わせると星が表示され、配信中のお気に入りが上に並びます。ポップアップのお気に入りと同じリストです。下のリストに重複して表示されなくなりました。",
+          ko: "트위치 왼쪽 목록에 StreamPulse 즐겨찾기: 팔로우한 채널에 마우스를 올리면 별이 나타나고, 방송 중인 즐겨찾기가 위로 올라갑니다. 팝업의 즐겨찾기와 같은 목록입니다. 아래 목록에는 더 이상 중복으로 표시되지 않습니다.",
+          id: "Favorit StreamPulse di bilah kiri Twitch: bintang muncul saat mengarahkan ke kanal yang diikuti, dan favorit yang sedang live naik ke atas. Daftarnya sama dengan favorit di popup. Kanal itu tidak lagi muncul dua kali di daftar bawah.",
+          nl: "StreamPulse-favorieten in de linkerbalk van Twitch: er verschijnt een ster als je over een gevolgd kanaal beweegt, en je live favorieten staan bovenaan. Het is dezelfde lijst als in de pop-up. Ze staan niet meer dubbel in de lijst eronder.",
+          sv: "StreamPulse-favoriter i Twitchs vänsterlist: en stjärna visas när du hovrar över en följd kanal, och dina favoriter som sänder hamnar överst. Det är samma lista som i popupen. De visas inte längre dubbelt i listan nedanför.",
+          cs: "Oblíbené StreamPulse v levém panelu Twitche: po najetí na sledovaný kanál se objeví hvězda a oblíbení v přímém přenosu jsou nahoře. Je to stejný seznam jako v okně rozšíření. V seznamu pod ním se už nezobrazují dvakrát."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "« Tous les réglages » ouvre maintenant un panneau directement sur Twitch, au lieu d'une nouvelle fenêtre.",
+          en: "\"All settings\" now opens a panel right on Twitch instead of a new window.",
+          es: "\"Todos los ajustes\" ahora abre un panel directamente en Twitch en lugar de una ventana nueva.",
+          "pt-BR": "\"Todas as configurações\" agora abre um painel direto na Twitch em vez de uma nova janela.",
+          de: "„Alle Einstellungen“ öffnet jetzt ein Panel direkt auf Twitch statt eines neuen Fensters.",
+          it: "\"Tutte le impostazioni\" ora apre un pannello direttamente su Twitch invece di una nuova finestra.",
+          pl: "„Wszystkie ustawienia” otwierają teraz panel bezpośrednio na Twitchu zamiast nowego okna.",
+          tr: "\"Tüm ayarlar\" artık yeni pencere yerine doğrudan Twitch üzerinde bir panel açıyor.",
+          ru: "«Все настройки» теперь открывают панель прямо на Twitch, а не новое окно.",
+          ja: "「すべての設定」は新しいウィンドウではなく、Twitch 上で直接パネルを開くようになりました。",
+          ko: "'모든 설정'이 이제 새 창 대신 트위치 화면에서 바로 패널을 엽니다.",
+          id: "\"Semua pengaturan\" kini membuka panel langsung di Twitch, bukan jendela baru.",
+          nl: "\"Alle instellingen\" opent nu een paneel direct op Twitch in plaats van een nieuw venster.",
+          sv: "\"Alla inställningar\" öppnar nu en panel direkt på Twitch i stället för ett nytt fönster.",
+          cs: "„Všechna nastavení“ nyní otevírají panel přímo na Twitchi místo nového okna."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "StreamPulse+ : choisis les effets de ton pseudo et de ton badge directement dans les paramètres du tchat Twitch, avec un aperçu en direct.",
+          en: "StreamPulse+: pick your name and badge effects right in Twitch's chat settings, with a live preview.",
+          es: "StreamPulse+: elige los efectos de tu nombre y tu insignia directamente en los ajustes del chat de Twitch, con vista previa en vivo.",
+          "pt-BR": "StreamPulse+: escolha os efeitos do seu nome e do seu emblema direto nas configurações do chat da Twitch, com prévia ao vivo.",
+          de: "StreamPulse+: Wähle die Effekte für Namen und Abzeichen direkt in den Twitch-Chateinstellungen, mit Live-Vorschau.",
+          it: "StreamPulse+: scegli gli effetti del nome e del badge direttamente nelle impostazioni della chat di Twitch, con anteprima dal vivo.",
+          pl: "StreamPulse+: wybierz efekty nazwy i odznaki bezpośrednio w ustawieniach czatu Twitcha, z podglądem na żywo.",
+          tr: "StreamPulse+: adının ve rozetinin efektlerini canlı önizlemeyle doğrudan Twitch sohbet ayarlarından seç.",
+          ru: "StreamPulse+: выбирай эффекты ника и значка прямо в настройках чата Twitch, с живым предпросмотром.",
+          ja: "StreamPulse+：名前とバッジのエフェクトを Twitch のチャット設定から直接、ライブプレビュー付きで選べます。",
+          ko: "StreamPulse+: 트위치 채팅 설정에서 바로 닉네임과 배지 효과를 실시간 미리보기와 함께 고르세요.",
+          id: "StreamPulse+: pilih efek nama dan lencanamu langsung di pengaturan chat Twitch, dengan pratinjau langsung.",
+          nl: "StreamPulse+: kies de effecten van je naam en badge direct in de chatinstellingen van Twitch, met live voorbeeld.",
+          sv: "StreamPulse+: välj effekter för ditt namn och märke direkt i Twitchs chattinställningar, med liveförhandsvisning.",
+          cs: "StreamPulse+: vyber efekty jména a odznaku přímo v nastavení chatu Twitche, s živým náhledem."
+        }
+      },
+      {
+        type: "fix",
+        text: {
+          fr: "L'aperçu vidéo au survol des chaînes fonctionne de nouveau, et l'effet Néon du pseudo est plus lisible.",
+          en: "The video preview when hovering channels works again, and the Neon name effect is easier to read.",
+          es: "La vista previa en vídeo al pasar sobre los canales vuelve a funcionar, y el efecto Neón del nombre se lee mejor.",
+          "pt-BR": "A prévia em vídeo ao passar o mouse nos canais voltou a funcionar, e o efeito Neon do nome está mais legível.",
+          de: "Die Videovorschau beim Überfahren von Kanälen funktioniert wieder, und der Neon-Namenseffekt ist besser lesbar.",
+          it: "L'anteprima video al passaggio sui canali funziona di nuovo, e l'effetto Neon del nome è più leggibile.",
+          pl: "Podgląd wideo po najechaniu na kanał znów działa, a efekt Neon nazwy jest czytelniejszy.",
+          tr: "Kanalların üzerine gelince açılan video önizleme yeniden çalışıyor, Neon ad efekti de daha okunaklı.",
+          ru: "Видеопревью при наведении на каналы снова работает, а эффект «Неон» для ника стал читабельнее.",
+          ja: "チャンネルにカーソルを合わせたときの動画プレビューが再び動作し、ネオンの名前エフェクトが読みやすくなりました。",
+          ko: "채널에 마우스를 올릴 때 영상 미리보기가 다시 작동하고, 네온 닉네임 효과가 더 읽기 쉬워졌습니다.",
+          id: "Pratinjau video saat mengarahkan ke kanal kembali berfungsi, dan efek nama Neon lebih mudah dibaca.",
+          nl: "De videovoorbeeld bij het bewegen over kanalen werkt weer, en het Neon-naameffect is beter leesbaar.",
+          sv: "Videoförhandsvisningen när du hovrar över kanaler fungerar igen, och Neon-namneffekten är lättare att läsa.",
+          cs: "Video náhled po najetí na kanál znovu funguje a efekt jména Neon je čitelnější."
+        }
+      }
+    ]
+  },
+  {
+    version: "26.9.15",
+    date: "2026-09-14",
+    title: {
+      fr: "Historique et StreamPulse+",
+      en: "History and StreamPulse+",
+      es: "Historial y StreamPulse+",
+      "pt-BR": "Histórico e StreamPulse+",
+      de: "Verlauf und StreamPulse+",
+      it: "Cronologia e StreamPulse+",
+      pl: "Historia i StreamPulse+",
+      tr: "Geçmiş ve StreamPulse+",
+      ru: "История и StreamPulse+",
+      ja: "履歴とStreamPulse+",
+      ko: "기록과 StreamPulse+",
+      id: "Riwayat dan StreamPulse+",
+      nl: "Geschiedenis en StreamPulse+",
+      sv: "Historik och StreamPulse+",
+      cs: "Historie a StreamPulse+"
+    },
+    subtitle: {
+      fr: "Retrouve les lives que tu as ratés, et découvre StreamPulse+ avec les alertes intelligentes.",
+      en: "Catch up on the lives you missed, and meet StreamPulse+ with smart alerts.",
+      es: "Recupera los directos que te perdiste y descubre StreamPulse+ con las alertas inteligentes.",
+      "pt-BR": "Recupere as lives que você perdeu e conheça o StreamPulse+ com os alertas inteligentes.",
+      de: "Hol verpasste Streams nach und entdecke StreamPulse+ mit intelligenten Benachrichtigungen.",
+      it: "Recupera le dirette che ti sei perso e scopri StreamPulse+ con gli avvisi intelligenti.",
+      pl: "Nadrób przegapione transmisje i poznaj StreamPulse+ z inteligentnymi alertami.",
+      tr: "Kaçırdığın yayınları yakala ve akıllı bildirimlerle StreamPulse+'ı keşfet.",
+      ru: "Наверстай пропущенные трансляции и открой StreamPulse+ с умными оповещениями.",
+      ja: "見逃した配信をチェックして、スマート通知付きのStreamPulse+を試そう。",
+      ko: "놓친 방송을 다시 보고, 스마트 알림이 있는 StreamPulse+를 만나 보세요.",
+      id: "Tonton lagi siaran yang terlewat, dan kenali StreamPulse+ dengan notifikasi pintar.",
+      nl: "Haal gemiste streams in en ontdek StreamPulse+ met slimme meldingen.",
+      sv: "Ta igen missade sändningar och upptäck StreamPulse+ med smarta aviseringar.",
+      cs: "Doháněj zmeškaná vysílání a objev StreamPulse+ s chytrými upozorněními."
+    },
+    changes: [
+      {
+        type: "new",
+        text: {
+          fr: "Nouvel onglet Historique : les lives que tu as ratés s'affichent en vignettes, avec leur durée et un accès direct à la rediffusion Twitch.",
+          en: "New History tab: the lives you missed show up as thumbnails, with their length and a direct link to the Twitch replay.",
+          es: "Nueva pestaña Historial: los directos que te perdiste aparecen en miniaturas, con su duración y acceso directo a la repetición de Twitch.",
+          "pt-BR": "Nova aba Histórico: as lives que você perdeu aparecem em miniaturas, com a duração e acesso direto à reprise da Twitch.",
+          de: "Neuer Tab Verlauf: verpasste Streams erscheinen als Vorschaubilder, mit Dauer und direktem Link zur Twitch-Aufzeichnung.",
+          it: "Nuova scheda Cronologia: le dirette che ti sei perso compaiono in miniatura, con la durata e l'accesso diretto alla replica su Twitch.",
+          pl: "Nowa karta Historia: przegapione transmisje pojawiają się jako miniatury, z czasem trwania i bezpośrednim linkiem do powtórki na Twitchu.",
+          tr: "Yeni Geçmiş sekmesi: kaçırdığın yayınlar süreleri ve Twitch tekrarına doğrudan bağlantıyla küçük resimler halinde görünür.",
+          ru: "Новая вкладка «История»: пропущенные трансляции отображаются миниатюрами, с длительностью и прямой ссылкой на запись Twitch.",
+          ja: "新しい「履歴」タブ：見逃した配信が長さとTwitchアーカイブへの直接リンク付きでサムネイル表示されます。",
+          ko: "새 기록 탭: 놓친 방송이 길이와 트위치 다시보기 바로가기와 함께 썸네일로 표시됩니다.",
+          id: "Tab Riwayat baru: siaran yang terlewat tampil sebagai thumbnail, dengan durasi dan tautan langsung ke tayangan ulang Twitch.",
+          nl: "Nieuw tabblad Geschiedenis: gemiste streams verschijnen als thumbnails, met hun duur en een directe link naar de Twitch-herhaling.",
+          sv: "Ny flik Historik: missade sändningar visas som miniatyrer, med längd och direktlänk till Twitch-repriset.",
+          cs: "Nová karta Historie: zmeškaná vysílání se zobrazí jako náhledy s délkou a přímým odkazem na záznam na Twitchi."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "StreamPulse+ : une formule mensuelle ou à vie pour soutenir l'extension. Tout ce qui existe reste gratuit. Clé de licence à activer via le badge PLUS, utilisable sur 2 navigateurs.",
+          en: "StreamPulse+: a monthly or lifetime plan to support the extension. Everything that exists stays free. Activate your license key from the PLUS badge, usable on 2 browsers.",
+          es: "StreamPulse+: una suscripción mensual o de por vida para apoyar la extensión. Todo lo que ya existe sigue siendo gratis. Activa tu clave desde la insignia PLUS, válida en 2 navegadores.",
+          "pt-BR": "StreamPulse+: plano mensal ou vitalício para apoiar a extensão. Tudo o que já existe continua grátis. Ative sua chave pelo selo PLUS, válida em 2 navegadores.",
+          de: "StreamPulse+: ein Monats- oder Lifetime-Plan zur Unterstützung der Erweiterung. Alles Bestehende bleibt kostenlos. Lizenzschlüssel über das PLUS-Abzeichen aktivieren, nutzbar in 2 Browsern.",
+          it: "StreamPulse+: un piano mensile o a vita per sostenere l'estensione. Tutto ciò che esiste resta gratuito. Attiva la chiave dal badge PLUS, valida su 2 browser.",
+          pl: "StreamPulse+: plan miesięczny lub dożywotni wspierający rozszerzenie. Wszystko, co już jest, pozostaje darmowe. Klucz aktywujesz przez odznakę PLUS, działa w 2 przeglądarkach.",
+          tr: "StreamPulse+: eklentiyi desteklemek için aylık veya ömür boyu plan. Mevcut her şey ücretsiz kalıyor. Lisans anahtarını PLUS rozetinden etkinleştir, 2 tarayıcıda kullanılabilir.",
+          ru: "StreamPulse+: ежемесячный или пожизненный план для поддержки расширения. Всё, что есть, остаётся бесплатным. Ключ активируется через значок PLUS и работает в 2 браузерах.",
+          ja: "StreamPulse+：拡張機能を応援する月額または買い切りプラン。既存の機能はすべて無料のままです。PLUSバッジからライセンスキーを有効化、2つのブラウザで使えます。",
+          ko: "StreamPulse+: 확장 프로그램을 응원하는 월간 또는 평생 플랜. 기존 기능은 모두 무료로 유지됩니다. PLUS 배지에서 라이선스 키를 활성화하며 브라우저 2개에서 사용할 수 있습니다.",
+          id: "StreamPulse+: paket bulanan atau seumur hidup untuk mendukung ekstensi. Semua yang sudah ada tetap gratis. Aktifkan kunci lisensi dari lencana PLUS, bisa dipakai di 2 browser.",
+          nl: "StreamPulse+: een maand- of levenslang abonnement om de extensie te steunen. Alles wat er al is blijft gratis. Activeer je licentiesleutel via het PLUS-badge, bruikbaar in 2 browsers.",
+          sv: "StreamPulse+: en månads- eller livstidsplan för att stödja tillägget. Allt som redan finns förblir gratis. Aktivera licensnyckeln via PLUS-märket, fungerar i 2 webbläsare.",
+          cs: "StreamPulse+: měsíční nebo doživotní plán na podporu rozšíření. Vše, co existuje, zůstává zdarma. Licenční klíč aktivuješ přes odznak PLUS, funguje ve 2 prohlížečích."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "Alertes intelligentes (StreamPulse+) : sois prévenu seulement quand un streamer lance un jeu précis, met un mot dans son titre ou dépasse un nombre de viewers. Réglages, StreamPulse+.",
+          en: "Smart alerts (StreamPulse+): only get notified when a streamer starts a specific game, puts a word in their title or passes a viewer count. Settings, StreamPulse+.",
+          es: "Alertas inteligentes (StreamPulse+): recibe un aviso solo cuando un streamer empieza un juego concreto, pone una palabra en el título o supera un número de espectadores. Ajustes, StreamPulse+.",
+          "pt-BR": "Alertas inteligentes (StreamPulse+): seja avisado só quando um streamer começa um jogo específico, coloca uma palavra no título ou passa de um número de espectadores. Configurações, StreamPulse+.",
+          de: "Intelligente Benachrichtigungen (StreamPulse+): nur benachrichtigt werden, wenn ein Streamer ein bestimmtes Spiel startet, ein Wort im Titel nutzt oder eine Zuschauerzahl überschreitet. Einstellungen, StreamPulse+.",
+          it: "Avvisi intelligenti (StreamPulse+): ricevi un avviso solo quando uno streamer avvia un gioco preciso, mette una parola nel titolo o supera un numero di spettatori. Impostazioni, StreamPulse+.",
+          pl: "Inteligentne alerty (StreamPulse+): powiadomienie tylko wtedy, gdy streamer uruchomi konkretną grę, doda słowo do tytułu lub przekroczy liczbę widzów. Ustawienia, StreamPulse+.",
+          tr: "Akıllı bildirimler (StreamPulse+): yalnızca bir yayıncı belirli bir oyunu açtığında, başlığa bir kelime eklediğinde veya izleyici sayısını aştığında haberdar ol. Ayarlar, StreamPulse+.",
+          ru: "Умные оповещения (StreamPulse+): уведомление только когда стример запускает нужную игру, добавляет слово в название или превышает число зрителей. Настройки, StreamPulse+.",
+          ja: "スマート通知（StreamPulse+）：配信者が特定のゲームを始めたとき、タイトルに特定の言葉を入れたとき、視聴者数を超えたときだけ通知します。設定の「StreamPulse+」から。",
+          ko: "스마트 알림(StreamPulse+): 스트리머가 특정 게임을 시작하거나, 제목에 단어를 넣거나, 시청자 수를 넘을 때만 알림을 받습니다. 설정, StreamPulse+.",
+          id: "Notifikasi pintar (StreamPulse+): hanya diberi tahu saat streamer memulai game tertentu, menaruh kata di judul, atau melewati jumlah penonton. Pengaturan, StreamPulse+.",
+          nl: "Slimme meldingen (StreamPulse+): krijg alleen een melding als een streamer een bepaalde game start, een woord in de titel zet of een aantal kijkers overschrijdt. Instellingen, StreamPulse+.",
+          sv: "Smarta aviseringar (StreamPulse+): få besked bara när en streamer startar ett visst spel, har ett ord i titeln eller passerar ett antal tittare. Inställningar, StreamPulse+.",
+          cs: "Chytrá upozornění (StreamPulse+): upozornění jen tehdy, když streamer spustí konkrétní hru, dá do názvu slovo nebo překročí počet diváků. Nastavení, StreamPulse+."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "Menu StreamPulse+ dans les réglages : couleur d'accent du popup, couleur du badge, 7 effets animés pour le badge et 6 pseudos spéciaux (aurore, or, néon…), visibles par tous les utilisateurs de StreamPulse et mis à jour en direct dans le tchat.",
+          en: "StreamPulse+ menu in settings: popup accent color, badge color, 7 animated badge effects and 6 special names (aurora, gold, neon…), visible to every StreamPulse user and updated live in chat.",
+          es: "Menú StreamPulse+ en los ajustes: color de acento del popup, color de la insignia, 7 efectos animados para la insignia y 6 nombres especiales (aurora, oro, neón…), visibles para todos los usuarios de StreamPulse y actualizados al instante en el chat.",
+          "pt-BR": "Menu StreamPulse+ nas configurações: cor de destaque do popup, cor do emblema, 7 efeitos animados para o emblema e 6 nomes especiais (aurora, ouro, neon…), visíveis para todos os usuários do StreamPulse e atualizados na hora no chat.",
+          de: "StreamPulse+-Menü in den Einstellungen: Akzentfarbe des Popups, Abzeichenfarbe, 7 animierte Abzeichen-Effekte und 6 spezielle Namen (Aurora, Gold, Neon…), sichtbar für alle StreamPulse-Nutzer und sofort im Chat aktualisiert.",
+          it: "Menu StreamPulse+ nelle impostazioni: colore d'accento del popup, colore del badge, 7 effetti animati per il badge e 6 nomi speciali (aurora, oro, neon…), visibili a tutti gli utenti StreamPulse e aggiornati subito in chat.",
+          pl: "Menu StreamPulse+ w ustawieniach: kolor akcentu okna, kolor odznaki, 7 animowanych efektów odznaki i 6 specjalnych nazw (zorza, złoto, neon…), widocznych dla wszystkich użytkowników StreamPulse i od razu aktualizowanych na czacie.",
+          tr: "Ayarlarda StreamPulse+ menüsü: açılır pencere vurgu rengi, rozet rengi, 7 animasyonlu rozet efekti ve 6 özel ad (kutup ışığı, altın, neon…); tüm StreamPulse kullanıcılarına görünür ve sohbette anında güncellenir.",
+          ru: "Меню StreamPulse+ в настройках: цвет акцента окна, цвет значка, 7 анимированных эффектов значка и 6 особых ников (сияние, золото, неон…), видимых всем пользователям StreamPulse и сразу обновляемых в чате.",
+          ja: "設定に StreamPulse+ メニュー：ポップアップのアクセントカラー、バッジの色、7種類のバッジアニメーション、6種類のスペシャルネーム（オーロラ、ゴールド、ネオンなど）。すべての StreamPulse ユーザーに表示され、チャットにすぐ反映されます。",
+          ko: "설정에 StreamPulse+ 메뉴: 팝업 강조 색상, 배지 색상, 7가지 배지 애니메이션 효과와 6가지 특별 닉네임(오로라, 골드, 네온 등). 모든 StreamPulse 사용자에게 보이며 채팅에 바로 반영됩니다.",
+          id: "Menu StreamPulse+ di pengaturan: warna aksen popup, warna lencana, 7 efek animasi lencana, dan 6 nama spesial (aurora, emas, neon…), terlihat oleh semua pengguna StreamPulse dan langsung diperbarui di chat.",
+          nl: "StreamPulse+-menu in de instellingen: accentkleur van de popup, badgekleur, 7 geanimeerde badge-effecten en 6 speciale namen (aurora, goud, neon…), zichtbaar voor alle StreamPulse-gebruikers en direct bijgewerkt in de chat.",
+          sv: "StreamPulse+-meny i inställningarna: accentfärg för popupen, märkesfärg, 7 animerade märkeseffekter och 6 specialnamn (norrsken, guld, neon…), synliga för alla StreamPulse-användare och uppdaterade direkt i chatten.",
+          cs: "Nabídka StreamPulse+ v nastavení: barva zvýraznění okna, barva odznaku, 7 animovaných efektů odznaku a 6 speciálních jmen (polární záře, zlato, neon…), viditelné všem uživatelům StreamPulse a hned aktualizované v chatu."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "Récap avancé et Wrapped annuel (StreamPulse+) : tes heures par catégorie, la courbe de ton activité et ton année entière dans le récap.",
+          en: "Advanced recap and yearly Wrapped (StreamPulse+): your hours by category, your activity curve and your whole year in the recap.",
+          es: "Resumen avanzado y Wrapped anual (StreamPulse+): tus horas por categoría, la curva de tu actividad y todo tu año en el resumen.",
+          "pt-BR": "Resumo avançado e Wrapped anual (StreamPulse+): suas horas por categoria, a curva da sua atividade e o seu ano inteiro no resumo.",
+          de: "Erweiterter Rückblick und Jahres-Wrapped (StreamPulse+): deine Stunden pro Kategorie, deine Aktivitätskurve und dein ganzes Jahr im Rückblick.",
+          it: "Riepilogo avanzato e Wrapped annuale (StreamPulse+): le tue ore per categoria, la curva della tua attività e il tuo anno intero nel riepilogo.",
+          pl: "Rozszerzone podsumowanie i roczny Wrapped (StreamPulse+): godziny według kategorii, krzywa aktywności i cały Twój rok w podsumowaniu.",
+          tr: "Gelişmiş özet ve yıllık Wrapped (StreamPulse+): kategoriye göre saatlerin, etkinlik eğrin ve tüm yılın özette.",
+          ru: "Расширенная сводка и годовой Wrapped (StreamPulse+): часы по категориям, кривая активности и весь ваш год в сводке.",
+          ja: "詳細な振り返りと年間 Wrapped（StreamPulse+）：カテゴリ別の時間、アクティビティの推移、1年分を振り返りに。",
+          ko: "고급 요약과 연간 Wrapped(StreamPulse+): 카테고리별 시간, 활동 곡선, 한 해 전체를 요약에서 확인하세요.",
+          id: "Rekap lanjutan dan Wrapped tahunan (StreamPulse+): jam per kategori, kurva aktivitasmu, dan setahun penuh di rekap.",
+          nl: "Uitgebreid overzicht en jaarlijkse Wrapped (StreamPulse+): je uren per categorie, je activiteitscurve en je hele jaar in het overzicht.",
+          sv: "Utökad sammanfattning och årlig Wrapped (StreamPulse+): dina timmar per kategori, din aktivitetskurva och hela ditt år i sammanfattningen.",
+          cs: "Rozšířený přehled a roční Wrapped (StreamPulse+): hodiny podle kategorie, křivka aktivity a celý tvůj rok v přehledu."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "Prédictions assistées (StreamPulse+) : mise automatique quelques secondes avant la fin selon ta règle, historique de tes paris, taux de réussite et gain net.",
+          en: "Assisted predictions (StreamPulse+): automatic bet a few seconds before the end based on your rule, betting history, win rate and net gain.",
+          es: "Predicciones asistidas (StreamPulse+): apuesta automática unos segundos antes del final según tu regla, historial de apuestas, tasa de acierto y ganancia neta.",
+          "pt-BR": "Palpites assistidos (StreamPulse+): aposta automática alguns segundos antes do fim pela sua regra, histórico de apostas, taxa de acerto e ganho líquido.",
+          de: "Unterstützte Vorhersagen (StreamPulse+): automatische Wette kurz vor Schluss nach deiner Regel, Wettverlauf, Trefferquote und Nettogewinn.",
+          it: "Previsioni assistite (StreamPulse+): puntata automatica pochi secondi prima della fine secondo la tua regola, storico delle puntate, percentuale di vittorie e guadagno netto.",
+          pl: "Wspomagane przewidywania (StreamPulse+): automatyczny zakład kilka sekund przed końcem według Twojej reguły, historia zakładów, skuteczność i zysk netto.",
+          tr: "Destekli tahminler (StreamPulse+): kuralına göre bitişten birkaç saniye önce otomatik tahmin, tahmin geçmişi, başarı oranı ve net kazanç.",
+          ru: "Помощь с прогнозами (StreamPulse+): автоставка за несколько секунд до конца по вашему правилу, история ставок, процент побед и чистый выигрыш.",
+          ja: "予想アシスト（StreamPulse+）：ルールに沿って締め切り数秒前に自動ベット。ベット履歴、的中率、純利益も確認できます。",
+          ko: "예측 도우미(StreamPulse+): 내 규칙에 따라 마감 몇 초 전에 자동 베팅하고, 베팅 기록과 적중률, 순이익을 보여 줍니다.",
+          id: "Prediksi terbantu (StreamPulse+): taruhan otomatis beberapa detik sebelum berakhir sesuai aturanmu, riwayat taruhan, tingkat kemenangan, dan untung bersih.",
+          nl: "Voorspellingshulp (StreamPulse+): automatisch inzetten vlak voor het einde volgens jouw regel, inzetgeschiedenis, winpercentage en nettowinst.",
+          sv: "Förutsägelsehjälp (StreamPulse+): automatisk insats några sekunder före slutet enligt din regel, insatshistorik, vinstprocent och nettovinst.",
+          cs: "Asistované predikce (StreamPulse+): automatická sázka pár sekund před koncem podle tvého pravidla, historie sázek, úspěšnost a čistý zisk."
+        }
+      },
+      {
+        type: "fix",
+        text: {
+          fr: "Le nom de la chaîne la plus regardée n'est plus coupé dans le récap, et l'onglet Nouveautés est aligné avec les autres.",
+          en: "The most watched channel's name is no longer cut off in the recap, and the What's new tab lines up with the others.",
+          es: "El nombre del canal más visto ya no se corta en el resumen, y la pestaña Novedades queda alineada con las demás.",
+          "pt-BR": "O nome do canal mais assistido não é mais cortado no resumo, e a aba Novidades fica alinhada com as outras.",
+          de: "Der Name des meistgesehenen Kanals wird im Rückblick nicht mehr abgeschnitten, und der Tab Neuigkeiten ist mit den anderen ausgerichtet.",
+          it: "Il nome del canale più visto non viene più tagliato nel riepilogo, e la scheda Novità è allineata alle altre.",
+          pl: "Nazwa najczęściej oglądanego kanału nie jest już ucinana w podsumowaniu, a karta Nowości jest wyrównana z pozostałymi.",
+          tr: "Özette en çok izlenen kanalın adı artık kesilmiyor ve Yenilikler sekmesi diğerleriyle hizalı.",
+          ru: "Название самого просматриваемого канала больше не обрезается в сводке, а вкладка «Новое» выровнена с остальными.",
+          ja: "振り返りで最も視聴したチャンネル名が途中で切れなくなり、「新着」タブがほかのタブと揃いました。",
+          ko: "요약에서 가장 많이 본 채널 이름이 더 이상 잘리지 않으며, 새 소식 탭이 다른 탭과 나란히 정렬됩니다.",
+          id: "Nama channel yang paling sering ditonton tidak lagi terpotong di rekap, dan tab Yang baru sejajar dengan tab lainnya.",
+          nl: "De naam van het meest bekeken kanaal wordt niet meer afgekapt in het overzicht, en het tabblad Nieuw staat gelijk met de andere.",
+          sv: "Namnet på den mest tittade kanalen klipps inte längre av i sammanfattningen, och fliken Nyheter ligger i linje med de andra.",
+          cs: "Název nejsledovanějšího kanálu se už v přehledu neořezává a karta Novinky je zarovnaná s ostatními."
+        }
+      },
+      {
+        type: "fix",
+        text: {
+          fr: "Le compteur « Drops aujourd'hui » de l'accueil est masqué le temps de corriger un mauvais décompte.",
+          en: "The \"Drops today\" counter on the home screen is hidden while a miscount is fixed.",
+          es: "El contador «Drops de hoy» de la pantalla de inicio se oculta mientras se corrige un conteo erróneo.",
+          "pt-BR": "O contador «Drops hoje» da tela inicial fica oculto enquanto uma contagem errada é corrigida.",
+          de: "Der Zähler „Drops heute“ auf dem Startbildschirm ist ausgeblendet, bis eine falsche Zählung behoben ist.",
+          it: "Il contatore «Drops di oggi» nella schermata iniziale è nascosto finché non viene corretto un conteggio errato.",
+          pl: "Licznik „Dropsy dzisiaj” na ekranie głównym jest ukryty do czasu poprawienia błędnego liczenia.",
+          tr: "Ana ekrandaki «Bugünkü Drops» sayacı, hatalı sayım düzeltilene kadar gizlendi.",
+          ru: "Счётчик «Drops сегодня» на главном экране скрыт, пока исправляется неверный подсчёт.",
+          ja: "ホーム画面の「今日のドロップ」カウンターは、集計の誤りを修正するまで非表示です。",
+          ko: "홈 화면의 '오늘의 드롭스' 카운터는 잘못된 집계를 고치는 동안 숨겨집니다.",
+          id: "Penghitung «Drops hari ini» di layar utama disembunyikan sementara kesalahan hitung diperbaiki.",
+          nl: "De teller „Drops vandaag” op het startscherm is verborgen terwijl een verkeerde telling wordt opgelost.",
+          sv: "Räknaren ”Drops i dag” på startskärmen är dold medan en felräkning åtgärdas.",
+          cs: "Počítadlo „Dropy dnes” na úvodní obrazovce je skryté, dokud se neopraví chybné počítání."
+        }
+      }
+    ]
+  },
+  {
+    version: "26.9.14",
+    date: "2026-09-14",
+    title: {
+      fr: "Un tout nouveau StreamPulse",
+      en: "A brand new StreamPulse",
+      es: "Un StreamPulse totalmente nuevo",
+      "pt-BR": "Um StreamPulse totalmente novo",
+      de: "Ein ganz neues StreamPulse",
+      it: "Uno StreamPulse tutto nuovo",
+      pl: "Zupełnie nowy StreamPulse",
+      tr: "Yepyeni bir StreamPulse",
+      ru: "Совершенно новый StreamPulse",
+      ja: "生まれ変わったStreamPulse",
+      ko: "완전히 새로워진 StreamPulse",
+      id: "StreamPulse yang serba baru",
+      nl: "Een gloednieuw StreamPulse",
+      sv: "Ett helt nytt StreamPulse",
+      cs: "Zcela nový StreamPulse"
+    },
+    subtitle: {
+      fr: "Nouveau design du popup et de toutes les pages, épingles et groupes pour vos chaînes, et une restauration qui ajoute vos données au lieu de les remplacer.",
+      en: "A new design for the popup and every page, pins and groups for your channels, and a restore that adds your data instead of replacing it.",
+      es: "Nuevo diseño del popup y de todas las páginas, fijados y grupos para tus canales, y una restauración que añade tus datos en lugar de reemplazarlos.",
+      "pt-BR": "Novo design do popup e de todas as páginas, fixados e grupos para seus canais, e uma restauração que adiciona seus dados em vez de substituí-los.",
+      de: "Neues Design für Popup und alle Seiten, Pins und Gruppen für deine Kanäle und eine Wiederherstellung, die deine Daten ergänzt statt sie zu ersetzen.",
+      it: "Nuovo design del popup e di tutte le pagine, fissati e gruppi per i tuoi canali, e un ripristino che aggiunge i tuoi dati invece di sostituirli.",
+      pl: "Nowy wygląd popupu i wszystkich stron, przypięte kanały i grupy oraz przywracanie, które dodaje dane zamiast je zastępować.",
+      tr: "Açılır pencere ve tüm sayfalar için yeni tasarım, kanalların için sabitleme ve gruplar, ve verilerini değiştirmek yerine ekleyen geri yükleme.",
+      ru: "Новый дизайн всплывающего окна и всех страниц, закрепление и группы каналов, а восстановление теперь добавляет данные, а не заменяет их.",
+      ja: "ポップアップと全ページの新デザイン、チャンネルのピン留めとグループ、そしてデータを置き換えずに追加する復元機能。",
+      ko: "팝업과 모든 페이지의 새 디자인, 채널 고정과 그룹, 그리고 데이터를 덮어쓰지 않고 더해 주는 복원 기능.",
+      id: "Desain baru untuk popup dan semua halaman, sematan dan grup untuk kanalmu, serta pemulihan yang menambahkan data alih-alih menggantinya.",
+      nl: "Een nieuw ontwerp voor de pop-up en alle pagina's, vastpinnen en groepen voor je kanalen, en een herstel dat je gegevens toevoegt in plaats van vervangt.",
+      sv: "Ny design för popupen och alla sidor, fästa kanaler och grupper, och en återställning som lägger till dina data i stället för att ersätta dem.",
+      cs: "Nový vzhled vyskakovacího okna i všech stránek, připnutí a skupiny kanálů a obnova, která data přidává místo nahrazení."
+    },
+    changes: [
+      {
+        type: "new",
+        text: {
+          fr: "Nouveau popup : le streamer en live s'affiche en grand avec sa miniature, les autres lives défilent en dessous, et vous voyez d'un coup d'œil vos points et Drops du jour.",
+          en: "New popup: the live streamer takes the stage with their thumbnail, other lives scroll below, and today's points and Drops are visible at a glance.",
+          es: "Nuevo popup: el streamer en directo se muestra en grande con su miniatura, los demás directos se desplazan debajo y ves de un vistazo tus puntos y Drops del día.",
+          "pt-BR": "Novo popup: o streamer ao vivo aparece em destaque com a miniatura, as outras lives rolam abaixo e você vê num relance seus pontos e Drops do dia.",
+          de: "Neues Popup: Der Streamer, der live ist, wird groß mit Vorschaubild gezeigt, die anderen Lives laufen darunter, und deine Punkte und Drops des Tages siehst du auf einen Blick.",
+          it: "Nuovo popup: lo streamer in diretta appare in grande con la sua miniatura, le altre dirette scorrono sotto e vedi a colpo d'occhio punti e Drops del giorno.",
+          pl: "Nowy popup: streamer na żywo jest pokazany w dużym formacie z miniaturą, pozostałe transmisje przewijają się poniżej, a dzisiejsze punkty i Dropsy widać od razu.",
+          tr: "Yeni açılır pencere: canlı yayıncı küçük resmiyle büyük gösterilir, diğer yayınlar altta kayar ve günün puanlarını ve Drops'larını tek bakışta görürsün.",
+          ru: "Новое всплывающее окно: стример в эфире показан крупно с превью, остальные трансляции прокручиваются ниже, а баллы и Drops за день видны сразу.",
+          ja: "新しいポップアップ：配信中の配信者がサムネイル付きで大きく表示され、他の配信は下に並び、今日のポイントとドロップもひと目で確認できます。",
+          ko: "새 팝업: 방송 중인 스트리머가 썸네일과 함께 크게 표시되고, 다른 방송은 아래로 넘겨 보며, 오늘의 포인트와 드롭스를 한눈에 확인할 수 있습니다.",
+          id: "Popup baru: streamer yang sedang live tampil besar dengan thumbnail, siaran lain bergulir di bawahnya, dan poin serta Drops hari ini terlihat sekilas.",
+          nl: "Nieuwe pop-up: de streamer die live is staat groot in beeld met de thumbnail, andere streams scrollen eronder en je punten en Drops van vandaag zie je in één oogopslag.",
+          sv: "Ny popup: streamern som sänder live visas stort med miniatyrbild, övriga sändningar rullar nedanför och dagens poäng och Drops syns direkt.",
+          cs: "Nové vyskakovací okno: streamer, který vysílá, je zobrazen velký s náhledem, ostatní vysílání se posouvají pod ním a dnešní body a Dropy vidíš na první pohled."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "Épinglez vos chaînes préférées, rangez-les dans des groupes et retrouvez-les dans la liste complète avec recherche et tri.",
+          en: "Pin your favorite channels, sort them into groups and find them in the full list with search and sorting.",
+          es: "Fija tus canales favoritos, organízalos en grupos y encuéntralos en la lista completa con búsqueda y orden.",
+          "pt-BR": "Fixe seus canais favoritos, organize-os em grupos e encontre-os na lista completa com busca e ordenação.",
+          de: "Pinne deine Lieblingskanäle, sortiere sie in Gruppen und finde sie in der vollständigen Liste mit Suche und Sortierung.",
+          it: "Fissa i tuoi canali preferiti, organizzali in gruppi e ritrovali nell'elenco completo con ricerca e ordinamento.",
+          pl: "Przypinaj ulubione kanały, układaj je w grupy i znajduj na pełnej liście z wyszukiwaniem i sortowaniem.",
+          tr: "Sevdiğin kanalları sabitle, gruplara ayır ve arama ve sıralama içeren tam listede bul.",
+          ru: "Закрепляйте любимые каналы, распределяйте их по группам и находите в полном списке с поиском и сортировкой.",
+          ja: "お気に入りのチャンネルをピン留めしてグループに分け、検索と並べ替えのできる一覧からすぐに見つけられます。",
+          ko: "좋아하는 채널을 고정하고 그룹으로 정리한 뒤, 검색과 정렬이 되는 전체 목록에서 찾아보세요.",
+          id: "Sematkan kanal favoritmu, kelompokkan dalam grup, dan temukan di daftar lengkap dengan pencarian dan pengurutan.",
+          nl: "Pin je favoriete kanalen, deel ze in groepen in en vind ze terug in de volledige lijst met zoeken en sorteren.",
+          sv: "Fäst dina favoritkanaler, ordna dem i grupper och hitta dem i hela listan med sökning och sortering.",
+          cs: "Připni si oblíbené kanály, roztřiď je do skupin a najdi je v úplném seznamu s vyhledáváním a řazením."
+        }
+      },
+      {
+        type: "improved",
+        text: {
+          fr: "Nouveau look pour le récap, les notes de version, l'accueil et les éléments ajoutés sur Twitch, aux couleurs de streampulse.fr.",
+          en: "A new look for the recap, the release notes, the welcome screens and the elements added on Twitch, matching streampulse.fr.",
+          es: "Nuevo aspecto para el resumen, las notas de versión, la bienvenida y los elementos añadidos en Twitch, con los colores de streampulse.fr.",
+          "pt-BR": "Novo visual para o resumo, as notas de versão, as boas-vindas e os elementos adicionados na Twitch, com as cores do streampulse.fr.",
+          de: "Neuer Look für den Rückblick, die Versionshinweise, die Begrüßung und die auf Twitch eingefügten Elemente, passend zu streampulse.fr.",
+          it: "Nuovo aspetto per il riepilogo, le note di versione, il benvenuto e gli elementi aggiunti su Twitch, con i colori di streampulse.fr.",
+          pl: "Nowy wygląd podsumowania, informacji o wersji, ekranu powitalnego i elementów dodawanych na Twitchu, w barwach streampulse.fr.",
+          tr: "Özet, sürüm notları, karşılama ekranları ve Twitch'e eklenen öğeler için streampulse.fr renklerinde yeni görünüm.",
+          ru: "Новый вид итогов, заметок о версии, приветствия и элементов на Twitch в стиле streampulse.fr.",
+          ja: "まとめ、リリースノート、ようこそ画面、Twitchに追加される要素のデザインをstreampulse.frに合わせて一新。",
+          ko: "요약, 릴리스 노트, 시작 화면, 트위치에 추가되는 요소가 streampulse.fr 스타일로 새로워졌습니다.",
+          id: "Tampilan baru untuk rekap, catatan rilis, layar sambutan, dan elemen yang ditambahkan di Twitch, senada dengan streampulse.fr.",
+          nl: "Een nieuwe look voor het overzicht, de releasenotes, het welkomstscherm en de elementen op Twitch, in de stijl van streampulse.fr.",
+          sv: "Nytt utseende för sammanfattningen, versionsinformationen, välkomstskärmen och elementen på Twitch, i streampulse.fr:s stil.",
+          cs: "Nový vzhled rekapitulace, poznámek k verzi, uvítání a prvků přidaných na Twitch v barvách streampulse.fr."
+        }
+      },
+      {
+        type: "improved",
+        text: {
+          fr: "Importer une sauvegarde s'ouvre dans un onglet et ajoute les streamers et le temps de visionnage à ceux déjà présents, sans écraser vos réglages.",
+          en: "Importing a backup opens in a tab and adds its streamers and watch time to what you already have, without overwriting your settings.",
+          es: "Importar una copia se abre en una pestaña y añade los streamers y el tiempo de visualización a los que ya tienes, sin sobrescribir tus ajustes.",
+          "pt-BR": "Importar um backup abre em uma aba e adiciona os streamers e o tempo assistido aos que você já tem, sem sobrescrever suas configurações.",
+          de: "Das Importieren einer Sicherung öffnet sich in einem Tab und fügt Streamer und Zuschauzeit zu deinen vorhandenen hinzu, ohne deine Einstellungen zu überschreiben.",
+          it: "L'importazione di un backup si apre in una scheda e aggiunge streamer e tempo di visione a quelli che hai già, senza sovrascrivere le impostazioni.",
+          pl: "Import kopii otwiera się w karcie i dodaje streamerów oraz czas oglądania do tych, które już masz, bez nadpisywania ustawień.",
+          tr: "Yedek içe aktarma bir sekmede açılır ve yayıncılarla izleme süresini mevcut olanlara ekler, ayarlarının üzerine yazmaz.",
+          ru: "Импорт резервной копии открывается во вкладке и добавляет стримеров и время просмотра к уже имеющимся, не перезаписывая настройки.",
+          ja: "バックアップの読み込みは専用タブで開き、設定を上書きせずに配信者と視聴時間を今のデータに追加します。",
+          ko: "백업 가져오기가 탭에서 열리며, 설정을 덮어쓰지 않고 스트리머와 시청 시간을 기존 데이터에 더해 줍니다.",
+          id: "Impor cadangan terbuka di tab dan menambahkan streamer serta waktu menonton ke data yang sudah ada, tanpa menimpa pengaturanmu.",
+          nl: "Een back-up importeren opent in een tabblad en voegt de streamers en kijktijd toe aan wat je al hebt, zonder je instellingen te overschrijven.",
+          sv: "Import av säkerhetskopia öppnas i en flik och lägger till streamers och tittartid till det du redan har, utan att skriva över inställningarna.",
+          cs: "Import zálohy se otevře v kartě a přidá streamery a dobu sledování k těm stávajícím, aniž by přepsal nastavení."
+        }
+      },
+      {
+        type: "fix",
+        text: {
+          fr: "L'annulation automatique des raids reconnaît de nouveau le bouton « Partir » de Twitch en français et dans d'autres langues.",
+          en: "Automatic raid opt-out recognizes Twitch's leave button again in French and other languages.",
+          es: "La cancelación automática de raids vuelve a reconocer el botón para salir de Twitch en español y otros idiomas.",
+          "pt-BR": "O cancelamento automático de raids volta a reconhecer o botão de sair da Twitch em português e outros idiomas.",
+          de: "Das automatische Abbrechen von Raids erkennt den Verlassen-Button von Twitch wieder, auch auf Deutsch.",
+          it: "L'annullamento automatico dei raid riconosce di nuovo il pulsante per uscire di Twitch in più lingue.",
+          pl: "Automatyczne anulowanie rajdów znów rozpoznaje przycisk opuszczenia na Twitchu w wielu językach.",
+          tr: "Baskınları otomatik iptal etme, Twitch'in ayrılma düğmesini birçok dilde yeniden tanıyor.",
+          ru: "Автоматическая отмена рейдов снова распознаёт кнопку выхода Twitch на разных языках.",
+          ja: "レイドの自動キャンセルが、複数の言語でTwitchの退出ボタンを再び認識するようになりました。",
+          ko: "자동 레이드 취소가 여러 언어에서 트위치의 나가기 버튼을 다시 인식합니다.",
+          id: "Pembatalan raid otomatis kembali mengenali tombol keluar Twitch dalam berbagai bahasa.",
+          nl: "Automatisch raids annuleren herkent de verlaatknop van Twitch weer in meerdere talen.",
+          sv: "Automatisk avbrytning av raids känner igen Twitchs lämna-knapp igen på flera språk.",
+          cs: "Automatické rušení raidů opět rozpozná tlačítko pro odchod na Twitchi v různých jazycích."
+        }
+      }
+    ]
+  },
+  {
+    version: "26.9.13",
+    date: "2026-09-13",
     title: {
       fr: "Savoir quand le titre change",
       en: "Know when the title changes",
@@ -85,6 +565,66 @@ export const RELEASES = [
       cs: "Nová upozornění, když streamer změní název vysílání, a velká vlna oprav v překladech."
     },
     changes: [
+      {
+        type: "new",
+        text: {
+          fr: "Sauvegarde de vos données : téléchargez un fichier avec vos streamers, réglages, statistiques et temps de visionnage, puis restaurez-le plus tard ou sur un autre navigateur. Réglages, section Données.",
+          en: "Data backup: download a file with your streamers, settings, stats and watch time, then restore it later or in another browser. Settings, Data section.",
+          es: "Copia de seguridad de tus datos: descarga un archivo con tus streamers, ajustes, estadísticas y tiempo de visualización, y restáuralo más tarde o en otro navegador. Ajustes, sección Datos.",
+          "pt-BR": "Backup dos seus dados: baixe um arquivo com seus streamers, configurações, estatísticas e tempo assistido e restaure depois ou em outro navegador. Configurações, seção Dados.",
+          de: "Datensicherung: Lade eine Datei mit deinen Streamern, Einstellungen, Statistiken und deiner Zuschauzeit herunter und stelle sie später oder in einem anderen Browser wieder her. Einstellungen, Bereich Daten.",
+          it: "Backup dei dati: scarica un file con i tuoi streamer, le impostazioni, le statistiche e il tempo di visione, poi ripristinalo in seguito o su un altro browser. Impostazioni, sezione Dati.",
+          pl: "Kopia zapasowa danych: pobierz plik ze streamerami, ustawieniami, statystykami i czasem oglądania, a potem przywróć go później lub w innej przeglądarce. Ustawienia, sekcja Dane.",
+          tr: "Veri yedekleme: yayıncılarını, ayarlarını, istatistiklerini ve izleme süreni içeren bir dosya indir, sonra ya da başka bir tarayıcıda geri yükle. Ayarlar, Veriler bölümü.",
+          ru: "Резервная копия данных: скачайте файл со стримерами, настройками, статистикой и временем просмотра и восстановите его позже или в другом браузере. Настройки, раздел «Данные».",
+          ja: "データのバックアップ：配信者リスト、設定、統計、視聴時間をファイルに保存し、あとで、または別のブラウザで復元できます。設定の「データ」から。",
+          ko: "데이터 백업: 스트리머 목록, 설정, 통계, 시청 시간을 파일로 내려받고 나중에 또는 다른 브라우저에서 복원하세요. 설정의 데이터 항목에서.",
+          id: "Cadangan data: unduh file berisi streamer, pengaturan, statistik, dan waktu menontonmu, lalu pulihkan nanti atau di browser lain. Pengaturan, bagian Data.",
+          nl: "Back-up van je gegevens: download een bestand met je streamers, instellingen, statistieken en kijktijd en herstel het later of in een andere browser. Instellingen, sectie Gegevens.",
+          sv: "Säkerhetskopiering: ladda ner en fil med dina streamers, inställningar, statistik och tittartid och återställ den senare eller i en annan webbläsare. Inställningar, avsnittet Data.",
+          cs: "Záloha dat: stáhni soubor se streamery, nastavením, statistikami a dobou sledování a obnov ho později nebo v jiném prohlížeči. Nastavení, sekce Data."
+        }
+      },
+      {
+        type: "fix",
+        text: {
+          fr: "Le badge communautaire StreamPulse ne s'affichait pas à côté des pseudos qui ont déjà des badges Twitch (abonné, Prime…) après un changement du tchat Twitch. Il apparaît de nouveau pour tout le monde.",
+          en: "The StreamPulse community badge was not shown next to usernames that already have Twitch badges (subscriber, Prime…) after a Twitch chat change. It now appears for everyone again.",
+          es: "La insignia comunitaria de StreamPulse no se mostraba junto a los nombres que ya tienen insignias de Twitch (suscriptor, Prime…) tras un cambio en el chat de Twitch. Ahora vuelve a aparecer para todos.",
+          "pt-BR": "O distintivo comunitário do StreamPulse não aparecia ao lado de nomes que já têm distintivos da Twitch (inscrito, Prime…) após uma mudança no chat da Twitch. Agora ele volta a aparecer para todos.",
+          de: "Das StreamPulse-Community-Abzeichen wurde nach einer Änderung am Twitch-Chat nicht neben Namen angezeigt, die bereits Twitch-Abzeichen haben (Abonnent, Prime…). Es erscheint jetzt wieder bei allen.",
+          it: "Il badge della comunità StreamPulse non compariva accanto ai nomi che hanno già badge Twitch (abbonato, Prime…) dopo una modifica alla chat di Twitch. Ora appare di nuovo per tutti.",
+          pl: "Odznaka społeczności StreamPulse nie pojawiała się przy nickach, które mają już odznaki Twitcha (subskrybent, Prime…), po zmianie czatu Twitcha. Teraz znów widać ją u wszystkich.",
+          tr: "Twitch sohbetindeki bir değişiklikten sonra StreamPulse topluluk rozeti, zaten Twitch rozeti (abone, Prime…) olan kullanıcı adlarının yanında görünmüyordu. Artık herkes için yeniden görünüyor.",
+          ru: "После изменения чата Twitch значок сообщества StreamPulse не отображался рядом с никами, у которых уже есть значки Twitch (подписчик, Prime…). Теперь он снова виден у всех.",
+          ja: "Twitchチャットの変更により、すでにTwitchバッジ（サブスク、Primeなど）を持つユーザー名の横にStreamPulseコミュニティバッジが表示されていませんでした。再びすべての人に表示されます。",
+          ko: "트위치 채팅 변경 이후 이미 트위치 배지(구독자, Prime 등)가 있는 닉네임 옆에 StreamPulse 커뮤니티 배지가 표시되지 않았습니다. 이제 다시 모두에게 표시됩니다.",
+          id: "Lencana komunitas StreamPulse tidak muncul di samping nama yang sudah memiliki lencana Twitch (pelanggan, Prime…) setelah perubahan pada obrolan Twitch. Kini lencana muncul kembali untuk semua orang.",
+          nl: "De StreamPulse-community-badge verscheen na een wijziging in de Twitch-chat niet naast namen die al Twitch-badges hebben (abonnee, Prime…). Hij is nu weer bij iedereen zichtbaar.",
+          sv: "StreamPulse-gemenskapsmärket visades inte bredvid namn som redan har Twitch-märken (prenumerant, Prime…) efter en ändring i Twitch-chatten. Nu syns det igen för alla.",
+          cs: "Komunitní odznak StreamPulse se po změně chatu Twitche nezobrazoval u přezdívek, které už mají odznaky Twitche (odběratel, Prime…). Nyní se znovu zobrazuje u všech."
+        }
+      },
+      {
+        type: "new",
+        text: {
+          fr: "Récap à la demande : choisissez les 7 ou 30 derniers jours ou un mois, en format PC (16:9) ou mobile (9:16), puis téléchargez l'image ou partagez-la sur X. Accessible depuis Réglages, Temps de visionnage.",
+          en: "On-demand recap: pick the last 7 or 30 days or a month, in desktop (16:9) or mobile (9:16) format, then download the image or share it on X. Available from Settings, Watch time.",
+          es: "Resumen a la carta: elige los últimos 7 o 30 días o un mes, en formato PC (16:9) o móvil (9:16), y descarga la imagen o compártela en X. Disponible en Ajustes, Tiempo de visualización.",
+          "pt-BR": "Resumo sob demanda: escolha os últimos 7 ou 30 dias ou um mês, no formato PC (16:9) ou celular (9:16), e baixe a imagem ou compartilhe no X. Disponível em Configurações, Tempo assistido.",
+          de: "Rückblick auf Abruf: Wähle die letzten 7 oder 30 Tage oder einen Monat, im PC- (16:9) oder Mobilformat (9:16), und lade das Bild herunter oder teile es auf X. Zu finden unter Einstellungen, Zuschauzeit.",
+          it: "Riepilogo su richiesta: scegli gli ultimi 7 o 30 giorni o un mese, in formato PC (16:9) o mobile (9:16), poi scarica l'immagine o condividila su X. Disponibile in Impostazioni, Tempo di visione.",
+          pl: "Podsumowanie na żądanie: wybierz ostatnie 7 lub 30 dni albo miesiąc, w formacie PC (16:9) lub telefonu (9:16), a potem pobierz obraz lub udostępnij go na X. Dostępne w Ustawieniach, Czas oglądania.",
+          tr: "İsteğe bağlı özet: son 7 veya 30 günü ya da bir ayı seç, PC (16:9) veya mobil (9:16) formatında, ardından görseli indir ya da X'te paylaş. Ayarlar, İzleme süresi bölümünden erişilebilir.",
+          ru: "Итоги по запросу: выбери последние 7 или 30 дней или месяц, в формате ПК (16:9) или телефона (9:16), затем скачай изображение или поделись им в X. Доступно в Настройках, Время просмотра.",
+          ja: "いつでも作れるまとめ：過去7日間・30日間または月を選び、PC（16:9）かモバイル（9:16）形式で画像をダウンロード、またはXでシェアできます。設定の「視聴時間」から利用できます。",
+          ko: "원할 때 만드는 결산: 최근 7일, 30일 또는 한 달을 고르고 PC(16:9) 또는 모바일(9:16) 형식으로 이미지를 다운로드하거나 X에 공유하세요. 설정의 시청 시간에서 이용할 수 있습니다.",
+          id: "Rekap kapan saja: pilih 7 atau 30 hari terakhir atau satu bulan, dalam format PC (16:9) atau ponsel (9:16), lalu unduh gambarnya atau bagikan di X. Tersedia di Pengaturan, Waktu menonton.",
+          nl: "Overzicht op aanvraag: kies de laatste 7 of 30 dagen of een maand, in pc- (16:9) of mobiel formaat (9:16), en download de afbeelding of deel hem op X. Te vinden onder Instellingen, Kijktijd.",
+          sv: "Sammanfattning när du vill: välj de senaste 7 eller 30 dagarna eller en månad, i datorformat (16:9) eller mobilformat (9:16), och ladda ner bilden eller dela den på X. Finns under Inställningar, Tittartid.",
+          cs: "Přehled na požádání: vyber posledních 7 nebo 30 dní nebo měsíc, ve formátu PC (16:9) nebo mobil (9:16), a stáhni obrázek nebo ho sdílej na X. Najdeš ho v Nastavení, Doba sledování."
+        }
+      },
       {
         type: "improved",
         text: {
@@ -268,21 +808,21 @@ export const RELEASES = [
       cs: "StreamPulse míří do Firefoxu"
     },
     subtitle: {
-      fr: "La version Firefox est en ligne, avec le récap ZEvent et le badge communautaire dans le tchat Twitch.",
-      en: "The Firefox version is live, along with the ZEvent recap and the community badge in Twitch chat.",
-      es: "La versión para Firefox ya está disponible, junto al resumen del ZEvent y la insignia comunitaria en el chat de Twitch.",
-      "pt-BR": "A versão para Firefox está no ar, junto com o resumo do ZEvent e o distintivo comunitário no chat da Twitch.",
-      de: "Die Firefox-Version ist da, zusammen mit dem ZEvent-Rückblick und dem Community-Abzeichen im Twitch-Chat.",
-      it: "La versione Firefox è online, insieme al riepilogo ZEvent e al badge della comunità nella chat di Twitch.",
-      pl: "Wersja na Firefoksa jest już dostępna, razem z podsumowaniem ZEvent i odznaką społeczności na czacie Twitcha.",
-      tr: "Firefox sürümü yayında; yanında ZEvent özeti ve Twitch sohbetindeki topluluk rozeti.",
-      ru: "Версия для Firefox доступна, вместе с итогами ZEvent и значком сообщества в чате Twitch.",
-      ja: "Firefox版を公開しました。ZEventの記録と、Twitchチャットのコミュニティバッジも一緒に。",
-      ko: "Firefox 버전이 출시되었습니다. ZEvent 결산과 트위치 채팅의 커뮤니티 배지도 함께.",
-      id: "Versi Firefox sudah tersedia, bersama rekap ZEvent dan lencana komunitas di obrolan Twitch.",
-      nl: "De Firefox-versie is live, samen met het ZEvent-overzicht en de community-badge in de Twitch-chat.",
-      sv: "Firefox-versionen är live, tillsammans med ZEvent-sammanfattningen och gemenskapsmärket i Twitch-chatten.",
-      cs: "Verze pro Firefox je online, spolu s přehledem ZEvent a komunitním odznakem v chatu Twitche."
+      fr: "La version Firefox est en ligne, avec le badge communautaire dans le tchat Twitch.",
+      en: "The Firefox version is live, along with the community badge in Twitch chat.",
+      es: "La versión para Firefox ya está disponible, junto a la insignia comunitaria en el chat de Twitch.",
+      "pt-BR": "A versão para Firefox está no ar, junto com o distintivo comunitário no chat da Twitch.",
+      de: "Die Firefox-Version ist da, zusammen mit dem Community-Abzeichen im Twitch-Chat.",
+      it: "La versione Firefox è online, insieme al badge della comunità nella chat di Twitch.",
+      pl: "Wersja na Firefoksa jest już dostępna, razem z odznaką społeczności na czacie Twitcha.",
+      tr: "Firefox sürümü yayında; yanında Twitch sohbetindeki topluluk rozeti.",
+      ru: "Версия для Firefox доступна, вместе со значком сообщества в чате Twitch.",
+      ja: "Firefox版を公開しました。Twitchチャットのコミュニティバッジも一緒に。",
+      ko: "Firefox 버전이 출시되었습니다. 트위치 채팅의 커뮤니티 배지도 함께.",
+      id: "Versi Firefox sudah tersedia, bersama lencana komunitas di obrolan Twitch.",
+      nl: "De Firefox-versie is live, samen met de community-badge in de Twitch-chat.",
+      sv: "Firefox-versionen är live, tillsammans med gemenskapsmärket i Twitch-chatten.",
+      cs: "Verze pro Firefox je online, spolu s komunitním odznakem v chatu Twitche."
     },
     changes: [
       {
@@ -303,26 +843,6 @@ export const RELEASES = [
           nl: "Officiële ondersteuning voor Mozilla Firefox: native audio-engine zonder offscreen-documenten en strikte naleving van de Mozilla-machtigingsregels.",
           sv: "Officiellt stöd för Mozilla Firefox: inbyggd ljudmotor utan offscreen-dokument och full överensstämmelse med Mozillas behörighetsregler.",
           cs: "Oficiální podpora pro Mozilla Firefox: nativní zvukový modul bez offscreen dokumentů a přísné dodržení pravidel oprávnění Mozilla."
-        }
-      },
-      {
-        type: "new",
-        text: {
-          fr: "ZEvent 2026 : pendant le week-end, un bandeau dédié, un filtre et le surlignage vert des streamers participants dans votre sidebar Twitch. L'événement terminé, retrouvez votre récap, le temps passé chez chaque participant, et exportez-le en image, au format Twitter ou story Instagram.",
-          en: "ZEvent 2026: during the weekend, a dedicated banner, a filter and green highlighting of participating streamers in your Twitch sidebar. Now that it is over, open your recap, how long you watched each participant, and export it as an image, in Twitter or Instagram story format.",
-          es: "ZEvent 2026: durante el fin de semana, un banner dedicado, un filtro y el resaltado verde de los streamers participantes en tu barra lateral de Twitch. Terminado el evento, consulta tu resumen, el tiempo pasado con cada participante, y expórtalo como imagen, en formato Twitter o historia de Instagram.",
-          "pt-BR": "ZEvent 2026: durante o fim de semana, um banner dedicado, um filtro e o destaque verde dos streamers participantes na sua barra lateral da Twitch. Encerrado o evento, veja seu resumo, o tempo assistido com cada participante, e exporte como imagem, em formato Twitter ou story do Instagram.",
-          de: "ZEvent 2026: Am Wochenende ein eigenes Banner, ein Filter und die grüne Hervorhebung teilnehmender Streamer in deiner Twitch-Seitenleiste. Nach dem Event öffnest du deinen Rückblick, wie lange du jeden Teilnehmer geschaut hast, und exportierst ihn als Bild im Twitter- oder Instagram-Story-Format.",
-          it: "ZEvent 2026: durante il weekend, un banner dedicato, un filtro e l'evidenziazione verde degli streamer partecipanti nella barra laterale di Twitch. A evento concluso, apri il tuo riepilogo, il tempo passato con ogni partecipante, ed esportalo come immagine, in formato Twitter o storia Instagram.",
-          pl: "ZEvent 2026: w weekend dedykowany baner, filtr i zielone podświetlenie uczestniczących streamerów na pasku bocznym Twitcha. Po zakończeniu otwórz swoje podsumowanie, ile czasu spędziłeś u każdego uczestnika, i wyeksportuj je jako obrazek w formacie Twittera lub relacji na Instagramie.",
-          tr: "ZEvent 2026: hafta sonu boyunca özel bir afiş, bir filtre ve Twitch kenar çubuğunuzda katılan yayıncıların yeşil vurgusu. Etkinlik bittiğinde özetinizi açın, her katılımcıyı ne kadar izlediğinizi görün ve Twitter veya Instagram hikâye formatında görsel olarak dışa aktarın.",
-          ru: "ZEvent 2026: в выходные: отдельный баннер, фильтр и зелёная подсветка участвующих стримеров в боковой панели Twitch. После завершения откройте свои итоги, сколько вы смотрели каждого участника, и сохраните картинку в формате Twitter или истории Instagram.",
-          ja: "ZEvent 2026：週末は専用バナー、フィルター、Twitchサイドバーでの参加ストリーマーの緑色ハイライト。終了後は、参加者ごとの視聴時間をまとめた記録を開き、Twitter形式またはInstagramストーリー形式の画像として書き出せます。",
-          ko: "ZEvent 2026: 주말 동안 전용 배너, 필터, 트위치 사이드바의 참가 스트리머 초록색 강조. 행사가 끝난 뒤에는 참가자별 시청 시간을 담은 결산을 열어 트위터 또는 인스타그램 스토리 형식의 이미지로 내보낼 수 있습니다.",
-          id: "ZEvent 2026: selama akhir pekan, banner khusus, filter, dan sorotan hijau streamer peserta di bilah sisi Twitch Anda. Setelah acara berakhir, buka rekap Anda, berapa lama Anda menonton tiap peserta, dan ekspor sebagai gambar dalam format Twitter atau story Instagram.",
-          nl: "ZEvent 2026: tijdens het weekend een eigen banner, een filter en groene markering van deelnemende streamers in je Twitch-zijbalk. Nu het voorbij is, open je je overzicht, hoelang je naar elke deelnemer keek, en exporteer je het als afbeelding, in Twitter- of Instagram-storyformaat.",
-          sv: "ZEvent 2026: under helgen en egen banner, ett filter och grön markering av deltagande streamers i ditt Twitch-sidofält. Nu när det är slut öppnar du din sammanfattning, hur länge du tittade på varje deltagare, och exporterar den som bild i Twitter- eller Instagram-storyformat.",
-          cs: "ZEvent 2026: o víkendu vlastní banner, filtr a zelené zvýraznění zúčastněných streamerů v postranním panelu Twitche. Po skončení otevřete svůj přehled, jak dlouho jste sledovali jednotlivé účastníky, a exportujte jej jako obrázek ve formátu Twitteru nebo Instagram story."
         }
       },
       {
@@ -583,26 +1103,6 @@ export const RELEASES = [
           nl: "Oplossing voor het laden van het Twitch-pictogram op systemen en browsers die hoofdlettergevoelig zijn voor bestandsnamen.",
           sv: "Fixat laddning av Twitch-ikonen på system och webbläsare som skiljer på stora och små bokstäver.",
           cs: "Oprava načítání ikony Twitche na systémech a v prohlížečích citlivých na velikost písmen v názvech souborů."
-        }
-      },
-      {
-        type: "fix",
-        text: {
-          fr: "Les réglages « Dispositif ZEvent » et « Badge communautaire » ne s'enregistraient pas : les activer ou les désactiver restait sans effet et affichait une erreur. Corrigé, avec un contrôle automatique qui empêche le problème de revenir sur les autres réglages.",
-          en: "The « ZEvent features » and « Community badge » settings were not saved: turning them on or off did nothing and showed an error. Fixed, with an automated check that prevents the same problem on other settings.",
-          es: "Los ajustes «Dispositivo ZEvent» y «Insignia comunitaria» no se guardaban: activarlos o desactivarlos no hacía nada y mostraba un error. Corregido, con una comprobación automática que evita el problema en los demás ajustes.",
-          "pt-BR": "As configurações «Recursos do ZEvent» e «Distintivo comunitário» não eram salvas: ativá-las ou desativá-las não fazia nada e exibia um erro. Corrigido, com uma verificação automática que evita o problema nas demais configurações.",
-          de: "Die Einstellungen „ZEvent-Funktionen“ und „Community-Abzeichen“ wurden nicht gespeichert: Ein- oder Ausschalten bewirkte nichts und zeigte einen Fehler. Behoben, mit einer automatischen Prüfung, die das Problem bei anderen Einstellungen verhindert.",
-          it: "Le impostazioni «Funzioni ZEvent» e «Badge della comunità» non venivano salvate: attivarle o disattivarle non faceva nulla e mostrava un errore. Corretto, con un controllo automatico che previene lo stesso problema altrove.",
-          pl: "Ustawienia „Funkcje ZEvent” i „Odznaka społeczności” nie zapisywały się: włączenie lub wyłączenie nic nie dawało i pokazywało błąd. Naprawione, wraz z automatyczną kontrolą zapobiegającą temu w innych ustawieniach.",
-          tr: "«ZEvent özellikleri» ve «Topluluk rozeti» ayarları kaydedilmiyordu: açmak veya kapatmak hiçbir şey yapmıyor ve hata veriyordu. Düzeltildi; diğer ayarlarda tekrarlanmasını önleyen otomatik bir denetim eklendi.",
-          ru: "Настройки «Функции ZEvent» и «Значок сообщества» не сохранялись: включение или выключение ничего не давало и показывало ошибку. Исправлено, добавлена автоматическая проверка, чтобы это не повторилось с другими настройками.",
-          ja: "「ZEvent機能」と「コミュニティバッジ」の設定が保存されず、オンオフしても何も起きずエラーが出ていました。修正し、他の設定でも再発しないよう自動チェックを追加しました。",
-          ko: "「ZEvent 기능」과 「커뮤니티 배지」 설정이 저장되지 않아, 켜거나 꺼도 반응이 없고 오류가 표시됐습니다. 수정했으며, 다른 설정에서도 재발하지 않도록 자동 검사를 추가했습니다.",
-          id: "Pengaturan «Fitur ZEvent» dan «Lencana komunitas» tidak tersimpan: menyalakan atau mematikannya tidak berpengaruh dan menampilkan galat. Diperbaiki, dengan pemeriksaan otomatis agar tidak terulang pada pengaturan lain.",
-          nl: "De instellingen 'ZEvent-functies' en 'Community-badge' werden niet opgeslagen: aan- of uitzetten deed niets en gaf een fout. Opgelost, met een automatische controle die dit bij andere instellingen voorkomt.",
-          sv: "Inställningarna ”ZEvent-funktioner” och ”Gemenskapsmärke” sparades inte: att slå på eller av gjorde ingenting och visade ett fel. Åtgärdat, med en automatisk kontroll som förhindrar samma sak för andra inställningar.",
-          cs: "Nastavení „Funkce ZEvent“ a „Komunitní odznak“ se neukládala: zapnutí ani vypnutí nic neudělalo a zobrazilo chybu. Opraveno, včetně automatické kontroly, která problém u dalších nastavení zastaví."
         }
       },
       {
