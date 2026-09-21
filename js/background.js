@@ -1912,7 +1912,7 @@ function lastSeenOf(streamerId) {
 async function buildStreamerStatus(streamer, twitchBatch = null) {
   const platform = streamer.platform || "twitch";
   let status;
-  if (twitchBatch && platform === "twitch") {
+  if (twitchBatch && normalizePlatform(platform) === "twitch") {
     const login = sanitizeLogin(streamer.twitch || streamer.handle);
     if (!login) {
       status = { isLive: false };
