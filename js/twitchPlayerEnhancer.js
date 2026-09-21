@@ -3,7 +3,6 @@
   const AUTO_REFRESH_FIELD = "autoRefreshPlayerErrors";
   const FAST_FORWARD_FIELD = "enableFastForwardButton";
 
-  const ERROR_CODES = ["1000", "2000", "3000", "4000", "5000"];
   const FAST_FORWARD_BUTTON_ID = "streampulse-fast-forward-btn";
   const FAST_FORWARD_STYLE_ID = "streampulse-fast-forward-style";
   const SHARED_STYLE_ID = "streampulse-enhancer-styles";
@@ -39,10 +38,36 @@
     features: DEFAULT_FEATURE_CONFIG,
   };
 
-  let autoRefreshEnabled = false;
+  // Relance du lecteur sur erreur (codes 1000-5000, dont le fameux #2000).
+  //
+  // On clique « Reessayer » a la place de l'utilisateur. Si l'overlay n'offre
+  // aucun bouton, ou si le clic n'a pas suffi au tour precedent, on recharge,
+  // mais jamais sur un onglet cache (on attend son retour), jamais deux fois
+  // pour la meme page, et jamais moins de 45 s apres un rechargement.
+  //
+  // Reglable : autoRefreshPlayerErrors, active par defaut. Une extension ne
+  // doit pas imposer un rechargement de page sans laisser couper la fonction.
+
+  const ERROR_GATE_SELECTOR =
+    '[data-a-target="player-overlay-content-gate"], .content-overlay-gate';
+  const ERROR_CODES = ["1000", "2000", "3000", "4000", "5000"];
+  const RETRY_GRACE_MS = 6000;
+  const RETRY_POLL_MS = 4000;
+
+  const RELOAD_STAMP_KEY = "streampulsePlayerReloadAt";
+  const RELOAD_COOLDOWN_MS = 45000;
+
   let errorCheckTimeoutId = null;
   let observedVideo = null;
   let videoAbortHandler = null;
+  let retryClickAttempted = false;
+  // Faux au depart : c'est setAutoRefresh(), appele par applyPreferences au
+  // chargement des reglages, qui demarre reellement la detection. Le mettre a
+  // vrai ici ferait sortir setAutoRefresh par son garde d'egalite, et plus
+  // rien n'aurait jamais lance le sondage.
+  let autoRefreshEnabled = false;
+  let reloadPendingUntilVisible = false;
+  let reloadAttempted = false;
 
   let fastForwardEnabled = false;
   let fastForwardEnsureIntervalId = null;
@@ -75,6 +100,15 @@
       color: #ffffff;
       cursor: pointer;
       transform: translateY(-1px);
+    }
+    .streampulse-latency-button.is-metadata {
+      align-self: center;
+      padding: 0 10px 0 0;
+      font-size: 13px;
+      gap: 6px;
+    }
+    .streampulse-latency-button.is-metadata:hover {
+      transform: none;
     }
     .streampulse-latency-dot {
       display: inline-block;
@@ -192,47 +226,84 @@
     return null;
   }
 
-  function attemptRecovery() {
-    const button = document.querySelector(
-      ".content-overlay-gate__allow-pointers button"
-    );
+  function hasPlayerError() {
+    const gate = document.querySelector(ERROR_GATE_SELECTOR);
+    if (!gate) return false;
+    const text = gate.textContent || "";
+    return ERROR_CODES.some((code) => text.includes(code));
+  }
+
+  function clickRetryButton() {
+    const button = document.querySelector(`${ERROR_GATE_SELECTOR} button`);
     if (button instanceof HTMLElement) {
       button.click();
+      return true;
+    }
+    return false;
+  }
+
+  /** Dernier recours : recharger, sous trois garde-fous cumules. */
+  function reloadPlayerPage() {
+    if (document.hidden) {
+      // Recharger un onglet que personne ne regarde couperait un stream
+      // ecoute en fond : on attend son retour au premier plan.
+      reloadPendingUntilVisible = true;
+      return;
+    }
+    reloadPendingUntilVisible = false;
+    if (reloadAttempted) return;
+    reloadAttempted = true;
+    try {
+      // sessionStorage survit au rechargement : c'est lui qui empeche la boucle.
+      const last = Number(sessionStorage.getItem(RELOAD_STAMP_KEY)) || 0;
+      if (Date.now() - last < RELOAD_COOLDOWN_MS) return;
+      sessionStorage.setItem(RELOAD_STAMP_KEY, String(Date.now()));
+    } catch (_error) {
+      return; // Stockage bloque : pas de garde-fou, donc pas de rechargement.
+    }
+    window.location.reload();
+  }
+
+  function attemptRecovery() {
+    // Un seul clic par erreur : si le lecteur re-affiche l'overlay, le tour
+    // de sondage suivant passera au rechargement. Re-cliquer en boucle sur un
+    // bouton qui ne repond pas ne sert a rien.
+    if (!retryClickAttempted) {
+      retryClickAttempted = clickRetryButton();
+      if (!retryClickAttempted) {
+        // Overlay sans bouton : le clic est impossible, on recharge.
+        reloadPlayerPage();
+        return;
+      }
+    } else {
+      // Le clic du tour precedent n'a pas suffi.
+      reloadPlayerPage();
+      return;
     }
 
     window.setTimeout(() => {
       const video = findVideoElement();
-      if (!video) return;
-      if (video.paused) {
+      if (video?.paused) {
         video.play().catch(() => {});
       }
-      window.setTimeout(() => {
-        seekToBufferedEnd(video);
-      }, 120);
-    }, 2000);
+      window.setTimeout(() => seekToBufferedEnd(video), 120);
+    }, RETRY_GRACE_MS);
   }
 
   function checkForPlayerErrors() {
     errorCheckTimeoutId = null;
-    if (!autoRefreshEnabled) {
-      return;
-    }
+    if (!autoRefreshEnabled) return;
 
     ensureVideoAbortListener();
 
-    const gate = document.querySelector(
-      'div[data-a-target="player-overlay-content-gate"]'
-    );
-    if (gate) {
-      const text = (gate.textContent || "").toLowerCase();
-      if (ERROR_CODES.some((code) => text.includes(code))) {
-        attemptRecovery();
-        scheduleErrorCheck(10000);
-        return;
-      }
+    if (hasPlayerError()) {
+      attemptRecovery();
+      scheduleErrorCheck(RETRY_GRACE_MS + RETRY_POLL_MS);
+      return;
     }
 
-    scheduleErrorCheck(8000);
+    retryClickAttempted = false;
+    scheduleErrorCheck(RETRY_POLL_MS);
   }
 
   function scheduleErrorCheck(delay = 2000) {
@@ -259,22 +330,19 @@
     detachVideoAbortListener();
     observedVideo = video;
     videoAbortHandler = () => {
-      if (autoRefreshEnabled) {
-        scheduleErrorCheck(100);
-      }
+      scheduleErrorCheck(100);
     };
     video.addEventListener("abort", videoAbortHandler);
   }
 
-  function enableAutoRefresh() {
-    if (autoRefreshEnabled) return;
-    autoRefreshEnabled = true;
-    ensureVideoAbortListener();
-    scheduleErrorCheck(500);
-  }
-
-  function disableAutoRefresh() {
-    autoRefreshEnabled = false;
+  function setAutoRefresh(enabled) {
+    if (enabled === autoRefreshEnabled) return;
+    autoRefreshEnabled = enabled;
+    if (enabled) {
+      ensureVideoAbortListener();
+      scheduleErrorCheck(500);
+      return;
+    }
     if (errorCheckTimeoutId != null) {
       clearTimeout(errorCheckTimeoutId);
       errorCheckTimeoutId = null;
@@ -510,12 +578,7 @@
   }
 
   function applyPreferences(preferences = {}) {
-    const shouldAutoRefresh = preferences[AUTO_REFRESH_FIELD] !== false;
-    if (shouldAutoRefresh && !autoRefreshEnabled) {
-      enableAutoRefresh();
-    } else if (!shouldAutoRefresh && autoRefreshEnabled) {
-      disableAutoRefresh();
-    }
+    setAutoRefresh(preferences[AUTO_REFRESH_FIELD] !== false);
 
     const shouldFastForward = preferences[FAST_FORWARD_FIELD] !== false;
     if (shouldFastForward && !fastForwardEnabled) {
@@ -526,6 +589,38 @@
 
     setHideTwitchExtensions(preferences.hideTwitchExtensions === true);
     setAutoCancelRaids(preferences.autoCancelRaids !== false);
+    syncKeepQualityFlag(preferences.keepQualityInBackground === true);
+    syncPlayerQuality(preferences.playerQuality);
+  }
+
+  // preventPause.js runs in the MAIN world and cannot read chrome.storage,
+  // so the opt-in is mirrored into page localStorage. Applies on next load.
+  const PLAYER_QUALITY_KEY = "streampulse:playerQuality";
+  const PLAYER_QUALITIES = ["auto", "source", "1440", "1080", "720", "480", "360"];
+
+  // playerQuality.js tourne dans le monde MAIN et ne lit pas chrome.storage :
+  // le reglage transite par le localStorage de la page, applique sans rechargement.
+  function syncPlayerQuality(value) {
+    const quality = PLAYER_QUALITIES.includes(value) ? value : "auto";
+    try {
+      window.localStorage.setItem(PLAYER_QUALITY_KEY, quality);
+      window.dispatchEvent(new Event("streampulse:quality-changed"));
+    } catch (_error) {
+      // Stockage bloque : Twitch garde la main sur la qualite.
+    }
+  }
+
+  const KEEP_QUALITY_FLAG_KEY = "streampulse:keepQualityInBackground";
+  function syncKeepQualityFlag(enable) {
+    try {
+      if (enable) {
+        window.localStorage.setItem(KEEP_QUALITY_FLAG_KEY, "1");
+      } else {
+        window.localStorage.removeItem(KEEP_QUALITY_FLAG_KEY);
+      }
+    } catch (_error) {
+      // Storage can be blocked (privacy mode): the feature simply stays off.
+    }
   }
 
   const HIDE_EXTENSIONS_STYLE_ID = "streampulse-hide-extensions-style";
@@ -855,7 +950,18 @@
         this.headerCheckIntervalId = window.setInterval(() => this.ensureHeader(), 3000);
       }
       if (this.updateIntervalId == null) {
-        this.updateIntervalId = window.setInterval(() => this.update(), 1000);
+        this.updateIntervalId = window.setInterval(() => {
+          // Inutile de mesurer la latence quand l'onglet est en arriere-plan ;
+          // au retour, update() recalcule tout depuis la video, et le listener
+          // visibilitychange ci-dessous rafraichit immediatement.
+          if (!document.hidden) this.update();
+        }, 1000);
+        if (!this._visibilityBound) {
+          this._visibilityBound = true;
+          document.addEventListener("visibilitychange", () => {
+            if (!document.hidden) this.update(true);
+          });
+        }
       }
       this.update(true);
     }
@@ -872,17 +978,28 @@
       this.detach();
     }
 
+    /**
+     * Barre d'infos sous le lecteur : le conteneur qui aligne le nombre de
+     * spectateurs et la duree du live. Repere par ".live-time", la seule classe
+     * stable du lot (les autres sont generees par Twitch a chaque build).
+     */
+    findMetadataBar() {
+      const liveTime = document.querySelector(".live-time");
+      const holder = liveTime?.parentElement?.parentElement;
+      return holder instanceof HTMLElement ? holder : null;
+    }
+
     findHeader() {
-      const selectors = [
-        ".stream-chat-header__left",
-        ".stream-chat-header",
-        '[data-a-target="chat-room-header"]',
-        '[data-test-selector="chat-room-header"]',
-      ];
-      for (const selector of selectors) {
-        const element = document.querySelector(selector);
-        if (element) return element;
+      const metadata = this.findMetadataBar();
+      if (metadata) {
+        this.headerMode = "metadata";
+        return metadata;
       }
+      // Plus de repli sur l'en-tete du chat : la barre d'infos du lecteur
+      // apparait quelques secondes apres le chargement de la page, et le
+      // bouton s'y teleportait depuis le chat, ce qui etait desagreable a
+      // l'oeil. On prefere attendre (le sondage de 3 s reessaie) et poser le
+      // bouton directement a sa place definitive.
       return null;
     }
 
@@ -926,7 +1043,12 @@
 
       this.button.append(this.dot, this.text);
       this.button.addEventListener("click", () => this.handleClick());
-      this.header.appendChild(this.button);
+      if (this.headerMode === "metadata") {
+        this.button.classList.add("is-metadata");
+        this.header.insertBefore(this.button, this.header.firstElementChild);
+      } else {
+        this.header.appendChild(this.button);
+      }
     }
 
     handleClick() {
@@ -1023,7 +1145,9 @@
     if (document.hidden) return;
 
     if (isTopWindow) {
-      if (autoRefreshEnabled) {
+      if (autoRefreshEnabled && reloadPendingUntilVisible && hasPlayerError()) {
+        reloadPlayerPage();
+      } else if (autoRefreshEnabled) {
         scheduleErrorCheck(500);
       }
       if (fastForwardEnabled) {
