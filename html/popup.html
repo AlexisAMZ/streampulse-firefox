@@ -252,33 +252,29 @@
         <section class="menu-panel" id="menu-alerts" role="tabpanel" aria-labelledby="menu-tab-alerts">
           <h2 data-i18n="popup.osd.menuAlerts">Alertes</h2>
 
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.liveNotificationsTitle">Notifications Chrome</span>
-              <span class="settings-description" data-i18n="popup.settings.liveNotificationsDescription">Recevoir une alerte lorsqu'un streamer suivi démarre un live.</span>
-            </span>
-            <input id="pref-live-notifications" type="checkbox" role="switch" />
-          </label>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.gameAlertsTitle">Alertes changement de catégorie</span>
-              <span class="settings-description" data-i18n="popup.settings.gameAlertsDescription">Être notifié lorsqu'un streamer change de jeu sur Twitch.</span>
-            </span>
-            <input id="pref-game-alerts" type="checkbox" role="switch" />
-          </label>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.titleAlertsTitle">Alertes changement de titre</span>
-              <span class="settings-description" data-i18n="popup.settings.titleAlertsDescription">Être notifié lorsqu'un streamer modifie le titre de son live.</span>
-            </span>
-            <input id="pref-title-alerts" type="checkbox" role="switch" />
-          </label>
+          <p class="settings-note" data-i18n="popup.settings.alertsPerStreamerNote">Ces alertes se règlent sur chaque streamer, depuis sa carte : notifications, changement de catégorie et de titre.</p>
+
           <label class="settings-toggle">
             <span class="settings-text">
               <span class="settings-title" data-i18n="popup.settings.soundsTitle">Son des notifications</span>
               <span class="settings-description" data-i18n="popup.settings.soundsDescription">Activer ou couper le son lors des alertes.</span>
             </span>
             <input id="pref-sounds" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.backgroundRaidAlertsTitle">Alertes de raids entrants (bêta)</span>
+              <span class="settings-description" data-i18n="popup.settings.backgroundRaidAlertsDescription">Surveiller tous les streamers Twitch suivis et notifier dès qu'un raid arrive, même hors de la page.</span>
+            </span>
+            <input id="pref-background-raid-alerts" type="checkbox" role="switch" />
+          </label>
+
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.autoCancelRaidsTitle">Annulation automatique des Raids</span>
+              <span class="settings-description" data-i18n="popup.settings.autoCancelRaidsDescription">Annuler automatiquement la redirection lors d'un Raid Twitch. Se désactive quand les alertes de raid en arrière-plan sont actives : les points se gagnent en suivant le raid.</span>
+            </span>
+            <input id="pref-auto-cancel-raids" type="checkbox" role="switch" />
           </label>
 
 
@@ -353,13 +349,6 @@
               <span class="settings-description" data-i18n="popup.settings.hideTwitchExtensionsDescription">Masquer les incrustations d'extensions sur le lecteur vidéo.</span>
             </span>
             <input id="pref-hide-twitch-extensions" type="checkbox" role="switch" />
-          </label>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.autoCancelRaidsTitle">Annulation automatique des Raids</span>
-              <span class="settings-description" data-i18n="popup.settings.autoCancelRaidsDescription">Annuler automatiquement la redirection lors d'un Raid Twitch.</span>
-            </span>
-            <input id="pref-auto-cancel-raids" type="checkbox" role="switch" />
           </label>
 
           <h3 class="settings-group-header" data-i18n="popup.osd.groupTabs">Onglets</h3>

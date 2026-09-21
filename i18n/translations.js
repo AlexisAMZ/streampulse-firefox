@@ -460,7 +460,13 @@ export const translations = {
         "titleAlertsTitle": "Alertes changement de titre",
         "titleAlertsDescription": "Être notifié lorsqu’un streamer modifie le titre de son live.",
         "soundsTitle": "Son des notifications",
+
+        "alertsPerStreamerNote": "Ces alertes se règlent sur chaque streamer, depuis sa carte : notifications, changement de catégorie et de titre.",
         "soundsDescription": "Activer ou couper le son lors des alertes.",
+
+        "backgroundRaidAlertsTitle": "Alertes de raids entrants (bêta)",
+
+        "backgroundRaidAlertsDescription": "Surveiller tous les streamers Twitch suivis et notifier dès qu'un raid arrive, même hors de la page.",
         "autoClaimTitle": "Récupération auto des points",
         "autoClaimDescription": "Cliquer automatiquement les bonus de points de chaîne sur Twitch.",
         "autoClaimDropsTitle": "Auto-claim Drops Twitch",
@@ -494,7 +500,7 @@ export const translations = {
         "faqPredictionsTitle": "Prédictions & Raids",
         "faqPredictionsBody": "Un widget déplaçable s'affiche sur la vidéo pour voter rapidement. Les redirections de raid sont annulées si l'option est active.",
         "autoCancelRaidsTitle": "Annulation automatique des Raids",
-        "autoCancelRaidsDescription": "Annuler automatiquement la redirection vers une chaîne raidée.",
+        "autoCancelRaidsDescription": "Annuler automatiquement la redirection lors d'un Raid Twitch. Se désactive quand les alertes de raid en arrière-plan sont actives : les points se gagnent en suivant le raid.",
         "hideTwitchExtensionsTitle": "Masquer les extensions Twitch",
         "hideTwitchExtensionsDescription": "Masquer les incrustations/overlays d'extensions sur le lecteur vidéo Twitch.",
         "preventTabDiscardTitle": "Empêcher la mise en veille de l'onglet",
@@ -670,6 +676,10 @@ export const translations = {
         "dropMessage": "Un Drop Twitch a été réclamé automatiquement.",
         "raidTitle": "StreamPulse · Raid annulé",
         "raidMessage": "Le transfert vers la chaîne raidée a été annulé.",
+
+        "raidIncomingTitle": "Raid en approche sur {{name}}",
+
+        "raidIncomingMessage": "{{raider}} arrive avec {{viewers}} spectateurs. Clique : tu seras déposé sur sa cible en suivant le raid, et les points se gagnent en venant de chez lui !",
         "unknownCategory": "Catégorie inconnue",
         "titleChangeTitle": "{{name}} change de titre",
         "titleChangeMessage": "{{to}}",
@@ -1278,7 +1288,13 @@ export const translations = {
         "titleAlertsTitle": "Title change alerts",
         "titleAlertsDescription": "Be notified when a streamer edits their stream title.",
         "soundsTitle": "Notification sound",
+
+        "alertsPerStreamerNote": "These alerts are set on each streamer, from their card: notifications, category and title changes.",
         "soundsDescription": "Play or mute the sound when alerts fire.",
+
+        "backgroundRaidAlertsTitle": "Incoming raid alerts (beta)",
+
+        "backgroundRaidAlertsDescription": "Watch every Twitch channel you follow on StreamPulse and notify as soon as a raid lands, even off the page.",
         "autoClaimTitle": "Auto-claim channel points",
         "autoClaimDescription": "Automatically click Twitch channel point bonuses for you.",
         "autoClaimDropsTitle": "Auto-claim Twitch Drops",
@@ -1312,7 +1328,7 @@ export const translations = {
         "faqPredictionsTitle": "Predictions & Raids",
         "faqPredictionsBody": "A draggable widget appears over the video so you can vote quickly. Raid redirections are cancelled when the option is on.",
         "autoCancelRaidsTitle": "Auto-cancel Raids",
-        "autoCancelRaidsDescription": "Automatically cancel redirection when raided.",
+        "autoCancelRaidsDescription": "Automatically cancel the redirect on a Twitch raid. Turns off when background raid alerts are active: the points are earned by following the raid.",
         "hideTwitchExtensionsTitle": "Hide Twitch extensions",
         "hideTwitchExtensionsDescription": "Hide Twitch extension overlays on the video player.",
         "preventTabDiscardTitle": "Prevent tab discarding",
@@ -1488,6 +1504,10 @@ export const translations = {
         "dropMessage": "A Twitch Drop was claimed automatically.",
         "raidTitle": "StreamPulse · Raid cancelled",
         "raidMessage": "The transfer to the raided channel was cancelled.",
+
+        "raidIncomingTitle": "Incoming raid on {{name}}",
+
+        "raidIncomingMessage": "{{raider}} is arriving with {{viewers}} viewers. Click: you'll be dropped onto their target while following the raid : raid points are earned by coming from their stream!",
         "unknownCategory": "Unknown category",
         "titleChangeTitle": "{{name}} changed title",
         "titleChangeMessage": "{{to}}",
@@ -2095,7 +2115,13 @@ export const translations = {
         "titleAlertsTitle": "Alertas de cambio de título",
         "titleAlertsDescription": "Recibe un aviso cuando un streamer edita el título de su directo.",
         "soundsTitle": "Sonido de las notificaciones",
+
+        "alertsPerStreamerNote": "Estas alertas se configuran en cada streamer, desde su tarjeta: notificaciones, cambios de categoría y de título.",
         "soundsDescription": "Activar o silenciar el sonido de las alertas.",
+
+        "backgroundRaidAlertsTitle": "Alertas de redadas entrantes (beta)",
+
+        "backgroundRaidAlertsDescription": "Vigilar todos los canales de Twitch que sigues y avisar en cuanto llegue una redada, incluso fuera de la página.",
         "autoClaimTitle": "Auto-reclamo de puntos",
         "autoClaimDescription": "Hacer clic automáticamente en los bonus de puntos del canal en Twitch.",
         "autoRefreshTitle": "Actualización automática",
@@ -2182,7 +2208,7 @@ export const translations = {
         "faqPredictionsTitle": "Predicciones y Raids",
         "faqPredictionsBody": "Un widget arrastrable aparece sobre el vídeo para votar rápido. Las redirecciones de raid se cancelan si la opción está activa.",
         "autoCancelRaidsTitle": "Cancelar raids automáticamente",
-        "autoCancelRaidsDescription": "Cancela automáticamente la redirección cuando te incluyen en un raid.",
+        "autoCancelRaidsDescription": "Cancelar automáticamente la redirección en un raid de Twitch. Se desactiva cuando las alertas de raid en segundo plano están activas: los puntos se ganan siguiendo el raid.",
         "hideTwitchExtensionsTitle": "Ocultar extensiones de Twitch",
         "hideTwitchExtensionsDescription": "Oculta las superposiciones de extensiones de Twitch en el reproductor de vídeo.",
         "preventTabDiscardTitle": "Evitar la suspensión de pestañas",
@@ -2306,6 +2332,10 @@ export const translations = {
         "dropMessage": "Se ha reclamado automáticamente un Drop de Twitch.",
         "raidTitle": "StreamPulse · Raid cancelado",
         "raidMessage": "Se ha cancelado la transferencia al canal del raid.",
+
+        "raidIncomingTitle": "Redada entrante en {{name}}",
+
+        "raidIncomingMessage": "{{raider}} llega con {{viewers}} espectadores. Haz clic: te llevarán a su objetivo siguiendo la redada; ¡los puntos se consiguen viniendo desde su directo!",
         "unknownCategory": "Categoría desconocida",
         "titleChangeTitle": "{{name}} cambió el título",
         "titleChangeMessage": "{{to}}",
@@ -2913,7 +2943,13 @@ export const translations = {
         "titleAlertsTitle": "Alertas de mudança de título",
         "titleAlertsDescription": "Seja notificado quando um streamer editar o título da live.",
         "soundsTitle": "Som das notificações",
+
+        "alertsPerStreamerNote": "Esses alertas são definidos em cada streamer, no card dele: notificações, mudanças de categoria e de título.",
         "soundsDescription": "Ativar ou silenciar o som dos alertas.",
+
+        "backgroundRaidAlertsTitle": "Alertas de raids recebidas (beta)",
+
+        "backgroundRaidAlertsDescription": "Monitorar todos os canais da Twitch que você segue e avisar assim que uma raid chegar, mesmo fora da página.",
         "autoClaimTitle": "Auto-resgate de pontos",
         "autoClaimDescription": "Clicar automaticamente nos bônus de channel points na Twitch.",
         "autoRefreshTitle": "Atualização automática",
@@ -3000,7 +3036,7 @@ export const translations = {
         "faqPredictionsTitle": "Previsões e Raids",
         "faqPredictionsBody": "Um widget arrastável aparece sobre o vídeo para votar rápido. Os redirecionamentos de raid são cancelados se a opção estiver ativa.",
         "autoCancelRaidsTitle": "Cancelar raids automaticamente",
-        "autoCancelRaidsDescription": "Cancela automaticamente o redirecionamento quando você recebe um raid.",
+        "autoCancelRaidsDescription": "Cancelar automaticamente o redirecionamento em um raid da Twitch. Desativa-se quando os alertas de raid em segundo plano estão ativos: os pontos são ganhos seguindo o raid.",
         "hideTwitchExtensionsTitle": "Ocultar extensões da Twitch",
         "hideTwitchExtensionsDescription": "Oculta as sobreposições de extensões da Twitch no player de vídeo.",
         "preventTabDiscardTitle": "Impedir a suspensão de abas",
@@ -3124,6 +3160,10 @@ export const translations = {
         "dropMessage": "Um Drop da Twitch foi resgatado automaticamente.",
         "raidTitle": "StreamPulse · Raid cancelado",
         "raidMessage": "A transferência para o canal do raid foi cancelada.",
+
+        "raidIncomingTitle": "Raid chegando em {{name}}",
+
+        "raidIncomingMessage": "{{raider}} está chegando com {{viewers}} espectadores. Clique: você será levado ao alvo acompanhando a raid; os pontos são ganhos vindo da live dele!",
         "unknownCategory": "Categoria desconhecida",
         "titleChangeTitle": "{{name}} mudou o título",
         "titleChangeMessage": "{{to}}",
@@ -3732,7 +3772,13 @@ export const translations = {
         "titleAlertsTitle": "Benachrichtigungen bei Titeländerung",
         "titleAlertsDescription": "Werde benachrichtigt, wenn ein Streamer den Titel seines Streams ändert.",
         "soundsTitle": "Benachrichtigungston",
+
+        "alertsPerStreamerNote": "Diese Warnungen werden pro Streamer über dessen Karte eingestellt: Benachrichtigungen, Kategorie- und Titelwechsel.",
         "soundsDescription": "Spielen Sie den Ton ab oder schalten Sie ihn stumm, wenn Alarme ausgelöst werden.",
+
+        "backgroundRaidAlertsTitle": "Warnung bei eingehenden Raids (Beta)",
+
+        "backgroundRaidAlertsDescription": "Alle verfolgten Twitch-Kanäle überwachen und benachrichtigen, sobald ein Raid ankommt – auch außerhalb der Seite.",
         "autoClaimTitle": "Kanalpunkte automatisch beanspruchen",
         "autoClaimDescription": "Klicken Sie automatisch auf Twitch-Kanalpunktboni für Sie.",
         "autoClaimDropsTitle": "Beanspruchen Sie Twitch Drops automatisch",
@@ -3766,7 +3812,7 @@ export const translations = {
         "faqPredictionsTitle": "Vorhersagen und Raids",
         "faqPredictionsBody": "Über dem Video erscheint ein verschiebbares Widget, damit Sie schnell abstimmen können. Raid-Umleitungen werden abgebrochen, wenn die Option aktiviert ist.",
         "autoCancelRaidsTitle": "Raids automatisch abbrechen",
-        "autoCancelRaidsDescription": "Bei einem Überfall wird die Umleitung automatisch abgebrochen.",
+        "autoCancelRaidsDescription": "Die Weiterleitung bei einem Twitch-Raid automatisch abbrechen. Deaktiviert sich, wenn Raid-Warnungen im Hintergrund aktiv sind: die Punkte gibt es für das Folgen des Raids.",
         "hideTwitchExtensionsTitle": "Twitch-Erweiterungen ausblenden",
         "hideTwitchExtensionsDescription": "Blenden Sie die Overlays der Twitch-Erweiterung im Videoplayer aus.",
         "preventTabDiscardTitle": "Verhindern Sie das Verwerfen von Tabs",
@@ -3942,6 +3988,10 @@ export const translations = {
         "dropMessage": "Ein Twitch-Drop wurde automatisch eingelöst.",
         "raidTitle": "StreamPulse · Raid abgebrochen",
         "raidMessage": "Die Weiterleitung zum geraideten Kanal wurde abgebrochen.",
+
+        "raidIncomingTitle": "Eingehender Raid auf {{name}}",
+
+        "raidIncomingMessage": "{{raider}} kommt mit {{viewers}} Zuschauern. Klicke: Du wirst beim Mitfahren des Raids zum Ziel gebracht – die Punkte gibt es nur, wenn du von seinem Stream kommst!",
         "unknownCategory": "Unbekannte Kategorie",
         "titleChangeTitle": "{{name}} hat den Titel geändert",
         "titleChangeMessage": "{{to}}",
@@ -4550,7 +4600,13 @@ export const translations = {
         "titleAlertsTitle": "Avvisi di cambio titolo",
         "titleAlertsDescription": "Ricevi una notifica quando uno streamer modifica il titolo della diretta.",
         "soundsTitle": "Suono di notifica",
+
+        "alertsPerStreamerNote": "Questi avvisi si impostano su ogni streamer, dalla sua scheda: notifiche, cambi di categoria e di titolo.",
         "soundsDescription": "Riproduci o disattiva il suono quando vengono attivati ​​gli avvisi.",
+
+        "backgroundRaidAlertsTitle": "Avvisi di raid in arrivo (beta)",
+
+        "backgroundRaidAlertsDescription": "Sorveglia tutti i canali Twitch che segui e avvisa appena arriva un raid, anche fuori dalla pagina.",
         "autoClaimTitle": "Rivendica automaticamente i punti canale",
         "autoClaimDescription": "Fai clic automaticamente sui bonus punti canale Twitch per te.",
         "autoClaimDropsTitle": "Riscuoti automaticamente i Twitch Drops",
@@ -4584,7 +4640,7 @@ export const translations = {
         "faqPredictionsTitle": "Pronostici e Raid",
         "faqPredictionsBody": "Sul video viene visualizzato un widget trascinabile per consentirti di votare rapidamente. I reindirizzamenti del raid vengono annullati quando l'opzione è attiva.",
         "autoCancelRaidsTitle": "Annulla automaticamente i raid",
-        "autoCancelRaidsDescription": "Annulla automaticamente il reindirizzamento in caso di raid.",
+        "autoCancelRaidsDescription": "Annulla automaticamente il reindirizzamento durante un raid Twitch. Si disattiva quando gli avvisi raid in background sono attivi: i punti si guadagnano seguendo il raid.",
         "hideTwitchExtensionsTitle": "Nascondi le estensioni Twitch",
         "hideTwitchExtensionsDescription": "Nascondi le sovrapposizioni dell'estensione Twitch sul lettore video.",
         "preventTabDiscardTitle": "Impedisci l'eliminazione delle schede",
@@ -4760,6 +4816,10 @@ export const translations = {
         "dropMessage": "Un Drop di Twitch è stato riscattato automaticamente.",
         "raidTitle": "StreamPulse · Raid annullato",
         "raidMessage": "Il trasferimento verso il canale del raid è stato annullato.",
+
+        "raidIncomingTitle": "Raid in arrivo su {{name}}",
+
+        "raidIncomingMessage": "{{raider}} arriva con {{viewers}} spettatori. Clicca: verrai portato al suo obiettivo seguendo il raid; i punti si guadagnano arrivando dal suo stream!",
         "unknownCategory": "Categoria sconosciuta",
         "titleChangeTitle": "{{name}} ha cambiato titolo",
         "titleChangeMessage": "{{to}}",
@@ -5368,7 +5428,13 @@ export const translations = {
         "titleAlertsTitle": "Alerty o zmianie tytułu",
         "titleAlertsDescription": "Otrzymuj powiadomienie, gdy streamer zmieni tytuł transmisji.",
         "soundsTitle": "Dźwięk powiadomienia",
+
+        "alertsPerStreamerNote": "Te alerty ustawia się dla każdego streamera na jego karcie: powiadomienia, zmiany kategorii i tytułu.",
         "soundsDescription": "Odtwórz lub wycisz dźwięk po uruchomieniu alertów.",
+
+        "backgroundRaidAlertsTitle": "Alerty nadchodzących raidów (beta)",
+
+        "backgroundRaidAlertsDescription": "Obserwuj wszystkie obserwowane kanały Twitch i powiadom, gdy tylko przybędzie raid : nawet poza stroną.",
         "autoClaimTitle": "Automatyczne odbieranie punktów kanału",
         "autoClaimDescription": "Automatycznie klikaj premie punktowe dla kanału Twitch.",
         "autoClaimDropsTitle": "Automatyczne odbieranie Twitch Drops",
@@ -5402,7 +5468,7 @@ export const translations = {
         "faqPredictionsTitle": "Prognozy i naloty",
         "faqPredictionsBody": "Nad filmem pojawi się widżet, który można przeciągać, dzięki czemu można szybko oddać głos. Przekierowania raidów są anulowane, gdy opcja jest włączona.",
         "autoCancelRaidsTitle": "Automatyczne anulowanie nalotów",
-        "autoCancelRaidsDescription": "Automatycznie anuluj przekierowanie w przypadku napadu.",
+        "autoCancelRaidsDescription": "Automatycznie anuluj przekierowanie podczas rajdu na Twitchu. Wyłącza się, gdy alerty rajdów w tle są aktywne: punkty zdobywa się, dołączając do rajdu.",
         "hideTwitchExtensionsTitle": "Ukryj rozszerzenia Twitcha",
         "hideTwitchExtensionsDescription": "Ukryj nakładki rozszerzeń Twitcha w odtwarzaczu wideo.",
         "preventTabDiscardTitle": "Zapobiegaj odrzucaniu zakładek",
@@ -5578,6 +5644,10 @@ export const translations = {
         "dropMessage": "Drop na Twitchu został odebrany automatycznie.",
         "raidTitle": "StreamPulse · Anulowano raid",
         "raidMessage": "Przeniesienie na kanał raidu zostało anulowane.",
+
+        "raidIncomingTitle": "Nadchodzący raid na {{name}}",
+
+        "raidIncomingMessage": "{{raider}} nadchodzi z {{viewers}} widzów. Kliknij: zostaniesz przeniesiony do celu wraz z raidem : punkty zdobywa się, przychodząc z jego streamu!",
         "unknownCategory": "Kategoria nieznana",
         "titleChangeTitle": "{{name}} zmienił tytuł",
         "titleChangeMessage": "{{to}}",
@@ -6186,7 +6256,13 @@ export const translations = {
         "titleAlertsTitle": "Başlık değişikliği uyarıları",
         "titleAlertsDescription": "Bir yayıncı yayın başlığını değiştirdiğinde bildirim al.",
         "soundsTitle": "Bildirim sesi",
+
+        "alertsPerStreamerNote": "Bu uyarılar her yayıncı için, kartından ayarlanır: bildirimler, kategori ve başlık değişiklikleri.",
         "soundsDescription": "Uyarılar geldiğinde sesi çal ya da sessize al.",
+
+        "backgroundRaidAlertsTitle": "Gelen raid bildirimleri (beta)",
+
+        "backgroundRaidAlertsDescription": "İzlediğin tüm Twitch kanallarını gözetle ve raid geldiği anda, sayfa kapalıyken bile haber ver.",
         "autoClaimTitle": "Kanal puanlarını otomatik olarak talep et",
         "autoClaimDescription": "Twitch kanal puan bonuslarını sizin adınıza otomatik olarak tıklasın.",
         "autoClaimDropsTitle": "Twitch Drops'u otomatik olarak talep et",
@@ -6220,7 +6296,7 @@ export const translations = {
         "faqPredictionsTitle": "Tahminler ve Baskınlar",
         "faqPredictionsBody": "Videonun üzerine sürüklenebilir bir widget belirir; böylece hızlıca oy verebilirsiniz. Bu seçenek etkinleştirildiğinde raid yönlendirmeleri iptal edilir.",
         "autoCancelRaidsTitle": "Baskınları Otomatik Olarak İptal Et",
-        "autoCancelRaidsDescription": "Baskın sırasında yönlendirmeyi otomatik olarak iptal et.",
+        "autoCancelRaidsDescription": "Twitch raidinde yönlendirmeyi otomatik iptal et. Arka plan raid uyarıları etkin olduğunda kapanır: puanlar raidi takip ederek kazanılır.",
         "hideTwitchExtensionsTitle": "Twitch uzantılarını gizle",
         "hideTwitchExtensionsDescription": "Video oynatıcıda Twitch uzantısı üst katmanlarını gizle.",
         "preventTabDiscardTitle": "Sekmenin kapatılmasını önle",
@@ -6396,6 +6472,10 @@ export const translations = {
         "dropMessage": "Bir Twitch Drop'u otomatik olarak alındı.",
         "raidTitle": "StreamPulse · Raid iptal edildi",
         "raidMessage": "Raid yapılan kanala aktarım iptal edildi.",
+
+        "raidIncomingTitle": "{{name}} kanalına gelen raid",
+
+        "raidIncomingMessage": "{{raider}}, {{viewers}} izleyiciyle geliyor. Tıkla: raidi takip ederek hedefine bırakılacaksın : puanlar onun yayınından gelerek kazanılır!",
         "unknownCategory": "Bilinmeyen kategori",
         "titleChangeTitle": "{{name}} başlığı değiştirdi",
         "titleChangeMessage": "{{to}}",
@@ -7004,7 +7084,13 @@ export const translations = {
         "titleAlertsTitle": "Оповещения об изменении названия",
         "titleAlertsDescription": "Получать уведомление, когда стример меняет название трансляции.",
         "soundsTitle": "Звук уведомления",
+
+        "alertsPerStreamerNote": "Эти оповещения настраиваются для каждого стримера на его карточке: уведомления, смены категории и названия.",
         "soundsDescription": "Воспроизводить или отключать звук при появлении уведомлений.",
+
+        "backgroundRaidAlertsTitle": "Оповещения о входящих рейдах (бета)",
+
+        "backgroundRaidAlertsDescription": "Следить за всеми каналами Twitch из StreamPulse и уведомлять о рейде, даже когда страница закрыта.",
         "autoClaimTitle": "Автоматическое начисление баллов по каналу «Auto-claim»",
         "autoClaimDescription": "Автоматически набирать для вас бонусные очки на канале Twitch.",
         "autoClaimDropsTitle": "Автоматическое получение призов Twitch Drops",
@@ -7038,7 +7124,7 @@ export const translations = {
         "faqPredictionsTitle": "Прогнозы и рейды",
         "faqPredictionsBody": "Над видео появляется перемещаемый виджет, позволяющий быстро проголосовать. При включении этой опции перенаправления в рейды отменяются.",
         "autoCancelRaidsTitle": "Автоматическая отмена рейдов",
-        "autoCancelRaidsDescription": "Автоматически отменять перенаправление при нападении.",
+        "autoCancelRaidsDescription": "Автоматически отменять перенаправление при рейде на Twitch. Отключается, когда активны фоновые оповещения о рейдах: баллы начисляются за присоединение к рейду.",
         "hideTwitchExtensionsTitle": "Скрыть расширения Twitch",
         "hideTwitchExtensionsDescription": "Скрыть оверлеи расширений Twitch в видеоплеере.",
         "preventTabDiscardTitle": "Предотвратить сброс вкладки",
@@ -7214,6 +7300,10 @@ export const translations = {
         "dropMessage": "Дроп Twitch получен автоматически.",
         "raidTitle": "StreamPulse · Рейд отменён",
         "raidMessage": "Переход на канал рейда отменён.",
+
+        "raidIncomingTitle": "Входящий рейд на {{name}}",
+
+        "raidIncomingMessage": "{{raider}} прибывает с {{viewers}} зрителями. Кликни: вас доставят к цели вместе с рейдом : очки начисляются, если прийти с его стрима!",
         "unknownCategory": "Неизвестная категория",
         "titleChangeTitle": "{{name}} изменил название",
         "titleChangeMessage": "{{to}}",
@@ -7822,7 +7912,13 @@ export const translations = {
         "titleAlertsTitle": "タイトル変更の通知",
         "titleAlertsDescription": "配信者が配信タイトルを変更したときに通知を受け取ります。",
         "soundsTitle": "通知音",
+
+        "alertsPerStreamerNote": "これらの通知はストリーマーごとに、そのカードから設定します：通知、カテゴリ変更、タイトル変更。",
         "soundsDescription": "アラートが発生した際に、音を再生するか、ミュートにするかを選択します。",
+
+        "backgroundRaidAlertsTitle": "レイド検知アラート（ベータ版）",
+
+        "backgroundRaidAlertsDescription": "StreamPulseに追加したすべてのTwitchチャンネルを監視し、ページを開いていなくてもレイド到着時に通知します。",
         "autoClaimTitle": "チャンネルポイントの自動獲得",
         "autoClaimDescription": "Twitchチャンネルのポイントボーナスを自動的にクリックします。",
         "autoClaimDropsTitle": "Twitch Dropsの自動受け取り",
@@ -7856,7 +7952,7 @@ export const translations = {
         "faqPredictionsTitle": "予想とレイド",
         "faqPredictionsBody": "動画の上にドラッグ可能なウィジェットが表示され、素早く投票できるようになります。このオプションをオンにすると、レイドへのリダイレクトはキャンセルされます。",
         "autoCancelRaidsTitle": "レイドの自動キャンセル",
-        "autoCancelRaidsDescription": "レイドを受けた際に、リダイレクトを自動的にキャンセルする。",
+        "autoCancelRaidsDescription": "Twitch のレイドで自動的にリダイレクトをキャンセルします。バックグラウンドのレイド通知が有効な場合はオフになります。ポイントはレイドをフォローすることで獲得できます。",
         "hideTwitchExtensionsTitle": "Twitchの拡張機能を非表示にする",
         "hideTwitchExtensionsDescription": "ビデオプレーヤー上のTwitch拡張機能のオーバーレイを非表示にする。",
         "preventTabDiscardTitle": "タブの破棄を防ぐ",
@@ -8032,6 +8128,10 @@ export const translations = {
         "dropMessage": "Twitch のドロップを自動で受け取りました。",
         "raidTitle": "StreamPulse · レイドをキャンセルしました",
         "raidMessage": "レイド先チャンネルへの移動をキャンセルしました。",
+
+        "raidIncomingTitle": "{{name}} にレイド到着",
+
+        "raidIncomingMessage": "{{raider}} が {{viewers}} 人の視聴者と到着中。クリックするとレイドに乗ったまま目標の配信へ移動します。ポイントはレイド経由で参加したときに獲得できます！",
         "unknownCategory": "カテゴリ不明",
         "titleChangeTitle": "{{name}} がタイトルを変更しました",
         "titleChangeMessage": "{{to}}",
@@ -8640,7 +8740,13 @@ export const translations = {
         "titleAlertsTitle": "제목 변경 알림",
         "titleAlertsDescription": "스트리머가 방송 제목을 변경하면 알림을 받습니다.",
         "soundsTitle": "알림 소리",
+
+        "alertsPerStreamerNote": "이 알림은 각 스트리머의 카드에서 설정합니다: 알림, 카테고리 변경, 제목 변경.",
         "soundsDescription": "알림이 울릴 때 소리를 재생하거나 음소거합니다.",
+
+        "backgroundRaidAlertsTitle": "들어오는 레이드 알림(베타)",
+
+        "backgroundRaidAlertsDescription": "StreamPulse에 추가한 모든 Twitch 채널을 감시하여 페이지를 벗어나 있어도 레이드가 도착하면 알립니다.",
         "autoClaimTitle": "채널 포인트 자동 적립",
         "autoClaimDescription": "Twitch 채널 포인트 보너스를 자동으로 클릭해 드립니다.",
         "autoClaimDropsTitle": "Twitch Drops 자동 수령",
@@ -8674,7 +8780,7 @@ export const translations = {
         "faqPredictionsTitle": "예측 및 레이드",
         "faqPredictionsBody": "동영상 위에 드래그 가능한 위젯이 표시되어 빠르게 투표할 수 있습니다. 이 옵션이 켜져 있으면 레이드 리디렉션이 취소됩니다.",
         "autoCancelRaidsTitle": "레이드 자동 취소",
-        "autoCancelRaidsDescription": "공격당했을 때 리다이렉션을 자동으로 취소합니다.",
+        "autoCancelRaidsDescription": "Twitch 레이드 시 리디렉션을 자동으로 취소합니다. 백그라운드 레이드 알림이 활성화되면 꺼집니다: 포인트는 레이드를 따라가야 받을 수 있습니다.",
         "hideTwitchExtensionsTitle": "Twitch 확장 프로그램 숨기기",
         "hideTwitchExtensionsDescription": "비디오 플레이어에서 Twitch 확장 프로그램 오버레이를 숨깁니다.",
         "preventTabDiscardTitle": "탭 삭제 방지",
@@ -8850,6 +8956,10 @@ export const translations = {
         "dropMessage": "트위치 드롭을 자동으로 수령했습니다.",
         "raidTitle": "StreamPulse · 레이드 취소",
         "raidMessage": "레이드 대상 채널로의 이동을 취소했습니다.",
+
+        "raidIncomingTitle": "{{name}}에 들어오는 레이드",
+
+        "raidIncomingMessage": "{{raider}}가 시청자 {{viewers}}명과 함께 도착합니다. 클릭하면 레이드를 따라 대상 채널로 이동합니다. 포인트는 레이드를 타고 이동할 때만 받을 수 있습니다!",
         "unknownCategory": "분류 미지정",
         "titleChangeTitle": "{{name}} 님이 제목을 변경했습니다",
         "titleChangeMessage": "{{to}}",
@@ -9458,7 +9568,13 @@ export const translations = {
         "titleAlertsTitle": "शीर्षक परिवर्तन अलर्ट",
         "titleAlertsDescription": "जब कोई स्ट्रीमर अपने स्ट्रीम शीर्षक को संपादित करता है तो उसे सूचित किया जाए।",
         "soundsTitle": "अधिसूचना ध्वनि",
+
+        "alertsPerStreamerNote": "ये अलर्ट प्रत्येक स्ट्रीमर के कार्ड पर सेट किए जाते हैं: सूचनाएं, श्रेणी और शीर्षक में बदलाव।",
         "soundsDescription": "अलर्ट सक्रिय होने पर ध्वनि चलाएं या म्यूट करें।",
+
+        "backgroundRaidAlertsTitle": "आने वाले रेड अलर्ट (बीटा)",
+
+        "backgroundRaidAlertsDescription": "सभी फॉलो किए गए Twitch चैनलों पर नज़र रखें और रेड आते ही सूचित करें, पेज से बाहर भी।",
         "autoClaimTitle": "स्वत: दावा चैनल अंक",
         "autoClaimDescription": "आपके लिए स्वचालित रूप से Twitch चैनल पॉइंट बोनस पर क्लिक करें।",
         "autoClaimDropsTitle": "स्वतः-दावा Twitch बूँदें",
@@ -9668,6 +9784,10 @@ export const translations = {
         "dropMessage": "एक Twitch ड्रॉप का स्वचालित रूप से दावा किया गया था।",
         "raidTitle": "StreamPulse · छापेमारी रद्द",
         "raidMessage": "छापे वाले चैनल का स्थानांतरण रद्द कर दिया गया।",
+
+        "raidIncomingTitle": "{{name}} पर छापेमारी आ रही है",
+
+        "raidIncomingMessage": "{{raider}} {{viewers}} दर्शकों के साथ आ रहा है।",
         "unknownCategory": "अज्ञात श्रेणी",
         "titleChangeTitle": "{{name}} बदला गया शीर्षक",
         "titleChangeMessage": "{{to}}",

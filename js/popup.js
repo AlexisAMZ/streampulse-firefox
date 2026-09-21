@@ -8,7 +8,6 @@ import {
   getCurrentLanguage,
   t,
   syncDocumentLanguage,
-  DEFAULT_LANGUAGE,
   resolveLocale,
 } from "./i18n.js";
 import {
@@ -24,20 +23,11 @@ import {
 } from "./platforms.js";
 import { createAllChannelsTile, createChannelRow, createMiniCard, formatNumber, renderStage, renderStageEmpty } from "./ui.js";
 import { initFeatures, renderHistory } from "./popup-features.js";
+import { DEFAULT_PREFERENCES } from "./preferences-data.js";
 
 const PREFERENCES_STORAGE_KEY = "betaGeneralPreferences";
 
-const defaultPreferences = {
-  liveNotifications: true,
-  gameNotifications: false,
-  soundsEnabled: true,
-  autoClaimChannelPoints: true,
-  autoRefreshPlayerErrors: true,
-  enableFastForwardButton: true,
-  watchTimeTracker: true,
-  language: DEFAULT_LANGUAGE,
-  sortOrder: "live",
-};
+const defaultPreferences = DEFAULT_PREFERENCES;
 
 const state = {
   streamers: [],
@@ -72,10 +62,8 @@ const sheetListEl = document.getElementById("sheet-list");
 const sheetSearchEl = document.getElementById("sheet-search");
 const sheetGroupsEl = document.getElementById("sheet-groups");
 const sheetTotalEl = document.getElementById("sheet-total");
-const liveNotificationsToggle = document.getElementById("pref-live-notifications");
-const gameAlertsToggle = document.getElementById("pref-game-alerts");
-const titleAlertsToggle = document.getElementById("pref-title-alerts");
 const soundsToggle = document.getElementById("pref-sounds");
+const backgroundRaidAlertsToggle = document.getElementById("pref-background-raid-alerts");
 const autoClaimToggle = document.getElementById("pref-auto-claim");
 const autoClaimDropsToggle = document.getElementById("pref-auto-claim-drops");
 const autoClaimMomentsToggle = document.getElementById("pref-auto-claim-moments");
@@ -881,17 +869,11 @@ async function handleSavePseudo() {
 
 function renderPreferences() {
   const prefs = state.preferences || defaultPreferences;
-  if (liveNotificationsToggle) {
-    liveNotificationsToggle.checked = prefs.liveNotifications !== false;
-  }
-  if (gameAlertsToggle) {
-    gameAlertsToggle.checked = Boolean(prefs.gameNotifications);
-  }
-  if (titleAlertsToggle) {
-    titleAlertsToggle.checked = Boolean(prefs.titleNotifications);
-  }
   if (soundsToggle) {
     soundsToggle.checked = prefs.soundsEnabled !== false;
+  }
+  if (backgroundRaidAlertsToggle) {
+    backgroundRaidAlertsToggle.checked = prefs.backgroundRaidAlerts === true;
   }
   if (autoClaimToggle) {
     autoClaimToggle.checked = prefs.autoClaimChannelPoints !== false;
@@ -912,7 +894,7 @@ function renderPreferences() {
     hideTwitchExtensionsToggle.checked = Boolean(prefs.hideTwitchExtensions);
   }
   if (autoCancelRaidsToggle) {
-    autoCancelRaidsToggle.checked = prefs.autoCancelRaids !== false;
+    autoCancelRaidsToggle.checked = prefs.autoCancelRaids === true;
   }
   if (preventTabDiscardToggle) {
     preventTabDiscardToggle.checked = prefs.preventTabDiscard !== false;
@@ -1501,20 +1483,6 @@ async function updatePreferences(updates) {
   renderPreferences();
   showFeedback(t("popup.settings.saved"));
 
-  if ("liveNotifications" in updates) {
-    const messageKey = updates.liveNotifications
-      ? "popup.preferences.liveEnabled"
-      : "popup.preferences.liveDisabled";
-    showFeedback(t(messageKey), "success");
-  }
-
-  if ("gameNotifications" in updates) {
-    const messageKey = updates.gameNotifications
-      ? "popup.preferences.gameEnabled"
-      : "popup.preferences.gameDisabled";
-    showFeedback(t(messageKey), "success");
-  }
-
   if ("soundsEnabled" in updates) {
     const messageKey = updates.soundsEnabled
       ? "popup.preferences.soundsEnabled"
@@ -1819,17 +1787,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     addStreamerForm?.addEventListener("submit", handleAddStreamer);
-    liveNotificationsToggle?.addEventListener("change", (e) => {
-      updatePreferences({ liveNotifications: e.target.checked });
-    });
-    gameAlertsToggle?.addEventListener("change", (e) => {
-      updatePreferences({ gameNotifications: e.target.checked });
-    });
-    titleAlertsToggle?.addEventListener("change", (e) => {
-      updatePreferences({ titleNotifications: e.target.checked });
-    });
     soundsToggle?.addEventListener("change", (e) => {
       updatePreferences({ soundsEnabled: e.target.checked });
+    });
+    backgroundRaidAlertsToggle?.addEventListener("change", (e) => {
+      // Suivre les raids rapporte des points : activer le détecteur coupe
+      // l'annulation automatique, qui annulerait le raid avant qu'on le suive.
+      const enableRaidAlerts = e.target.checked;
+      updatePreferences({
+        backgroundRaidAlerts: enableRaidAlerts,
+        ...(enableRaidAlerts ? { autoCancelRaids: false } : {}),
+      });
+      if (enableRaidAlerts && autoCancelRaidsToggle) {
+        autoCancelRaidsToggle.checked = false;
+      }
     });
     autoClaimToggle?.addEventListener("change", (e) => {
       updatePreferences({ autoClaimChannelPoints: e.target.checked });

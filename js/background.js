@@ -21,6 +21,16 @@ import { HISTORY_KEY, addSession, emptyHistory, markSeen, patchSession } from ".
 import { thankPlusSubscriber } from "./plus-thanks.js";
 import { SMART_ALERTS_KEY, normalizeRules, decideSmartAlert } from "./smart-alerts.js";
 import { PLUS_KEY, getDeviceId, isPlusActive, needsRecheck, verifyLicense } from "./plus.js";
+import { DEFAULT_PREFERENCES } from "./preferences-data.js";
+import { syncEventSubRaid, stopEventSubRaid } from "./eventsubRaid.js";
+import {
+  RAID_WATCHER_ALARM,
+  syncRaidWatcher,
+  stopRaidWatcher,
+} from "./raidWatcher.js";
+
+/** Qualites proposees pour le lecteur Twitch. "auto" laisse Twitch decider. */
+const PLAYER_QUALITIES = ["auto", "source", "1440", "1080", "720", "480", "360"];
 
 const STORAGE_KEYS = {
   STREAMERS: "betaGeneralStreamers",
@@ -112,47 +122,6 @@ const BADGE_COLOR_LIVE = "#f7f4e3";
 const BADGE_COLOR_IDLE = "#6C5CE7";
 
 const PREFERENCES_KEY = "betaGeneralPreferences";
-const DEFAULT_PREFERENCES = {
-  liveNotifications: true,
-  gameNotifications: false,
-  titleNotifications: false,
-  dropAlerts: true,
-  predictionAlerts: true,
-  raidAlerts: true,
-  soundsEnabled: true,
-  autoClaimChannelPoints: true,
-  autoClaimDrops: true,
-  autoClaimMoments: true,
-  autoOpenInventory: false,
-  autoOpenInventoryIntervalHours: 24,
-  hideTwitchExtensions: false,
-  autoCancelRaids: true,
-  preventTabDiscard: true,
-  enablePredictionsPopup: true,
-  enableTabLiveIcon: true,
-  enableStreamerFavicon: true,
-  autoRefreshPlayerErrors: true,
-  enableFastForwardButton: true,
-  watchTimeTracker: true,
-  chatKeywords: "",
-  chatBlockedUsers: "",
-  language: DEFAULT_LANGUAGE,
-  sortOrder: "live",
-  previewsEnabled: true,
-  previewsMode: "image",
-  previewsSurfaceDirectory: true,
-  previewsSurfaceSidebar: true,
-  previewsSurfaceClips: true,
-  previewsSurfaceSearch: true,
-  previewsSize: "m",
-  previewsAudio: false,
-  previewsShowDelayMs: 200,
-  previewsAnimations: true,
-  communityBadge: true,
-  // "author" = couleur du pseudo, "theme" = blanc/noir selon Twitch,
-  // ou une couleur hexadecimale fixe.
-  communityBadgeColor: "author",
-};
 
 const DEFAULT_STATS = {
   channelPointsClaimed: 0,
@@ -537,6 +506,15 @@ function sanitizeBadgeColor(value) {
   return DEFAULT_PREFERENCES.communityBadgeColor;
 }
 
+// Bornes 1-24 h : une seule source de coercion, shared par sanitize() et le
+// handler updatePreferences (prealablement dupliquees avec des regles differentes).
+function clampInventoryIntervalHours(value) {
+  const hours = Number(value);
+  return Number.isFinite(hours)
+    ? Math.min(24, Math.max(1, Math.round(hours)))
+    : 24;
+}
+
 class PreferenceStore {
   static sanitize(preferences = {}) {
     const SORT_ORDER_VALUES = ["live", "name-asc", "name-desc", "custom"];
@@ -554,19 +532,29 @@ class PreferenceStore {
       dropAlerts: preferences.dropAlerts !== false,
       predictionAlerts: preferences.predictionAlerts !== false,
       raidAlerts: preferences.raidAlerts !== false,
+      backgroundRaidAlerts: preferences.backgroundRaidAlerts === true,
       soundsEnabled: preferences.soundsEnabled !== false,
       autoClaimChannelPoints: preferences.autoClaimChannelPoints !== false,
       autoClaimDrops: preferences.autoClaimDrops !== false,
       autoClaimMoments: preferences.autoClaimMoments !== false,
       autoOpenInventory: Boolean(preferences.autoOpenInventory),
-      autoOpenInventoryIntervalHours: Number(preferences.autoOpenInventoryIntervalHours) > 0 ? Number(preferences.autoOpenInventoryIntervalHours) : 24,
+      autoOpenInventoryIntervalHours: clampInventoryIntervalHours(preferences.autoOpenInventoryIntervalHours),
       hideTwitchExtensions: Boolean(preferences.hideTwitchExtensions),
-      autoCancelRaids: preferences.autoCancelRaids !== false,
+      keepQualityInBackground: preferences.keepQualityInBackground === true,
+      enablePipButton: preferences.enablePipButton !== false,
+      autoRefreshPlayerErrors: preferences.autoRefreshPlayerErrors !== false,
+      enableClipDownload: preferences.enableClipDownload !== false,
+      playerQuality: PLAYER_QUALITIES.includes(preferences.playerQuality) ? preferences.playerQuality : "auto",
+      // Les alertes de raid rapportent des points en suivant le raid : garder
+      // l'annulation automatique active rendrait les deux fonctionnalités
+      // contradictoires (le raid est annulé avant qu'on puisse le suivre).
+      // Tant que le détecteur de raids est actif, l'annulation est forcée off.
+      autoCancelRaids:
+        preferences.autoCancelRaids === true && preferences.backgroundRaidAlerts !== true,
       preventTabDiscard: preferences.preventTabDiscard !== false,
       enablePredictionsPopup: preferences.enablePredictionsPopup !== false,
       enableTabLiveIcon: preferences.enableTabLiveIcon !== false,
       enableStreamerFavicon: preferences.enableStreamerFavicon !== false,
-      autoRefreshPlayerErrors: preferences.autoRefreshPlayerErrors !== false,
       enableFastForwardButton: preferences.enableFastForwardButton !== false,
       watchTimeTracker: preferences.watchTimeTracker !== false,
       chatKeywords: typeof preferences.chatKeywords === "string" ? preferences.chatKeywords : "",
@@ -585,7 +573,7 @@ class PreferenceStore {
         ? Math.min(2000, Math.max(0, previewsDelay))
         : 200,
       previewsAnimations: preferences.previewsAnimations !== false,
-      communityBadge: preferences.communityBadge !== false,
+      communityBadge: preferences.communityBadge === true,
       communityBadgeColor: sanitizeBadgeColor(preferences.communityBadgeColor),
     };
   }
@@ -2260,6 +2248,94 @@ async function migrateAutoOpenInventoryInterval() {
   }
 }
 
+// ─── Bêta : détection des raids entrants en arrière-plan ────────────────────
+//
+// Le watcher IRC est opt-in (backgroundRaidAlerts) : une fois activé, il
+// maintient une connexion anonyme vers les chaînes Twitch favorites. Voir
+// js/raidWatcher.js pour le détail du protocole et les limites de coût.
+
+async function refreshRaidWatcher() {
+  try {
+    const preferences = await PreferenceStore.get();
+    if (preferences.backgroundRaidAlerts !== true) {
+      stopEventSubRaid();
+      stopRaidWatcher();
+      return;
+    }
+    // EventSub d'abord : l'evenement channel.raid part au DEBUT du compte a
+    // rebours (~90 s avant l'arrivee), la ou l'IRC n'entend le raid qu'a son
+    // atterrissage. L'IRC reste le repli si l'Helix token n'est pas disponible.
+    await ensureConfig();
+    if (CONFIG.accessToken && CONFIG.clientId) {
+      const active = await syncEventSubRaid(notifyIncomingRaid, twitchHeaders);
+      if (active) {
+        // Les deux en meme temps notifieraient chaque raid deux fois.
+        stopRaidWatcher();
+        return;
+      }
+    }
+    await syncRaidWatcher(notifyIncomingRaid);
+  } catch (error) {
+    console.warn("Raid watcher sync failed:", error.message);
+  }
+}
+
+async function notifyIncomingRaid({ channel, raider, viewers }) {
+  const preferences = await PreferenceStore.get();
+  const lang = normalizeLanguage(preferences?.language);
+
+  const displayName = await resolveChannelDisplayName(channel);
+  const viewersText = formatNumberForLanguage(lang, viewers || 0);
+
+  let iconUrl = null;
+  try {
+    iconUrl = await resolveChannelAvatar("twitch", channel);
+  } catch (_) {
+    // L'avatar est décoratif : la notification part sans icône dédiée.
+  }
+
+  await NotificationCenter.show({
+    title: translate(lang, "background.notifications.raidIncomingTitle", {
+      name: displayName,
+    }),
+    message: translate(lang, "background.notifications.raidIncomingMessage", {
+      raider: raider || translate(lang, "common.unknown"),
+      viewers: viewersText,
+    }),
+    platform: "twitch",
+    // Les points de raid se gagnent en arrivant DEPUIS le stream du raid
+    // partant : on ouvre chez {{raider}}, pas sur la chaîne raidée.
+    url: buildProfileUrl("twitch", raider),
+    iconUrl,
+    requireInteraction: false,
+    priority: 1,
+    playSound: preferences?.soundsEnabled !== false,
+  });
+}
+
+// Le handle IRC est en minuscules ; on récupère le nom d'affichage connu des
+// données de l'extension avant de retomber sur le handle brut.
+async function resolveChannelDisplayName(channel) {
+  try {
+    const stored = await chrome.storage.local.get(STORAGE_KEYS.STREAMERS);
+    const streamers = Array.isArray(stored[STORAGE_KEYS.STREAMERS])
+      ? stored[STORAGE_KEYS.STREAMERS]
+      : [];
+    const match = streamers.find(
+      (s) =>
+        (s.platform || "twitch") === "twitch" &&
+        getHandleComparisonKey("twitch", s.handle || s.twitch || s.id || "") ===
+          getHandleComparisonKey("twitch", channel)
+    );
+    if (match?.displayName || match?.name) {
+      return match.displayName || match.name;
+    }
+  } catch (_) {
+    // Lecture de storage échouée : on retombe sur le handle.
+  }
+  return formatHandleForDisplay("twitch", channel);
+}
+
 chrome.runtime.onInstalled.addListener(async (details) => {
   initDone = true;
   await fetchRemoteConfig(); // load credentials before first poll
@@ -2320,7 +2396,9 @@ chrome.runtime.onStartup.addListener(async () => {
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === WATCHER_ALARM) {
+  if (alarm.name === RAID_WATCHER_ALARM) {
+    refreshRaidWatcher();
+  } else if (alarm.name === WATCHER_ALARM) {
     pollStreamers({ forceNotification: false }).catch((error) => {
       console.warn("Polling error:", error.message);
     });
@@ -2942,191 +3020,55 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     case "updatePreferences":
       (async () => {
-        const incomingUpdates = request.updates || {};
-        const updates = {};
-        if ("liveNotifications" in incomingUpdates) {
-          updates.liveNotifications =
-            incomingUpdates.liveNotifications !== false;
-        }
-        if ("gameNotifications" in incomingUpdates) {
-          updates.gameNotifications =
-            incomingUpdates.gameNotifications === true;
-        }
-        if ("titleNotifications" in incomingUpdates) {
-          updates.titleNotifications =
-            incomingUpdates.titleNotifications === true;
-        }
-        if ("soundsEnabled" in incomingUpdates) {
-          updates.soundsEnabled = incomingUpdates.soundsEnabled !== false;
-        }
-        if ("autoClaimChannelPoints" in incomingUpdates) {
-          updates.autoClaimChannelPoints =
-            incomingUpdates.autoClaimChannelPoints !== false;
-        }
-        if ("autoRefreshPlayerErrors" in incomingUpdates) {
-          updates.autoRefreshPlayerErrors =
-            incomingUpdates.autoRefreshPlayerErrors !== false;
-        }
-        // Default-true toggles: any value other than an explicit `false` keeps them on.
-        if ("autoClaimDrops" in incomingUpdates) {
-          updates.autoClaimDrops = incomingUpdates.autoClaimDrops !== false;
-        }
-        if ("autoClaimMoments" in incomingUpdates) {
-          updates.autoClaimMoments = incomingUpdates.autoClaimMoments !== false;
-        }
-        if ("autoCancelRaids" in incomingUpdates) {
-          updates.autoCancelRaids = incomingUpdates.autoCancelRaids !== false;
-        }
-        if ("preventTabDiscard" in incomingUpdates) {
-          updates.preventTabDiscard =
-            incomingUpdates.preventTabDiscard !== false;
-        }
-        if ("enableTabLiveIcon" in incomingUpdates) {
-          updates.enableTabLiveIcon =
-            incomingUpdates.enableTabLiveIcon !== false;
-        }
-        if ("enableStreamerFavicon" in incomingUpdates) {
-          updates.enableStreamerFavicon =
-            incomingUpdates.enableStreamerFavicon !== false;
-        }
-        if ("enablePredictionsPopup" in incomingUpdates) {
-          updates.enablePredictionsPopup =
-            incomingUpdates.enablePredictionsPopup !== false;
-        }
-        if ("dropAlerts" in incomingUpdates) {
-          updates.dropAlerts = incomingUpdates.dropAlerts !== false;
-        }
-        if ("predictionAlerts" in incomingUpdates) {
-          updates.predictionAlerts = incomingUpdates.predictionAlerts !== false;
-        }
-        if ("raidAlerts" in incomingUpdates) {
-          updates.raidAlerts = incomingUpdates.raidAlerts !== false;
-        }
-        // Default-false toggle: requires an explicit `true` to enable.
-        if ("autoOpenInventory" in incomingUpdates) {
-          updates.autoOpenInventory =
-            incomingUpdates.autoOpenInventory === true;
-        }
-        if ("autoOpenInventoryIntervalHours" in incomingUpdates) {
-          const hours = Number(incomingUpdates.autoOpenInventoryIntervalHours);
-          updates.autoOpenInventoryIntervalHours = Number.isFinite(hours)
-            ? Math.min(24, Math.max(1, Math.round(hours)))
-            : DEFAULT_PREFERENCES.autoOpenInventoryIntervalHours;
-        }
-        if ("hideTwitchExtensions" in incomingUpdates) {
-          updates.hideTwitchExtensions =
-            incomingUpdates.hideTwitchExtensions === true;
-        }
-        if ("enableFastForwardButton" in incomingUpdates) {
-          updates.enableFastForwardButton =
-            incomingUpdates.enableFastForwardButton !== false;
-        }
-        if ("chatKeywords" in incomingUpdates) {
-          updates.chatKeywords =
-            typeof incomingUpdates.chatKeywords === "string"
-              ? incomingUpdates.chatKeywords
-              : "";
-        }
-        if ("chatBlockedUsers" in incomingUpdates) {
-          updates.chatBlockedUsers =
-            typeof incomingUpdates.chatBlockedUsers === "string"
-              ? incomingUpdates.chatBlockedUsers
-              : "";
-        }
-        if ("watchTimeTracker" in incomingUpdates) {
-          updates.watchTimeTracker =
-            incomingUpdates.watchTimeTracker !== false;
-        }
-        if ("language" in incomingUpdates) {
-          updates.language = normalizeLanguage(incomingUpdates.language);
-        }
-        if ("sortOrder" in incomingUpdates) {
-          const allowed = ["live", "name-asc", "name-desc", "custom"];
-          const val = incomingUpdates.sortOrder;
-          updates.sortOrder = allowed.includes(val) ? val : "live";
-        }
-        if ("previewsEnabled" in incomingUpdates) {
-          updates.previewsEnabled = incomingUpdates.previewsEnabled !== false;
-        }
-        if ("previewsMode" in incomingUpdates) {
-          updates.previewsMode =
-            incomingUpdates.previewsMode === "video" ? "video" : "image";
-        }
-        if ("previewsSurfaceDirectory" in incomingUpdates) {
-          updates.previewsSurfaceDirectory =
-            incomingUpdates.previewsSurfaceDirectory !== false;
-        }
-        if ("previewsSurfaceSidebar" in incomingUpdates) {
-          updates.previewsSurfaceSidebar =
-            incomingUpdates.previewsSurfaceSidebar !== false;
-        }
-        if ("previewsSurfaceClips" in incomingUpdates) {
-          updates.previewsSurfaceClips =
-            incomingUpdates.previewsSurfaceClips !== false;
-        }
-        if ("previewsSurfaceSearch" in incomingUpdates) {
-          updates.previewsSurfaceSearch =
-            incomingUpdates.previewsSurfaceSearch !== false;
-        }
-        if ("previewsSize" in incomingUpdates) {
-          const allowedSizes = ["s", "m", "l"];
-          updates.previewsSize = allowedSizes.includes(incomingUpdates.previewsSize)
-            ? incomingUpdates.previewsSize
-            : "m";
-        }
-        if ("previewsAudio" in incomingUpdates) {
-          updates.previewsAudio = incomingUpdates.previewsAudio === true;
-        }
-        if ("previewsShowDelayMs" in incomingUpdates) {
-          const d = Number(incomingUpdates.previewsShowDelayMs);
-          updates.previewsShowDelayMs = Number.isFinite(d)
-            ? Math.min(2000, Math.max(0, d))
-            : 200;
-        }
-        if ("previewsAnimations" in incomingUpdates) {
-          updates.previewsAnimations =
-            incomingUpdates.previewsAnimations !== false;
-        }
-        if ("communityBadge" in incomingUpdates) {
-          updates.communityBadge = incomingUpdates.communityBadge !== false;
-        }
-        if ("communityBadgeColor" in incomingUpdates) {
-          updates.communityBadgeColor = sanitizeBadgeColor(
-            incomingUpdates.communityBadgeColor
+        try {
+          const incomingUpdates = request.updates || {};
+          // Coercion unique : PreferenceStore.sanitize() est la seule source de
+          // verite (le bloc duplique qui vivait ici a fini par perdre des cles,
+          // cf. le commentaire de sanitize()). On ne garde que les cles que
+          // l'appelant a envoyees et que sanitize reconnait.
+          const sanitized = PreferenceStore.sanitize(incomingUpdates);
+          const updates = Object.fromEntries(
+            Object.keys(incomingUpdates)
+              .filter((key) => key in sanitized)
+              .map((key) => [key, sanitized[key]])
           );
-        }
+          if (Object.keys(updates).length === 0) {
+            const preferences = await PreferenceStore.get();
+            const incomingKeys = Object.keys(incomingUpdates);
 
-        if (Object.keys(updates).length === 0) {
-          const preferences = await PreferenceStore.get();
-          const incomingKeys = Object.keys(incomingUpdates);
+            // Charge utile vide : il n'y a rien a faire, ce n'est pas une erreur.
+            // Le bandeau rouge sortait ici, sans qu'aucun reglage n'ait echoue.
+            // La serialisation de sendMessage supprime les proprietes valant
+            // undefined, donc un appelant peut envoyer un objet qui arrive vide.
+            if (incomingKeys.length === 0) {
+              sendResponse({ success: true, preferences });
+              return;
+            }
 
-          // Charge utile vide : il n'y a rien a faire, ce n'est pas une erreur.
-          // Le bandeau rouge sortait ici, sans qu'aucun reglage n'ait echoue.
-          // La serialisation de sendMessage supprime les proprietes valant
-          // undefined, donc un appelant peut envoyer un objet qui arrive vide.
-          if (incomingKeys.length === 0) {
-            sendResponse({ success: true, preferences });
+            // Des cles sont bien arrivees mais aucune n'est reconnue : la, c'est
+            // un vrai defaut. On les nomme dans la console du service worker,
+            // faute de quoi le bandeau ne dit pas laquelle est en cause.
+            console.warn(
+              "[SP] updatePreferences: aucune cle reconnue parmi",
+              incomingKeys
+            );
+            sendResponse({
+              error: translateWithPrefs(
+                preferences,
+                "background.errors.noPreferencesUpdate"
+              ),
+            });
             return;
           }
 
-          // Des cles sont bien arrivees mais aucune n'est reconnue : la, c'est
-          // un vrai defaut. On les nomme dans la console du service worker,
-          // faute de quoi le bandeau ne dit pas laquelle est en cause.
-          console.warn(
-            "[SP] updatePreferences: aucune cle reconnue parmi",
-            incomingKeys
-          );
-          sendResponse({
-            error: translateWithPrefs(
-              preferences,
-              "background.errors.noPreferencesUpdate"
-            ),
-          });
-          return;
+          const preferences = await PreferenceStore.update(updates);
+          if ("backgroundRaidAlerts" in updates) {
+            refreshRaidWatcher();
+          }
+          sendResponse({ success: true, preferences });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
         }
-
-        const preferences = await PreferenceStore.update(updates);
-        sendResponse({ success: true, preferences });
       })();
       return true;
 
@@ -3167,6 +3109,7 @@ scheduleKeepAliveAlarm();
   initDone = true;
   await PreferenceStore.ensureDefaults();
   await NotificationCenter.init();
+  refreshRaidWatcher();
 
   // Only poll on SW wake if cached statuses are stale (>60s old).
   // Avoids triggering a full poll every time the popup is reopened.

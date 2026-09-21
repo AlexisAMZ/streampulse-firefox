@@ -254,14 +254,19 @@ if (!syntaxFails) pass(`${jsFiles.length} JS files parse cleanly`);
   const bgSrc = fs.existsSync(abs("js/background.js"))
     ? fs.readFileSync(abs("js/background.js"), "utf8")
     : "";
-  const defStart = bgSrc.indexOf("const DEFAULT_PREFERENCES = {");
+  // DEFAULT_PREFERENCES vit desormais dans js/preferences-data.js (module
+  // partage avec la popup) : la parité se verifie entre ce fichier et sanitize().
+  const defSrc = fs.existsSync(abs("js/preferences-data.js"))
+    ? fs.readFileSync(abs("js/preferences-data.js"), "utf8")
+    : "";
+  const defStart = defSrc.indexOf("export const DEFAULT_PREFERENCES = {");
   const sanStart = bgSrc.indexOf("static sanitize(preferences");
   const getStart = bgSrc.indexOf("static async get()", sanStart);
 
   if (defStart === -1 || sanStart === -1 || getStart === -1) {
-    warn("js/background.js: DEFAULT_PREFERENCES or PreferenceStore.sanitize() not found, preference parity not checked");
+    warn("js/preferences-data.js: DEFAULT_PREFERENCES or PreferenceStore.sanitize() not found, preference parity not checked");
   } else {
-    const defBody = bgSrc.slice(defStart, bgSrc.indexOf("\n};", defStart));
+    const defBody = defSrc.slice(defStart, defSrc.indexOf("\n};", defStart));
     const sanBody = bgSrc.slice(sanStart, getStart);
     const keysOf = (body, indent) =>
       [...body.matchAll(new RegExp(`^\\s{${indent}}([A-Za-z0-9_]+):`, "gm"))].map((m) => m[1]);
@@ -279,21 +284,17 @@ if (!syntaxFails) pass(`${jsFiles.length} JS files parse cleanly`);
       pass(`${defKeys.length} preferences survive sanitize(): none silently reset on write`);
     }
 
-    // Survivre a sanitize() ne suffit pas : le handler "updatePreferences"
-    // ne recopie que les cles qu'il liste. Une cle absente est silencieusement
-    // ignoree, et si c'est la seule envoyee, la mise a jour renvoie une erreur.
-    const handled = new Set(
-      [...bgSrc.matchAll(/"([A-Za-z0-9_]+)" in incomingUpdates/g)].map((m) => m[1])
-    );
-    const unwritable = defKeys.filter((k) => !handled.has(k));
-    if (!handled.size) {
+    // Survivre a sanitize() ne suffit pas : le handler "updatePreferences" ne
+    // doit pas perdre de cle. Depuis la fusion, sanitize() est l'unique source
+    // de coercion et le handler filtre sur ses cles : une cle acceptee par
+    // sanitize est donc forcement ecrite. On le verifie par presence du
+    // filtrage, faute de quoi un ref futur du handler vers une liste en dur
+    // repasserait inapercu.
+    const handlerDelegates = /PreferenceStore\.sanitize\(incomingUpdates\)/.test(bgSrc);
+    if (!handlerDelegates) {
       warn("js/background.js: updatePreferences handler not parsed, write parity not checked");
-    } else if (unwritable.length) {
-      unwritable.forEach((k) =>
-        fail(`preference "${k}" is in DEFAULT_PREFERENCES but the updatePreferences handler ignores it: the toggle silently fails`)
-      );
     } else {
-      pass(`${defKeys.length} preferences are accepted by the updatePreferences handler`);
+      pass(`updatePreferences delegates coercion to sanitize(): all ${defKeys.length} preferences writable`);
     }
   }
 
