@@ -4,6 +4,7 @@ import {
   BACKUP_FORMAT,
   BACKUP_KEYS,
   buildBackup,
+  mergeBackup,
   parseBackup,
   backupFileName,
 } from "../js/backup.js";
@@ -25,6 +26,16 @@ const storage = {
     "2026-09-12": { "kick:amine": { platform: "kick", channel: "amine", watchSeconds: 1800, avatarUrl: "" } },
   },
   userProfile: { handle: "alexisamz", displayName: "AlexisAMZ", avatarUrl: "" },
+  betaPinnedIds: ["twitch:gotaga", "kick:amine"],
+  betaChannelGroups: [{ id: "g1", name: "Amis", memberIds: ["twitch:gotaga"] }],
+  streamPulseHistory: { "2026-09-12": [{ channel: "gotaga", minutes: 42 }] },
+  streamPulseSmartAlerts: [{ handle: "gotaga", game: "Just Chatting" }],
+  streamPulseCosmetics: { badgeFx: "glow", nameFx: "" },
+  streamPulseAccent: "violet",
+  streamPulsePredictionRule: { percent: 10, maxPoints: 5000 },
+  // Lie a cette installation : jamais dans une sauvegarde.
+  streamPulsePlus: { status: "active", licenseKey: "SP-XXXX", plan: "lifetime" },
+  streamPulseDeviceId: "device-123",
   // Caches et secrets : jamais dans une sauvegarde.
   betaGeneralStatuses: { "twitch:gotaga": { isLive: true } },
   "streampulse:kickToken": "secret",
@@ -40,6 +51,29 @@ test("buildBackup ne garde que les donnees de l'utilisateur, avec des metadonnee
   assert.deepEqual(Object.keys(backup.data).sort(), [...BACKUP_KEYS].sort());
   assert.equal("betaGeneralStatuses" in backup.data, false);
   assert.equal("streampulse:kickToken" in backup.data, false);
+  assert.equal("streamPulsePlus" in backup.data, false);
+  assert.equal("streamPulseDeviceId" in backup.data, false);
+});
+
+test("les favoris epingles sont sauvegardes, relus et fusionnes sans doublon", () => {
+  const backup = buildBackup(storage, { version: "26.9.19", now: NOW });
+  assert.deepEqual(backup.data.betaPinnedIds, ["twitch:gotaga", "kick:amine"]);
+
+  const parsed = parseBackup(backup);
+  assert.equal(parsed.ok, true);
+  assert.deepEqual(parsed.data.betaPinnedIds, ["twitch:gotaga", "kick:amine"]);
+  assert.deepEqual(parsed.data.betaChannelGroups, [
+    { id: "g1", name: "Amis", memberIds: ["twitch:gotaga"] },
+  ]);
+
+  const merged = mergeBackup({ betaPinnedIds: ["twitch:squeezie", "kick:amine"] }, parsed.data);
+  assert.deepEqual(merged.data.betaPinnedIds, ["twitch:squeezie", "kick:amine", "twitch:gotaga"]);
+});
+
+test("un favori epingle invalide fait refuser la sauvegarde plutot que de la salir", () => {
+  const result = parseBackup({ betaPinnedIds: "twitch:gotaga" });
+  assert.equal(result.ok, false);
+  assert.equal(result.error, "invalid-betaPinnedIds");
 });
 
 test("buildBackup omet les cles absentes du stockage", () => {
@@ -116,4 +150,25 @@ test("parseBackup ecarte les streamers et les entrees de temps corrompus", () =>
 
 test("backupFileName date le fichier en heure locale", () => {
   assert.equal(backupFileName(new Date(2026, 8, 13, 23, 30)), "streampulse-backup-2026-09-13.json");
+});
+
+test("une liste de groupes vide n'invalide pas la sauvegarde", () => {
+  const result = parseBackup({ betaGeneralStreamers: [], betaChannelGroups: [] });
+  assert.equal(result.ok, true, result.error);
+  assert.deepEqual(result.data.betaChannelGroups, []);
+});
+
+test("les groupes de chaines fusionnent en liste, sans doublon d'identite", () => {
+  const incoming = { betaChannelGroups: [{ id: "g1", name: "Amis" }, { id: "g2", name: "LoL" }] };
+  const merged = mergeBackup({ betaChannelGroups: [{ id: "g1", name: "Amis (local)" }] }, incoming);
+  assert.deepEqual(merged.data.betaChannelGroups, [
+    { id: "g1", name: "Amis (local)" },
+    { id: "g2", name: "LoL" },
+  ]);
+});
+
+test("un objet la ou une liste de groupes est attendue reste refuse", () => {
+  const result = parseBackup({ betaChannelGroups: { amis: [] } });
+  assert.equal(result.ok, false);
+  assert.equal(result.error, "invalid-betaChannelGroups");
 });

@@ -167,14 +167,11 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "html/audio-handler.html",
-        "html/changelog.html",
-        "sons/notification.mp3",
         "images/photos/128px.png",
         "images/photos/logosp.png"
       ],
       "matches": [
-        "<all_urls>"
+        "https://www.twitch.tv/*"
       ]
     },
     {

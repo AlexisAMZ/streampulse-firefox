@@ -8,6 +8,7 @@
   // Opt-in: the "keepQualityInBackground" setting is mirrored into this
   // localStorage flag by twitchPlayerEnhancer.js (isolated world, which can
   // read chrome.storage). Changes apply on the next page load.
+  // Compatible with 7TV, BetterTTV, and FrankerFaceZ.
 
   const FLAG_KEY = "streampulse:keepQualityInBackground";
 

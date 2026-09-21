@@ -50,7 +50,6 @@ const preferenceToggleDefinitions = [
   { element: document.getElementById("onboarding-live-notifications"), key: "liveNotifications" },
   { element: document.getElementById("onboarding-game-alerts"), key: "gameNotifications" },
   { element: document.getElementById("onboarding-sounds"), key: "soundsEnabled" },
-  { element: document.getElementById("onboarding-auto-refresh"), key: "autoRefreshPlayerErrors" },
   { element: document.getElementById("onboarding-fast-forward"), key: "enableFastForwardButton" },
   { element: document.getElementById("onboarding-hide-extensions"), key: "hideTwitchExtensions" },
   { element: document.getElementById("onboarding-auto-claim"), key: "autoClaimChannelPoints" },
@@ -61,7 +60,16 @@ const preferenceToggleDefinitions = [
   { element: document.getElementById("onboarding-prevent-tab-discard"), key: "preventTabDiscard" },
   { element: document.getElementById("onboarding-streamer-favicon"), key: "enableStreamerFavicon" },
   { element: document.getElementById("onboarding-tab-live-icon"), key: "enableTabLiveIcon" },
+  { element: document.getElementById("onboarding-community-badge"), key: "communityBadge" },
 ];
+
+/**
+ * Réglages désactivés tant que l'utilisateur ne les active pas : une valeur
+ * absente vaut « non ». Le badge communautaire envoie une empreinte du pseudo,
+ * il demande donc un accord explicite ; suivre les raids rapporte des points.
+ */
+const OFF_BY_DEFAULT = new Set(["communityBadge", "autoCancelRaids"]);
+const isEnabled = (preferences, key) => (OFF_BY_DEFAULT.has(key) ? preferences?.[key] === true : preferences?.[key] !== false);
 
 const LANGUAGE_FLAGS = { fr: "🇫🇷", en: "🇬🇧", es: "🇪🇸", "pt-BR": "🇧🇷", de: "🇩🇪", it: "🇮🇹", pl: "🇵🇱", tr: "🇹🇷", ru: "🇷🇺", ja: "🇯🇵", ko: "🇰🇷" };
 
@@ -104,6 +112,11 @@ function updateStepper() {
   pills.forEach((pill, i) => {
     pill.classList.toggle("active", i === currentStep);
     pill.classList.toggle("completed", i < currentStep);
+    // Seules les étapes déjà traversées sont cliquables : les futures restent
+    // dans le flux (le wizard est linéaire) mais jamais atteignables au clavier.
+    pill.disabled = i > currentStep;
+    if (i === currentStep) pill.setAttribute("aria-current", "step");
+    else pill.removeAttribute("aria-current");
   });
   if (stepCounterCurrent) {
     stepCounterCurrent.textContent = String(currentStep + 1).padStart(2, "0");
@@ -152,6 +165,9 @@ function renderProfileFromState() {
   if (profilePreviewName) {
     profilePreviewName.textContent = display || "—";
   }
+  // L'aperçu du badge reflète le pseudo saisi en temps réel.
+  const badgePreviewName = document.getElementById("badge-preview-name");
+  if (badgePreviewName) badgePreviewName.textContent = display ? `@${display}` : "@toi";
 
   if (profileInputCount) profileInputCount.textContent = String((profileInput?.value || "").length);
 
@@ -216,8 +232,10 @@ function scheduleProfileLookup(rawValue) {
     } else {
       userProfile = { handle, displayName: handle, avatarUrl: "" };
       setProfileAvatarImage("");
-      setAvatarStatus("error");
-      setHintState("error", t("onboarding.profileHintNotFound"));
+      /* Pas de compte Twitch (ou pseudo inconnu) : ce n'est pas une erreur.
+         On garde le pseudo saisi tel quel, en état neutre. */
+      setAvatarStatus("idle");
+      setHintState("idle", t("onboarding.profileHintKept"));
     }
     renderProfileFromState();
   }, 450);
@@ -437,9 +455,6 @@ function renderStreamers(streamers = []) {
     (typeof chrome !== "undefined" && chrome.runtime) ||
     (typeof browser !== "undefined" && browser.runtime) ||
     null;
-  const fallbackAvatar = runtime
-    ? runtime.getURL("images/photos/avatars/default-48.png")
-    : "../images/photos/avatars/default-48.png";
 
   streamers.forEach((streamer) => {
     const item = document.createElement("li");
@@ -453,11 +468,11 @@ function renderStreamers(streamers = []) {
     const platformId = streamer.platform || DEFAULT_PLATFORM;
     const definition = getPlatformDefinition(platformId);
     const platformIcon = runtime ? runtime.getURL(definition.icon) : `../${definition.icon}`;
-    avatar.src = streamer.avatarUrl || platformIcon || fallbackAvatar;
+    avatar.src = streamer.avatarUrl || platformIcon;
     const handleLabel = formatHandleForDisplay(platformId, streamer.handle || streamer.twitch);
     avatar.alt = streamer.displayName || handleLabel || "Streamer";
     avatar.referrerPolicy = "no-referrer";
-    avatar.onerror = function () { this.onerror = null; this.src = platformIcon || fallbackAvatar; };
+    avatar.onerror = function () { this.onerror = null; this.src = platformIcon; };
 
     const name = document.createElement("span");
     name.className = "streamer-name";
@@ -469,7 +484,9 @@ function renderStreamers(streamers = []) {
     removeButton.className = "remove-streamer";
     removeButton.type = "button";
     removeButton.dataset.streamerId = streamer.id;
-    removeButton.setAttribute("aria-label", t("onboarding.removeStreamer"));
+    removeButton.innerHTML =
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    removeButton.setAttribute("aria-label", t("onboarding.removeStreamerName", { name: handleLabel || avatar.alt }));
 
     item.append(info, removeButton);
     streamerList.appendChild(item);
@@ -479,12 +496,12 @@ function renderStreamers(streamers = []) {
 function renderPreferenceToggles(preferences = {}) {
   preferenceToggleDefinitions.forEach(({ element, key }) => {
     if (!element) return;
-    element.checked = preferences[key] !== false;
+    element.checked = isEnabled(preferences, key);
   });
 }
 
 async function updatePreferenceToggle({ element, key }, enabled) {
-  const previous = currentPreferences?.[key] !== false;
+  const previous = isEnabled(currentPreferences, key);
   try {
     const response = await chrome.runtime.sendMessage({
       type: "updatePreferences",
@@ -558,6 +575,8 @@ function registerEventListeners() {
   document.getElementById("btn-back-1")?.addEventListener("click", () => goToStep(0, "back"));
   document.getElementById("btn-back-2")?.addEventListener("click", () => goToStep(1, "back"));
   document.getElementById("btn-back-3")?.addEventListener("click", () => goToStep(2, "back"));
+  document.getElementById("btn-skip-1")?.addEventListener("click", () => goToStep(2, "forward"));
+  document.getElementById("btn-skip-2")?.addEventListener("click", () => goToStep(3, "forward"));
 
   /* Stepper pill clicks */
   document.querySelectorAll(".step-pill").forEach((pill) => {
@@ -690,7 +709,7 @@ function setupUpdateModeUI() {
     if (titleEl && !titleEl.querySelector(".badge-new")) {
       const badge = document.createElement("span");
       badge.className = "badge-new";
-      badge.textContent = "NOUVEAU";
+      badge.textContent = t("onboarding.newBadge");
       titleEl.appendChild(badge);
     }
   });
@@ -715,19 +734,8 @@ function setupUpdateModeUI() {
  * Il était écrit V1.0 en dur dans le HTML : tous les utilisateurs voyaient cette
  * valeur quelle que soit leur version installée.
  */
-function renderSystemVersion() {
-  const host = document.getElementById("ob-sys-version");
-  if (!host) return;
-  try {
-    host.textContent = `V${chrome.runtime.getManifest().version}`;
-  } catch (_) {
-    host.textContent = "";
-  }
-}
-
 async function initialize() {
   await initI18n();
-  renderSystemVersion();
   buildLanguageButtons();
   refreshTranslations();
   registerEventListeners();

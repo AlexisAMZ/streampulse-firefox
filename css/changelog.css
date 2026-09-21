@@ -19,7 +19,7 @@
 .cl-tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .cl-tag-new { background: var(--lcd); color: var(--lcd-ink); }
 .cl-tag-improved { background: var(--violet-soft); box-shadow: inset 0 0 0 1px var(--violet-line); color: var(--violet-text); }
-.cl-tag-fix { background: rgba(255, 138, 128, 0.12); box-shadow: inset 0 0 0 1px rgba(255, 138, 128, 0.3); color: #ffb3ab; }
+.cl-tag-fix { background: color-mix(in srgb, var(--danger) 12%, transparent); box-shadow: inset 0 0 0 1px var(--danger); color: var(--danger); }
 
 .cl-list { margin: 10px 0 0; padding: 0; list-style: none; }
 .cl-item { position: relative; padding: 13px 0 13px 24px; box-shadow: inset 0 -1px 0 var(--line); font-size: 15.5px; line-height: 1.6; }
@@ -50,11 +50,11 @@ a.cl-thanks-handle:hover { color: var(--violet-text); }
 .cl-history-title { font-weight: 600; }
 .cl-history-entry .cl-list { margin: 0 0 14px 112px; }
 
-.cl-donation-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 64px; padding: 24px 28px; border-radius: 22px; background: var(--violet); color: #ffffff; }
+.cl-donation-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 64px; padding: 24px 28px; border-radius: 22px; background: var(--violet); color: var(--paper); }
 .cl-donation-title { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
 .cl-donation-icon svg { width: 24px; height: 24px; }
 .cl-donation-buttons { display: flex; gap: 8px; }
-.cl-donation-btn { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; background: #ffffff; color: #1a0b14; font-weight: 700; text-decoration: none; transition: background-color var(--dur-fast) ease; }
+.cl-donation-btn { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; background: var(--paper); color: var(--paper-ink); font-weight: 700; text-decoration: none; transition: background-color var(--dur-fast) ease; }
 .cl-donation-btn:hover { background: var(--lcd); }
 .cl-donation-btn-icon { width: 16px; height: 16px; }
 

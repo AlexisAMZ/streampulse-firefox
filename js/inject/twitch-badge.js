@@ -502,15 +502,62 @@
    * Plutot que de parier, on mesure l'espace reellement obtenu et on ne pose
    * une marge que s'il n'y en a pas : sinon le badge est colle au precedent.
    */
-  function ensureSpacing(badge) {
-    try {
-      var prev = badge.previousElementSibling;
-      if (!prev) return;
-      var gap = badge.getBoundingClientRect().left - prev.getBoundingClientRect().right;
-      if (gap < 3) badge.classList.add("sp-chat-badge--spaced");
-    } catch (_e) {
-      // Twitch reconstruit son DOM en permanence : le noeud peut disparaitre entre sa selection et son usage.
+  /**
+   * Espacement badge/pseudo, par salve : on differe la mesure au prochain
+   * frame pour lire tous les rects d'un coup, avant toute mutation — sinon
+   * chaque badge alterne lecture/écriture de layout (reflow par message).
+   * Onglet masqué, requestAnimationFrame ne tourne pas : on purge alors au
+   * retour sur l'onglet (visibilitychange), l'espacement reste donc correct.
+   */
+  var spacingQueue = [];
+  var spacingScheduled = false;
+
+  function flushSpacing() {
+    spacingScheduled = false;
+    var pending = spacingQueue;
+    spacingQueue = [];
+    var gaps = [];
+    for (var i = 0; i < pending.length; i++) {
+      try {
+        var prev = pending[i].previousElementSibling;
+        // Phase de lecture uniquement : aucune mutation avant la fin de la boucle.
+        gaps.push(prev ? pending[i].getBoundingClientRect().left - prev.getBoundingClientRect().right : Infinity);
+      } catch (_e) {
+        gaps.push(Infinity);
+      }
     }
+    for (var j = 0; j < pending.length; j++) {
+      if (gaps[j] < 3) pending[j].classList.add("sp-chat-badge--spaced");
+    }
+  }
+
+  function onSpacingVisible() {
+    if (!document.hidden) return;
+    document.addEventListener("visibilitychange", function onVisible() {
+      document.removeEventListener("visibilitychange", onVisible);
+      if (!document.hidden && spacingQueue.length) flushSpacing();
+    });
+  }
+
+  function queueSpacing(badge) {
+    spacingQueue.push(badge);
+    // File plafonnee : onglet masque tres longtemps, on mesure la salve en
+    // attente plutot que de la laisser croitre sans borne.
+    if (spacingQueue.length > 300) {
+      flushSpacing();
+      return;
+    }
+    if (spacingScheduled) return;
+    spacingScheduled = true;
+    if (document.hidden) {
+      onSpacingVisible();
+    } else {
+      requestAnimationFrame(flushSpacing);
+    }
+  }
+
+  function ensureSpacing(badge) {
+    queueSpacing(badge);
   }
 
   /**
@@ -756,7 +803,12 @@
     }
 
     attachObserver();
-    setInterval(attachObserver, 2000);
+    // Re-check periodique : Twitch remonte un nouveau conteneur de chat a chaque
+    // navigation de chaine. On evite tout travail quand l'onglet est masque.
+    setInterval(function () {
+      if (!(chrome.runtime && chrome.runtime.id)) return;
+      if (!document.hidden) attachObserver();
+    }, 2000);
   }
 
   // ── Demarrage ────────────────────────────────────────────────────────────
@@ -773,8 +825,10 @@
       var i18n = typeof window !== "undefined" ? window.__SP_I18N__ : null;
       badgeLang = i18n ? i18n.resolve(prefs.language || navigator.language) : "en";
       readOwnLocal(prefs, res && res[COSMETICS_KEY]);
-      if (prefs.communityBadge === false) {
-        log("desactive par l utilisateur");
+      // Badge desactive par defaut depuis 26.9.18 : il envoie une empreinte du
+      // pseudo, donc il ne demarre qu'avec l'accord explicite de l'utilisateur.
+      if (prefs.communityBadge !== true) {
+        log("desactive (non active par l utilisateur)");
         return;
       }
 
@@ -784,7 +838,10 @@
       setupChatObserver();
       setupBadgeCard();
       // Les reglages des autres abonnes arrivent sans recharger la page.
-      setInterval(fetchRemoteBadges, REFRESH_MS);
+      setInterval(function () {
+        if (!(chrome.runtime && chrome.runtime.id)) return;
+        if (!document.hidden) fetchRemoteBadges();
+      }, REFRESH_MS);
 
       chrome.storage.onChanged.addListener(function (changes, area) {
         if (area !== "local") return;
@@ -807,6 +864,8 @@
       });
 
       setInterval(function () {
+        if (document.hidden) return;
+        if (!(chrome.runtime && chrome.runtime.id)) return;
         if (!currentTwitchUser) {
           currentTwitchUser = detectCurrentTwitchUser();
           if (currentTwitchUser) {

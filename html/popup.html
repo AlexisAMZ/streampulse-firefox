@@ -49,7 +49,7 @@
         <div class="stage-media" id="stage-media"></div>
         <div class="greeting">
           <h1 class="greeting-title" id="greeting-title">Bonsoir.<br /><span class="greeting-sub">Voici qui est en ligne.</span></h1>
-          <p class="greeting-hint" id="greeting-live-count"></p>
+          <p class="greeting-hint" id="greeting-live-count" role="status"></p>
         </div>
         <div class="stage-pager" id="stage-pager" hidden>
           <button id="stage-prev" type="button" class="icon-button" data-i18n-attr-ariaLabel="popup.cplus.prev" data-i18n-attr-title="popup.cplus.prev" aria-label="Live précédent">
@@ -84,7 +84,7 @@
 
       <section class="live-strip">
         <div class="strip-head">
-          <h2 class="strip-title"><span data-i18n="popup.osd.sectionLive">En direct</span><span class="strip-count" id="live-count"></span></h2>
+          <h2 class="strip-title"><span data-i18n="popup.osd.sectionLive">En direct</span><span class="strip-count" id="live-count" role="status"></span></h2>
           <div class="segmented" id="platform-filter-group" role="group" data-i18n-attr-ariaLabel="popup.osd.filterLabel">
             <button type="button" class="pf-btn active" aria-pressed="true" data-filter="all" data-i18n="popup.osd.filterAll">Tout</button>
             <button type="button" class="pf-btn" aria-pressed="false" data-filter="pinned" data-i18n="popup.cplus.pinnedFilter">Épinglés</button>
@@ -118,6 +118,8 @@
         <div class="sheet-head">
           <h2 id="sheet-title" data-i18n="popup.cplus.allChannels">Toutes les chaînes</h2>
           <span class="sheet-total" id="sheet-total"></span>
+          <span class="sheet-hint" data-i18n="popup.cplus.reorderHint">Réordonner : Alt + ↑ ↓</span>
+          <span class="visually-hidden" id="sheet-live" role="status" aria-live="polite"></span>
           <label class="sheet-search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             <span class="visually-hidden" data-i18n="popup.cplus.searchLabel">Chercher</span>
@@ -146,6 +148,7 @@
           <button class="seg-btn active" type="button" data-platform="all" aria-pressed="true" data-i18n="popup.history.filterAll">Tout</button>
           <button class="seg-btn" type="button" data-platform="twitch" aria-pressed="false">Twitch</button>
           <button class="seg-btn" type="button" data-platform="kick" aria-pressed="false">Kick</button>
+          <button class="seg-btn" type="button" data-platform="youtube" aria-pressed="false">YouTube</button>
         </div>
       </div>
       <ul class="history-grid" id="history-grid"></ul>
@@ -156,7 +159,7 @@
       </div>
     </section>
 
-    <section id="plus-view" class="plus-view hidden" role="dialog" aria-labelledby="plus-title">
+    <section id="plus-view" class="plus-view hidden" role="dialog" aria-modal="true" aria-labelledby="plus-title">
       <div class="plus-main">
         <h2 class="plus-title" id="plus-title"><span data-i18n="popup.plus.title">Va plus loin</span><br /><em data-i18n="popup.plus.titleAccent">sur tes lives.</em></h2>
         <p class="plus-intro" data-i18n="popup.plus.intro">Tout ce que tu as déjà reste gratuit. StreamPulse+ ajoute des outils pour les viewers les plus assidus.</p>
@@ -225,6 +228,10 @@
         <button id="menu-tab-automation" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-automation" data-panel="automation" tabindex="-1">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           <span data-i18n="popup.osd.menuAutomation">Automatisation</span>
+        </button>
+        <button id="menu-tab-player" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-player" data-panel="player" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+          <span data-i18n="popup.osd.menuPlayer">Lecteur</span>
         </button>
         <button id="menu-tab-previews" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-previews" data-panel="previews" tabindex="-1">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="m10 8 5 3-5 3z"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
@@ -329,28 +336,6 @@
             </select>
           </div>
 
-          <h3 class="settings-group-header" data-i18n="popup.osd.groupPlayer">Lecteur</h3>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.autoRefreshTitle">Actualisation automatique</span>
-              <span class="settings-description" data-i18n="popup.settings.autoRefreshDescription">Relancer le lecteur Twitch en cas d'erreur.</span>
-            </span>
-            <input id="pref-auto-refresh" type="checkbox" role="switch" />
-          </label>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.fastForwardTitle">Bouton d'avance rapide</span>
-              <span class="settings-description" data-i18n="popup.settings.fastForwardDescription">Ajouter un bouton pour rattraper instantanément le direct.</span>
-            </span>
-            <input id="pref-fast-forward" type="checkbox" role="switch" />
-          </label>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.hideTwitchExtensionsTitle">Masquer les extensions Twitch</span>
-              <span class="settings-description" data-i18n="popup.settings.hideTwitchExtensionsDescription">Masquer les incrustations d'extensions sur le lecteur vidéo.</span>
-            </span>
-            <input id="pref-hide-twitch-extensions" type="checkbox" role="switch" />
-          </label>
 
           <h3 class="settings-group-header" data-i18n="popup.osd.groupTabs">Onglets</h3>
           <label class="settings-toggle">
@@ -373,6 +358,69 @@
               <span class="settings-description" data-i18n="popup.settings.tabLiveIconDescription">Afficher un point rouge LIVE sur l'icône de l'onglet quand le flux est en direct.</span>
             </span>
             <input id="pref-enable-tab-live-icon" type="checkbox" role="switch" />
+          </label>
+        </section>
+
+        <!-- Lecteur -->
+        <section class="menu-panel" id="menu-player" role="tabpanel" aria-labelledby="menu-tab-player" hidden>
+          <h2 data-i18n="popup.osd.menuPlayer">Lecteur</h2>
+
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.keepQualityTitle">Garder la qualité en arrière-plan</span>
+              <span class="settings-description" data-i18n="popup.settings.keepQualityDescription">Empêcher Twitch de baisser la qualité quand l'onglet n'est pas affiché.</span>
+            </span>
+            <input id="pref-keep-quality" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.fastForwardTitle">Bouton d'avance rapide</span>
+              <span class="settings-description" data-i18n="popup.settings.fastForwardDescription">Ajouter un bouton pour rattraper instantanément le direct.</span>
+            </span>
+            <input id="pref-fast-forward" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.pipButtonTitle">Bouton Picture-in-Picture</span>
+              <span class="settings-description" data-i18n="popup.settings.pipButtonDescription">Ajouter un bouton au lecteur pour regarder le live dans une mini-fenêtre.</span>
+            </span>
+            <input id="pref-pip-button" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.autoRefreshTitle">Relancer le lecteur en cas d'erreur</span>
+              <span class="settings-description" data-i18n="popup.settings.autoRefreshDescription">Cliquer « Réessayer » à votre place sur les erreurs #1000 à #5000, et recharger l'onglet si cela ne suffit pas.</span>
+            </span>
+            <input id="pref-auto-refresh" type="checkbox" role="switch" />
+          </label>
+          <div class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.playerQualityTitle">Qualité du lecteur</span>
+              <span class="settings-description" data-i18n="popup.settings.playerQualityDescription">Ouvrir chaque live dans cette qualité. Auto laisse Twitch décider.</span>
+            </span>
+            <select id="pref-player-quality" class="settings-select" data-i18n-attr-ariaLabel="popup.settings.playerQualityTitle">
+              <option value="auto" selected data-i18n="popup.settings.playerQualityAuto">Auto</option>
+              <option value="source" data-i18n="popup.settings.playerQualitySource">Source</option>
+              <option value="1440">1440p (2K)</option>
+              <option value="1080">1080p</option>
+              <option value="720">720p</option>
+              <option value="480">480p</option>
+              <option value="360">360p</option>
+            </select>
+          </div>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.hideTwitchExtensionsTitle">Masquer les extensions Twitch</span>
+              <span class="settings-description" data-i18n="popup.settings.hideTwitchExtensionsDescription">Masquer les incrustations d'extensions sur le lecteur vidéo.</span>
+            </span>
+            <input id="pref-hide-twitch-extensions" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.clipDownloadTitle">Téléchargement des clips</span>
+              <span class="settings-description" data-i18n="popup.settings.clipDownloadDescription">Ajouter un bouton pour enregistrer les clips Twitch en MP4. StreamPulse+.</span>
+            </span>
+            <input id="pref-clip-download" type="checkbox" role="switch" />
           </label>
         </section>
 
@@ -464,7 +512,6 @@
             <span class="settings-description" data-i18n="onboarding.blockedUsersDescription">Masquer les messages d'utilisateurs spécifiques (séparés par des virgules).</span>
             <textarea id="pref-blocked-users" rows="3" class="settings-textarea" placeholder="bot, spammer" data-i18n-attr-placeholder="onboarding.blockedUsersPlaceholder"></textarea>
             <div class="field-actions">
-              <button id="save-blocked-users" class="button button-quiet" type="button" data-i18n="popup.actions.saveBlockedUsers">Enregistrer les utilisateurs masqués</button>
             </div>
           </div>
         </section>
@@ -566,7 +613,7 @@
                 <option value="theme" data-i18n="popup.settings.badgeColorTheme">Selon le thème Twitch</option>
                 <option value="custom" data-i18n="popup.settings.badgeColorCustom">Couleur personnalisée</option>
               </select>
-              <input id="pref-badge-color-value" class="badge-color-input" type="color" value="#9147ff" data-i18n-attr-ariaLabel="popup.settings.badgeColorCustom" hidden />
+              <input id="pref-badge-color-value" class="badge-color-input" type="color" value="#9146ff" data-i18n-attr-ariaLabel="popup.settings.badgeColorCustom" hidden />
             </span>
           </div>
           <p class="settings-description badge-plus-note" id="badge-plus-note" data-i18n="popup.settings.badgePlusOff">Avec StreamPulse+, ta couleur personnalisée est visible par tous les utilisateurs de StreamPulse.</p>

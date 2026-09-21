@@ -1,7 +1,7 @@
 (() => {
   const PREFERENCES_KEY = "betaGeneralPreferences";
-  const AUTO_REFRESH_FIELD = "autoRefreshPlayerErrors";
   const FAST_FORWARD_FIELD = "enableFastForwardButton";
+  const AUTO_REFRESH_FIELD = "autoRefreshPlayerErrors";
 
   const FAST_FORWARD_BUTTON_ID = "streampulse-fast-forward-btn";
   const FAST_FORWARD_STYLE_ID = "streampulse-fast-forward-style";
@@ -32,42 +32,11 @@
 
   };
 
+  // Seul `features` est consomme : ne pas demander (ni garder en memoire) les
+  // identifiants Twitch du service worker, dont ce script n'a aucun usage.
   let extensionConfig = {
-    clientId: "",
-    accessToken: "",
     features: DEFAULT_FEATURE_CONFIG,
   };
-
-  // Relance du lecteur sur erreur (codes 1000-5000, dont le fameux #2000).
-  //
-  // On clique « Reessayer » a la place de l'utilisateur. Si l'overlay n'offre
-  // aucun bouton, ou si le clic n'a pas suffi au tour precedent, on recharge,
-  // mais jamais sur un onglet cache (on attend son retour), jamais deux fois
-  // pour la meme page, et jamais moins de 45 s apres un rechargement.
-  //
-  // Reglable : autoRefreshPlayerErrors, active par defaut. Une extension ne
-  // doit pas imposer un rechargement de page sans laisser couper la fonction.
-
-  const ERROR_GATE_SELECTOR =
-    '[data-a-target="player-overlay-content-gate"], .content-overlay-gate';
-  const ERROR_CODES = ["1000", "2000", "3000", "4000", "5000"];
-  const RETRY_GRACE_MS = 6000;
-  const RETRY_POLL_MS = 4000;
-
-  const RELOAD_STAMP_KEY = "streampulsePlayerReloadAt";
-  const RELOAD_COOLDOWN_MS = 45000;
-
-  let errorCheckTimeoutId = null;
-  let observedVideo = null;
-  let videoAbortHandler = null;
-  let retryClickAttempted = false;
-  // Faux au depart : c'est setAutoRefresh(), appele par applyPreferences au
-  // chargement des reglages, qui demarre reellement la detection. Le mettre a
-  // vrai ici ferait sortir setAutoRefresh par son garde d'egalite, et plus
-  // rien n'aurait jamais lance le sondage.
-  let autoRefreshEnabled = false;
-  let reloadPendingUntilVisible = false;
-  let reloadAttempted = false;
 
   let fastForwardEnabled = false;
   let fastForwardEnsureIntervalId = null;
@@ -101,15 +70,6 @@
       cursor: pointer;
       transform: translateY(-1px);
     }
-    .streampulse-latency-button.is-metadata {
-      align-self: center;
-      padding: 0 10px 0 0;
-      font-size: 13px;
-      gap: 6px;
-    }
-    .streampulse-latency-button.is-metadata:hover {
-      transform: none;
-    }
     .streampulse-latency-dot {
       display: inline-block;
       width: 8px;
@@ -128,6 +88,15 @@
     }
     .streampulse-latency-button.is-disabled:hover {
       color: #dedee3;
+      transform: none;
+    }
+    .streampulse-latency-button.is-metadata {
+      align-self: center;
+      padding: 0 10px 0 0;
+      font-size: 13px;
+      gap: 6px;
+    }
+    .streampulse-latency-button.is-metadata:hover {
       transform: none;
     }
     .dPOHRS {
@@ -226,6 +195,37 @@
     return null;
   }
 
+  // Relance du lecteur sur erreur (codes 1000-5000, dont le fameux #2000).
+  //
+  // On clique « Reessayer » a la place de l'utilisateur. Si l'overlay n'offre
+  // aucun bouton, ou si le clic n'a pas suffi au tour precedent, on recharge —
+  // mais jamais sur un onglet cache (on attend son retour), jamais deux fois
+  // pour la meme page, et jamais moins de 45 s apres un rechargement.
+  //
+  // Reglable : autoRefreshPlayerErrors, active par defaut. Une extension ne
+  // doit pas imposer un rechargement de page sans laisser couper la fonction.
+
+  const ERROR_GATE_SELECTOR =
+    '[data-a-target="player-overlay-content-gate"], .content-overlay-gate';
+  const ERROR_CODES = ["1000", "2000", "3000", "4000", "5000"];
+  const RETRY_GRACE_MS = 6000;
+  const RETRY_POLL_MS = 4000;
+
+  const RELOAD_STAMP_KEY = "streampulsePlayerReloadAt";
+  const RELOAD_COOLDOWN_MS = 45000;
+
+  let errorCheckTimeoutId = null;
+  let observedVideo = null;
+  let videoAbortHandler = null;
+  let retryClickAttempted = false;
+  // Faux au depart : c'est setAutoRefresh(), appele par applyPreferences au
+  // chargement des reglages, qui demarre reellement la detection. Le mettre a
+  // vrai ici ferait sortir setAutoRefresh par son garde d'egalite, et plus
+  // rien n'aurait jamais lance le sondage.
+  let autoRefreshEnabled = false;
+  let reloadPendingUntilVisible = false;
+  let reloadAttempted = false;
+
   function hasPlayerError() {
     const gate = document.querySelector(ERROR_GATE_SELECTOR);
     if (!gate) return false;
@@ -293,7 +293,6 @@
   function checkForPlayerErrors() {
     errorCheckTimeoutId = null;
     if (!autoRefreshEnabled) return;
-
     ensureVideoAbortListener();
 
     if (hasPlayerError()) {
@@ -335,21 +334,6 @@
     video.addEventListener("abort", videoAbortHandler);
   }
 
-  function setAutoRefresh(enabled) {
-    if (enabled === autoRefreshEnabled) return;
-    autoRefreshEnabled = enabled;
-    if (enabled) {
-      ensureVideoAbortListener();
-      scheduleErrorCheck(500);
-      return;
-    }
-    if (errorCheckTimeoutId != null) {
-      clearTimeout(errorCheckTimeoutId);
-      errorCheckTimeoutId = null;
-    }
-    detachVideoAbortListener();
-  }
-
   function insertFastForwardStyle() {
     if (document.getElementById(FAST_FORWARD_STYLE_ID)) {
       return;
@@ -362,14 +346,14 @@
         justify-content: center;
         background: transparent;
         border: none;
-        border-radius: 4px;
+        border-radius: 9000px;
         color: #ffffff;
         cursor: pointer;
         display: inline-flex;
-        width: 3rem;
-        height: 3rem;
+        width: 32px;
+        height: 32px;
         padding: 0;
-        margin: 0 6px 0 0;
+        margin: 0 4px 0 0;
         background-repeat: no-repeat;
         background-size: contain;
         transition: background-color 0.2s ease, color 0.2s ease;
@@ -385,8 +369,9 @@
         background-color: rgba(38, 38, 38, 1);
       }
       #${FAST_FORWARD_BUTTON_ID} svg {
-        width: 100%;
-        height: 100%;
+        width: 20px;
+        height: 20px;
+        display: block;
         pointer-events: none;
         fill: currentColor;
       }
@@ -406,8 +391,9 @@
       button.type = "button";
       button.className = "streampulse-fast-forward-button";
       button.innerHTML = `
-      <svg viewBox="0 0 1024 1024" aria-hidden="true">
-        <path d="M825.8 498 538.4 249.9c-10.7-9.2-26.4-.9-26.4 14v496.3c0 14.9 15.7 23.2 26.4 14L825.8 526c8.3-7.2 8.3-20.8 0-28zm-320 0L218.4 249.9c-10.7-9.2-26.4-.9-26.4 14v496.3c0 14.9 15.7 23.2 26.4 14L505.8 526c4.1-3.6 6.2-8.8 6.2-14 0-5.2-2.1-10.4-6.2-14z"></path>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 5.5v13l8-6.5-8-6.5Zm9 0v13l8-6.5-8-6.5Z"></path>
+        <path d="M21 5h2v14h-2V5Z"></path>
       </svg>
     `;
 
@@ -501,7 +487,8 @@
       });
     }
     button.setAttribute("aria-label", texts.tooltip);
-    button.title = tooltip;
+    button.dataset.spLabel = tooltip;
+    window.__SP_TIP__?.attach(button, () => button.dataset.spLabel || "");
     return button;
   }
 
@@ -861,6 +848,21 @@
     else disableVolumeBoost();
   }
 
+  function setAutoRefresh(enabled) {
+    if (enabled === autoRefreshEnabled) return;
+    autoRefreshEnabled = enabled;
+    if (enabled) {
+      ensureVideoAbortListener();
+      scheduleErrorCheck(500);
+      return;
+    }
+    if (errorCheckTimeoutId != null) {
+      clearTimeout(errorCheckTimeoutId);
+      errorCheckTimeoutId = null;
+    }
+    detachVideoAbortListener();
+  }
+
   function applyPreferences(preferences = {}) {
     setAutoRefresh(preferences[AUTO_REFRESH_FIELD] !== false);
 
@@ -872,7 +874,7 @@
     }
 
     setHideTwitchExtensions(preferences.hideTwitchExtensions === true);
-    setAutoCancelRaids(preferences.autoCancelRaids !== false);
+    setAutoCancelRaids(preferences.autoCancelRaids === true);
     syncKeepQualityFlag(preferences.keepQualityInBackground === true);
     syncPlayerQuality(preferences.playerQuality);
     setVolumeBoost(preferences[VOLUME_BOOST_FIELD] !== false);
@@ -940,20 +942,14 @@
   let raidCheckIntervalId = null;
   let raidObserver = null;
 
-  // Twitch routes whose first path segment is a feature name, not a login.
-  const NON_CHANNEL_ROUTES = new Set([
-    "directory", "settings", "drops", "downloads", "subscriptions", "wallet",
-    "inventory", "friends", "u", "videos", "search", "prime", "turbo", "store",
-    "jobs", "p",
-  ]);
 
   function getCurrentChannel() {
     try {
       const segment = location.pathname.replace(/^\//, "").split("/")[0] || "";
-      const candidate = segment.toLowerCase();
-      if (!candidate || NON_CHANNEL_ROUTES.has(candidate)) return "";
-      if (!/^[a-z0-9_]{3,25}$/.test(candidate)) return "";
-      return candidate;
+      // Liste canonique + test de login partages (js/inject/dom.js, charge
+      // avant ce script via le manifest) : l'ancien plancher {3,25} rejetait
+      // des logins courts legitimes.
+      return window.__SP_DOM__.isChannelLogin(segment) ? segment.toLowerCase() : "";
     } catch (_) {
       return "";
     }
@@ -1195,8 +1191,6 @@
       const loadedConfig =
         (await chrome.runtime.sendMessage({ type: "getConfig" })) || {};
       extensionConfig = {
-        clientId: loadedConfig.clientId || "",
-        accessToken: loadedConfig.accessToken || "",
         features: mergeFeatureConfig(
           DEFAULT_FEATURE_CONFIG,
           loadedConfig.features || {}
@@ -1208,8 +1202,6 @@
         error
       );
       extensionConfig = {
-        clientId: "",
-        accessToken: "",
         features: DEFAULT_FEATURE_CONFIG,
       };
     }
@@ -1236,9 +1228,9 @@
       }
       if (this.updateIntervalId == null) {
         this.updateIntervalId = window.setInterval(() => {
-          // Inutile de mesurer la latence quand l'onglet est en arriere-plan ;
-          // au retour, update() recalcule tout depuis la video, et le listener
-          // visibilitychange ci-dessous rafraichit immediatement.
+          // Inutile de mesurer la latence quand l'onglet est en arrière-plan ;
+          // au retour, update() recalcule tout depuis la vidéo, et le listener
+          // visibilitychange ci-dessous rafraîchit immédiatement.
           if (!document.hidden) this.update();
         }, 1000);
         if (!this._visibilityBound) {
@@ -1422,6 +1414,7 @@
     }
 
     if (isTopWindow) {
+      // La detection demarre via applyPreferences, selon le reglage.
       initPreferences();
     }
   }
@@ -1432,11 +1425,14 @@
     if (isTopWindow) {
       if (autoRefreshEnabled && reloadPendingUntilVisible && hasPlayerError()) {
         reloadPlayerPage();
-      } else if (autoRefreshEnabled) {
-        scheduleErrorCheck(500);
+        return;
       }
+      scheduleErrorCheck(500);
       if (fastForwardEnabled) {
         ensureFastForwardButton();
+      }
+      if (volumeBoostEnabled) {
+        ensureVolumeBoostButton();
       }
       latencyFeature?.update(true);
 

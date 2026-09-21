@@ -37,8 +37,10 @@ function openTab(url) {
 function durationLabel(seconds) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.round((seconds % 3600) / 60);
-  if (hours <= 0) return `${minutes} min`;
-  return minutes >= 30 && hours < 10 ? `${hours} h ${String(minutes).padStart(2, "0")}` : `${hours} h`;
+  if (hours <= 0) return t("popup.history.durationMinutes", { count: minutes });
+  return minutes >= 30 && hours < 10
+    ? t("popup.history.durationHoursShort", { h: hours, m: String(minutes).padStart(2, "0") })
+    : t("popup.history.durationHours", { count: hours });
 }
 
 function agoLabel(endedAt, now = Date.now()) {
@@ -100,6 +102,24 @@ function createVodCard(entry) {
     if (!entry.seen) chrome.runtime.sendMessage({ type: "markHistorySeen", id: entry.id }).catch?.(() => {});
   });
   item.append(card);
+
+  // Suppression directe : un « X » discret sur la carte, sans ouvrir le VOD.
+  const dismiss = node("button", "vod-dismiss");
+  dismiss.type = "button";
+  dismiss.setAttribute("aria-label", t("popup.history.dismiss", { name }));
+  dismiss.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  dismiss.addEventListener("click", (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    chrome.runtime
+      .sendMessage({ type: "removeHistoryEntry", id: entry.id })
+      .catch?.(() => {});
+    item.remove();
+    // Le compteur et l'état vide doivent se recalculer sans la carte retirée.
+    renderHistory().catch(() => {});
+  });
+  item.append(dismiss);
   return item;
 }
 
@@ -193,16 +213,36 @@ function initPlus() {
   });
 
   const plans = document.querySelectorAll(".plus-plan");
-  plans.forEach((plan) =>
-    plan.addEventListener("click", () => {
-      selectedPlan = plan.dataset.plan;
-      plans.forEach((other) => {
-        const on = other === plan;
-        other.classList.toggle("active", on);
-        other.setAttribute("aria-checked", String(on));
-      });
-    }),
-  );
+  const selectPlan = (plan) => {
+    selectedPlan = plan.dataset.plan;
+    plans.forEach((other) => {
+      const on = other === plan;
+      other.classList.toggle("active", on);
+      other.setAttribute("aria-checked", String(on));
+    });
+  };
+  plans.forEach((plan) => plan.addEventListener("click", () => selectPlan(plan)));
+  // Motif radiogroup ARIA : les flèches déplacent la sélection (et le focus),
+  // les deux boutons ne restent pas tous deux dans l'ordre de tabulation.
+  document.querySelector(".plus-plans")?.addEventListener("keydown", (event) => {
+    const list = Array.from(plans);
+    const index = list.indexOf(document.activeElement);
+    if (index === -1) return;
+    const targets = {
+      ArrowRight: list[(index + 1) % list.length],
+      ArrowDown: list[(index + 1) % list.length],
+      ArrowLeft: list[(index - 1 + list.length) % list.length],
+      ArrowUp: list[(index - 1 + list.length) % list.length],
+    };
+    const next = targets[event.key];
+    if (!next) return;
+    event.preventDefault();
+    selectPlan(next);
+    next.focus();
+  });
+  plans.forEach((plan) => {
+    plan.tabIndex = plan.classList.contains("active") ? 0 : -1;
+  });
 
   $("plus-checkout")?.addEventListener("click", () => openTab(plusPageUrl(getCurrentLanguage(), selectedPlan)));
 
@@ -558,6 +598,24 @@ function initBadgeColorLock() {
   });
 }
 
+/**
+ * Le téléchargement des clips est un avantage StreamPulse+ : sans licence,
+ * l'activer ouvre l'écran d'abonnement. Écouté en capture, avant popup.js.
+ */
+function initClipDownloadLock() {
+  document.addEventListener(
+    "change",
+    (event) => {
+      const toggle = event.target;
+      if (toggle?.id !== "pref-clip-download" || !toggle.checked || plusActive()) return;
+      event.stopImmediatePropagation();
+      toggle.checked = false;
+      openPlus();
+    },
+    true,
+  );
+}
+
 function initAccent() {
   $("accent-swatches")?.addEventListener("click", (event) => {
     const swatch = event.target.closest(".accent-swatch");
@@ -716,6 +774,7 @@ export async function initFeatures() {
   initSmartAlerts();
   initAccent();
   initBadgeColorLock();
+  initClipDownloadLock();
   initCosmetics();
   initPredictions();
 

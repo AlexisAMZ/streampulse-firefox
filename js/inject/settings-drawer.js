@@ -24,8 +24,14 @@
   var MARK_URL = chrome.runtime.getURL("images/photos/128px.png");
 
   // Réglages activés tant que l'utilisateur ne les a pas coupés.
+  // Reglages actifs par defaut : sans cette liste, prefOn() les lit comme
+  // eteints tant que l'utilisateur n'y a jamais touche, l'interrupteur
+  // s'affiche a l'envers et le premier clic ne fait rien de visible.
+  // Doit rester aligne sur DEFAULT_PREFERENCES dans js/background.js.
   var DEFAULT_ON = [
-    "autoClaimChannelPoints", "liveNotifications", "communityBadge", "enableFastForwardButton",
+    "autoClaimChannelPoints", "autoClaimDrops", "autoClaimMoments",
+    "liveNotifications", "soundsEnabled",
+    "enableFastForwardButton", "enablePipButton", "autoRefreshPlayerErrors",
     "previewsEnabled", "previewsSurfaceDirectory", "previewsSurfaceSidebar",
   ];
 
@@ -41,8 +47,10 @@
           ["autoCancelRaids", "autoCancelRaidsTitle"],
         ] },
         { title: "shared.settings.groupChat", keys: [
-          ["autoRefreshPlayerErrors", "autoRefreshTitle"],
+          ["keepQualityInBackground", "keepQualityTitle"],
           ["enableFastForwardButton", "fastForwardTitle"],
+          ["enablePipButton", "pipButtonTitle"],
+          ["autoRefreshPlayerErrors", "autoRefreshTitle"],
           ["hideTwitchExtensions", "hideTwitchExtensionsTitle"],
           ["communityBadge", "communityBadgeTitle"],
         ] },
@@ -92,12 +100,7 @@
     return api ? api.get(ctx.lang, key) : key;
   }
 
-  function el(tag, cls, text) {
-    var node = document.createElement(tag);
-    if (cls) node.className = cls;
-    if (text != null) node.textContent = text;
-    return node;
-  }
+  var el = window.__SP_DOM__.el;
 
   function alive() {
     return !!(chrome.runtime && chrome.runtime.id);

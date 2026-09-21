@@ -13,16 +13,16 @@ import {
   getHandleComparisonKey,
   getPlatformIcon,
   getPlatformLabelKey,
+  isYoutubeChannelId,
   normalizePlatform,
   platformSupportsLiveStatus,
-  isYoutubeChannelId,
   sanitizeHandle,
 } from "./platforms.js";
-import { HISTORY_KEY, addSession, emptyHistory, markSeen, patchSession } from "./history-data.js";
+import { HISTORY_KEY, addSession, emptyHistory, markSeen, patchSession, removeEntry } from "./history-data.js";
+import { DEFAULT_PREFERENCES } from "./preferences-data.js";
 import { thankPlusSubscriber } from "./plus-thanks.js";
 import { SMART_ALERTS_KEY, normalizeRules, decideSmartAlert } from "./smart-alerts.js";
 import { PLUS_KEY, getDeviceId, isPlusActive, needsRecheck, verifyLicense } from "./plus.js";
-import { DEFAULT_PREFERENCES } from "./preferences-data.js";
 import { syncEventSubRaid, stopEventSubRaid } from "./eventsubRaid.js";
 import {
   RAID_WATCHER_ALARM,
@@ -46,14 +46,15 @@ const STORAGE_KEYS = {
   // wiped/reset. This is critical for MV3: every SW restart wipes the
   // in-memory `streamerLiveState` Map, so we MUST restore from storage.
   LIVE_STATE: "streamPulseLiveState",
+  EVENT_LOGS: "betaEventLogs",
 };
 
 // ─── Remote config (credentials hosted on Vercel, never in the zip) ──────────
 const REMOTE_CONFIG_URL = "https://streampulse.fr/api/streampulse-config";
 const REMOTE_CONFIG_CACHE_KEY = "streampulse:remoteConfig";
-const REMOTE_CONFIG_TTL_MS = 30 * 60 * 1000; // 30 min, plafond avant re-check ;
-// un token mort est de toute facon detecte au premier 401/403 (fetchTwitchJson
-// recharge alors la config immediatement), ce TTL ne borne que le pire cas.
+const REMOTE_CONFIG_TTL_MS = 30 * 60 * 1000; // 30 min — plafond avant re-check ;
+// un token mort est de toute façon detecte au premier 401/403 (fetchTwitchJson
+// recharge alors la config immédiatement), ce TTL ne borne que le pire cas.
 
 let CONFIG = { ...LOCAL_CONFIG };
 let _configReady = null;
@@ -72,8 +73,11 @@ async function fetchRemoteConfig() {
     }
     // Cache fresh → nothing more to do.
     if (cached && Date.now() - cached.fetchedAt < REMOTE_CONFIG_TTL_MS) return;
-    // Cache missing or stale → refresh from the network.
-    const res = await fetch(REMOTE_CONFIG_URL, { cache: "no-store" });
+    // Cache missing or stale → refresh from the network. Le paramètre
+    // aléatoire contourne le cache Edge (Vercel a deja servi des reponses
+    // perimees contenant un token mort apres une rotation de credentials).
+    const url = `${REMOTE_CONFIG_URL}?t=${Date.now()}`;
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return;
     const data = await res.json();
     if (data?.clientId) {
@@ -103,13 +107,13 @@ function ensureConfig() {
 
 /**
  * Rotation de token : quand Twitch rejette le jeton en cache (401/403), on
- * re-fetch la config serveur en ignorant le cache de 30 min. Une rotation
- * cote streampulse.fr devient donc effective en quelques secondes chez tous
- * les utilisateurs, au lieu d'attendre l'expiration du TTL.
+ * re-fetch la config serveur en ignorant le cache de 6 h. Une rotation côté
+ * streampulse.fr devient donc effective en quelques secondes chez tous les
+ * utilisateurs, au lieu d'attendre l'expiration du TTL.
  */
 async function refreshRemoteConfigForce() {
   try {
-    const res = await fetch(REMOTE_CONFIG_URL, { cache: "no-store" });
+    const res = await fetch(`${REMOTE_CONFIG_URL}?t=${Date.now()}`, { cache: "no-store" });
     if (!res.ok) return false;
     const data = await res.json();
     if (!data?.clientId) return false;
@@ -124,12 +128,9 @@ async function refreshRemoteConfigForce() {
 }
 
 /**
- * fetchJson pour l'API Twitch : rejoue la requete une fois si Twitch repond
- * 401/403 apres avoir recharge la config distante (token expire ou revoque
- * pendant que le cache local le croyait encore bon). Le garde ensureConfig
- * reste indispensable ici : la page d'arriere-plan Firefox se decharge comme
- * un service worker, donc CONFIG peut etre revenu au fallback local sans
- * accessToken a chaque reveil.
+ * fetchJson pour l'API Twitch : rejoue la requête une fois si Twitch répond
+ * 401/403 après avoir rechargé la config distante (token expiré ou révoqué
+ * pendant que le cache local le croyait encore bon).
  */
 async function fetchTwitchJson(url, options = {}, timeoutMs = 15000) {
   await ensureConfig();
@@ -165,8 +166,6 @@ const NOTIFICATION_NAMESPACE = "streampulse";
 
 const BADGE_COLOR_LIVE = "#f7f4e3";
 const BADGE_COLOR_IDLE = "#6C5CE7";
-const BADGE_COLOR_UPDATE = "#9146ff";
-const BADGE_LIVE_COUNT_KEY = "streampulse:badgeLiveCount";
 
 const PREFERENCES_KEY = "betaGeneralPreferences";
 
@@ -181,6 +180,48 @@ const DEFAULT_POLL_INTERVAL =
   Number(CONFIG.pollIntervalMinutes) > 0 ? CONFIG.pollIntervalMinutes : 1;
 
 
+// ─── Diagnostic : expose tot, meme si une erreur survient plus bas ───────────
+// Console du service worker (chrome://extensions → inspect du worker).
+self.__SP_DEBUG__ = {
+  async fakeTitleChange(handle) {
+    return this._fake(handle, "title", " [test StreamPulse]");
+  },
+  async fakeGameChange(handle) {
+    return this._fake(handle, "game", "Tests & Démos");
+  },
+  async fakeRaid(handle) {
+    const streamers = await DataStore.getStreamers();
+    const login = String(handle || "").toLowerCase();
+    const streamer = streamers.find(
+      (item) => String(item.handle || item.twitch || "").toLowerCase() === login
+    );
+    if (!streamer) return "StreamPulse: streamer introuvable";
+    await notifyIncomingRaid({
+      channel: streamer.handle || streamer.twitch,
+      raider: streamer.displayName || "TestRaid",
+      viewers: 42,
+    });
+    return "StreamPulse: notification de raid envoyee (chemin d'affichage)";
+  },
+  async _fake(handle, field, value) {
+    const streamers = await DataStore.getStreamers();
+    const login = String(handle || "").toLowerCase();
+    const streamer = streamers.find(
+      (item) =>
+        String(item.handle || item.twitch || "").toLowerCase() === login ||
+        (login === "" && streamerLiveState.get(item.id)?.isLive)
+    );
+    if (!streamer) return "StreamPulse: streamer introuvable (essaie sans handle pour cibler n'importe quel streamer en direct)";
+    const state = streamerLiveState.get(streamer.id);
+    if (!state || !state.isLive) {
+      return `StreamPulse: ${streamer.handle} n'est pas en direct — la simulation n'a de sens qu'en direct`;
+    }
+    state[field] = value;
+    await pollStreamers();
+    return `StreamPulse: changement de ${field} simule pour ${streamer.handle} — une alerte doit partir si l'alerte correspondante est active`;
+  },
+};
+
 function sanitizeLogin(value = "") {
   return sanitizeHandle("twitch", value);
 }
@@ -191,7 +232,15 @@ const _kickToken = { value: null, expiresAt: 0 };
 
 async function getKickCredentials() {
   const data = await chrome.storage.local.get("streampulse:kickCreds");
-  return data["streampulse:kickCreds"] || null;
+  const stored = data["streampulse:kickCreds"];
+  if (stored?.clientId && stored?.clientSecret) return stored;
+  // Repli : identifiants servis par la config distante streampulse.fr
+  // (variables Vercel STREAMPULSE_KICK_CLIENT_ID / _CLIENT_SECRET), hydratées
+  // dans CONFIG par fetchRemoteConfig().
+  if (CONFIG.kickClientId && CONFIG.kickClientSecret) {
+    return { clientId: CONFIG.kickClientId, clientSecret: CONFIG.kickClientSecret };
+  }
+  return null;
 }
 
 // Vol unique : sans lui, deux sondages concurrents demandent chacun un jeton
@@ -206,6 +255,30 @@ function getKickAppToken() {
 }
 
 async function fetchKickAppToken() {
+  // Les identifiants Kick peuvent venir de la config distante : garantit qu'elle
+  // est hydratee (cache d'abord) avant de conclure a une absence de creds.
+  await ensureConfig();
+
+  // 1) Voie privilégiée : le proxy streampulse.fr fabrique le jeton — le client
+  // secret ne quitte jamais le serveur. Échec silencieux si l'endpoint est
+  // indisponible (ancien déploiement) : on retombe sur les credentials locaux.
+  try {
+    const resp = await fetch(`https://streampulse.fr/api/kick-token?t=${Date.now()}`, { cache: "no-store" });
+    if (resp.ok) {
+      const json = await resp.json();
+      const expiresAt = json.expires_at ?? Date.now() + (json.expires_in ?? 3600) * 1000;
+      if (json.access_token && Date.now() < expiresAt - 120_000) {
+        _kickToken.value = json.access_token;
+        _kickToken.expiresAt = expiresAt;
+        await chrome.storage.local.set({
+          "streampulse:kickToken": { value: json.access_token, expiresAt },
+        });
+        return json.access_token;
+      }
+    }
+  } catch { /* repli ci-dessous */ }
+
+  // 2) Repli : credentials locaux (saveKickCreds / config distante transitoire)
   const creds = await getKickCredentials();
   if (!creds?.clientId || !creds?.clientSecret) return null;
 
@@ -342,6 +415,16 @@ function normalizeStreamer(raw) {
       typeof raw.notificationsEnabled === "boolean"
         ? raw.notificationsEnabled
         : true,
+    // Defauts explicites (defauts globaux) : sans eux, un champ absent valait
+    // « activé » via !== false — bruyant des qu'on ajoute un streamer.
+    gameNotificationsEnabled:
+      typeof raw.gameNotificationsEnabled === "boolean"
+        ? raw.gameNotificationsEnabled
+        : DEFAULT_PREFERENCES.gameNotifications,
+    titleNotificationsEnabled:
+      typeof raw.titleNotificationsEnabled === "boolean"
+        ? raw.titleNotificationsEnabled
+        : DEFAULT_PREFERENCES.titleNotifications,
     avatarUrl: raw.avatarUrl || "",
     twitchId: platform === "twitch" ? raw.twitchId || "" : "",
     createdAt: raw.createdAt || Date.now(),
@@ -475,6 +558,15 @@ function formatNumberForLanguage(lang, value) {
   }
 }
 
+// Bornes 1-24 h : une seule source de coercion, shared par sanitize() et le
+// handler updatePreferences (prealablement dupliquees avec des regles differentes).
+function clampInventoryIntervalHours(value) {
+  const hours = Number(value);
+  return Number.isFinite(hours)
+    ? Math.min(24, Math.max(1, Math.round(hours)))
+    : 24;
+}
+
 class DataStore {
   static async getStreamers() {
     const stored = await chrome.storage.local.get(STORAGE_KEYS.STREAMERS);
@@ -551,15 +643,6 @@ function sanitizeBadgeColor(value) {
     return value.trim().toLowerCase();
   }
   return DEFAULT_PREFERENCES.communityBadgeColor;
-}
-
-// Bornes 1-24 h : une seule source de coercion, shared par sanitize() et le
-// handler updatePreferences (prealablement dupliquees avec des regles differentes).
-function clampInventoryIntervalHours(value) {
-  const hours = Number(value);
-  return Number.isFinite(hours)
-    ? Math.min(24, Math.max(1, Math.round(hours)))
-    : 24;
 }
 
 class PreferenceStore {
@@ -692,18 +775,47 @@ class StatsStore {
     return merged;
   }
 
-  static async increment(stat, value = 1) {
-    const current = await this.get();
-    const newValue = (current[stat] || 0) + value;
-    return this.update({ [stat]: newValue });
+  // Read-modify-write sequencé : deux increments quasi simultanes (points +
+  // drop dans la meme seconde) s'ecrasaient sinon — meme pattern que HistoryStore.
+  static _queue = Promise.resolve();
+
+  static _enqueue(task) {
+    const run = this._queue.then(task, task);
+    this._queue = run.catch(() => {});
+    return run;
+  }
+
+  static increment(stat, value = 1) {
+    return this._enqueue(async () => {
+      const current = await this.get();
+      const newValue = (current[stat] || 0) + value;
+      return this.update({ [stat]: newValue });
+    });
   }
 }
 
 class EventLogStore {
+  // Before the EVENT_LOGS key existed, getLogs() read the whole storage and
+  // addLog() wrote under the literal "undefined" key. Recover those logs once.
+  static LEGACY_KEY = "undefined";
+
   static async getLogs() {
     try {
-      const stored = await chrome.storage.local.get(STORAGE_KEYS.EVENT_LOGS);
-      return stored[STORAGE_KEYS.EVENT_LOGS] || [];
+      const stored = await chrome.storage.local.get([
+        STORAGE_KEYS.EVENT_LOGS,
+        this.LEGACY_KEY,
+      ]);
+      const current = stored[STORAGE_KEYS.EVENT_LOGS];
+      if (current) {
+        return current;
+      }
+      const legacy = stored[this.LEGACY_KEY];
+      if (Array.isArray(legacy) && legacy.length > 0) {
+        await chrome.storage.local.set({ [STORAGE_KEYS.EVENT_LOGS]: legacy });
+        await chrome.storage.local.remove(this.LEGACY_KEY);
+        return legacy;
+      }
+      return [];
     } catch (_) {
       return [];
     }
@@ -770,6 +882,7 @@ async function resolveChannelAvatar(platform, channel) {
   // 4. API lookup (one-shot, cached)
   try {
     if (platform === "twitch") {
+      await ensureConfig();
       const data = await fetchTwitchJson(
         `https://api.twitch.tv/helix/users?login=${encodeURIComponent(channel)}`,
         { headers: twitchHeaders() }
@@ -835,6 +948,10 @@ class HistoryStore {
 
   static markSeen(id) {
     return this._enqueue(async () => this.save(markSeen(await this.get(), id)));
+  }
+
+  static removeEntry(id) {
+    return this._enqueue(async () => this.save(removeEntry(await this.get(), id)));
   }
 
   static recordEnded(streamer, liveState) {
@@ -1005,10 +1122,23 @@ class WatchTimeStore {
     await chrome.storage.local.set({ [STORAGE_KEYS.WATCH_TIME_DAILY]: next });
   }
 
-  static async record(platform, channel, seconds, avatarUrl = "", game = "") {
-    // Skip pure presence pings (no actual data to record)
-    if (seconds <= 0) return;
+  // record() et getSummary() font du read-modify-write sur la meme cle :
+  // ils passent par une file pour ne jamais s'ecarter (meme pattern que HistoryStore).
+  static _queue = Promise.resolve();
 
+  static _enqueue(task) {
+    const run = this._queue.then(task, task);
+    this._queue = run.catch(() => {});
+    return run;
+  }
+
+  static record(platform, channel, seconds, avatarUrl = "", game = "") {
+    // Skip pure presence pings (no actual data to record)
+    if (seconds <= 0) return Promise.resolve();
+    return this._enqueue(() => this._record(platform, channel, seconds, avatarUrl, game));
+  }
+
+  static async _record(platform, channel, seconds, avatarUrl = "", game = "") {
     const month = this._getMonthKey();
     const data = await this._getData();
 
@@ -1068,11 +1198,8 @@ class WatchTimeStore {
       })
     );
 
-    // Save back any newly resolved avatars
-    if (data[key]) {
-      data[key] = monthData;
-      await this._saveData(data);
-    }
+    // Persister les avatars resolus ICI ferait un RMW concurrent avec record() :
+    // on laisse record() en être responsable (il met deja avatarUrl a jour).
 
     const totalSeconds = entries.reduce((s, e) => s + e.watchSeconds, 0);
     const availableMonths = Object.keys(data).sort().reverse();
@@ -1105,10 +1232,10 @@ function twitchStreamToStatus(stream) {
 }
 
 /**
- * Sonde tous les logins Twitch suivis en un minimum de requetes Helix (1 appel
- * par tranche de 100, au lieu d'1 appel par streamer) : c'est ce qui evite de
- * saturer le quota 800 req/min du client ID quand la base d'utilisateurs
- * grandit. Renvoie une Map login -> stream Helix (les chaines hors ligne n'y
+ * Sonde tous les logins Twitch suivis en un minimum de requetes Helix
+ * (1 appel par tranche de 100, au lieu d'1 appel par streamer) : c'est ce qui
+ * evite de saturer le quota 800 req/min du client ID quand la base d'utilisateurs
+ * grandit. Renvoie une Map login -> stream Helix (les chaines hors ligne y
  * figurent simplement pas).
  */
 async function fetchTwitchStreamsBatch(logins) {
@@ -1145,6 +1272,7 @@ class PlatformChecker {
   static async getTwitchUser(login) {
     const sanitized = sanitizeLogin(login);
     if (!sanitized) return null;
+    await ensureConfig();
     try {
       const data = await fetchTwitchJson(
         `https://api.twitch.tv/helix/users?login=${sanitized}`,
@@ -1160,6 +1288,7 @@ class PlatformChecker {
   static async getTwitchStatus(login) {
     const sanitized = sanitizeLogin(login);
     if (!sanitized) return { isLive: false };
+    await ensureConfig();
     try {
       const data = await fetchTwitchJson(
         `https://api.twitch.tv/helix/streams?user_login=${sanitized}`,
@@ -1270,15 +1399,14 @@ class PlatformChecker {
       stream?.category?.title ||
       "";
 
-    const preferredSize = { width: 1280, height: 720 };
-    const dimensionSuffix = `${preferredSize.width}x${preferredSize.height}`;
     // Optimize: Cache for 60 seconds to prevent flickering on every popup open
     const cb = Math.floor(Date.now() / 60000); // 1-minute cache bucket
 
-    const slug = channel?.slug || channel?.user?.username || stream?.slug;
-    const channelId = channel?.id || stream?.channel_id || stream?.id;
-
-    // API-provided URLs first (most reliable), then constructed fallbacks
+    // Uniquement les URLs fournies par l'API. Kick renvoie `thumbnail: null`
+    // quand il n'a pas d'image ; les URLs construites qui étaient sondées en
+    // secours (images.kick.com/v2/stream-thumbnails/..., files.kick.com/
+    // stream-thumbnails/...) répondent 403 en réel : elles ne donnaient jamais
+    // d'image et rajoutaient des probes mortes qui retardaient le chargement.
     const apiRaw = [
       stream?.thumbnail?.url,
       stream?.thumbnail?.src,
@@ -1286,27 +1414,9 @@ class PlatformChecker {
       stream?.thumbnail,
     ];
 
-    const constructedRaw = [];
-    if (channelId) {
-      constructedRaw.push(
-        `https://images.kick.com/v2/stream-thumbnails/${channelId}/live-${dimensionSuffix}.webp`,
-        `https://images.kick.com/v2/stream-thumbnails/${channelId}/live-${dimensionSuffix}.jpg`,
-        `https://files.kick.com/stream-thumbnails/${channelId}/livestream-${dimensionSuffix}.webp`,
-        `https://files.kick.com/stream-thumbnails/${channelId}/livestream-${dimensionSuffix}.jpg`,
-        `https://files.kick.com/stream-thumbnails/${channelId}/livestream.jpg`
-      );
-    }
-    if (slug) {
-      constructedRaw.push(
-        `https://files.kick.com/stream-thumbnails/${slug}/livestream-${dimensionSuffix}.webp`,
-        `https://files.kick.com/stream-thumbnails/${slug}/livestream-${dimensionSuffix}.jpg`,
-        `https://files.kick.com/stream-thumbnails/${slug}/livestream.jpg`
-      );
-    }
-
     const distinctUrls = new Set();
     const allCandidates = [];
-    for (const raw of [...apiRaw, ...constructedRaw]) {
+    for (const raw of apiRaw) {
       const resolved = resolveKickAsset(raw);
       if (resolved && !resolved.includes("null") && !resolved.includes("undefined")) {
         if (!distinctUrls.has(resolved)) {
@@ -1732,11 +1842,22 @@ class NotificationCenter {
 }
 
 class NotificationSystem {
-  static async notifyLive(streamer, status, preferences = DEFAULT_PREFERENCES) {
-    if (preferences.liveNotifications === false) {
-      return;
-    }
+  // Avatar du streamer si connu, icone de plateforme sinon — logique partagée
+  // par les trois notifications (avant : copie-collé trois fois).
+  static resolveNotificationIcon(streamer, platformKey) {
+    const streamerStatus = streamerStates.get(streamer.id);
+    const fallbackIcon =
+      (chrome?.runtime && getPlatformIcon(platformKey)
+        ? chrome.runtime.getURL(getPlatformIcon(platformKey))
+        : null) || NotificationCenter.getDefaultIcon();
+    return NotificationCenter.resolveIcon(
+      streamerStatus?.avatarUrl || streamer.avatarUrl || fallbackIcon
+    );
+  }
 
+  static async notifyLive(streamer, status, preferences = DEFAULT_PREFERENCES) {
+    // Le verrou par streamer est dejà verifie par l'appelant : ici on ne
+    // re-verifie pas la preference globale (modele « par streamer d'abord »).
     const lang = normalizeLanguage(preferences?.language);
     const platform = status.platform || streamer.platform || "twitch";
     const name =
@@ -1779,14 +1900,6 @@ class NotificationSystem {
       platform,
       streamer.handle || streamer.twitch || streamer.id
     );
-    const streamerStatus = streamerStates.get(streamer.id);
-    const fallbackIcon =
-      (chrome?.runtime && getPlatformIcon(platform)
-        ? chrome.runtime.getURL(getPlatformIcon(platform))
-        : null) || NotificationCenter.getDefaultIcon();
-    const iconCandidate =
-      streamerStatus?.avatarUrl || streamer.avatarUrl || fallbackIcon;
-    const iconUrl = NotificationCenter.resolveIcon(iconCandidate);
 
     await NotificationCenter.show({
       title,
@@ -1794,9 +1907,41 @@ class NotificationSystem {
       streamerId: streamer.id,
       platform: status.platform,
       url: status.url || targetUrl,
-      iconUrl,
+      iconUrl: this.resolveNotificationIcon(streamer, platform),
       requireInteraction: true,
       priority: 2,
+      playSound: preferences?.soundsEnabled !== false,
+    });
+  }
+
+  // Changement de catégorie ou de titre : mêmes garde-fous, même structure,
+  // seuls les textes et les paramètres de traduction varient.
+  static async notifyChangeEvent(
+    streamer,
+    preferences,
+    { alertKey: _alertKey, titleKey, messageKey, messageParams, platform }
+  ) {
+    const lang = normalizeLanguage(preferences?.language);
+    const platformKey = platform || streamer.platform || "twitch";
+    if (!platformSupportsLiveStatus(platformKey)) {
+      return;
+    }
+    const name =
+      streamer.displayName ||
+      formatHandleForDisplay(platformKey, streamer.handle || streamer.twitch);
+
+    await NotificationCenter.show({
+      title: translate(lang, titleKey, { name }),
+      message: translate(lang, messageKey, messageParams(lang)),
+      streamerId: streamer.id,
+      platform: platformKey,
+      url: buildProfileUrl(
+        platformKey,
+        streamer.handle || streamer.twitch || streamer.id
+      ),
+      iconUrl: this.resolveNotificationIcon(streamer, platformKey),
+      requireInteraction: false,
+      priority: 1,
       playSound: preferences?.soundsEnabled !== false,
     });
   }
@@ -1808,64 +1953,17 @@ class NotificationSystem {
     preferences = DEFAULT_PREFERENCES,
     platform = null
   ) {
-    if (
-      preferences.liveNotifications === false ||
-      !preferences.gameNotifications
-    ) {
-      return;
-    }
-
-    const lang = normalizeLanguage(preferences?.language);
-    const platformKey = platform || streamer.platform || "twitch";
-    if (!platformSupportsLiveStatus(platformKey)) {
-      return;
-    }
-    const title = translate(
-      lang,
-      "background.notifications.categoryChangeTitle",
-      {
-        name:
-          streamer.displayName ||
-          formatHandleForDisplay(
-            platformKey,
-            streamer.handle || streamer.twitch
-          ),
-      }
-    );
-    const message = translate(
-      lang,
-      "background.notifications.categoryChangeMessage",
-      {
+    await this.notifyChangeEvent(streamer, preferences, {
+      alertKey: "gameNotifications",
+      titleKey: "background.notifications.categoryChangeTitle",
+      messageKey: "background.notifications.categoryChangeMessage",
+      messageParams: (lang) => ({
         from:
           fromGame ||
           translate(lang, "background.notifications.unknownCategory"),
         to: toGame || translate(lang, "background.notifications.newCategory"),
-      }
-    );
-
-    const targetUrl = buildProfileUrl(
-      platformKey,
-      streamer.handle || streamer.twitch || streamer.id
-    );
-    const streamerStatus = streamerStates.get(streamer.id);
-    const fallbackIcon =
-      (chrome?.runtime && getPlatformIcon(platformKey)
-        ? chrome.runtime.getURL(getPlatformIcon(platformKey))
-        : null) || NotificationCenter.getDefaultIcon();
-    const iconCandidate =
-      streamerStatus?.avatarUrl || streamer.avatarUrl || fallbackIcon;
-    const iconUrl = NotificationCenter.resolveIcon(iconCandidate);
-
-    await NotificationCenter.show({
-      title,
-      message,
-      streamerId: streamer.id,
-      platform: platformKey,
-      url: targetUrl,
-      iconUrl,
-      requireInteraction: false,
-      priority: 1,
-      playSound: preferences?.soundsEnabled !== false,
+      }),
+      platform,
     });
   }
 
@@ -1876,87 +1974,75 @@ class NotificationSystem {
     preferences = DEFAULT_PREFERENCES,
     platform = null
   ) {
-    if (
-      preferences.liveNotifications === false ||
-      !preferences.titleNotifications
-    ) {
-      return;
-    }
-
-    const lang = normalizeLanguage(preferences?.language);
-    const platformKey = platform || streamer.platform || "twitch";
-    if (!platformSupportsLiveStatus(platformKey)) {
-      return;
-    }
-    const title = translate(
-      lang,
-      "background.notifications.titleChangeTitle",
-      {
-        name:
-          streamer.displayName ||
-          formatHandleForDisplay(
-            platformKey,
-            streamer.handle || streamer.twitch
-          ),
-      }
-    );
-    // Le corps ne montre que le nouveau titre : un flux Twitch en fait souvent
-    // plusieurs par session et le « avant apres » deborde de la notification.
-    const message = translate(
-      lang,
-      "background.notifications.titleChangeMessage",
-      {
+    await this.notifyChangeEvent(streamer, preferences, {
+      alertKey: "titleNotifications",
+      titleKey: "background.notifications.titleChangeTitle",
+      // Le corps ne montre que le nouveau titre : un flux Twitch en fait souvent
+      // plusieurs par session et le « avant apres » deborde de la notification.
+      messageKey: "background.notifications.titleChangeMessage",
+      messageParams: (lang) => ({
         to:
           toTitle ||
           translate(lang, "background.notifications.unknownTitle"),
-      }
-    );
-
-    const targetUrl = buildProfileUrl(
-      platformKey,
-      streamer.handle || streamer.twitch || streamer.id
-    );
-    const streamerStatus = streamerStates.get(streamer.id);
-    const fallbackIcon =
-      (chrome?.runtime && getPlatformIcon(platformKey)
-        ? chrome.runtime.getURL(getPlatformIcon(platformKey))
-        : null) || NotificationCenter.getDefaultIcon();
-    const iconCandidate =
-      streamerStatus?.avatarUrl || streamer.avatarUrl || fallbackIcon;
-    const iconUrl = NotificationCenter.resolveIcon(iconCandidate);
-
-    await NotificationCenter.show({
-      title,
-      message,
-      streamerId: streamer.id,
-      platform: platformKey,
-      url: targetUrl,
-      iconUrl,
-      requireInteraction: false,
-      priority: 1,
-      playSound: preferences?.soundsEnabled !== false,
+      }),
+      platform,
     });
   }
 
+  // Chaque clic sur « Tester une notification » fait tourner un compteur :
+  // 1er clic = live, 2e = changement de categorie, 3e = changement de titre.
+  // Permet de verifier le pipeline complet des trois alertes sans attendre
+  // qu'un streamer change reellement de jeu ou de titre.
+  static _testStep = 0;
+
   static async sendTest(preferences = DEFAULT_PREFERENCES) {
-    if (preferences.liveNotifications === false) {
-      throw new Error(
-        translateWithPrefs(
-          preferences,
-          "background.errors.notificationsDisabled"
-        )
-      );
+    const lang = normalizeLanguage(preferences?.language);
+    const step = this._testStep % 3;
+    this._testStep += 1;
+
+    if (step === 0) {
+      await NotificationCenter.show({
+        title: translate(lang, "common.appName"),
+        message: translate(lang, "background.notifications.testSimpleMessage"),
+        requireInteraction: true,
+        priority: 2,
+        playSound: preferences?.soundsEnabled !== false,
+      });
+      return;
     }
 
-    const lang = normalizeLanguage(preferences?.language);
-
-    await NotificationCenter.show({
-      title: translate(lang, "common.appName"),
-      message: translate(lang, "background.notifications.testSimpleMessage"),
-      requireInteraction: true,
-      priority: 2,
-      playSound: preferences?.soundsEnabled !== false,
-    });
+    // Bypass volontaire des preferences : l'objectif du bouton est de montrer
+    // a quoi ressemble chaque type d'alerte, meme si elle est desactivee.
+    const forcedPrefs = {
+      ...preferences,
+      liveNotifications: true,
+      gameNotifications: true,
+      titleNotifications: true,
+    };
+    const fakeStreamer = {
+      id: "test",
+      platform: "twitch",
+      handle: "test",
+      displayName: translate(lang, "common.appName"),
+      notificationsEnabled: true,
+      gameNotificationsEnabled: true,
+      titleNotificationsEnabled: true,
+    };
+    if (step === 1) {
+      await this.notifyGameChange(
+        fakeStreamer,
+        translate(lang, "background.notifications.unknownCategory"),
+        translate(lang, "background.notifications.newCategory"),
+        forcedPrefs
+      );
+    } else {
+      await this.notifyTitleChange(
+        fakeStreamer,
+        "",
+        translate(lang, "background.notifications.testTitleMessage"),
+        forcedPrefs
+      );
+    }
   }
 }
 
@@ -1991,6 +2077,99 @@ class SoundManager {
     }
   }
 }
+
+// ─── Bêta : détection des raids entrants en arrière-plan ────────────────────
+//
+// Le watcher IRC est opt-in (backgroundRaidAlerts) : une fois activé, il
+// maintient une connexion anonyme vers les chaînes Twitch favorites. Voir
+// js/raidWatcher.js pour le détail du protocole et les limites de coût.
+
+async function refreshRaidWatcher() {
+  try {
+    const preferences = await PreferenceStore.get();
+    if (preferences.backgroundRaidAlerts !== true) {
+      stopEventSubRaid();
+      stopRaidWatcher();
+      return;
+    }
+    // EventSub d'abord : l'evenement channel.raid part au DEBUT du compte a
+    // rebours (~90 s avant l'arrivee), la ou l'IRC n'entend le raid qu'a son
+    // atterrissage. L'IRC reste le repli si l'Helix token n'est pas disponible.
+    await ensureConfig();
+    if (CONFIG.accessToken && CONFIG.clientId) {
+      const active = await syncEventSubRaid(notifyIncomingRaid, twitchHeaders);
+      if (active) {
+        // Les deux en meme temps notifieraient chaque raid deux fois.
+        stopRaidWatcher();
+        return;
+      }
+    }
+    await syncRaidWatcher(notifyIncomingRaid);
+  } catch (error) {
+    console.warn("Raid watcher sync failed:", error.message);
+  }
+}
+
+async function notifyIncomingRaid({ channel, raider, viewers }) {
+  const preferences = await PreferenceStore.get();
+  const lang = normalizeLanguage(preferences?.language);
+
+  const displayName = await resolveChannelDisplayName(channel);
+  const viewersText = formatNumberForLanguage(lang, viewers || 0);
+
+  let iconUrl = null;
+  try {
+    iconUrl = await resolveChannelAvatar("twitch", channel);
+  } catch (_) {
+    // L'avatar est décoratif : la notification part sans icône dédiée.
+  }
+
+  await NotificationCenter.show({
+    title: translate(lang, "background.notifications.raidIncomingTitle", {
+      name: displayName,
+    }),
+    message: translate(lang, "background.notifications.raidIncomingMessage", {
+      raider: raider || translate(lang, "common.unknown"),
+      viewers: viewersText,
+    }),
+    platform: "twitch",
+    // Les points de raid se gagnent en arrivant DEPUIS le stream du raid
+    // partant : on ouvre chez {{raider}}, pas sur la chaîne raidée.
+    url: buildProfileUrl("twitch", raider),
+    iconUrl,
+    requireInteraction: false,
+    priority: 1,
+    playSound: preferences?.soundsEnabled !== false,
+  });
+}
+
+// Le handle IRC est en minuscules ; on récupère le nom d'affichage connu des
+// données de l'extension avant de retomber sur le handle brut.
+async function resolveChannelDisplayName(channel) {
+  try {
+    const stored = await chrome.storage.local.get(STORAGE_KEYS.STREAMERS);
+    const streamers = Array.isArray(stored[STORAGE_KEYS.STREAMERS])
+      ? stored[STORAGE_KEYS.STREAMERS]
+      : [];
+    const match = streamers.find(
+      (s) =>
+        (s.platform || "twitch") === "twitch" &&
+        getHandleComparisonKey("twitch", s.handle || s.twitch || s.id || "") ===
+          getHandleComparisonKey("twitch", channel)
+    );
+    if (match?.displayName || match?.name) {
+      return match.displayName || match.name;
+    }
+  } catch (_) {
+    // Lecture de storage échouée : on retombe sur le handle.
+  }
+  return formatHandleForDisplay("twitch", channel);
+}
+
+/** Cle du dernier nombre de streamers en direct, relu apres un redemarrage. */
+const BADGE_LIVE_COUNT_KEY = "streampulse:badgeLiveCount";
+/** Violet Twitch, comme la pastille inline des notes dans la popup. */
+const BADGE_COLOR_UPDATE = "#9146ff";
 
 class ActionBadge {
   static formatBadgeCount(count) {
@@ -2032,8 +2211,8 @@ class ActionBadge {
   }
 
   static async update(liveCount, preferences = null) {
-    // Le compteur survit au dechargement de la page d'arriere-plan : sans lui,
-    // un rendu declenche par une autre source (notes de version, demarrage)
+    // Le compteur survit aux redemarrages du service worker : sans lui, le
+    // rendu declenche par une autre source (notes de version, demarrage)
     // n'aurait aucun moyen de savoir combien de streamers sont en direct et
     // effacerait le badge.
     try {
@@ -2045,8 +2224,8 @@ class ActionBadge {
   /**
    * Unique ecrivain du badge. Deux sources veulent l'ecrire : le nombre de
    * streamers en direct et la pastille « notes de version non lues ». Elles
-   * s'ecrasaient mutuellement, et la resynchronisation tournant a chaque
-   * reveil de la page d'arriere-plan, le compteur disparaissait a des moments
+   * s'ecrasaient mutuellement, et syncUpdateBadge() tournant a chaque
+   * demarrage du service worker, le compteur disparaissait a des moments
    * arbitraires. Le direct l'emporte, puisque c'est la question a laquelle le
    * badge repond ; la pastille des notes n'apparait que quand personne n'est
    * en direct.
@@ -2078,10 +2257,6 @@ class ActionBadge {
   }
 }
 
-async function syncUpdateBadge() {
-  await ActionBadge.render();
-}
-
 /**
  * Dernier titre et derniere categorie vus en direct pour ce streamer.
  * Se lit avant que le sondage en cours n'ecrase l'etat, donc renvoie bien
@@ -2099,27 +2274,23 @@ function lastSeenOf(streamerId) {
 }
 
 /**
- * Construit le statut d'un streamer. `twitchBatch` est le resultat de la
- * sonde groupee (voir pollStreamers) : { streams: Map|null, error } ; quand
- * il est fourni, aucune requete Helix individuelle n'est emise pour ce
- * streamer. Un echec du batch marque tous les streamers Twitch en erreur (la
- * boucle de sondage preserve alors leur etat live precedent).
+ * Construit le statut d'un streamer. `twitchBatch` est le résultat de la
+ * sonde groupée (voir pollStreamers) : { streams: Map|null, error } — quand
+ * il est fourni, aucune requête Helix individuelle n'est émise pour ce
+ * streamer. Un échec du batch marque tous les streamers Twitch en erreur
+ * (la boucle de sondage préserve alors leur état live précédent).
  */
 async function buildStreamerStatus(streamer, twitchBatch = null) {
   const platform = streamer.platform || "twitch";
   let status;
-  if (twitchBatch && normalizePlatform(platform) === "twitch") {
+  if (twitchBatch && platform === "twitch") {
     const login = sanitizeLogin(streamer.twitch || streamer.handle);
     if (!login) {
       status = { isLive: false };
     } else if (twitchBatch.error) {
       status = { isLive: false, error: twitchBatch.error, isError: true };
     } else {
-      status = {
-        ...twitchStreamToStatus(twitchBatch.streams.get(login)),
-        url: buildProfileUrl(platform, streamer.twitch || streamer.handle),
-        supportsLiveStatus: platformSupportsLiveStatus(platform),
-      };
+      status = twitchStreamToStatus(twitchBatch.streams.get(login));
     }
   } else {
     status = await PlatformChecker.getStatus(streamer);
@@ -2192,6 +2363,12 @@ async function pollStreamers({ forceNotification = false } = {}) {
   return _pollInFlight;
 }
 
+// Rattrapage : un stream détecté en direct alors qu'il a démarré depuis plus
+// de 10 minutes n'est pas un événement « vient de partir » (navigateur fermé,
+// SW endormi, extension rechargée). Ces streamers ne déclenchent pas 1
+// notification chacun : ils alimentent une seule notification groupée.
+const CATCHUP_THRESHOLD_MS = 10 * 60 * 1000;
+
 async function _pollStreamersImpl({ forceNotification = false } = {}) {
   await ensureConfig(); // hydrate credentials before any Twitch API call (MV3 SW restart safety)
   const streamers = await DataStore.getStreamers();
@@ -2229,6 +2406,7 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
           thumbnailUrl: entry.thumbnailUrl || "",
           matchedRuleIds: Array.isArray(entry.matchedRuleIds) ? entry.matchedRuleIds : [],
           supportsLiveStatus: entry.supportsLiveStatus !== false,
+          updatedAt: typeof entry.updatedAt === "number" ? entry.updatedAt : undefined,
         });
       }
     });
@@ -2248,10 +2426,10 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
     streamerById.set(streamer.id, streamer);
   });
 
-  // Sonde groupee Twitch : 1 requete Helix par tranche de 100 streamers au
-  // lieu d'1 requete par streamer. Un echec du batch est propage tel quel
-  // (chaque streamer Twitch repart en isError, l'etat live precedent est
-  // conserve par la boucle ci-dessous).
+  // Sonde groupée Twitch : 1 requête Helix par tranche de 100 streamers au
+  // lieu d'1 requête par streamer. Un échec du batch est propagé tel quel
+  // (chaque streamer Twitch repart en isError, l'état live précédent est
+  // conservé par la boucle ci-dessous).
   const twitchBatch = { streams: new Map(), error: "" };
   const twitchLogins = streamers
     .filter((streamer) => normalizePlatform(streamer.platform || "twitch") === "twitch")
@@ -2266,16 +2444,18 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
     }
   }
 
-  // Kick reste sonde par chaine (pas d'API batch) : on borne la concurrence.
+  // Kick reste sondé par chaine (pas d'API batch) : on borne la concurrence.
   const statuses = [];
   const CONCURRENCY = 3;
   for (let i = 0; i < streamers.length; i += CONCURRENCY) {
     const batch = streamers.slice(i, i + CONCURRENCY);
-    const results = await Promise.all(
-      batch.map((streamer) => buildStreamerStatus(streamer, twitchBatch))
-    );
+    const results = await Promise.all(batch.map((streamer) => buildStreamerStatus(streamer, twitchBatch)));
     statuses.push(...results);
   }
+
+  // Streamers déjà en direct au premier sondage (rattrapage) : une seule
+  // notification groupée sera envoyée après la boucle, pas 1 par streamer.
+  const catchUpLive = [];
 
   for (const status of statuses) {
     const streamer = streamerById.get(status.id);
@@ -2303,6 +2483,10 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
       thumbnailUrl: status.active?.isLive ? status.active?.thumbnailUrl || previousLiveState.thumbnailUrl || "" : "",
       matchedRuleIds: [],
       supportsLiveStatus: status.active?.supportsLiveStatus !== false,
+      // Horodaté pour la détection de rattrapage : si notre dernière
+      // observation remonte à trop longtemps, un live détecté n'est pas
+      // un événement « vient de partir » (navigateur fermé, SW endormi).
+      updatedAt: Date.now(),
       isError: Boolean(status.active?.isError),
     };
 
@@ -2324,9 +2508,11 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
       );
     }
 
-    const notificationsEnabled =
-      preferences.liveNotifications !== false &&
-      streamer.notificationsEnabled !== false;
+    // Mode « par streamer d'abord » : le toggle du streamer est la seule
+    // source de vérite (les toggles globaux des reglages sont des actions en
+    // masse, plus des verrous — sinon deux interrupteurs doivent etre actifs
+    // pour qu'une alerte parte, et personne ne comprend pourquoi elle ne part pas).
+    const notificationsEnabled = streamer.notificationsEnabled !== false;
 
     // Regles d'alerte du streamer : elles remplacent l'alerte classique.
     const smartDecision = nextLiveState.isError
@@ -2352,15 +2538,56 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
         previousLiveState.sessionId !== nextLiveState.sessionId;
 
       if (!wasLive || sessionChanged) {
-        await NotificationSystem.notifyLive(
-          streamer,
-          status.active,
-          preferences
-        );
+        // Rattrapage : pas d'alerte individuelle mensongère (« X est en
+        // direct ! » pour un stream de 3 h) ni de rafale au démarrage.
+        // Deux signaux, l'un couvre l'autre : l'âge de notre dernière
+        // observation persistée (fonctionne pour toutes les plateformes,
+        // YouTube n'expose pas de startedAt), et le startedAt de l'API
+        // quand il existe.
+        const stateAge =
+          typeof previousLiveState.updatedAt === "number"
+            ? Date.now() - previousLiveState.updatedAt
+            : Number.POSITIVE_INFINITY;
+        const startedAtMs = nextLiveState.startedAt ? Date.parse(nextLiveState.startedAt) : NaN;
+        const isCatchUp =
+          stateAge > CATCHUP_THRESHOLD_MS ||
+          (Number.isFinite(startedAtMs) && Date.now() - startedAtMs > CATCHUP_THRESHOLD_MS);
+        if (isCatchUp) {
+          const platform = status.platform || streamer.platform || "twitch";
+          catchUpLive.push(
+            streamer.displayName ||
+              formatHandleForDisplay(platform, streamer.handle || streamer.twitch)
+          );
+        } else {
+          await NotificationSystem.notifyLive(
+            streamer,
+            status.active,
+            preferences
+          );
+        }
       } else {
         const gameNotificationsEnabled = streamer.gameNotificationsEnabled !== false;
+        // Journal de diagnostic : un changement de jeu/titre sans alerte est
+        // invisible pour l'utilisateur. Le SW console (chrome://extensions →
+        // inspect) dit alors exactement quel garde a bloque l'envoi.
+        if (previousLiveState.isLive && nextLiveState.isLive && previousLiveState.game !== nextLiveState.game) {
+          console.info("[SP] changement de categorie detecte:", streamer.handle, {
+            prefGame: preferences.gameNotifications,
+            prefLive: preferences.liveNotifications,
+            streamerToggle: streamer.gameNotificationsEnabled,
+          });
+        }
+        if (previousLiveState.isLive && nextLiveState.isLive && previousLiveState.title !== nextLiveState.title) {
+          console.info("[SP] changement de titre detecte:", streamer.handle, {
+            prefTitle: preferences.titleNotifications,
+            prefLive: preferences.liveNotifications,
+            streamerToggle: streamer.titleNotificationsEnabled,
+            sessionIdentique:
+              !previousLiveState.sessionId || !nextLiveState.sessionId ||
+              previousLiveState.sessionId === nextLiveState.sessionId,
+          });
+        }
         const shouldNotifyGame =
-          preferences.gameNotifications &&
           gameNotificationsEnabled &&
           preferences.liveNotifications !== false &&
           previousLiveState.isLive &&
@@ -2383,7 +2610,6 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
 
         const titleNotificationsEnabled = streamer.titleNotificationsEnabled !== false;
         const shouldNotifyTitle =
-          preferences.titleNotifications &&
           titleNotificationsEnabled &&
           preferences.liveNotifications !== false &&
           previousLiveState.isLive &&
@@ -2408,6 +2634,23 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
 
     streamerStates.set(status.id, status);
     streamerLiveState.set(streamer.id, nextLiveState);
+  }
+
+  // Rattrapage au démarrage : une seule notification récapitulative, quel que
+  // soit le nombre de streamers trouvés déjà en direct.
+  if (catchUpLive.length > 0) {
+    const lang = normalizeLanguage(preferences?.language);
+    const shown = catchUpLive.slice(0, 3).join(", ");
+    const rest = catchUpLive.length - 3;
+    const names = rest > 0 ? `${shown} +${rest}` : shown;
+    await NotificationCenter.show({
+      title: translate(lang, "background.notifications.startupBatchTitle"),
+      message: translate(lang, "background.notifications.startupBatchBody", { names }),
+      iconUrl: NotificationCenter.getDefaultIcon(),
+      requireInteraction: false,
+      priority: 1,
+      playSound: preferences?.soundsEnabled !== false,
+    });
   }
 
   const statusesObject = {};
@@ -2510,6 +2753,13 @@ function scheduleKeepAliveAlarm() {
 
 let initDone = false;
 
+// Badge "nouveau" sur l'icone de l'extension : visible avant meme d'ouvrir la
+// popup, pose a chaque mise a jour, retire quand les notes de version sont
+// ouvertes. Violet Twitch, comme la pastille inline des notes dans la popup.
+async function syncUpdateBadge() {
+  await ActionBadge.render();
+}
+
 async function openOnboarding(mode = "") {
   const query = mode ? `?mode=${encodeURIComponent(mode)}` : "";
   const url = chrome.runtime.getURL(`html/onboarding.html${query}`);
@@ -2558,92 +2808,21 @@ async function migrateAutoOpenInventoryInterval() {
   }
 }
 
-// ─── Bêta : détection des raids entrants en arrière-plan ────────────────────
-//
-// Le watcher IRC est opt-in (backgroundRaidAlerts) : une fois activé, il
-// maintient une connexion anonyme vers les chaînes Twitch favorites. Voir
-// js/raidWatcher.js pour le détail du protocole et les limites de coût.
+// 26.9.18 : suivre un raid rapporte des points de chaine, donc l'annulation
+// automatique passe a desactivee par defaut. L'ancien defaut (active) etait deja
+// ecrit en storage chez tout le monde : on bascule une seule fois, marque par un
+// drapeau, pour qu'un utilisateur qui la reactive ne soit pas ecrase ensuite.
+const RAID_CANCEL_MIGRATION_KEY = "autoCancelRaidsMigratedToOff";
 
-async function refreshRaidWatcher() {
+async function migrateAutoCancelRaidsOff() {
   try {
-    const preferences = await PreferenceStore.get();
-    if (preferences.backgroundRaidAlerts !== true) {
-      stopEventSubRaid();
-      stopRaidWatcher();
-      return;
-    }
-    // EventSub d'abord : l'evenement channel.raid part au DEBUT du compte a
-    // rebours (~90 s avant l'arrivee), la ou l'IRC n'entend le raid qu'a son
-    // atterrissage. L'IRC reste le repli si l'Helix token n'est pas disponible.
-    await ensureConfig();
-    if (CONFIG.accessToken && CONFIG.clientId) {
-      const active = await syncEventSubRaid(notifyIncomingRaid, twitchHeaders);
-      if (active) {
-        // Les deux en meme temps notifieraient chaque raid deux fois.
-        stopRaidWatcher();
-        return;
-      }
-    }
-    await syncRaidWatcher(notifyIncomingRaid);
+    const stored = await chrome.storage.local.get(RAID_CANCEL_MIGRATION_KEY);
+    if (stored[RAID_CANCEL_MIGRATION_KEY]) return;
+    await PreferenceStore.update({ autoCancelRaids: false });
+    await chrome.storage.local.set({ [RAID_CANCEL_MIGRATION_KEY]: true });
   } catch (error) {
-    console.warn("Raid watcher sync failed:", error.message);
+    console.warn("Raid cancel migration failed:", error.message);
   }
-}
-
-async function notifyIncomingRaid({ channel, raider, viewers }) {
-  const preferences = await PreferenceStore.get();
-  const lang = normalizeLanguage(preferences?.language);
-
-  const displayName = await resolveChannelDisplayName(channel);
-  const viewersText = formatNumberForLanguage(lang, viewers || 0);
-
-  let iconUrl = null;
-  try {
-    iconUrl = await resolveChannelAvatar("twitch", channel);
-  } catch (_) {
-    // L'avatar est décoratif : la notification part sans icône dédiée.
-  }
-
-  await NotificationCenter.show({
-    title: translate(lang, "background.notifications.raidIncomingTitle", {
-      name: displayName,
-    }),
-    message: translate(lang, "background.notifications.raidIncomingMessage", {
-      raider: raider || translate(lang, "common.unknown"),
-      viewers: viewersText,
-    }),
-    platform: "twitch",
-    // Les points de raid se gagnent en arrivant DEPUIS le stream du raid
-    // partant : on ouvre chez {{raider}}, pas sur la chaîne raidée.
-    url: buildProfileUrl("twitch", raider),
-    iconUrl,
-    requireInteraction: false,
-    priority: 1,
-    playSound: preferences?.soundsEnabled !== false,
-  });
-}
-
-// Le handle IRC est en minuscules ; on récupère le nom d'affichage connu des
-// données de l'extension avant de retomber sur le handle brut.
-async function resolveChannelDisplayName(channel) {
-  try {
-    const stored = await chrome.storage.local.get(STORAGE_KEYS.STREAMERS);
-    const streamers = Array.isArray(stored[STORAGE_KEYS.STREAMERS])
-      ? stored[STORAGE_KEYS.STREAMERS]
-      : [];
-    const match = streamers.find(
-      (s) =>
-        (s.platform || "twitch") === "twitch" &&
-        getHandleComparisonKey("twitch", s.handle || s.twitch || s.id || "") ===
-          getHandleComparisonKey("twitch", channel)
-    );
-    if (match?.displayName || match?.name) {
-      return match.displayName || match.name;
-    }
-  } catch (_) {
-    // Lecture de storage échouée : on retombe sur le handle.
-  }
-  return formatHandleForDisplay("twitch", channel);
 }
 
 chrome.runtime.onInstalled.addListener(async (details) => {
@@ -2652,6 +2831,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   const streamers = await DataStore.ensureDefaults();
   await PreferenceStore.ensureDefaults();
   await migrateAutoOpenInventoryInterval();
+  await migrateAutoCancelRaidsOff();
   await NotificationCenter.init();
   scheduleWatcherAlarm();
   scheduleKeepAliveAlarm();
@@ -2769,45 +2949,57 @@ async function openStreamerFromNotification(streamerId) {
   }
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+function handleMessage(request, sender, sendResponse) {
   switch (request?.type) {
     case "notify":
       (async () => {
-        await NotificationCenter.show({
-          title: request.title,
-          message: request.message,
-          url: request.url || null,
-          streamerId: request.streamerId || null,
-          platform: request.platform || null,
-          requireInteraction: Boolean(request.requireInteraction),
-          priority:
-            typeof request.priority === "number"
-              ? request.priority
-              : request.requireInteraction
-              ? 2
-              : 0,
-          playSound: request.playSound !== false,
-        });
-        sendResponse({ success: true });
+        try {
+          await NotificationCenter.show({
+            title: request.title,
+            message: request.message,
+            url: request.url || null,
+            streamerId: request.streamerId || null,
+            platform: request.platform || null,
+            requireInteraction: Boolean(request.requireInteraction),
+            priority:
+              typeof request.priority === "number"
+                ? request.priority
+                : request.requireInteraction
+                ? 2
+                : 0,
+            playSound: request.playSound !== false,
+          });
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
       })();
       return true;
 
     case "schedule":
       (async () => {
-        await NotificationCenter.schedule(request);
-        sendResponse({ success: true });
+        try {
+          await NotificationCenter.schedule(request);
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
       })();
       return true;
 
     case "openPatchNotes":
       (async () => {
-        await chrome.storage.local.set({
-          patchNotesUnread: false,
-          seenPatchNotesVersion: chrome.runtime.getManifest().version,
-        });
-        await syncUpdateBadge();
-        await openPatchNotes();
-        sendResponse({ success: true });
+        try {
+          await chrome.storage.local.set({
+            patchNotesUnread: false,
+            seenPatchNotesVersion: chrome.runtime.getManifest().version,
+          });
+          await syncUpdateBadge();
+          await openPatchNotes();
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
       })();
       return true;
 
@@ -2923,13 +3115,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     case "getStreamers":
       (async () => {
-        const [streamers, statuses, preferences, profileData] = await Promise.all([
-          DataStore.getStreamers(),
-          DataStore.getStatuses(),
-          PreferenceStore.get(),
-          chrome.storage.local.get("userProfile")
-        ]);
-        sendResponse({ streamers, statuses, preferences, userProfile: profileData.userProfile || null });
+        try {
+          const [streamers, statuses, preferences, profileData] = await Promise.all([
+            DataStore.getStreamers(),
+            DataStore.getStatuses(),
+            PreferenceStore.get(),
+            chrome.storage.local.get("userProfile")
+          ]);
+          sendResponse({ streamers, statuses, preferences, userProfile: profileData.userProfile || null });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
       })();
       return true;
 
@@ -2956,221 +3152,223 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true;
     }
 
+
     case "addStreamer":
       (async () => {
-        const preferences = await PreferenceStore.get();
-        const requestedPlatform = request.platform || "twitch";
-        const platform = normalizePlatform(
-          requestedPlatform || DEFAULT_PLATFORM
-        );
-        const rawHandle =
-          request.handle ??
-          request.twitch ??
-          request.login ??
-          request.url ??
-          "";
-        const handle = sanitizeHandle(platform, rawHandle);
-
-        if (!handle) {
-          const platformLabel = translateWithPrefs(
-            preferences,
-            getPlatformLabelKey(platform)
+        try {
+          const preferences = await PreferenceStore.get();
+          const requestedPlatform = request.platform || "twitch";
+          const platform = normalizePlatform(
+            requestedPlatform || DEFAULT_PLATFORM
           );
-          sendResponse({
-            error: translateWithPrefs(
+          const rawHandle =
+            request.handle ??
+            request.twitch ??
+            request.login ??
+            request.url ??
+            "";
+          const handle = sanitizeHandle(platform, rawHandle);
+
+          if (!handle) {
+            const platformLabel = translateWithPrefs(
               preferences,
-              "background.errors.invalidHandle",
-              { platform: platformLabel }
-            ),
+              getPlatformLabelKey(platform)
+            );
+            sendResponse({
+              error: translateWithPrefs(
+                preferences,
+                "background.errors.invalidHandle",
+                { platform: platformLabel }
+              ),
+            });
+            return;
+          }
+
+          const streamers = await DataStore.getStreamers();
+          const incomingKey = getHandleComparisonKey(platform, handle);
+          const alreadyExists = streamers.some((streamer) => {
+            const existingKey = getHandleComparisonKey(
+              streamer.platform || "twitch",
+              streamer.handle || streamer.twitch || streamer.id
+            );
+            return existingKey === incomingKey;
           });
-          return;
-        }
 
-        const streamers = await DataStore.getStreamers();
-        const incomingKey = getHandleComparisonKey(platform, handle);
-        const alreadyExists = streamers.some((streamer) => {
-          const existingKey = getHandleComparisonKey(
-            streamer.platform || "twitch",
-            streamer.handle || streamer.twitch || streamer.id
-          );
-          return existingKey === incomingKey;
-        });
-
-        if (alreadyExists) {
-          const platformLabel = translateWithPrefs(
-            preferences,
-            getPlatformLabelKey(platform)
-          );
-          sendResponse({
-            error: translateWithPrefs(
+          if (alreadyExists) {
+            const platformLabel = translateWithPrefs(
               preferences,
-              "background.errors.streamerExistsPlatform",
-              { platform: platformLabel }
-            ),
-          });
-          return;
-        }
-
-        let sourceData = {
-          id: `${platform}:${handle}`,
-          platform,
-          handle,
-          notificationsEnabled: true,
-          socials: {},
-        };
-
-        if (platform === "twitch") {
-          const user = await PlatformChecker.getTwitchUser(handle);
-          if (!user || user._apiError) {
-            const errorKey = user?._apiError
-              ? "background.errors.apiError"
-              : "background.errors.streamerNotFound";
+              getPlatformLabelKey(platform)
+            );
             sendResponse({
               error: translateWithPrefs(
                 preferences,
-                errorKey,
-                {
-                  platform: translateWithPrefs(
-                    preferences,
-                    getPlatformLabelKey(platform)
-                  ),
-                }
+                "background.errors.streamerExistsPlatform",
+                { platform: platformLabel }
               ),
             });
             return;
           }
 
-          sourceData = {
-            ...sourceData,
-            id: handle,
-            twitch: handle,
-            displayName: user.display_name || handle,
-            avatarUrl: user.profile_image_url || "",
-            twitchId: user.id,
-          };
-        } else if (platform === "kick") {
-          const channel = await PlatformChecker.getKickChannel(handle);
-          if (!channel || channel._apiError) {
-            const errorKey = channel?._apiError
-              ? "background.errors.apiError"
-              : "background.errors.streamerNotFound";
-            sendResponse({
-              error: translateWithPrefs(
-                preferences,
-                errorKey,
-                {
-                  platform: translateWithPrefs(
-                    preferences,
-                    getPlatformLabelKey(platform)
-                  ),
-                }
-              ),
-            });
-            return;
-          }
-
-          sourceData = {
-            ...sourceData,
-            displayName:
-              channel?.user?.display_name ||
-              channel?.user?.username ||
-              channel?.slug ||
-              formatHandleForDisplay(platform, handle),
-            avatarUrl: resolveExternalUrl(
-              channel?.user?.profile_pic,
-              "https://files.kick.com"
-            ),
-            handle: channel?.slug || handle,
-          };
-        } else if (platform === "youtube") {
-          // La chaîne doit exister : on résout handle → channelId (et on
-          // garde l'avatar et le nom au passage). Échec = chaîne inconnue.
-          const channel = await PlatformChecker.resolveYoutubeChannel(handle);
-          if (!channel?.id) {
-            sendResponse({
-              error: translateWithPrefs(
-                preferences,
-                "background.errors.streamerNotFound",
-                {
-                  platform: translateWithPrefs(
-                    preferences,
-                    getPlatformLabelKey(platform)
-                  ),
-                }
-              ),
-            });
-            return;
-          }
-          sourceData = {
-            ...sourceData,
-            displayName: channel.name || formatHandleForDisplay(platform, handle),
-            avatarUrl: channel.avatar || "",
-          };
-        } else {
-          sourceData = {
-            ...sourceData,
-            displayName:
-              request.displayName ||
-              formatHandleForDisplay(platform, handle),
-            avatarUrl: request.avatarUrl || "",
-          };
-        }
-
-        if (platform === "twitch") {
-          sourceData.id = sourceData.twitch;
-        } else {
-          sourceData.id = `${platform}:${sanitizeHandle(
+          let sourceData = {
+            id: `${platform}:${handle}`,
             platform,
-            sourceData.handle
-          )}`;
+            handle,
+            notificationsEnabled: true,
+            socials: {},
+          };
+
+          if (platform === "twitch") {
+            const user = await PlatformChecker.getTwitchUser(handle);
+            if (!user || user._apiError) {
+              const errorKey = user?._apiError
+                ? "background.errors.apiError"
+                : "background.errors.streamerNotFound";
+              sendResponse({
+                error: translateWithPrefs(
+                  preferences,
+                  errorKey,
+                  {
+                    platform: translateWithPrefs(
+                      preferences,
+                      getPlatformLabelKey(platform)
+                    ),
+                  }
+                ),
+              });
+              return;
+            }
+
+            sourceData = {
+              ...sourceData,
+              id: handle,
+              twitch: handle,
+              displayName: user.display_name || handle,
+              avatarUrl: user.profile_image_url || "",
+              twitchId: user.id,
+            };
+          } else if (platform === "kick") {
+            const channel = await PlatformChecker.getKickChannel(handle);
+            if (!channel || channel._apiError) {
+              const errorKey = channel?._apiError
+                ? "background.errors.apiError"
+                : "background.errors.streamerNotFound";
+              sendResponse({
+                error: translateWithPrefs(
+                  preferences,
+                  errorKey,
+                  {
+                    platform: translateWithPrefs(
+                      preferences,
+                      getPlatformLabelKey(platform)
+                    ),
+                  }
+                ),
+              });
+              return;
+            }
+
+            sourceData = {
+              ...sourceData,
+              displayName:
+                channel?.user?.display_name ||
+                channel?.user?.username ||
+                channel?.slug ||
+                formatHandleForDisplay(platform, handle),
+              avatarUrl: resolveExternalUrl(
+                channel?.user?.profile_pic,
+                "https://files.kick.com"
+              ),
+              handle: channel?.slug || handle,
+            };
+          } else if (platform === "youtube") {
+            // La chaîne doit exister : on résout handle → channelId (et on
+            // garde l'avatar et le nom au passage). Échec = chaîne inconnue.
+            const channel = await PlatformChecker.resolveYoutubeChannel(handle);
+            if (!channel?.id) {
+              sendResponse({
+                error: translateWithPrefs(
+                  preferences,
+                  "background.errors.streamerNotFound",
+                  {
+                    platform: translateWithPrefs(
+                      preferences,
+                      getPlatformLabelKey(platform)
+                    ),
+                  }
+                ),
+              });
+              return;
+            }
+            sourceData = {
+              ...sourceData,
+              displayName: channel.name || formatHandleForDisplay(platform, handle),
+              avatarUrl: channel.avatar || "",
+            };
+          } else {
+            sourceData = {
+              ...sourceData,
+              displayName:
+                request.displayName ||
+                formatHandleForDisplay(platform, handle),
+              avatarUrl: request.avatarUrl || "",
+            };
+          }
+
+          if (platform === "twitch") {
+            sourceData.id = sourceData.twitch;
+          } else {
+            sourceData.id = `${platform}:${sanitizeHandle(
+              platform,
+              sourceData.handle
+            )}`;
+          }
+
+          const newStreamer = normalizeStreamer(sourceData);
+
+          const updated = await DataStore.saveStreamers([
+            ...streamers,
+            newStreamer,
+          ]);
+
+          await pollStreamers({ forceNotification: false });
+
+          sendResponse({
+            success: true,
+            streamers: updated,
+          });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
         }
-
-        const newStreamer = normalizeStreamer(sourceData);
-
-        const updated = await DataStore.saveStreamers([
-          ...streamers,
-          newStreamer,
-        ]);
-
-        await pollStreamers({ forceNotification: false });
-
-        sendResponse({
-          success: true,
-          streamers: updated,
-        });
       })();
       return true;
 
     case "removeStreamer":
       (async () => {
-        const targetId = request.id;
-        const streamers = await DataStore.getStreamers();
-        const filtered = streamers.filter((s) => s.id !== targetId);
-        await DataStore.saveStreamers(filtered);
-        streamerStates.delete(targetId);
-        streamerCache.delete(targetId);
-        streamerLiveState.delete(targetId);
-        await pollStreamers({ forceNotification: false });
-        sendResponse({ success: true, streamers: filtered });
+        try {
+          const targetId = request.id;
+          const streamers = await DataStore.getStreamers();
+          const filtered = streamers.filter((s) => s.id !== targetId);
+          await DataStore.saveStreamers(filtered);
+          streamerStates.delete(targetId);
+          streamerCache.delete(targetId);
+          streamerLiveState.delete(targetId);
+          await pollStreamers({ forceNotification: false });
+          sendResponse({ success: true, streamers: filtered });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
       })();
       return true;
 
     case "toggleNotifications":
-      (async () => {
-        const preferences = await PreferenceStore.get();
-        const streamers = await DataStore.getStreamers();
-        const idx = streamers.findIndex((s) => s.id === request.id);
-        if (idx === -1) {
-          sendResponse({ error: translateWithPrefs(preferences, "background.errors.streamerNotFound", { platform: "" }) });
-          return;
-        }
-        streamers[idx].notificationsEnabled = Boolean(request.enabled);
-        await DataStore.saveStreamers(streamers);
-        sendResponse({ success: true });
-      })();
-      return true;
-
     case "toggleGameNotifications":
+    case "toggleTitleNotifications": {
+      // Trois messages jumeaux : le nom du flag decoule du type de message.
+      const flagByType = {
+        toggleNotifications: "notificationsEnabled",
+        toggleGameNotifications: "gameNotificationsEnabled",
+        toggleTitleNotifications: "titleNotificationsEnabled",
+      };
       (async () => {
         const preferences = await PreferenceStore.get();
         const streamers = await DataStore.getStreamers();
@@ -3179,26 +3377,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           sendResponse({ error: translateWithPrefs(preferences, "background.errors.streamerNotFound", { platform: "" }) });
           return;
         }
-        streamers[idx].gameNotificationsEnabled = Boolean(request.enabled);
+        streamers[idx][flagByType[request.type]] = Boolean(request.enabled);
         await DataStore.saveStreamers(streamers);
         sendResponse({ success: true });
       })();
       return true;
-
-    case "toggleTitleNotifications":
-      (async () => {
-        const preferences = await PreferenceStore.get();
-        const streamers = await DataStore.getStreamers();
-        const idx = streamers.findIndex((s) => s.id === request.id);
-        if (idx === -1) {
-          sendResponse({ error: translateWithPrefs(preferences, "background.errors.streamerNotFound", { platform: "" }) });
-          return;
-        }
-        streamers[idx].titleNotificationsEnabled = Boolean(request.enabled);
-        await DataStore.saveStreamers(streamers);
-        sendResponse({ success: true });
-      })();
-      return true;
+    }
 
     case "refreshStatuses":
       PlatformChecker.refreshAll().then(() => {
@@ -3222,13 +3406,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               resolveChannelAvatar(platform, channel)
                 .then(async (avatar) => {
                   if (avatar) {
-                    const data = await WatchTimeStore._getData();
-                    const month = WatchTimeStore._getMonthKey();
-                    const key = `${platform}:${channel}`;
-                    if (data[month]?.[key] && !data[month][key].avatarUrl) {
-                      data[month][key].avatarUrl = avatar;
-                      await WatchTimeStore._saveData(data);
-                    }
+                    // RMW passe par la file du store, comme record().
+                    await WatchTimeStore._enqueue(async () => {
+                      const data = await WatchTimeStore._getData();
+                      const month = WatchTimeStore._getMonthKey();
+                      const key = `${platform}:${channel}`;
+                      if (data[month]?.[key] && !data[month][key].avatarUrl) {
+                        data[month][key].avatarUrl = avatar;
+                        await WatchTimeStore._saveData(data);
+                      }
+                    });
                   }
                 })
                 .catch(() => {});
@@ -3247,17 +3434,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         .catch((error) => sendResponse({ error: error.message }));
       return true;
 
+    case "removeHistoryEntry":
+      HistoryStore.removeEntry(String(request.id || ""))
+        .then(() => sendResponse({ success: true }))
+        .catch((error) => sendResponse({ error: error.message }));
+      return true;
+
     case "activatePlus":
       (async () => {
-        const result = await verifyLicense(request.key, fetch, Date.now(), await getDeviceId(chrome.storage.local));
-        if (result.ok) await chrome.storage.local.set({ [PLUS_KEY]: result.record });
-        sendResponse(result);
-        if (result.ok) {
-          const prefs = await PreferenceStore.get();
-          const lang = normalizeLanguage(prefs?.language);
-          thankPlusSubscriber(result.record.licenseKey, (key) => translate(lang, key)).catch(() => {});
+        try {
+          const result = await verifyLicense(request.key, fetch, Date.now(), await getDeviceId(chrome.storage.local));
+          if (result.ok) await chrome.storage.local.set({ [PLUS_KEY]: result.record });
+          sendResponse(result);
+          if (result.ok) {
+            const prefs = await PreferenceStore.get();
+            const lang = normalizeLanguage(prefs?.language);
+            thankPlusSubscriber(result.record.licenseKey, (key) => translate(lang, key)).catch(() => {});
+          }
+          if (result.ok) pollStreamers().catch(() => {});
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
         }
-        if (result.ok) pollStreamers().catch(() => {});
       })();
       return true;
 
@@ -3284,51 +3481,55 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     case "incrementStat":
       (async () => {
-        const { stat, value, channel, text, raidTarget } = request;
-        if (stat) {
-          await StatsStore.increment(stat, Number(value) || 1);
-          let type = "info";
-          if (stat === "dropsClaimed") type = "drop";
-          else if (stat === "momentsClaimed") type = "moment";
-          else if (stat === "raidsCancelled") type = "raid";
-          else if (stat === "channelPointsClaimed") type = "points";
+        try {
+          const { stat, value, channel, text, raidTarget } = request;
+          if (stat) {
+            await StatsStore.increment(stat, Number(value) || 1);
+            let type = "info";
+            if (stat === "dropsClaimed") type = "drop";
+            else if (stat === "momentsClaimed") type = "moment";
+            else if (stat === "raidsCancelled") type = "raid";
+            else if (stat === "channelPointsClaimed") type = "points";
 
-          let logText = text || `${stat} (+${value || 1})`;
-          if (!text && type === "raid" && raidTarget) {
-            logText = `Raid → ${raidTarget} (annulé)`;
-          }
+            let logText = text || `${stat} (+${value || 1})`;
+            if (!text && type === "raid" && raidTarget) {
+              logText = `Raid → ${raidTarget} (annulé)`;
+            }
 
-          await EventLogStore.addLog({
-            type,
-            channel: channel || "",
-            text: logText,
-            value: value || 1,
-          });
-
-          // Alertes d'evenement. On passe par NotificationCenter comme partout
-          // ailleurs : il resout l'icone en URL absolue, retombe sur l'icone
-          // embarquee si le telechargement echoue, et attrape le rejet.
-          //
-          // Les deux appels directs qui vivaient ici passaient un chemin
-          // relatif ("images/photos/128px.png"). Un service worker resout le
-          // relatif contre sa propre URL, soit js/images/photos/128px.png, qui
-          // n'existe pas : Chrome refusait la notification entiere avec
-          // « Unable to download all specified images », et faute de callback
-          // la promesse rejetee remontait en Uncaught (in promise).
-          const prefs = await PreferenceStore.get();
-          if (type === "drop" && prefs.dropAlerts) {
-            await NotificationCenter.show({
-              title: translateWithPrefs(prefs, "background.notifications.dropTitle"),
-              message: text || translateWithPrefs(prefs, "background.notifications.dropMessage"),
+            await EventLogStore.addLog({
+              type,
+              channel: channel || "",
+              text: logText,
+              value: value || 1,
             });
-          } else if (type === "raid" && prefs.raidAlerts) {
-            await NotificationCenter.show({
-              title: translateWithPrefs(prefs, "background.notifications.raidTitle"),
-              message: text || translateWithPrefs(prefs, "background.notifications.raidMessage"),
-            });
+
+            // Alertes d'evenement. On passe par NotificationCenter comme partout
+            // ailleurs : il resout l'icone en URL absolue, retombe sur l'icone
+            // embarquee si le telechargement echoue, et attrape le rejet.
+            //
+            // Les deux appels directs qui vivaient ici passaient un chemin
+            // relatif ("images/photos/128px.png"). Un service worker resout le
+            // relatif contre sa propre URL, soit js/images/photos/128px.png, qui
+            // n'existe pas : Chrome refusait la notification entiere avec
+            // « Unable to download all specified images », et faute de callback
+            // la promesse rejetee remontait en Uncaught (in promise).
+            const prefs = await PreferenceStore.get();
+            if (type === "drop" && prefs.dropAlerts) {
+              await NotificationCenter.show({
+                title: translateWithPrefs(prefs, "background.notifications.dropTitle"),
+                message: text || translateWithPrefs(prefs, "background.notifications.dropMessage"),
+              });
+            } else if (type === "raid" && prefs.raidAlerts) {
+              await NotificationCenter.show({
+                title: translateWithPrefs(prefs, "background.notifications.raidTitle"),
+                message: text || translateWithPrefs(prefs, "background.notifications.raidMessage"),
+              });
+            }
           }
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
         }
-        sendResponse({ success: true });
       })();
       return true;
 
@@ -3346,14 +3547,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     
     case "resetStat":
       (async () => {
-        const { stat } = request;
-        if (stat) {
+        try {
+          const { stat } = request;
+          if (stat) {
 
-          const current = await StatsStore.get();
-          current[stat] = 0;
-          await chrome.storage.local.set({ [STORAGE_KEYS.STATS]: current });
+            const current = await StatsStore.get();
+            current[stat] = 0;
+            await chrome.storage.local.set({ [STORAGE_KEYS.STATS]: current });
+          }
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
         }
-        sendResponse({ success: true });
       })();
       return true;
 
@@ -3413,19 +3618,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     case "testNotification":
       (async () => {
-        const preferences = await PreferenceStore.get();
         try {
-          await NotificationSystem.sendTest(preferences);
-          sendResponse({ success: true });
+          const preferences = await PreferenceStore.get();
+          try {
+            await NotificationSystem.sendTest(preferences);
+            sendResponse({ success: true });
+          } catch (error) {
+            sendResponse({
+              error:
+                error?.message ||
+                translateWithPrefs(
+                  preferences,
+                  "background.errors.testNotificationFailed"
+                ),
+            });
+          }
         } catch (error) {
-          sendResponse({
-            error:
-              error?.message ||
-              translateWithPrefs(
-                preferences,
-                "background.errors.testNotificationFailed"
-              ),
-          });
+          sendResponse({ error: error?.message || String(error) });
         }
       })();
       return true;
@@ -3438,6 +3647,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   return false;
+}
+
+// Filet uniforme : aucune exception (sync) ne doit laisser la popup sans
+// reponse, et chaque IIFE async dispose desormais de son propre try/catch.
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  try {
+    return handleMessage(request, sender, sendResponse);
+  } catch (error) {
+    console.warn("[SP] onMessage:", error?.message || error);
+    try {
+      sendResponse({ error: error?.message || String(error) });
+    } catch (_) {
+      // Canal deja ferme : la popup a ete fermee entre-temps.
+    }
+    return false;
+  }
 });
 
 scheduleWatcherAlarm();
@@ -3471,7 +3696,10 @@ scheduleKeepAliveAlarm();
 
 if (chrome.tabs?.onUpdated?.addListener) {
   chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if (tab?.url && (tab.url.includes("twitch.tv") || tab.url.includes("kick.com"))) {
+    if (
+      tab?.url &&
+      (tab.url.includes("twitch.tv") || tab.url.includes("kick.com") || tab.url.includes("youtube.com"))
+    ) {
       try {
         const prefs = await PreferenceStore.get();
         if (prefs.preventTabDiscard && tab.autoDiscardable !== false) {

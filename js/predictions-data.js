@@ -1,7 +1,6 @@
 // Prédictions assistées (StreamPulse+). Module pur : règle de mise, choix de
 // l'option, historique et statistiques. Aucun accès à chrome.* ni au DOM.
-// Testé par tests/predictions-data.test.mjs. Les content scripts en reçoivent
-// un jumeau en script classique, généré par scripts/build-inline-predictions.mjs.
+// Testé par tests/predictions-data.test.mjs, chargé par predictionsAssist.js.
 
 export const PREDICTION_RULE_KEY = "streamPulsePredictionRule";
 export const PREDICTION_HISTORY_KEY = "streamPulsePredictionHistory";

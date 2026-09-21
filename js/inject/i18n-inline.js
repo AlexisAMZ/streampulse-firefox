@@ -16,6 +16,9 @@
 
   var STRINGS = {
   "fr": {
+    "enhancer": {
+      "jumpToLive": "Aller au direct (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Favoris StreamPulse",
       "pin": "Ajouter aux favoris StreamPulse",
@@ -69,6 +72,12 @@
     "player": {
       "skipToLive": "Rattraper le direct",
       "holdToFastForward": "Maintenir pour avance x2",
+      "volumeBoostLabel": "Amplifier le volume",
+      "volumeBoostHint": "Clic : marche arrêt · molette ou flèches : régler, jusqu'à 200 %",
+      "pictureInPicture": "Picture-in-Picture",
+      "clipDownload": "Télécharger le clip (MP4)",
+      "clipDownloading": "Téléchargement du clip…",
+      "clipDownloadFailed": "Échec du téléchargement, réessayez",
       "latencyEmpty": "Latence : --",
       "latencyValue": "Latence : {{value}}s",
       "offline": "HORS LIGNE"
@@ -86,7 +95,7 @@
         "autoClaimDropsTitle": "Auto-claim Drops Twitch",
         "autoClaimMomentsTitle": "Auto-claim Moments Twitch",
         "autoCancelRaidsTitle": "Annulation automatique des Raids",
-        "autoRefreshTitle": "Actualisation automatique",
+        "autoRefreshTitle": "Relancer le lecteur en cas d'erreur",
         "fastForwardTitle": "Bouton d'avance rapide",
         "hideTwitchExtensionsTitle": "Masquer les extensions Twitch",
         "communityBadgeTitle": "Badge communautaire",
@@ -126,6 +135,9 @@
     }
   },
   "en": {
+    "enhancer": {
+      "jumpToLive": "Jump to Live (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse favorites",
       "pin": "Add to StreamPulse favorites",
@@ -179,6 +191,12 @@
     "player": {
       "skipToLive": "Skip to live",
       "holdToFastForward": "Hold to fast-forward x2",
+      "volumeBoostLabel": "Boost the volume",
+      "volumeBoostHint": "Click: on/off · scroll or arrows: adjust, up to 200%",
+      "pictureInPicture": "Picture-in-Picture",
+      "clipDownload": "Download clip (MP4)",
+      "clipDownloading": "Downloading clip…",
+      "clipDownloadFailed": "Download failed, try again",
       "latencyEmpty": "Latency: --",
       "latencyValue": "Latency: {{value}}s",
       "offline": "OFFLINE"
@@ -196,7 +214,7 @@
         "autoClaimDropsTitle": "Auto-claim Twitch Drops",
         "autoClaimMomentsTitle": "Auto-claim Twitch Moments",
         "autoCancelRaidsTitle": "Auto-cancel Raids",
-        "autoRefreshTitle": "Automatic refresh",
+        "autoRefreshTitle": "Recover the player on errors",
         "fastForwardTitle": "Fast-forward button",
         "hideTwitchExtensionsTitle": "Hide Twitch extensions",
         "communityBadgeTitle": "Community badge",
@@ -236,6 +254,9 @@
     }
   },
   "es": {
+    "enhancer": {
+      "jumpToLive": "Ir al directo (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Favoritos de StreamPulse",
       "pin": "Añadir a favoritos de StreamPulse",
@@ -289,6 +310,12 @@
     "player": {
       "skipToLive": "Volver al directo",
       "holdToFastForward": "Mantén pulsado para avanzar x2",
+      "volumeBoostLabel": "Amplificar el volumen",
+      "volumeBoostHint": "Clic: activar o desactivar · rueda o flechas: ajustar, hasta 200 %",
+      "pictureInPicture": "Imagen en imagen",
+      "clipDownload": "Descargar clip (MP4)",
+      "clipDownloading": "Descargando clip…",
+      "clipDownloadFailed": "Error en la descarga, inténtalo de nuevo",
       "latencyEmpty": "Latencia: --",
       "latencyValue": "Latencia: {{value}}s",
       "offline": "DESCONECTADO"
@@ -306,7 +333,7 @@
         "autoClaimDropsTitle": "Reclamar Drops de Twitch automáticamente",
         "autoClaimMomentsTitle": "Reclamar Moments de Twitch automáticamente",
         "autoCancelRaidsTitle": "Cancelar raids automáticamente",
-        "autoRefreshTitle": "Actualización automática",
+        "autoRefreshTitle": "Recuperar el reproductor si falla",
         "fastForwardTitle": "Botón de avance rápido",
         "hideTwitchExtensionsTitle": "Ocultar extensiones de Twitch",
         "communityBadgeTitle": "Insignia comunitaria",
@@ -346,6 +373,9 @@
     }
   },
   "pt-BR": {
+    "enhancer": {
+      "jumpToLive": "Ir para o ao vivo (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Favoritos do StreamPulse",
       "pin": "Adicionar aos favoritos do StreamPulse",
@@ -399,6 +429,12 @@
     "player": {
       "skipToLive": "Voltar ao ao vivo",
       "holdToFastForward": "Segure para avançar x2",
+      "volumeBoostLabel": "Amplificar o volume",
+      "volumeBoostHint": "Clique: liga ou desliga · roda ou setas: ajustar, até 200%",
+      "pictureInPicture": "Picture-in-Picture",
+      "clipDownload": "Baixar clipe (MP4)",
+      "clipDownloading": "Baixando clipe…",
+      "clipDownloadFailed": "Falha no download, tente novamente",
       "latencyEmpty": "Latência: --",
       "latencyValue": "Latência: {{value}}s",
       "offline": "OFFLINE"
@@ -416,7 +452,7 @@
         "autoClaimDropsTitle": "Resgatar Drops da Twitch automaticamente",
         "autoClaimMomentsTitle": "Resgatar Moments da Twitch automaticamente",
         "autoCancelRaidsTitle": "Cancelar raids automaticamente",
-        "autoRefreshTitle": "Atualização automática",
+        "autoRefreshTitle": "Recuperar o player em caso de erro",
         "fastForwardTitle": "Botão de avanço rápido",
         "hideTwitchExtensionsTitle": "Ocultar extensões da Twitch",
         "communityBadgeTitle": "Distintivo comunitário",
@@ -456,6 +492,9 @@
     }
   },
   "de": {
+    "enhancer": {
+      "jumpToLive": "Zum Live-Stream springen (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse-Favoriten",
       "pin": "Zu StreamPulse-Favoriten hinzufügen",
@@ -509,6 +548,12 @@
     "player": {
       "skipToLive": "Weiter zum Leben",
       "holdToFastForward": "Halten Sie die Taste gedrückt, um x2",
+      "volumeBoostLabel": "Lautstärke verstärken",
+      "volumeBoostHint": "Klick: ein oder aus · Scrollen oder Pfeile: bis 200 %",
+      "pictureInPicture": "Bild-in-Bild",
+      "clipDownload": "Clip herunterladen (MP4)",
+      "clipDownloading": "Clip wird heruntergeladen…",
+      "clipDownloadFailed": "Download fehlgeschlagen, versuche es erneut",
       "latencyEmpty": "vorzuspulen Latenz: --",
       "latencyValue": "Latenz: {{value}}s",
       "offline": "OFFLINE"
@@ -526,7 +571,7 @@
         "autoClaimDropsTitle": "Beanspruchen Sie Twitch Drops automatisch",
         "autoClaimMomentsTitle": "Beanspruchen Sie automatisch Twitch-Momente",
         "autoCancelRaidsTitle": "Raids automatisch abbrechen",
-        "autoRefreshTitle": "Automatische Aktualisierung",
+        "autoRefreshTitle": "Player bei Fehlern wiederherstellen",
         "fastForwardTitle": "Schnellvorlauf-Taste",
         "hideTwitchExtensionsTitle": "Twitch-Erweiterungen ausblenden",
         "communityBadgeTitle": "Community-Abzeichen",
@@ -566,6 +611,9 @@
     }
   },
   "it": {
+    "enhancer": {
+      "jumpToLive": "Vai alla diretta (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Preferiti StreamPulse",
       "pin": "Aggiungi ai preferiti StreamPulse",
@@ -619,6 +667,12 @@
     "player": {
       "skipToLive": "Passa alla diretta",
       "holdToFastForward": "Tieni premuto per avanzare velocemente x2",
+      "volumeBoostLabel": "Amplifica il volume",
+      "volumeBoostHint": "Clic: attiva o disattiva · rotella o frecce: regola, fino al 200%",
+      "pictureInPicture": "Picture-in-Picture",
+      "clipDownload": "Scarica clip (MP4)",
+      "clipDownloading": "Download della clip…",
+      "clipDownloadFailed": "Download non riuscito, riprova",
       "latencyEmpty": "Latenza: --",
       "latencyValue": "Latenza: {{value}}s",
       "offline": "NON IN LINEA"
@@ -636,7 +690,7 @@
         "autoClaimDropsTitle": "Riscuoti automaticamente i Twitch Drops",
         "autoClaimMomentsTitle": "Rivendica automaticamente i momenti Twitch",
         "autoCancelRaidsTitle": "Annulla automaticamente i raid",
-        "autoRefreshTitle": "Aggiornamento automatico",
+        "autoRefreshTitle": "Ripristina il player in caso di errore",
         "fastForwardTitle": "Pulsante di avanzamento veloce",
         "hideTwitchExtensionsTitle": "Nascondi le estensioni Twitch",
         "communityBadgeTitle": "Badge della comunità",
@@ -676,6 +730,9 @@
     }
   },
   "pl": {
+    "enhancer": {
+      "jumpToLive": "Przejdź na żywo (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Ulubione StreamPulse",
       "pin": "Dodaj do ulubionych StreamPulse",
@@ -729,6 +786,12 @@
     "player": {
       "skipToLive": "Przejdź do transmisji na żywo",
       "holdToFastForward": "Przytrzymaj, aby przewinąć do przodu x2",
+      "volumeBoostLabel": "Wzmocnij głośność",
+      "volumeBoostHint": "Klik: włącz lub wyłącz · kółko lub strzałki: do 200%",
+      "pictureInPicture": "Obraz w obrazie",
+      "clipDownload": "Pobierz klip (MP4)",
+      "clipDownloading": "Pobieranie klipu…",
+      "clipDownloadFailed": "Pobieranie nie powiodło się, spróbuj ponownie",
       "latencyEmpty": "Opóźnienie: --",
       "latencyValue": "Opóźnienie: {{value}} s",
       "offline": "OFFLINE"
@@ -746,7 +809,7 @@
         "autoClaimDropsTitle": "Automatyczne odbieranie Twitch Drops",
         "autoClaimMomentsTitle": "Automatyczne odbieranie chwil Twitch",
         "autoCancelRaidsTitle": "Automatyczne anulowanie nalotów",
-        "autoRefreshTitle": "Automatyczne odświeżanie",
+        "autoRefreshTitle": "Napraw odtwarzacz przy błędzie",
         "fastForwardTitle": "Przycisk przewijania do przodu",
         "hideTwitchExtensionsTitle": "Ukryj rozszerzenia Twitcha",
         "communityBadgeTitle": "Odznaka społeczności",
@@ -786,6 +849,9 @@
     }
   },
   "tr": {
+    "enhancer": {
+      "jumpToLive": "Canlı yayına git (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse favorileri",
       "pin": "StreamPulse favorilerine ekle",
@@ -839,6 +905,12 @@
     "player": {
       "skipToLive": "Canlı yayına atla",
       "holdToFastForward": "Hızlı ileri sarma için basılı tutun x2",
+      "volumeBoostLabel": "Sesi güçlendir",
+      "volumeBoostHint": "Tık: aç veya kapat · tekerlek veya oklar: %200'e kadar ayarla",
+      "pictureInPicture": "Resim içinde resim",
+      "clipDownload": "Klibi indir (MP4)",
+      "clipDownloading": "Klip indiriliyor…",
+      "clipDownloadFailed": "İndirme başarısız, tekrar dene",
       "latencyEmpty": "Gecikme: --",
       "latencyValue": "Gecikme süresi: {{value}} saniye",
       "offline": "ÇEVRİMDIŞI"
@@ -856,7 +928,7 @@
         "autoClaimDropsTitle": "Twitch Drops'u otomatik olarak talep et",
         "autoClaimMomentsTitle": "Twitch Moments'ı otomatik olarak talep et",
         "autoCancelRaidsTitle": "Baskınları Otomatik Olarak İptal Et",
-        "autoRefreshTitle": "Otomatik yenileme",
+        "autoRefreshTitle": "Hata olunca oynatıcıyı kurtar",
         "fastForwardTitle": "Hızlı ileri sarma düğmesi",
         "hideTwitchExtensionsTitle": "Twitch uzantılarını gizle",
         "communityBadgeTitle": "Topluluk rozeti",
@@ -896,6 +968,9 @@
     }
   },
   "ru": {
+    "enhancer": {
+      "jumpToLive": "Перейти к прямому эфиру (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Избранное StreamPulse",
       "pin": "Добавить в избранное StreamPulse",
@@ -949,6 +1024,12 @@
     "player": {
       "skipToLive": "Перейти к трансляции",
       "holdToFastForward": "Удерживайте для ускоренного просмотра в 2 раза",
+      "volumeBoostLabel": "Усилить громкость",
+      "volumeBoostHint": "Клик: вкл или выкл · колесо или стрелки: до 200 %",
+      "pictureInPicture": "Картинка в картинке",
+      "clipDownload": "Скачать клип (MP4)",
+      "clipDownloading": "Скачивание клипа…",
+      "clipDownloadFailed": "Не удалось скачать, попробуйте снова",
       "latencyEmpty": "Задержка: --",
       "latencyValue": "Задержка: {{value}} с",
       "offline": "ОФЛАЙН"
@@ -966,7 +1047,7 @@
         "autoClaimDropsTitle": "Автоматическое получение призов Twitch Drops",
         "autoClaimMomentsTitle": "Автоматическое добавление моментов Twitch",
         "autoCancelRaidsTitle": "Автоматическая отмена рейдов",
-        "autoRefreshTitle": "Автоматическое обновление",
+        "autoRefreshTitle": "Восстанавливать плеер при ошибке",
         "fastForwardTitle": "Кнопка «Перемотка вперед»",
         "hideTwitchExtensionsTitle": "Скрыть расширения Twitch",
         "communityBadgeTitle": "Значок сообщества",
@@ -1006,6 +1087,9 @@
     }
   },
   "ja": {
+    "enhancer": {
+      "jumpToLive": "ライブに移動 (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse お気に入り",
       "pin": "StreamPulse お気に入りに追加",
@@ -1059,6 +1143,12 @@
     "player": {
       "skipToLive": "ライブへスキップ",
       "holdToFastForward": "長押しで早送り（2倍速）",
+      "volumeBoostLabel": "音量をブースト",
+      "volumeBoostHint": "クリック：オン/オフ · ホイールや矢印：最大200%まで調整",
+      "pictureInPicture": "ピクチャー・イン・ピクチャー",
+      "clipDownload": "クリップをダウンロード (MP4)",
+      "clipDownloading": "クリップをダウンロード中…",
+      "clipDownloadFailed": "ダウンロードに失敗しました。もう一度お試しください",
       "latencyEmpty": "レイテンシー：--",
       "latencyValue": "遅延：{{value}}秒",
       "offline": "オフライン"
@@ -1076,7 +1166,7 @@
         "autoClaimDropsTitle": "Twitch Dropsの自動受け取り",
         "autoClaimMomentsTitle": "Twitch Momentsの自動申請",
         "autoCancelRaidsTitle": "レイドの自動キャンセル",
-        "autoRefreshTitle": "自動更新",
+        "autoRefreshTitle": "エラー時にプレーヤーを復帰させる",
         "fastForwardTitle": "早送りボタン",
         "hideTwitchExtensionsTitle": "Twitchの拡張機能を非表示にする",
         "communityBadgeTitle": "コミュニティバッジ",
@@ -1116,6 +1206,9 @@
     }
   },
   "ko": {
+    "enhancer": {
+      "jumpToLive": "라이브로 이동 (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse 즐겨찾기",
       "pin": "StreamPulse 즐겨찾기에 추가",
@@ -1169,6 +1262,12 @@
     "player": {
       "skipToLive": "라이브로 건너뛰기",
       "holdToFastForward": "길게 누르면 2배속으로 빨리 감기",
+      "volumeBoostLabel": "음량 증폭",
+      "volumeBoostHint": "클릭: 켜기/끄기 · 휠 또는 화살표: 최대 200%까지 조절",
+      "pictureInPicture": "PIP 모드",
+      "clipDownload": "클립 다운로드 (MP4)",
+      "clipDownloading": "클립 다운로드 중…",
+      "clipDownloadFailed": "다운로드에 실패했습니다. 다시 시도하세요",
       "latencyEmpty": "지연 시간: --",
       "latencyValue": "지연 시간: {{value}}초",
       "offline": "오프라인"
@@ -1186,7 +1285,7 @@
         "autoClaimDropsTitle": "Twitch Drops 자동 수령",
         "autoClaimMomentsTitle": "Twitch 모멘트 자동 클레임",
         "autoCancelRaidsTitle": "레이드 자동 취소",
-        "autoRefreshTitle": "자동 새로고침",
+        "autoRefreshTitle": "오류 시 플레이어 복구",
         "fastForwardTitle": "빨리 감기 버튼",
         "hideTwitchExtensionsTitle": "Twitch 확장 프로그램 숨기기",
         "communityBadgeTitle": "커뮤니티 배지",

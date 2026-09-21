@@ -48,25 +48,40 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "Nouveau",
+
+
+
+      "badgePreviewMessage": "Regarde, c'est mon badge StreamPulse !",
+
+
+      "welcomeTitle": "Ne rate plus jamais un live.",
+
+
+      "skipStep": "Passer cette étape",
+
+
+      "badgePrivacyNote": "Désactivé par défaut. Si tu l'actives : une empreinte de ton pseudo est envoyée à streampulse.fr au maximum une fois par jour. Rien d'autre ne quitte ton navigateur.",
+
+
+      "advancedSettings": "Réglages avancés",
+
+
+      "removeStreamerName": "Supprimer {{name}}",
+
+      
       "htmlLang": "fr",
       "stepProfile": "Pseudo",
       "profileTitle": "Ton pseudo Twitch.",
-      "profileDescription": "Renseigne ton pseudo pour personnaliser StreamPulse. On récupère ta photo de profil Twitch pour t'accueillir comme il faut.",
+      "profileDescription": "Optionnel : renseigne ton pseudo Twitch et on récupère ta photo de profil pour t'accueillir. Pas de compte Twitch, ou tu préfères ne pas le donner ? Passe cette étape, tout marche quand même.",
       "profileInputLabel": "TON PSEUDO TWITCH",
       "profileHintIdle": "Saisis ton pseudo : on cherche automatiquement ton profil Twitch.",
       "profileHintSearching": "Recherche en cours…",
       "profileHintFound": "✓ Trouvé : {{handle}}",
-      "profileHintNotFound": "Aucun profil Twitch trouvé. Tu peux quand même continuer.",
+      "profileHintKept": "Profil Twitch introuvable : pas grave, on garde ce pseudo tel quel. Tu peux aussi passer cette étape.",
       "profilePreviewSuffix": "Voici qui est en ligne.",
       "documentTitle": "Première configuration",
       "welcomeTagline": "EXTENSION FIREFOX · TWITCH · KICK · YOUTUBE",
-      "welcomeWord1": "Ne",
-      "welcomeWord2": "rate",
-      "welcomeWord3": "plus",
-      "welcomeWord4": "jamais",
-      "welcomeWord5": "un",
-      "welcomeWord6": "live.",
-      "welcomeTitle": "Bienvenue sur StreamPulse",
       "welcomeDescription": "Ajoute ton premier streamer pour recevoir ses notifications. Tu pourras en ajouter d'autres ensuite directement depuis StreamPulse.",
       "languagePrompt": "Choisis la langue de l’extension",
       "languageHint": "Tu pourras la modifier plus tard depuis les réglages.",
@@ -99,8 +114,6 @@ export const translations = {
       "qualityGroupHint": "Automatise les petites actions répétitives.",
       "autoClaimTitle": "Récupération auto des points",
       "autoClaimDescription": "Cliquer automatiquement les bonus de points de chaîne sur Twitch.",
-      "autoRefreshTitle": "Actualisation automatique",
-      "autoRefreshDescription": "Relancer le lecteur Twitch lorsqu’un message d’erreur (#1000, #2000, #3000, #4000 ou #5000) apparaît.",
       "fastForwardTitle": "Bouton d'avance rapide",
       "fastForwardDescription": "Ajouter un bouton au lecteur pour rattraper instantanément le direct.",
       "chatFilterTitle": "Mots-clés masqués",
@@ -118,7 +131,7 @@ export const translations = {
       "placeholders": {
         "twitch": "ex: AlexisAMZ",
         "kick": "ex: Teuf",
-        "youtube": "@handle ou lien de chaîne YouTube"
+        "youtube": "@handle ou lien de chaîne YouTube",
       },
       "submit": "Ajouter",
       "currentHeader": "Streamers suivis",
@@ -154,6 +167,15 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "Nouveau",
+
+        "durationMinutes": "{{count}} min",
+
+        "durationHours": "{{count}} h",
+
+        "durationHoursShort": "{{h}} h {{m}}",
+
+        
         "filterLabel": "Filtrer par plateforme",
         "filterAll": "Tout",
         "countSingular": "1 live",
@@ -161,9 +183,9 @@ export const translations = {
         "summary": "ratés ces 14 derniers jours · {{duration}} de contenu",
         "emptyTitle": "Aucun live raté",
         "emptyBody": "Quand un streamer suivi termine un live sans que tu l'aies regardé, il apparaît ici avec sa rediffusion.",
-        "newBadge": "Nouveau",
         "watchVod": "Voir la rediffusion de {{name}}",
         "openChannel": "Ouvrir les vidéos de {{name}}",
+        "dismiss": "Retirer {{name}} de la liste",
         "agoMinutes": "il y a {{count}} min",
         "agoHours": "il y a {{count}} h",
         "agoDays": "il y a {{count}} j"
@@ -298,10 +320,18 @@ export const translations = {
         "noStreamers": "Ajoute d'abord un streamer depuis l'accueil."
       },
       "cplus": {
+
+
+        "emptyCta": "Ajouter ton premier streamer",
+
+        "reorderHint": "Réordonner : Alt + ↑ ↓",
+
+        "rowMoved": "{{name}} déplacé en position {{position}}",
+
+        
         "liveOf": "{{live}} sur {{total}}",
         "justStarted": "{{name}} vient de lancer",
         "since": "depuis {{duration}}",
-        "newBadge": "Nouveau",
         "prev": "Live précédent",
         "next": "Live suivant",
         "activityLabel": "Activité du jour",
@@ -380,6 +410,7 @@ export const translations = {
         "menuLabel": "Sections des réglages",
         "menuAlerts": "Alertes",
         "menuAutomation": "Automatisation",
+        "menuPlayer": "Lecteur",
         "menuPreviews": "Aperçus",
         "menuChat": "Chat",
         "menuData": "Temps et données",
@@ -429,7 +460,7 @@ export const translations = {
         "all": "tous",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "Ajouter un streamer",
       "addStreamerTitlePlatform": "Ajouter un streamer {{platform}}",
@@ -440,7 +471,7 @@ export const translations = {
       "placeholders": {
         "twitch": "ex: AlexisAMZ",
         "kick": "ex: Teuf",
-        "youtube": "@handle ou lien de chaîne YouTube"
+        "youtube": "@handle ou lien de chaîne YouTube",
       },
       "emptyState": "Aucun streamer suivi. Ajoutez-en un pour commencer.",
       "sort": {
@@ -457,18 +488,15 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ actif : ta couleur personnalisée est visible par tous les utilisateurs de StreamPulse.",
         "badgePlusOff": "Avec StreamPulse+, ta couleur personnalisée est visible par tous les utilisateurs de StreamPulse.",
         "liveNotificationsTitle": "Notifications Firefox",
-        "liveNotificationsDescription": "Recevoir une alerte lorsqu’un streamer suivi démarre un live.",
+        "liveNotificationsDescription": "Appliqué à tous tes streamers suivis : tu peux ensuite l'ajuster par streamer.",
         "gameAlertsTitle": "Alertes changement de catégorie",
-        "gameAlertsDescription": "Être notifié lorsqu’un streamer change de jeu sur Twitch.",
+        "gameAlertsDescription": "Appliqué à tous tes streamers suivis : tu peux ensuite l'ajuster par streamer.",
         "titleAlertsTitle": "Alertes changement de titre",
-        "titleAlertsDescription": "Être notifié lorsqu’un streamer modifie le titre de son live.",
+        "titleAlertsDescription": "Appliqué à tous tes streamers suivis : tu peux ensuite l'ajuster par streamer.",
         "soundsTitle": "Son des notifications",
-
         "alertsPerStreamerNote": "Ces alertes se règlent sur chaque streamer, depuis sa carte : notifications, changement de catégorie et de titre.",
         "soundsDescription": "Activer ou couper le son lors des alertes.",
-
         "backgroundRaidAlertsTitle": "Alertes de raids entrants (bêta)",
-
         "backgroundRaidAlertsDescription": "Surveiller tous les streamers Twitch suivis et notifier dès qu'un raid arrive, même hors de la page.",
         "autoClaimTitle": "Récupération auto des points",
         "autoClaimDescription": "Cliquer automatiquement les bonus de points de chaîne sur Twitch.",
@@ -506,10 +534,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Annuler automatiquement la redirection lors d'un Raid Twitch. Se désactive quand les alertes de raid en arrière-plan sont actives : les points se gagnent en suivant le raid.",
         "hideTwitchExtensionsTitle": "Masquer les extensions Twitch",
         "hideTwitchExtensionsDescription": "Masquer les incrustations/overlays d'extensions sur le lecteur vidéo Twitch.",
+        "keepQualityTitle": "Garder la qualité en arrière-plan",
+        "keepQualityDescription": "Empêcher Twitch de baisser la qualité ou de mettre en pause quand l'onglet n'est pas affiché. Utilise plus de ressources. S'applique au prochain chargement de l'onglet.",
+        "autoRefreshTitle": "Relancer le lecteur en cas d'erreur",
+        "autoRefreshDescription": "Cliquer « Réessayer » à votre place sur les erreurs #1000 à #5000, et recharger l'onglet si cela ne suffit pas.",
+        "pipButtonTitle": "Bouton Picture-in-Picture",
+        "pipButtonDescription": "Ajouter un bouton au lecteur pour regarder le live dans une mini-fenêtre.",
+        "playerQualityTitle": "Qualité du lecteur",
+        "playerQualityDescription": "Ouvrir chaque live dans cette qualité. Auto laisse Twitch décider.",
+        "playerQualityAuto": "Auto",
+        "playerQualitySource": "Source",
+        "clipDownloadTitle": "Téléchargement des clips",
+        "clipDownloadDescription": "Ajouter un bouton sur les pages de clips pour les enregistrer en MP4. StreamPulse+.",
         "preventTabDiscardTitle": "Empêcher la mise en veille de l'onglet",
-        "preventTabDiscardDescription": "Empêcher Firefox de fermer ou décharger les onglets Twitch/Kick inactifs.",
-        "autoRefreshTitle": "Actualisation automatique",
-        "autoRefreshDescription": "Relancer le lecteur Twitch si un message d’erreur (#1000, #2000, #3000, #4000 ou #5000) apparaît.",
+        "preventTabDiscardDescription": "Empêcher Firefox de fermer ou décharger les onglets Twitch, Kick ou YouTube inactifs.",
         "fastForwardTitle": "Bouton d'avance rapide",
         "fastForwardDescription": "Ajouter un bouton pour rattraper instantanément le direct quand le flux est en retard.",
         "communityBadgeTitle": "Badge communautaire",
@@ -583,7 +621,7 @@ export const translations = {
       },
       "supportDev": "Offrir un Bubble Tea au développeur",
       "testNotification": "Tester une notification",
-      "notifBlockedBody": "Firefox bloque les notifications de StreamPulse : tu ne seras pas prévenu des lives.",
+      "notifBlockedBody": "Chrome bloque les notifications de StreamPulse : tu ne seras pas prévenu des lives.",
       "notifBlockedAction": "Réglages",
       "card": {
         "offline": "Hors ligne",
@@ -619,8 +657,14 @@ export const translations = {
         "soundsDisabled": "Son des notifications désactivé.",
         "autoClaimEnabled": "Récupération automatique des points activée.",
         "autoClaimDisabled": "Récupération automatique des points désactivée.",
-        "autoRefreshEnabled": "Actualisation automatique du lecteur activée.",
-        "autoRefreshDisabled": "Actualisation automatique du lecteur désactivée.",
+        "keepQualityEnabled": "Qualité conservée en arrière-plan. Rechargez l'onglet Twitch pour l'appliquer.",
+        "keepQualityDisabled": "Qualité en arrière-plan gérée par Twitch.",
+        "autoRefreshEnabled": "Relance automatique du lecteur activée.",
+        "autoRefreshDisabled": "Relance automatique du lecteur désactivée.",
+        "pipButtonEnabled": "Bouton Picture-in-Picture activé.",
+        "pipButtonDisabled": "Bouton Picture-in-Picture désactivé.",
+        "clipDownloadEnabled": "Téléchargement des clips activé.",
+        "clipDownloadDisabled": "Téléchargement des clips désactivé.",
         "fastForwardEnabled": "Bouton d'avance rapide activé.",
         "fastForwardDisabled": "Bouton d'avance rapide désactivé.",
         "watchTimeEnabled": "Watch Time Tracker activé.",
@@ -670,6 +714,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}} est en live",
+        "startupBatchTitle": "En direct maintenant",
+        "startupBatchBody": "Déjà en direct : {{names}}",
         "liveMessage": "{{game}} • {{viewers}} spectateurs",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} spectateurs",
@@ -679,9 +725,7 @@ export const translations = {
         "dropMessage": "Un Drop Twitch a été réclamé automatiquement.",
         "raidTitle": "StreamPulse · Raid annulé",
         "raidMessage": "Le transfert vers la chaîne raidée a été annulé.",
-
         "raidIncomingTitle": "Raid en approche sur {{name}}",
-
         "raidIncomingMessage": "{{raider}} arrive avec {{viewers}} spectateurs. Clique : tu seras déposé sur sa cible en suivant le raid, et les points se gagnent en venant de chez lui !",
         "unknownCategory": "Catégorie inconnue",
         "titleChangeTitle": "{{name}} change de titre",
@@ -689,6 +733,7 @@ export const translations = {
         "unknownTitle": "Nouveau titre",
         "newCategory": "Nouvelle catégorie",
         "testSimpleMessage": "Ceci est une notification de test.",
+        "testTitleMessage": "Voici un exemple de nouveau titre, comme une vraie alerte.",
         "plusThanksTitle": "Merci du fond du cœur ❤️",
         "plusThanksMessage": "Ton abonnement StreamPulse+ me touche vraiment. Grâce à toi, je peux continuer à faire grandir l'extension. Merci ! Alexis",
       },
@@ -696,6 +741,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}} en direct"
       }
     },
     "recap": {
@@ -722,6 +769,7 @@ export const translations = {
       "formatDesktop": "PC · 16:9",
       "formatMobile": "Mobile · 9:16",
       "loading": "Chargement de tes statistiques…",
+      "canvasSummary": "Image récap : {{time}} de visionnage sur la période. Chaîne la plus regardée : {{top}}.",
       "emptyTitle": "Rien à afficher pour cette période.",
       "emptyBody": "Le Watch Time Tracker n'a rien enregistré sur cette période. Vérifie qu'il est activé dans les réglages.",
       "download": "Télécharger l'image",
@@ -746,7 +794,7 @@ export const translations = {
       "restorePage": {
         "documentTitle": "Importer une sauvegarde · StreamPulse",
         "title": "Importe une sauvegarde",
-        "intro": "Choisis le fichier .json téléchargé avec « Sauvegarder mes données », depuis cette version de StreamPulse ou une plus ancienne. Son contenu s'ajoute à tes données actuelles.",
+        "intro": "Choisis le fichier .json téléchargé avec «\u00a0Sauvegarder mes données\u00a0», depuis cette version de StreamPulse ou une plus ancienne. Son contenu s'ajoute à tes données actuelles.",
         "drop": "Glisse ton fichier de sauvegarde ici",
         "or": "ou",
         "choose": "Choisir un fichier",
@@ -799,6 +847,14 @@ export const translations = {
       "noNotesBody": "Les notes de cette version n'ont pas encore été publiées."
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "Aller au direct (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "Favoris StreamPulse",
         "pin": "Ajouter aux favoris StreamPulse",
@@ -852,6 +908,12 @@ export const translations = {
       "player": {
         "skipToLive": "Rattraper le direct",
         "holdToFastForward": "Maintenir pour avance x2",
+        "volumeBoostLabel": "Amplifier le volume",
+        "volumeBoostHint": "Clic : marche arrêt · molette ou flèches : régler, jusqu'à 200 %",
+        "pictureInPicture": "Picture-in-Picture",
+        "clipDownload": "Télécharger le clip (MP4)",
+        "clipDownloading": "Téléchargement du clip…",
+        "clipDownloadFailed": "Échec du téléchargement, réessayez",
         "latencyEmpty": "Latence : --",
         "latencyValue": "Latence : {{value}}s",
         "offline": "HORS LIGNE"
@@ -880,25 +942,40 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "New",
+
+
+
+      "badgePreviewMessage": "Look, that's my StreamPulse badge!",
+
+
+      "welcomeTitle": "Never miss a live again.",
+
+
+      "skipStep": "Skip this step",
+
+
+      "badgePrivacyNote": "Off by default. If you enable it: a hashed version of your username is sent to streampulse.fr at most once a day. Nothing else leaves your browser.",
+
+
+      "advancedSettings": "Advanced settings",
+
+
+      "removeStreamerName": "Remove {{name}}",
+
+      
       "htmlLang": "en",
       "stepProfile": "Username",
       "profileTitle": "Your Twitch username.",
-      "profileDescription": "Tell us your handle to personalize StreamPulse. We'll grab your Twitch profile picture to greet you properly.",
+      "profileDescription": "Optional: enter your Twitch username and we'll grab your profile picture to greet you properly. No Twitch account, or you'd rather not share it? Just skip this step, everything works anyway.",
       "profileInputLabel": "YOUR TWITCH USERNAME",
       "profileHintIdle": "Type your handle: we'll look up your Twitch profile.",
       "profileHintSearching": "Searching…",
       "profileHintFound": "✓ Found: {{handle}}",
-      "profileHintNotFound": "No Twitch profile found. You can still continue.",
+      "profileHintKept": "Twitch profile not found: no worries, we'll keep this username as is. You can also skip this step.",
       "profilePreviewSuffix": "Here's who's online.",
       "documentTitle": "First-time setup",
       "welcomeTagline": "FIREFOX EXTENSION · TWITCH · KICK · YOUTUBE",
-      "welcomeWord1": "Never",
-      "welcomeWord2": "miss",
-      "welcomeWord3": "a",
-      "welcomeWord4": "live",
-      "welcomeWord5": "ever",
-      "welcomeWord6": "again.",
-      "welcomeTitle": "Welcome to StreamPulse",
       "welcomeDescription": "Add your first streamer to start receiving their notifications. You can add more later directly from StreamPulse.",
       "languagePrompt": "Choose the extension language",
       "languageHint": "You can change it later from the settings.",
@@ -931,8 +1008,6 @@ export const translations = {
       "qualityGroupHint": "Automate repetitive tasks to save time.",
       "autoClaimTitle": "Auto-claim channel points",
       "autoClaimDescription": "Automatically click Twitch channel point bonuses for you.",
-      "autoRefreshTitle": "Automatic refresh",
-      "autoRefreshDescription": "Reload the Twitch player when an error message appears (#1000, #2000, #3000, #4000 or #5000).",
       "fastForwardTitle": "Fast-forward button",
       "fastForwardDescription": "Add a button to the player to catch up to live instantly.",
       "chatFilterTitle": "Chat Filter",
@@ -950,7 +1025,7 @@ export const translations = {
       "placeholders": {
         "twitch": "e.g. minos",
         "kick": "e.g. trainwreckstv",
-        "youtube": "@handle or YouTube channel URL"
+        "youtube": "@handle or YouTube channel URL",
       },
       "submit": "Add",
       "currentHeader": "Followed streamers",
@@ -986,6 +1061,15 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "New",
+
+        "durationMinutes": "{{count}} min",
+
+        "durationHours": "{{count}} hr",
+
+        "durationHoursShort": "{{h}} hr {{m}}",
+
+        
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
@@ -993,9 +1077,9 @@ export const translations = {
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
         "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "Remove {{name}} from the list",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -1130,10 +1214,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "Add your first streamer",
+
+        "reorderHint": "Reorder: Alt + ↑ ↓",
+
+        "rowMoved": "{{name}} moved to position {{position}}",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -1212,6 +1304,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "Player",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -1261,7 +1354,7 @@ export const translations = {
         "all": "all",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "Add a streamer",
       "addStreamerTitlePlatform": "Add a {{platform}} streamer",
@@ -1272,7 +1365,7 @@ export const translations = {
       "placeholders": {
         "twitch": "e.g. minos",
         "kick": "e.g. trainwreckstv",
-        "youtube": "@handle or YouTube channel URL"
+        "youtube": "@handle or YouTube channel URL",
       },
       "emptyState": "No streamers followed yet. Add one to get started.",
       "sort": {
@@ -1289,18 +1382,15 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ is active: your custom color is visible to every StreamPulse user.",
         "badgePlusOff": "With StreamPulse+, your custom color is visible to every StreamPulse user.",
         "liveNotificationsTitle": "Firefox notifications",
-        "liveNotificationsDescription": "Get an alert when a followed streamer goes live.",
+        "liveNotificationsDescription": "Applied to all your followed streamers: you can fine-tune per streamer afterwards.",
         "gameAlertsTitle": "Category change alerts",
-        "gameAlertsDescription": "Be notified when a streamer switches games on Twitch.",
+        "gameAlertsDescription": "Applied to all your followed streamers: you can fine-tune per streamer afterwards.",
         "titleAlertsTitle": "Title change alerts",
-        "titleAlertsDescription": "Be notified when a streamer edits their stream title.",
+        "titleAlertsDescription": "Applied to all your followed streamers: you can fine-tune per streamer afterwards.",
         "soundsTitle": "Notification sound",
-
         "alertsPerStreamerNote": "These alerts are set on each streamer, from their card: notifications, category and title changes.",
         "soundsDescription": "Play or mute the sound when alerts fire.",
-
         "backgroundRaidAlertsTitle": "Incoming raid alerts (beta)",
-
         "backgroundRaidAlertsDescription": "Watch every Twitch channel you follow on StreamPulse and notify as soon as a raid lands, even off the page.",
         "autoClaimTitle": "Auto-claim channel points",
         "autoClaimDescription": "Automatically click Twitch channel point bonuses for you.",
@@ -1338,10 +1428,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Automatically cancel the redirect on a Twitch raid. Turns off when background raid alerts are active: the points are earned by following the raid.",
         "hideTwitchExtensionsTitle": "Hide Twitch extensions",
         "hideTwitchExtensionsDescription": "Hide Twitch extension overlays on the video player.",
+        "keepQualityTitle": "Keep quality in background",
+        "keepQualityDescription": "Stop Twitch from lowering quality or pausing when the tab isn't visible. Uses more resources. Applies the next time the tab loads.",
+        "autoRefreshTitle": "Recover the player on errors",
+        "autoRefreshDescription": "Press \"Try again\" for you on errors #1000 to #5000, and reload the tab if that isn't enough.",
+        "pipButtonTitle": "Picture-in-Picture button",
+        "pipButtonDescription": "Add a player button to watch the stream in a mini window.",
+        "playerQualityTitle": "Player quality",
+        "playerQualityDescription": "Open every stream at this quality. Auto lets Twitch decide.",
+        "playerQualityAuto": "Auto",
+        "playerQualitySource": "Source",
+        "clipDownloadTitle": "Clip downloads",
+        "clipDownloadDescription": "Add a button on clip pages to save clips as MP4. StreamPulse+.",
         "preventTabDiscardTitle": "Prevent tab discarding",
-        "preventTabDiscardDescription": "Prevent Firefox from discarding inactive Twitch/Kick tabs.",
-        "autoRefreshTitle": "Automatic refresh",
-        "autoRefreshDescription": "Reload the Twitch player when an error message appears (#1000, #2000, #3000, #4000 or #5000).",
+        "preventTabDiscardDescription": "Prevent Firefox from discarding inactive Twitch, Kick or YouTube tabs.",
         "fastForwardTitle": "Fast-forward button",
         "fastForwardDescription": "Add a button to instantly catch up to live when the stream lags behind.",
         "communityBadgeTitle": "Community badge",
@@ -1415,7 +1515,7 @@ export const translations = {
       },
       "supportDev": "Offer a Bubble Tea to the developer",
       "testNotification": "Send a test notification",
-      "notifBlockedBody": "Firefox is blocking StreamPulse notifications: you won't be alerted when streamers go live.",
+      "notifBlockedBody": "Chrome is blocking StreamPulse notifications: you won't be alerted when streamers go live.",
       "notifBlockedAction": "Settings",
       "card": {
         "offline": "Offline",
@@ -1451,8 +1551,14 @@ export const translations = {
         "soundsDisabled": "Notification sound disabled.",
         "autoClaimEnabled": "Channel point auto-claim enabled.",
         "autoClaimDisabled": "Channel point auto-claim disabled.",
-        "autoRefreshEnabled": "Automatic player refresh enabled.",
-        "autoRefreshDisabled": "Automatic player refresh disabled.",
+        "keepQualityEnabled": "Background quality kept. Reload the Twitch tab to apply.",
+        "keepQualityDisabled": "Background quality handled by Twitch.",
+        "autoRefreshEnabled": "Automatic player recovery enabled.",
+        "autoRefreshDisabled": "Automatic player recovery disabled.",
+        "pipButtonEnabled": "Picture-in-Picture button enabled.",
+        "pipButtonDisabled": "Picture-in-Picture button disabled.",
+        "clipDownloadEnabled": "Clip downloads enabled.",
+        "clipDownloadDisabled": "Clip downloads disabled.",
         "fastForwardEnabled": "Fast-forward button enabled.",
         "fastForwardDisabled": "Fast-forward button disabled.",
         "watchTimeEnabled": "Watch Time Tracker enabled.",
@@ -1502,6 +1608,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}} is live",
+        "startupBatchTitle": "Live right now",
+        "startupBatchBody": "Already live: {{names}}",
         "liveMessage": "{{game}} • {{viewers}} viewers",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} viewers",
@@ -1511,9 +1619,7 @@ export const translations = {
         "dropMessage": "A Twitch Drop was claimed automatically.",
         "raidTitle": "StreamPulse · Raid cancelled",
         "raidMessage": "The transfer to the raided channel was cancelled.",
-
         "raidIncomingTitle": "Incoming raid on {{name}}",
-
         "raidIncomingMessage": "{{raider}} is arriving with {{viewers}} viewers. Click: you'll be dropped onto their target while following the raid : raid points are earned by coming from their stream!",
         "unknownCategory": "Unknown category",
         "titleChangeTitle": "{{name}} changed title",
@@ -1521,6 +1627,7 @@ export const translations = {
         "unknownTitle": "New title",
         "newCategory": "New category",
         "testSimpleMessage": "This is a test notification.",
+        "testTitleMessage": "Here is a sample new title, like a real alert.",
         "plusThanksTitle": "Thank you from the bottom of my heart ❤️",
         "plusThanksMessage": "Your StreamPulse+ subscription truly means a lot to me. Thanks to you, I can keep making the extension better. Thank you! Alexis",
       },
@@ -1528,6 +1635,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}} live"
       }
     },
     "recap": {
@@ -1554,6 +1663,7 @@ export const translations = {
       "formatDesktop": "Desktop · 16:9",
       "formatMobile": "Mobile · 9:16",
       "loading": "Loading your stats…",
+      "canvasSummary": "Recap image: {{time}} watched over the period. Most-watched channel: {{top}}.",
       "emptyTitle": "Nothing to show for this period.",
       "emptyBody": "The Watch Time Tracker has not recorded anything for this period. Make sure it is turned on in the settings.",
       "download": "Download image",
@@ -1631,6 +1741,14 @@ export const translations = {
       "noNotesBody": "The notes for this version have not been published yet."
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "Jump to Live (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "StreamPulse favorites",
         "pin": "Add to StreamPulse favorites",
@@ -1684,6 +1802,12 @@ export const translations = {
       "player": {
         "skipToLive": "Skip to live",
         "holdToFastForward": "Hold to fast-forward x2",
+        "volumeBoostLabel": "Boost the volume",
+        "volumeBoostHint": "Click: on/off · scroll or arrows: adjust, up to 200%",
+        "pictureInPicture": "Picture-in-Picture",
+        "clipDownload": "Download clip (MP4)",
+        "clipDownloading": "Downloading clip…",
+        "clipDownloadFailed": "Download failed, try again",
         "latencyEmpty": "Latency: --",
         "latencyValue": "Latency: {{value}}s",
         "offline": "OFFLINE"
@@ -1712,6 +1836,28 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "Nuevo",
+
+
+
+      "badgePreviewMessage": "¡Mira, esta es mi insignia de StreamPulse!",
+
+
+      "welcomeTitle": "No te pierdas nunca más un directo.",
+
+
+      "skipStep": "Omitir este paso",
+
+
+      "badgePrivacyNote": "Desactivado por defecto. Si lo activas: se envía una versión cifrada de tu usuario a streampulse.fr como máximo una vez al día. Nada más sale de tu navegador.",
+
+
+      "advancedSettings": "Ajustes avanzados",
+
+
+      "removeStreamerName": "Eliminar {{name}}",
+
+      
       "stepProfile": "Usuario",
       "profileTitle": "Tu nombre de usuario en Twitch.",
       "profileDescription": "Indícanos tu usuario para personalizar StreamPulse. Recogeremos tu foto de perfil de Twitch para darte la bienvenida como toca.",
@@ -1719,17 +1865,10 @@ export const translations = {
       "profileHintIdle": "Escribe tu usuario: buscaremos tu perfil de Twitch automáticamente.",
       "profileHintSearching": "Buscando…",
       "profileHintFound": "✓ Encontrado: {{handle}}",
-      "profileHintNotFound": "No se ha encontrado ningún perfil de Twitch. Puedes continuar de todos modos.",
+      "profileHintKept": "Perfil de Twitch no encontrado: no pasa nada, guardamos este usuario tal cual. También puedes saltarte este paso.",
       "profilePreviewSuffix": "Aquí tienes quién está en línea.",
       "documentTitle": "Configuración inicial",
       "welcomeTagline": "EXTENSIÓN FIREFOX · TWITCH · KICK · YOUTUBE",
-      "welcomeWord1": "Nunca",
-      "welcomeWord2": "te",
-      "welcomeWord3": "pierdas",
-      "welcomeWord4": "un",
-      "welcomeWord5": "live",
-      "welcomeWord6": "más.",
-      "welcomeTitle": "Bienvenido a StreamPulse",
       "welcomeDescription": "Añade tu primer streamer para recibir sus notificaciones. Después podrás añadir más directamente desde StreamPulse.",
       "languagePrompt": "Elige el idioma de la extensión",
       "languageHint": "Podrás cambiarlo más tarde desde los ajustes.",
@@ -1762,8 +1901,6 @@ export const translations = {
       "qualityGroupHint": "Automatiza las pequeñas acciones repetitivas.",
       "autoClaimTitle": "Auto-reclamo de puntos",
       "autoClaimDescription": "Hacer clic automáticamente en los bonus de puntos del canal en Twitch.",
-      "autoRefreshTitle": "Actualización automática",
-      "autoRefreshDescription": "Reinicia el reproductor de Twitch cuando aparece un mensaje de error (#1000, #2000, #3000, #4000 o #5000).",
       "fastForwardTitle": "Botón de avance rápido",
       "fastForwardDescription": "Añade un botón al reproductor para volver al live al instante.",
       "chatFilterTitle": "Palabras filtradas",
@@ -1781,7 +1918,7 @@ export const translations = {
       "placeholders": {
         "twitch": "ej.: AlexisAMZ",
         "kick": "ej.: Teuf",
-        "youtube": "@usuario o enlace de canal de YouTube"
+        "youtube": "@usuario o enlace de canal de YouTube",
       },
       "submit": "Añadir",
       "currentHeader": "Streamers seguidos",
@@ -1818,16 +1955,25 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "Nuevo",
+
+        "durationMinutes": "{{count}} min",
+
+        "durationHours": "{{count}} h",
+
+        "durationHoursShort": "{{h}} h {{m}}",
+
+        
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
         "countPlural": "{{count}} lives",
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
-        "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
+        "emptyBody": "Cuando un streamer que sigues termina un directo que no has visto, aparece aquí con su repetición.",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "Quitar a {{name}} de la lista",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -1962,10 +2108,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "Añade tu primer streamer",
+
+        "reorderHint": "Reordenar: Alt + ↑ ↓",
+
+        "rowMoved": "{{name}} movido a la posición {{position}}",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -2044,6 +2198,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "Reproductor",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -2092,7 +2247,7 @@ export const translations = {
         "all": "todos",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "Añadir un streamer",
       "addStreamerTitlePlatform": "Añadir un streamer de {{platform}}",
@@ -2103,7 +2258,7 @@ export const translations = {
       "placeholders": {
         "twitch": "ej.: AlexisAMZ",
         "kick": "ej.: Teuf",
-        "youtube": "@usuario o enlace de canal de YouTube"
+        "youtube": "@usuario o enlace de canal de YouTube",
       },
       "emptyState": "Aún no sigues a ningún streamer. Añade uno para empezar.",
       "sort": {
@@ -2120,23 +2275,18 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ activo: tu color personalizado es visible para todos los usuarios de StreamPulse.",
         "badgePlusOff": "Con StreamPulse+, tu color personalizado es visible para todos los usuarios de StreamPulse.",
         "liveNotificationsTitle": "Notificaciones de Firefox",
-        "liveNotificationsDescription": "Recibe una alerta cuando un streamer que sigues empiece un live.",
+        "liveNotificationsDescription": "Se aplica a todos los streamers que sigues: puedes ajustarlo por streamer después.",
         "gameAlertsTitle": "Alertas de cambio de categoría",
-        "gameAlertsDescription": "Recibe una notificación cuando un streamer cambie de juego en Twitch.",
+        "gameAlertsDescription": "Se aplica a todos los streamers que sigues: puedes ajustarlo por streamer después.",
         "titleAlertsTitle": "Alertas de cambio de título",
-        "titleAlertsDescription": "Recibe un aviso cuando un streamer edita el título de su directo.",
+        "titleAlertsDescription": "Se aplica a todos los streamers que sigues: puedes ajustarlo por streamer después.",
         "soundsTitle": "Sonido de las notificaciones",
-
         "alertsPerStreamerNote": "Estas alertas se configuran en cada streamer, desde su tarjeta: notificaciones, cambios de categoría y de título.",
         "soundsDescription": "Activar o silenciar el sonido de las alertas.",
-
         "backgroundRaidAlertsTitle": "Alertas de redadas entrantes (beta)",
-
         "backgroundRaidAlertsDescription": "Vigilar todos los canales de Twitch que sigues y avisar en cuanto llegue una redada, incluso fuera de la página.",
         "autoClaimTitle": "Auto-reclamo de puntos",
         "autoClaimDescription": "Hacer clic automáticamente en los bonus de puntos del canal en Twitch.",
-        "autoRefreshTitle": "Actualización automática",
-        "autoRefreshDescription": "Reinicia el reproductor de Twitch si aparece un mensaje de error (#1000, #2000, #3000, #4000 o #5000).",
         "fastForwardTitle": "Botón de avance rápido",
         "fastForwardDescription": "Añade un botón para volver al live al instante cuando el flujo se atrasa.",
         "communityBadgeTitle": "Insignia comunitaria",
@@ -2222,8 +2372,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Cancelar automáticamente la redirección en un raid de Twitch. Se desactiva cuando las alertas de raid en segundo plano están activas: los puntos se ganan siguiendo el raid.",
         "hideTwitchExtensionsTitle": "Ocultar extensiones de Twitch",
         "hideTwitchExtensionsDescription": "Oculta las superposiciones de extensiones de Twitch en el reproductor de vídeo.",
+        "keepQualityTitle": "Mantener la calidad en segundo plano",
+        "keepQualityDescription": "Evita que Twitch baje la calidad o pause cuando la pestaña no está visible. Usa más recursos. Se aplica la próxima vez que cargue la pestaña.",
+        "autoRefreshTitle": "Recuperar el reproductor si falla",
+        "autoRefreshDescription": "Pulsa «Reintentar» por ti en los errores #1000 a #5000 y recarga la pestaña si no basta.",
+        "pipButtonTitle": "Botón de imagen en imagen",
+        "pipButtonDescription": "Añade un botón al reproductor para ver el directo en una minipantalla.",
+        "playerQualityTitle": "Calidad del reproductor",
+        "playerQualityDescription": "Abre cada directo con esta calidad. Auto deja que Twitch decida.",
+        "playerQualityAuto": "Auto",
+        "playerQualitySource": "Fuente",
+        "clipDownloadTitle": "Descarga de clips",
+        "clipDownloadDescription": "Añade un botón en las páginas de clips para guardarlos en MP4. StreamPulse+.",
         "preventTabDiscardTitle": "Evitar la suspensión de pestañas",
-        "preventTabDiscardDescription": "Evita que Firefox descarte las pestañas inactivas de Twitch o Kick."
+        "preventTabDiscardDescription": "Evita que Firefox descarte las pestañas inactivas de Twitch, Kick o YouTube."
       },
       "watchTime": {
         "totalTime": "Tiempo total",
@@ -2246,7 +2408,7 @@ export const translations = {
       },
       "supportDev": "Invitar a un Bubble Tea al desarrollador",
       "testNotification": "Probar una notificación",
-      "notifBlockedBody": "Firefox bloquea las notificaciones de StreamPulse: no recibirás avisos de los directos.",
+      "notifBlockedBody": "Chrome bloquea las notificaciones de StreamPulse: no recibirás avisos de los directos.",
       "notifBlockedAction": "Ajustes",
       "card": {
         "offline": "Offline",
@@ -2282,8 +2444,14 @@ export const translations = {
         "soundsDisabled": "Sonido de las notificaciones desactivado.",
         "autoClaimEnabled": "Auto-reclamo de puntos activado.",
         "autoClaimDisabled": "Auto-reclamo de puntos desactivado.",
-        "autoRefreshEnabled": "Actualización automática del reproductor activada.",
-        "autoRefreshDisabled": "Actualización automática del reproductor desactivada.",
+        "keepQualityEnabled": "Calidad mantenida en segundo plano. Recarga la pestaña de Twitch para aplicarlo.",
+        "keepQualityDisabled": "Calidad en segundo plano gestionada por Twitch.",
+        "autoRefreshEnabled": "Recuperación automática del reproductor activada.",
+        "autoRefreshDisabled": "Recuperación automática del reproductor desactivada.",
+        "pipButtonEnabled": "Botón de imagen en imagen activado.",
+        "pipButtonDisabled": "Botón de imagen en imagen desactivado.",
+        "clipDownloadEnabled": "Descarga de clips activada.",
+        "clipDownloadDisabled": "Descarga de clips desactivada.",
         "fastForwardEnabled": "Botón de avance rápido activado.",
         "fastForwardDisabled": "Botón de avance rápido desactivado.",
         "watchTimeEnabled": "Watch Time Tracker activado.",
@@ -2334,6 +2502,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}} está en live",
+        "startupBatchTitle": "En directo ahora",
+        "startupBatchBody": "Ya en directo: {{names}}",
         "liveMessage": "{{game}} • {{viewers}} espectadores",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} espectadores",
@@ -2343,9 +2513,7 @@ export const translations = {
         "dropMessage": "Se ha reclamado automáticamente un Drop de Twitch.",
         "raidTitle": "StreamPulse · Raid cancelado",
         "raidMessage": "Se ha cancelado la transferencia al canal del raid.",
-
         "raidIncomingTitle": "Redada entrante en {{name}}",
-
         "raidIncomingMessage": "{{raider}} llega con {{viewers}} espectadores. Haz clic: te llevarán a su objetivo siguiendo la redada; ¡los puntos se consiguen viniendo desde su directo!",
         "unknownCategory": "Categoría desconocida",
         "titleChangeTitle": "{{name}} cambió el título",
@@ -2353,6 +2521,7 @@ export const translations = {
         "unknownTitle": "Nuevo título",
         "newCategory": "Nueva categoría",
         "testSimpleMessage": "Esto es una notificación de prueba.",
+        "testTitleMessage": "Este es un ejemplo de nuevo título, como una alerta real.",
         "plusThanksTitle": "¡Gracias de todo corazón ❤️",
         "plusThanksMessage": "Tu suscripción a StreamPulse+ me emociona de verdad. Gracias a ti puedo seguir mejorando la extensión. ¡Gracias! Alexis",
       },
@@ -2360,6 +2529,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}} en directo"
       }
     },
     "recap": {
@@ -2387,6 +2558,7 @@ export const translations = {
       "formatMobile": "Móvil · 9:16",
       "loading": "Cargando tus estadísticas…",
       "emptyTitle": "No hay nada que mostrar en este periodo.",
+      "canvasSummary": "Imagen resumen: {{time}} de visionado en el periodo. Canal más visto: {{top}}.",
       "emptyBody": "El Watch Time Tracker no ha registrado nada en este periodo. Comprueba que esté activado en los ajustes.",
       "download": "Descargar imagen",
       "share": "Compartir en X",
@@ -2463,6 +2635,14 @@ export const translations = {
       "noNotesBody": "Las notas de esta versión aún no se han publicado."
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "Ir al directo (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "Favoritos de StreamPulse",
         "pin": "Añadir a favoritos de StreamPulse",
@@ -2516,6 +2696,12 @@ export const translations = {
       "player": {
         "skipToLive": "Volver al directo",
         "holdToFastForward": "Mantén pulsado para avanzar x2",
+        "volumeBoostLabel": "Amplificar el volumen",
+        "volumeBoostHint": "Clic: activar o desactivar · rueda o flechas: ajustar, hasta 200 %",
+        "pictureInPicture": "Imagen en imagen",
+        "clipDownload": "Descargar clip (MP4)",
+        "clipDownloading": "Descargando clip…",
+        "clipDownloadFailed": "Error en la descarga, inténtalo de nuevo",
         "latencyEmpty": "Latencia: --",
         "latencyValue": "Latencia: {{value}}s",
         "offline": "DESCONECTADO"
@@ -2544,6 +2730,20 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "Novo",
+
+
+      "badgePreviewMessage": "Olha, essa é a minha insígnia do StreamPulse!",
+
+      "welcomeTitle": "Nunca mais perca uma live.",
+
+      "skipStep": "Pular esta etapa",
+
+      "badgePrivacyNote": "Desativado por padrão. Se você ativar: um hash do seu nome de usuário é enviado para streampulse.fr no máximo uma vez por dia. Nada mais sai do seu navegador.",
+
+      "advancedSettings": "Configurações avançadas",
+
+      "removeStreamerName": "Remover {{name}}",
       "stepProfile": "Usuário",
       "profileTitle": "Seu nome de usuário na Twitch.",
       "profileDescription": "Coloque seu nome de usuário para personalizar o StreamPulse. A gente pega sua foto de perfil da Twitch para te receber direitinho.",
@@ -2551,17 +2751,10 @@ export const translations = {
       "profileHintIdle": "Digite seu nome de usuário: buscamos seu perfil da Twitch automaticamente.",
       "profileHintSearching": "Buscando…",
       "profileHintFound": "✓ Encontrado: {{handle}}",
-      "profileHintNotFound": "Nenhum perfil da Twitch encontrado. Você pode continuar mesmo assim.",
+      "profileHintKept": "Perfil da Twitch não encontrado: sem problemas, vamos manter este nome de usuário como está. Você também pode pular esta etapa.",
       "profilePreviewSuffix": "Veja quem está online.",
       "documentTitle": "Configuração inicial",
       "welcomeTagline": "EXTENSÃO FIREFOX · TWITCH · KICK · YOUTUBE",
-      "welcomeWord1": "Nunca",
-      "welcomeWord2": "mais",
-      "welcomeWord3": "perca",
-      "welcomeWord4": "uma",
-      "welcomeWord5": "live.",
-      "welcomeWord6": "",
-      "welcomeTitle": "Bem-vindo ao StreamPulse",
       "welcomeDescription": "Adicione seu primeiro streamer para receber as notificações dele. Você pode adicionar mais depois direto pelo StreamPulse.",
       "languagePrompt": "Escolha o idioma da extensão",
       "languageHint": "Você poderá mudar depois nas configurações.",
@@ -2594,8 +2787,6 @@ export const translations = {
       "qualityGroupHint": "Automatize as pequenas tarefas repetitivas.",
       "autoClaimTitle": "Auto-resgate de pontos",
       "autoClaimDescription": "Clicar automaticamente nos bônus de channel points na Twitch.",
-      "autoRefreshTitle": "Atualização automática",
-      "autoRefreshDescription": "Reinicia o player da Twitch quando aparece uma mensagem de erro (#1000, #2000, #3000, #4000 ou #5000).",
       "fastForwardTitle": "Botão de avanço rápido",
       "fastForwardDescription": "Adiciona um botão ao player para voltar à live na hora.",
       "chatFilterTitle": "Palavras filtradas",
@@ -2613,7 +2804,7 @@ export const translations = {
       "placeholders": {
         "twitch": "ex.: AlexisAMZ",
         "kick": "ex.: Teuf",
-        "youtube": "@usuário ou link de canal do YouTube"
+        "youtube": "@usuário ou link de canal do YouTube",
       },
       "submit": "Adicionar",
       "currentHeader": "Streamers seguidos",
@@ -2650,16 +2841,20 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "Novo",
+        "durationMinutes": "{{count}} min",
+        "durationHours": "{{count}} h",
+        "durationHoursShort": "{{h}} h {{m}}",
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
         "countPlural": "{{count}} lives",
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
-        "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
+        "emptyBody": "Quando um streamer que você segue termina uma live que você não assistiu, ela aparece aqui com o replay.",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "Remover {{name}} da lista",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -2794,10 +2989,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "Adicione seu primeiro streamer",
+
+        "reorderHint": "Reordenar: Alt + ↑ ↓",
+
+        "rowMoved": "{{name}} movido para a posição {{position}}",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -2876,6 +3079,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "Player",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -2924,7 +3128,7 @@ export const translations = {
         "all": "todos",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "Adicionar um streamer",
       "addStreamerTitlePlatform": "Adicionar um streamer de {{platform}}",
@@ -2935,7 +3139,7 @@ export const translations = {
       "placeholders": {
         "twitch": "ex.: AlexisAMZ",
         "kick": "ex.: Teuf",
-        "youtube": "@usuário ou link de canal do YouTube"
+        "youtube": "@usuário ou link de canal do YouTube",
       },
       "emptyState": "Você ainda não segue nenhum streamer. Adicione um para começar.",
       "sort": {
@@ -2952,23 +3156,18 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ ativo: sua cor personalizada fica visível para todos os usuários do StreamPulse.",
         "badgePlusOff": "Com o StreamPulse+, sua cor personalizada fica visível para todos os usuários do StreamPulse.",
         "liveNotificationsTitle": "Notificações do Firefox",
-        "liveNotificationsDescription": "Receba um alerta quando um streamer que você segue ficar ao vivo.",
+        "liveNotificationsDescription": "Aplicado a todos os streamers que você segue: você pode ajustar por streamer depois.",
         "gameAlertsTitle": "Alertas de mudança de categoria",
-        "gameAlertsDescription": "Seja notificado quando um streamer mudar de jogo na Twitch.",
+        "gameAlertsDescription": "Aplicado a todos os streamers que você segue: você pode ajustar por streamer depois.",
         "titleAlertsTitle": "Alertas de mudança de título",
-        "titleAlertsDescription": "Seja notificado quando um streamer editar o título da live.",
+        "titleAlertsDescription": "Aplicado a todos os streamers que você segue: você pode ajustar por streamer depois.",
         "soundsTitle": "Som das notificações",
-
         "alertsPerStreamerNote": "Esses alertas são definidos em cada streamer, no card dele: notificações, mudanças de categoria e de título.",
         "soundsDescription": "Ativar ou silenciar o som dos alertas.",
-
         "backgroundRaidAlertsTitle": "Alertas de raids recebidas (beta)",
-
         "backgroundRaidAlertsDescription": "Monitorar todos os canais da Twitch que você segue e avisar assim que uma raid chegar, mesmo fora da página.",
         "autoClaimTitle": "Auto-resgate de pontos",
         "autoClaimDescription": "Clicar automaticamente nos bônus de channel points na Twitch.",
-        "autoRefreshTitle": "Atualização automática",
-        "autoRefreshDescription": "Reinicia o player da Twitch se aparecer uma mensagem de erro (#1000, #2000, #3000, #4000 ou #5000).",
         "fastForwardTitle": "Botão de avanço rápido",
         "fastForwardDescription": "Adiciona um botão para voltar à live na hora quando o stream atrasa.",
         "communityBadgeTitle": "Distintivo comunitário",
@@ -3054,8 +3253,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Cancelar automaticamente o redirecionamento em um raid da Twitch. Desativa-se quando os alertas de raid em segundo plano estão ativos: os pontos são ganhos seguindo o raid.",
         "hideTwitchExtensionsTitle": "Ocultar extensões da Twitch",
         "hideTwitchExtensionsDescription": "Oculta as sobreposições de extensões da Twitch no player de vídeo.",
+        "keepQualityTitle": "Manter a qualidade em segundo plano",
+        "keepQualityDescription": "Impede a Twitch de baixar a qualidade ou pausar quando a aba não está visível. Usa mais recursos. Aplica-se na próxima vez que a aba carregar.",
+        "autoRefreshTitle": "Recuperar o player em caso de erro",
+        "autoRefreshDescription": "Clica em \"Tentar novamente\" por você nos erros #1000 a #5000 e recarrega a aba se não for suficiente.",
+        "pipButtonTitle": "Botão Picture-in-Picture",
+        "pipButtonDescription": "Adiciona um botão ao player para assistir à live em uma minijanela.",
+        "playerQualityTitle": "Qualidade do player",
+        "playerQualityDescription": "Abre cada live nesta qualidade. Auto deixa a Twitch decidir.",
+        "playerQualityAuto": "Auto",
+        "playerQualitySource": "Fonte",
+        "clipDownloadTitle": "Download de clipes",
+        "clipDownloadDescription": "Adiciona um botão nas páginas de clipes para salvá-los em MP4. StreamPulse+.",
         "preventTabDiscardTitle": "Impedir a suspensão de abas",
-        "preventTabDiscardDescription": "Impede que o Firefox descarte abas inativas da Twitch ou Kick."
+        "preventTabDiscardDescription": "Impede que o Firefox descarte abas inativas da Twitch, Kick ou YouTube."
       },
       "watchTime": {
         "totalTime": "Tempo total",
@@ -3078,7 +3289,7 @@ export const translations = {
       },
       "supportDev": "Pagar um Bubble Tea para o dev",
       "testNotification": "Testar uma notificação",
-      "notifBlockedBody": "O Firefox está bloqueando as notificações do StreamPulse: você não será avisado das lives.",
+      "notifBlockedBody": "O Chrome está bloqueando as notificações do StreamPulse: você não será avisado das lives.",
       "notifBlockedAction": "Configurações",
       "card": {
         "offline": "Offline",
@@ -3114,8 +3325,14 @@ export const translations = {
         "soundsDisabled": "Som das notificações desativado.",
         "autoClaimEnabled": "Auto-resgate de pontos ativado.",
         "autoClaimDisabled": "Auto-resgate de pontos desativado.",
-        "autoRefreshEnabled": "Atualização automática do player ativada.",
-        "autoRefreshDisabled": "Atualização automática do player desativada.",
+        "keepQualityEnabled": "Qualidade mantida em segundo plano. Recarregue a aba da Twitch para aplicar.",
+        "keepQualityDisabled": "Qualidade em segundo plano gerenciada pela Twitch.",
+        "autoRefreshEnabled": "Recuperação automática do player ativada.",
+        "autoRefreshDisabled": "Recuperação automática do player desativada.",
+        "pipButtonEnabled": "Botão Picture-in-Picture ativado.",
+        "pipButtonDisabled": "Botão Picture-in-Picture desativado.",
+        "clipDownloadEnabled": "Download de clipes ativado.",
+        "clipDownloadDisabled": "Download de clipes desativado.",
         "fastForwardEnabled": "Botão de avanço rápido ativado.",
         "fastForwardDisabled": "Botão de avanço rápido desativado.",
         "watchTimeEnabled": "Watch Time Tracker ativado.",
@@ -3166,6 +3383,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}} está ao vivo",
+        "startupBatchTitle": "Ao vivo agora",
+        "startupBatchBody": "Já ao vivo: {{names}}",
         "liveMessage": "{{game}} • {{viewers}} espectadores",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} espectadores",
@@ -3175,9 +3394,7 @@ export const translations = {
         "dropMessage": "Um Drop da Twitch foi resgatado automaticamente.",
         "raidTitle": "StreamPulse · Raid cancelado",
         "raidMessage": "A transferência para o canal do raid foi cancelada.",
-
         "raidIncomingTitle": "Raid chegando em {{name}}",
-
         "raidIncomingMessage": "{{raider}} está chegando com {{viewers}} espectadores. Clique: você será levado ao alvo acompanhando a raid; os pontos são ganhos vindo da live dele!",
         "unknownCategory": "Categoria desconhecida",
         "titleChangeTitle": "{{name}} mudou o título",
@@ -3185,6 +3402,7 @@ export const translations = {
         "unknownTitle": "Novo título",
         "newCategory": "Nova categoria",
         "testSimpleMessage": "Esta é uma notificação de teste.",
+        "testTitleMessage": "Aqui está um exemplo de novo título, como um alerta real.",
         "plusThanksTitle": "Obrigado de coração ❤️",
         "plusThanksMessage": "Sua assinatura do StreamPulse+ me emociona de verdade. Graças a você, posso continuar melhorando a extensão. Obrigado! Alexis",
       },
@@ -3192,6 +3410,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}} ao vivo"
       }
     },
     "recap": {
@@ -3219,6 +3439,7 @@ export const translations = {
       "formatMobile": "Celular · 9:16",
       "loading": "Carregando suas estatísticas…",
       "emptyTitle": "Nada para mostrar neste período.",
+      "canvasSummary": "Imagem resumo: {{time}} de visualização no período. Canal mais assistido: {{top}}.",
       "emptyBody": "O Watch Time Tracker não registrou nada neste período. Verifique se ele está ativado nas configurações.",
       "download": "Baixar imagem",
       "share": "Compartilhar no X",
@@ -3295,6 +3516,9 @@ export const translations = {
       "noNotesBody": "As notas desta versão ainda não foram publicadas."
     },
     "inject": {
+      "enhancer": {
+        "jumpToLive": "Ir para o ao vivo (StreamPulse)"
+      },
       "twitchUi": {
         "favorites": "Favoritos do StreamPulse",
         "pin": "Adicionar aos favoritos do StreamPulse",
@@ -3348,6 +3572,12 @@ export const translations = {
       "player": {
         "skipToLive": "Voltar ao ao vivo",
         "holdToFastForward": "Segure para avançar x2",
+        "volumeBoostLabel": "Amplificar o volume",
+        "volumeBoostHint": "Clique: liga ou desliga · roda ou setas: ajustar, até 200%",
+        "pictureInPicture": "Picture-in-Picture",
+        "clipDownload": "Baixar clipe (MP4)",
+        "clipDownloading": "Baixando clipe…",
+        "clipDownloadFailed": "Falha no download, tente novamente",
         "latencyEmpty": "Latência: --",
         "latencyValue": "Latência: {{value}}s",
         "offline": "OFFLINE"
@@ -3376,6 +3606,28 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "Neu",
+
+
+
+      "badgePreviewMessage": "Schau, das ist mein StreamPulse-Abzeichen!",
+
+
+      "welcomeTitle": "Verpasse nie wieder einen Stream.",
+
+
+      "skipStep": "Diesen Schritt überspringen",
+
+
+      "badgePrivacyNote": "Standardmäßig aus. Wenn aktiviert: Ein verschlüsselter Hash deines Benutzernamens wird höchstens einmal täglich an streampulse.fr gesendet. Nichts anderes verlässt deinen Browser.",
+
+
+      "advancedSettings": "Erweiterte Einstellungen",
+
+
+      "removeStreamerName": "{{name}} entfernen",
+
+      
       "htmlLang": "de",
       "stepProfile": "Benutzername",
       "profileTitle": "Dein Twitch-Benutzername.",
@@ -3384,17 +3636,10 @@ export const translations = {
       "profileHintIdle": "Geben Sie Ihren Benutzernamen ein: Wir suchen nach Ihrem Twitch-Profil.",
       "profileHintSearching": "Suche...",
       "profileHintFound": "✓ Gefunden: {{handle}}",
-      "profileHintNotFound": "Kein Twitch-Profil gefunden. Sie können trotzdem fortfahren.",
+      "profileHintKept": "Twitch-Profil nicht gefunden: kein Problem, wir behalten diesen Benutzernamen so. Du kannst diesen Schritt auch überspringen.",
       "profilePreviewSuffix": "Hier erfahren Sie, wer online ist.",
       "documentTitle": "Erstmalige Einrichtung",
       "welcomeTagline": "FIREFOX-ERWEITERUNG · TWITCH · KICK · YOUTUBE",
-      "welcomeWord1": "Niemals",
-      "welcomeWord2": "vermissen",
-      "welcomeWord3": "A",
-      "welcomeWord4": "live",
-      "welcomeWord5": "immer",
-      "welcomeWord6": "wieder.",
-      "welcomeTitle": "Willkommen bei StreamPulse",
       "welcomeDescription": "Fügen Sie Ihren ersten Streamer hinzu, um dessen Benachrichtigungen zu erhalten. Sie können später direkt aus StreamPulse weitere hinzufügen.",
       "languagePrompt": "Wählen Sie die Erweiterungssprache",
       "languageHint": "Sie können es später in den Einstellungen ändern.",
@@ -3427,8 +3672,6 @@ export const translations = {
       "qualityGroupHint": "Automatisieren Sie sich wiederholende Aufgaben, um Zeit zu sparen.",
       "autoClaimTitle": "Kanalpunkte automatisch beanspruchen",
       "autoClaimDescription": "Klicken Sie automatisch auf Twitch-Kanalpunktboni für Sie.",
-      "autoRefreshTitle": "Automatische Aktualisierung",
-      "autoRefreshDescription": "Laden Sie den Twitch-Player neu, wenn eine Fehlermeldung erscheint (#1000, #2000, #3000, #4000 oder #5000).",
       "fastForwardTitle": "Schnellvorlauf-Taste",
       "fastForwardDescription": "Fügen Sie dem Player eine Schaltfläche hinzu, um sofort auf dem Laufenden zu bleiben.",
       "chatFilterTitle": "Chat-Filter",
@@ -3446,7 +3689,7 @@ export const translations = {
       "placeholders": {
         "twitch": "z.B. Minos",
         "kick": "z.B. trainwreckstv",
-        "youtube": "@Name oder YouTube-Kanal-Link"
+        "youtube": "@Name oder YouTube-Kanal-Link",
       },
       "submit": "Hinzufügen",
       "currentHeader": "Streamern gefolgt",
@@ -3482,16 +3725,25 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "Neu",
+
+        "durationMinutes": "{{count}} Min.",
+
+        "durationHours": "{{count}} Std.",
+
+        "durationHoursShort": "{{h}} Std. {{m}}",
+
+        
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
         "countPlural": "{{count}} lives",
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
-        "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
+        "emptyBody": "Wenn ein Streamer, dem du folgst, einen Stream beendet, den du nicht gesehen hast, taucht er hier mit seiner Wiederholung auf.",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "{{name}} aus der Liste entfernen",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -3626,10 +3878,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "Füge deinen ersten Streamer hinzu",
+
+        "reorderHint": "Sortieren: Alt + ↑ ↓",
+
+        "rowMoved": "{{name}} auf Position {{position}} verschoben",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -3708,6 +3968,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "Player",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -3757,7 +4018,7 @@ export const translations = {
         "all": "alle",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "Fügen Sie einen Streamer hinzu",
       "addStreamerTitlePlatform": "Fügen Sie einen {{platform}}-Streamer hinzu",
@@ -3768,7 +4029,7 @@ export const translations = {
       "placeholders": {
         "twitch": "z.B. Minos",
         "kick": "z.B. trainwreckstv",
-        "youtube": "@Name oder YouTube-Kanal-Link"
+        "youtube": "@Name oder YouTube-Kanal-Link",
       },
       "emptyState": "Es sind noch keine Streamer gefolgt. Fügen Sie eines hinzu, um loszulegen.",
       "sort": {
@@ -3785,18 +4046,15 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ aktiv: Deine eigene Farbe ist für alle StreamPulse-Nutzer sichtbar.",
         "badgePlusOff": "Mit StreamPulse+ ist deine eigene Farbe für alle StreamPulse-Nutzer sichtbar.",
         "liveNotificationsTitle": "Firefox-Benachrichtigungen",
-        "liveNotificationsDescription": "Erhalten Sie eine Benachrichtigung, wenn ein Streamer, dem Sie folgen, live geht.",
+        "liveNotificationsDescription": "Gilt für alle gefolgten Streamer: anschließend pro Streamer anpassbar.",
         "gameAlertsTitle": "Benachrichtigungen zu Kategorieänderungen",
-        "gameAlertsDescription": "Werden Sie benachrichtigt, wenn ein Streamer das Spiel auf Twitch wechselt.",
+        "gameAlertsDescription": "Gilt für alle gefolgten Streamer: anschließend pro Streamer anpassbar.",
         "titleAlertsTitle": "Benachrichtigungen bei Titeländerung",
-        "titleAlertsDescription": "Werde benachrichtigt, wenn ein Streamer den Titel seines Streams ändert.",
+        "titleAlertsDescription": "Gilt für alle gefolgten Streamer: anschließend pro Streamer anpassbar.",
         "soundsTitle": "Benachrichtigungston",
-
         "alertsPerStreamerNote": "Diese Warnungen werden pro Streamer über dessen Karte eingestellt: Benachrichtigungen, Kategorie- und Titelwechsel.",
         "soundsDescription": "Spielen Sie den Ton ab oder schalten Sie ihn stumm, wenn Alarme ausgelöst werden.",
-
         "backgroundRaidAlertsTitle": "Warnung bei eingehenden Raids (Beta)",
-
         "backgroundRaidAlertsDescription": "Alle verfolgten Twitch-Kanäle überwachen und benachrichtigen, sobald ein Raid ankommt – auch außerhalb der Seite.",
         "autoClaimTitle": "Kanalpunkte automatisch beanspruchen",
         "autoClaimDescription": "Klicken Sie automatisch auf Twitch-Kanalpunktboni für Sie.",
@@ -3834,10 +4092,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Die Weiterleitung bei einem Twitch-Raid automatisch abbrechen. Deaktiviert sich, wenn Raid-Warnungen im Hintergrund aktiv sind: die Punkte gibt es für das Folgen des Raids.",
         "hideTwitchExtensionsTitle": "Twitch-Erweiterungen ausblenden",
         "hideTwitchExtensionsDescription": "Blenden Sie die Overlays der Twitch-Erweiterung im Videoplayer aus.",
+        "keepQualityTitle": "Qualität im Hintergrund behalten",
+        "keepQualityDescription": "Verhindert, dass Twitch die Qualität senkt oder pausiert, wenn der Tab nicht sichtbar ist. Verbraucht mehr Ressourcen. Gilt ab dem nächsten Laden des Tabs.",
+        "autoRefreshTitle": "Player bei Fehlern wiederherstellen",
+        "autoRefreshDescription": "Klickt bei den Fehlern #1000 bis #5000 für dich auf „Erneut versuchen“ und lädt den Tab neu, wenn das nicht reicht.",
+        "pipButtonTitle": "Bild-in-Bild-Button",
+        "pipButtonDescription": "Fügt dem Player einen Button hinzu, um den Stream in einem Mini-Fenster zu sehen.",
+        "playerQualityTitle": "Player-Qualität",
+        "playerQualityDescription": "Startet jeden Stream in dieser Qualität. Auto überlässt Twitch die Wahl.",
+        "playerQualityAuto": "Auto",
+        "playerQualitySource": "Quelle",
+        "clipDownloadTitle": "Clip-Downloads",
+        "clipDownloadDescription": "Fügt auf Clip-Seiten einen Button hinzu, um Clips als MP4 zu speichern. StreamPulse+.",
         "preventTabDiscardTitle": "Verhindern Sie das Verwerfen von Tabs",
-        "preventTabDiscardDescription": "Verhindern Sie, dass Firefox inaktive Twitch/Kick-Tabs verwirft.",
-        "autoRefreshTitle": "Automatische Aktualisierung",
-        "autoRefreshDescription": "Laden Sie den Twitch-Player neu, wenn eine Fehlermeldung erscheint (#1000, #2000, #3000, #4000 oder #5000).",
+        "preventTabDiscardDescription": "Verhindern Sie, dass Firefox inaktive Twitch-, Kick- oder YouTube-Tabs verwirft.",
         "fastForwardTitle": "Schnellvorlauf-Taste",
         "fastForwardDescription": "Fügen Sie eine Schaltfläche hinzu, um sofort auf den neuesten Stand zu kommen, wenn der Stream hinterherhinkt.",
         "communityBadgeTitle": "Community-Abzeichen",
@@ -3911,7 +4179,7 @@ export const translations = {
       },
       "supportDev": "Bieten Sie dem Entwickler einen Bubble Tea an",
       "testNotification": "Senden Sie eine Testbenachrichtigung",
-      "notifBlockedBody": "Firefox blockiert die Benachrichtigungen von StreamPulse: Du wirst nicht über Livestreams informiert.",
+      "notifBlockedBody": "Chrome blockiert die Benachrichtigungen von StreamPulse: Du wirst nicht über Livestreams informiert.",
       "notifBlockedAction": "Einstellungen",
       "card": {
         "offline": "Offline",
@@ -3947,8 +4215,14 @@ export const translations = {
         "soundsDisabled": "Benachrichtigungston deaktiviert.",
         "autoClaimEnabled": "Automatische Kanalpunktbeanspruchung aktiviert.",
         "autoClaimDisabled": "Automatische Kanalpunktbeanspruchung deaktiviert.",
-        "autoRefreshEnabled": "Automatische Spieleraktualisierung aktiviert.",
-        "autoRefreshDisabled": "Automatische Spieleraktualisierung deaktiviert.",
+        "keepQualityEnabled": "Qualität im Hintergrund bleibt erhalten. Lade den Twitch-Tab neu, um es anzuwenden.",
+        "keepQualityDisabled": "Qualität im Hintergrund wird von Twitch gesteuert.",
+        "autoRefreshEnabled": "Automatische Player-Wiederherstellung aktiviert.",
+        "autoRefreshDisabled": "Automatische Player-Wiederherstellung deaktiviert.",
+        "pipButtonEnabled": "Bild-in-Bild-Button aktiviert.",
+        "pipButtonDisabled": "Bild-in-Bild-Button deaktiviert.",
+        "clipDownloadEnabled": "Clip-Downloads aktiviert.",
+        "clipDownloadDisabled": "Clip-Downloads deaktiviert.",
         "fastForwardEnabled": "Schnellvorlauf-Taste aktiviert.",
         "fastForwardDisabled": "Schnellvorlauf-Taste deaktiviert.",
         "watchTimeEnabled": "Watch Time Tracker aktiviert.",
@@ -3998,6 +4272,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}} ist live",
+        "startupBatchTitle": "Jetzt live",
+        "startupBatchBody": "Bereits live: {{names}}",
         "liveMessage": "{{game}} • {{viewers}} Zuschauer",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} Zuschauer",
@@ -4007,9 +4283,7 @@ export const translations = {
         "dropMessage": "Ein Twitch-Drop wurde automatisch eingelöst.",
         "raidTitle": "StreamPulse · Raid abgebrochen",
         "raidMessage": "Die Weiterleitung zum geraideten Kanal wurde abgebrochen.",
-
         "raidIncomingTitle": "Eingehender Raid auf {{name}}",
-
         "raidIncomingMessage": "{{raider}} kommt mit {{viewers}} Zuschauern. Klicke: Du wirst beim Mitfahren des Raids zum Ziel gebracht – die Punkte gibt es nur, wenn du von seinem Stream kommst!",
         "unknownCategory": "Unbekannte Kategorie",
         "titleChangeTitle": "{{name}} hat den Titel geändert",
@@ -4017,6 +4291,7 @@ export const translations = {
         "unknownTitle": "Neuer Titel",
         "newCategory": "Neue Kategorie",
         "testSimpleMessage": "Dies ist eine Testbenachrichtigung.",
+        "testTitleMessage": "Hier ist ein Beispiel für einen neuen Titel, wie eine echte Warnung.",
         "plusThanksTitle": "Von Herzen danke ❤️",
         "plusThanksMessage": "Dein StreamPulse+ Abo bedeutet mir wirklich viel. Dank dir kann ich die Erweiterung weiter verbessern. Danke! Alexis",
       },
@@ -4024,6 +4299,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}} live"
       }
     },
     "recap": {
@@ -4051,6 +4328,7 @@ export const translations = {
       "formatMobile": "Mobil · 9:16",
       "loading": "Deine Statistiken werden geladen…",
       "emptyTitle": "Für diesen Zeitraum gibt es nichts anzuzeigen.",
+      "canvasSummary": "Récap-Bild: {{time}} Sehdauer im Zeitraum. Meistgesehener Kanal: {{top}}.",
       "emptyBody": "Der Watch Time Tracker hat in diesem Zeitraum nichts erfasst. Prüfe, ob er in den Einstellungen aktiviert ist.",
       "download": "Bild herunterladen",
       "share": "Auf X teilen",
@@ -4127,6 +4405,14 @@ export const translations = {
       "noNotesBody": "Die Hinweise zu dieser Version wurden noch nicht veröffentlicht."
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "Zum Live-Stream springen (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "StreamPulse-Favoriten",
         "pin": "Zu StreamPulse-Favoriten hinzufügen",
@@ -4180,6 +4466,12 @@ export const translations = {
       "player": {
         "skipToLive": "Weiter zum Leben",
         "holdToFastForward": "Halten Sie die Taste gedrückt, um x2",
+        "volumeBoostLabel": "Lautstärke verstärken",
+        "volumeBoostHint": "Klick: ein oder aus · Scrollen oder Pfeile: bis 200 %",
+        "pictureInPicture": "Bild-in-Bild",
+        "clipDownload": "Clip herunterladen (MP4)",
+        "clipDownloading": "Clip wird heruntergeladen…",
+        "clipDownloadFailed": "Download fehlgeschlagen, versuche es erneut",
         "latencyEmpty": "vorzuspulen Latenz: --",
         "latencyValue": "Latenz: {{value}}s",
         "offline": "OFFLINE"
@@ -4208,6 +4500,28 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "Nuovo",
+
+
+
+      "badgePreviewMessage": "Guarda, questo è il mio badge StreamPulse!",
+
+
+      "welcomeTitle": "Non perdere mai più una diretta.",
+
+
+      "skipStep": "Salta questo passaggio",
+
+
+      "badgePrivacyNote": "Disattivato per impostazione predefinita. Se lo attivi: una versione cifrata del tuo nome utente viene inviata a streampulse.fr al massimo una volta al giorno. Nulla altro lascia il browser.",
+
+
+      "advancedSettings": "Impostazioni avanzate",
+
+
+      "removeStreamerName": "Rimuovi {{name}}",
+
+      
       "htmlLang": "it",
       "stepProfile": "Nome utente",
       "profileTitle": "Il tuo nome utente Twitch.",
@@ -4216,17 +4530,10 @@ export const translations = {
       "profileHintIdle": "Inserisci il tuo handle: cercheremo il tuo profilo Twitch.",
       "profileHintSearching": "Ricerca…",
       "profileHintFound": "✓ Trovato: {{handle}}",
-      "profileHintNotFound": "Nessun profilo Twitch trovato. Puoi ancora continuare.",
+      "profileHintKept": "Profilo Twitch non trovato: nessun problema, teniamo questo nome utente così com'è. Puoi anche saltare questo passaggio.",
       "profilePreviewSuffix": "Ecco chi è online.",
       "documentTitle": "Prima configurazione",
       "welcomeTagline": "ESTENSIONE FIREFOX · TWITCH · KICK · YOUTUBE",
-      "welcomeWord1": "Mai",
-      "welcomeWord2": "signorina",
-      "welcomeWord3": "un",
-      "welcomeWord4": "vivi",
-      "welcomeWord5": "mai",
-      "welcomeWord6": "Ancora.",
-      "welcomeTitle": "Benvenuti in StreamPulse",
       "welcomeDescription": "Aggiungi il tuo primo streamer per iniziare a ricevere le sue notifiche. Puoi aggiungerne altri in seguito direttamente da StreamPulse.",
       "languagePrompt": "Scegli la lingua dell'estensione",
       "languageHint": "Potrai modificarlo in seguito dalle impostazioni.",
@@ -4259,8 +4566,6 @@ export const translations = {
       "qualityGroupHint": "Automatizza le attività ripetitive per risparmiare tempo.",
       "autoClaimTitle": "Rivendica automaticamente i punti canale",
       "autoClaimDescription": "Fai clic automaticamente sui bonus punti canale Twitch per te.",
-      "autoRefreshTitle": "Aggiornamento automatico",
-      "autoRefreshDescription": "Ricarica il lettore Twitch quando viene visualizzato un messaggio di errore (#1000, #2000, #3000, #4000 o #5000).",
       "fastForwardTitle": "Pulsante di avanzamento veloce",
       "fastForwardDescription": "Aggiungi un pulsante al player per restare aggiornato in tempo reale.",
       "chatFilterTitle": "Filtro chat",
@@ -4278,7 +4583,7 @@ export const translations = {
       "placeholders": {
         "twitch": "per esempio. mino",
         "kick": "per esempio. trainwreckstv",
-        "youtube": "@handle o link del canale YouTube"
+        "youtube": "@handle o link del canale YouTube",
       },
       "submit": "Aggiungi",
       "currentHeader": "Streamer seguiti",
@@ -4314,16 +4619,25 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "Nuovo",
+
+        "durationMinutes": "{{count}} min",
+
+        "durationHours": "{{count}} h",
+
+        "durationHoursShort": "{{h}} h {{m}}",
+
+        
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
         "countPlural": "{{count}} lives",
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
-        "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
+        "emptyBody": "Quando uno streamer che segui chiude una diretta che non hai visto, compare qui con la sua replica.",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "Rimuovi {{name}} dall'elenco",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -4458,10 +4772,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "Aggiungi il tuo primo streamer",
+
+        "reorderHint": "Riordina: Alt + ↑ ↓",
+
+        "rowMoved": "{{name}} spostato in posizione {{position}}",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -4540,6 +4862,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "Player",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -4589,7 +4912,7 @@ export const translations = {
         "all": "tutto",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "Aggiungi uno streamer",
       "addStreamerTitlePlatform": "Aggiungi uno streamer {{platform}}",
@@ -4600,7 +4923,7 @@ export const translations = {
       "placeholders": {
         "twitch": "per esempio. mino",
         "kick": "per esempio. trainwreckstv",
-        "youtube": "@handle o link del canale YouTube"
+        "youtube": "@handle o link del canale YouTube",
       },
       "emptyState": "Nessuno streamer è stato ancora seguito. Aggiungine uno per iniziare.",
       "sort": {
@@ -4617,18 +4940,15 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ attivo: il tuo colore personalizzato è visibile a tutti gli utenti StreamPulse.",
         "badgePlusOff": "Con StreamPulse+, il tuo colore personalizzato è visibile a tutti gli utenti StreamPulse.",
         "liveNotificationsTitle": "Notifiche di Firefox",
-        "liveNotificationsDescription": "Ricevi un avviso quando uno streamer seguito va in diretta.",
+        "liveNotificationsDescription": "Applicato a tutti gli streamer seguiti: puoi regolarlo per streamer dopo.",
         "gameAlertsTitle": "Avvisi di cambio di categoria",
-        "gameAlertsDescription": "Ricevi una notifica quando uno streamer cambia gioco su Twitch.",
+        "gameAlertsDescription": "Applicato a tutti gli streamer seguiti: puoi regolarlo per streamer dopo.",
         "titleAlertsTitle": "Avvisi di cambio titolo",
-        "titleAlertsDescription": "Ricevi una notifica quando uno streamer modifica il titolo della diretta.",
+        "titleAlertsDescription": "Applicato a tutti gli streamer seguiti: puoi regolarlo per streamer dopo.",
         "soundsTitle": "Suono di notifica",
-
         "alertsPerStreamerNote": "Questi avvisi si impostano su ogni streamer, dalla sua scheda: notifiche, cambi di categoria e di titolo.",
         "soundsDescription": "Riproduci o disattiva il suono quando vengono attivati ​​gli avvisi.",
-
         "backgroundRaidAlertsTitle": "Avvisi di raid in arrivo (beta)",
-
         "backgroundRaidAlertsDescription": "Sorveglia tutti i canali Twitch che segui e avvisa appena arriva un raid, anche fuori dalla pagina.",
         "autoClaimTitle": "Rivendica automaticamente i punti canale",
         "autoClaimDescription": "Fai clic automaticamente sui bonus punti canale Twitch per te.",
@@ -4666,10 +4986,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Annulla automaticamente il reindirizzamento durante un raid Twitch. Si disattiva quando gli avvisi raid in background sono attivi: i punti si guadagnano seguendo il raid.",
         "hideTwitchExtensionsTitle": "Nascondi le estensioni Twitch",
         "hideTwitchExtensionsDescription": "Nascondi le sovrapposizioni dell'estensione Twitch sul lettore video.",
+        "keepQualityTitle": "Mantieni la qualità in background",
+        "keepQualityDescription": "Impedisce a Twitch di abbassare la qualità o mettere in pausa quando la scheda non è visibile. Usa più risorse. Si applica al prossimo caricamento della scheda.",
+        "autoRefreshTitle": "Ripristina il player in caso di errore",
+        "autoRefreshDescription": "Preme \"Riprova\" al posto tuo sugli errori da #1000 a #5000 e ricarica la scheda se non basta.",
+        "pipButtonTitle": "Pulsante Picture-in-Picture",
+        "pipButtonDescription": "Aggiunge un pulsante al player per guardare la diretta in una mini finestra.",
+        "playerQualityTitle": "Qualità del player",
+        "playerQualityDescription": "Apre ogni diretta con questa qualità. Auto lascia decidere Twitch.",
+        "playerQualityAuto": "Auto",
+        "playerQualitySource": "Sorgente",
+        "clipDownloadTitle": "Download delle clip",
+        "clipDownloadDescription": "Aggiunge un pulsante nelle pagine delle clip per salvarle in MP4. StreamPulse+.",
         "preventTabDiscardTitle": "Impedisci l'eliminazione delle schede",
-        "preventTabDiscardDescription": "Impedisci a Firefox di eliminare le schede Twitch/Kick inattive.",
-        "autoRefreshTitle": "Aggiornamento automatico",
-        "autoRefreshDescription": "Ricarica il lettore Twitch quando viene visualizzato un messaggio di errore (#1000, #2000, #3000, #4000 o #5000).",
+        "preventTabDiscardDescription": "Impedisci a Firefox di eliminare le schede Twitch, Kick o YouTube inattive.",
         "fastForwardTitle": "Pulsante di avanzamento veloce",
         "fastForwardDescription": "Aggiungi un pulsante per restare immediatamente aggiornato in diretta quando lo streaming è in ritardo.",
         "communityBadgeTitle": "Badge della comunità",
@@ -4743,7 +5073,7 @@ export const translations = {
       },
       "supportDev": "Offri un Bubble Tea allo sviluppatore",
       "testNotification": "Invia una notifica di prova",
-      "notifBlockedBody": "Firefox blocca le notifiche di StreamPulse: non riceverai avvisi sulle live.",
+      "notifBlockedBody": "Chrome blocca le notifiche di StreamPulse: non riceverai avvisi sulle live.",
       "notifBlockedAction": "Impostazioni",
       "card": {
         "offline": "Non in linea",
@@ -4779,8 +5109,14 @@ export const translations = {
         "soundsDisabled": "Suono di notifica disabilitato.",
         "autoClaimEnabled": "Rivendicazione automatica dei punti canale abilitata.",
         "autoClaimDisabled": "Rivendicazione automatica dei punti canale disattivata.",
-        "autoRefreshEnabled": "Aggiornamento automatico del lettore abilitato.",
-        "autoRefreshDisabled": "Aggiornamento automatico del lettore disabilitato.",
+        "keepQualityEnabled": "Qualità mantenuta in background. Ricarica la scheda di Twitch per applicare.",
+        "keepQualityDisabled": "Qualità in background gestita da Twitch.",
+        "autoRefreshEnabled": "Ripristino automatico del player attivato.",
+        "autoRefreshDisabled": "Ripristino automatico del player disattivato.",
+        "pipButtonEnabled": "Pulsante Picture-in-Picture attivato.",
+        "pipButtonDisabled": "Pulsante Picture-in-Picture disattivato.",
+        "clipDownloadEnabled": "Download delle clip attivato.",
+        "clipDownloadDisabled": "Download delle clip disattivato.",
         "fastForwardEnabled": "Pulsante di avanzamento veloce abilitato.",
         "fastForwardDisabled": "Pulsante di avanzamento veloce disabilitato.",
         "watchTimeEnabled": "Guarda il monitoraggio del tempo abilitato.",
@@ -4830,6 +5166,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}} è attivo",
+        "startupBatchTitle": "In diretta adesso",
+        "startupBatchBody": "Già in diretta: {{names}}",
         "liveMessage": "{{game}} • {{viewers}} spettatori",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} spettatori",
@@ -4839,9 +5177,7 @@ export const translations = {
         "dropMessage": "Un Drop di Twitch è stato riscattato automaticamente.",
         "raidTitle": "StreamPulse · Raid annullato",
         "raidMessage": "Il trasferimento verso il canale del raid è stato annullato.",
-
         "raidIncomingTitle": "Raid in arrivo su {{name}}",
-
         "raidIncomingMessage": "{{raider}} arriva con {{viewers}} spettatori. Clicca: verrai portato al suo obiettivo seguendo il raid; i punti si guadagnano arrivando dal suo stream!",
         "unknownCategory": "Categoria sconosciuta",
         "titleChangeTitle": "{{name}} ha cambiato titolo",
@@ -4849,6 +5185,7 @@ export const translations = {
         "unknownTitle": "Nuovo titolo",
         "newCategory": "Nuova categoria",
         "testSimpleMessage": "Questa è una notifica di prova.",
+        "testTitleMessage": "Ecco un esempio di nuovo titolo, come un vero avviso.",
         "plusThanksTitle": "Grazie di cuore ❤️",
         "plusThanksMessage": "Il tuo abbonamento a StreamPulse+ mi tocca davvero. Grazie a te posso continuare a migliorare l'estensione. Grazie! Alexis",
       },
@@ -4856,6 +5193,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}} in diretta"
       }
     },
     "recap": {
@@ -4883,6 +5222,7 @@ export const translations = {
       "formatMobile": "Mobile · 9:16",
       "loading": "Caricamento delle statistiche…",
       "emptyTitle": "Niente da mostrare per questo periodo.",
+      "canvasSummary": "Immagine riepilogo: {{time}} di visione nel periodo. Canale più guardato: {{top}}.",
       "emptyBody": "Il Watch Time Tracker non ha registrato nulla in questo periodo. Verifica che sia attivo nelle impostazioni.",
       "download": "Scarica immagine",
       "share": "Condividi su X",
@@ -4959,6 +5299,14 @@ export const translations = {
       "noNotesBody": "Le note per questa versione non sono state ancora pubblicate."
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "Vai alla diretta (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "Preferiti StreamPulse",
         "pin": "Aggiungi ai preferiti StreamPulse",
@@ -5012,6 +5360,12 @@ export const translations = {
       "player": {
         "skipToLive": "Passa alla diretta",
         "holdToFastForward": "Tieni premuto per avanzare velocemente x2",
+        "volumeBoostLabel": "Amplifica il volume",
+        "volumeBoostHint": "Clic: attiva o disattiva · rotella o frecce: regola, fino al 200%",
+        "pictureInPicture": "Picture-in-Picture",
+        "clipDownload": "Scarica clip (MP4)",
+        "clipDownloading": "Download della clip…",
+        "clipDownloadFailed": "Download non riuscito, riprova",
         "latencyEmpty": "Latenza: --",
         "latencyValue": "Latenza: {{value}}s",
         "offline": "NON IN LINEA"
@@ -5040,6 +5394,28 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "Nowe",
+
+
+
+      "badgePreviewMessage": "Spójrz, to moja odznaka StreamPulse!",
+
+
+      "welcomeTitle": "Nigdy więcej nie przegap transmisji.",
+
+
+      "skipStep": "Pomiń ten krok",
+
+
+      "badgePrivacyNote": "Domyślnie wyłączone. Po włączeniu: skrót nazwy użytkownika jest wysyłany do streampulse.fr najwyżej raz dziennie. Nic innego nie opuszcza przeglądarki.",
+
+
+      "advancedSettings": "Ustawienia zaawansowane",
+
+
+      "removeStreamerName": "Usuń {{name}}",
+
+      
       "htmlLang": "pl",
       "stepProfile": "Nazwa użytkownika",
       "profileTitle": "Twoja nazwa użytkownika na Twitchu.",
@@ -5048,17 +5424,10 @@ export const translations = {
       "profileHintIdle": "Wpisz swój nick: sprawdzimy Twój profil na Twitchu.",
       "profileHintSearching": "Badawczy…",
       "profileHintFound": "✓ Znaleziono: {{handle}}",
-      "profileHintNotFound": "Nie znaleziono profilu Twitch. Nadal możesz kontynuować.",
+      "profileHintKept": "Nie znaleziono profilu Twitch: nic się nie stało, zachowujemy ten pseudonim bez zmian. Możesz też pominąć ten krok.",
       "profilePreviewSuffix": "Oto, kto jest online.",
       "documentTitle": "Konfiguracja po raz pierwszy",
       "welcomeTagline": "ROZSZERZENIE FIREFOX · TWITCH · KICK · YOUTUBE",
-      "welcomeWord1": "Nigdy",
-      "welcomeWord2": "chybić",
-      "welcomeWord3": "A",
-      "welcomeWord4": "na żywo",
-      "welcomeWord5": "kiedykolwiek",
-      "welcomeWord6": "Ponownie.",
-      "welcomeTitle": "Witamy w StreamPulse",
       "welcomeDescription": "Dodaj swojego pierwszego streamera, aby zacząć otrzymywać jego powiadomienia. Możesz dodać więcej później bezpośrednio ze StreamPulse.",
       "languagePrompt": "Wybierz język rozszerzenia",
       "languageHint": "Możesz to później zmienić w ustawieniach.",
@@ -5091,8 +5460,6 @@ export const translations = {
       "qualityGroupHint": "Automatyzuj powtarzalne zadania, aby zaoszczędzić czas.",
       "autoClaimTitle": "Automatycznie odbieraj punkty kanału",
       "autoClaimDescription": "Automatycznie klikaj premie punktowe dla kanału Twitch.",
-      "autoRefreshTitle": "Automatyczne odświeżanie",
-      "autoRefreshDescription": "Załaduj ponownie odtwarzacz Twitch, gdy pojawi się komunikat o błędzie (#1000, #2000, #3000, #4000 lub #5000).",
       "fastForwardTitle": "Przycisk przewijania do przodu",
       "fastForwardDescription": "Dodaj przycisk do odtwarzacza, aby nadrobić zaległości i żyć natychmiast.",
       "chatFilterTitle": "Filtr czatu",
@@ -5110,7 +5477,7 @@ export const translations = {
       "placeholders": {
         "twitch": "np. Minos",
         "kick": "np. wrak pociągu",
-        "youtube": "@pseudo lub link do kanału YouTube"
+        "youtube": "@pseudo lub link do kanału YouTube",
       },
       "submit": "Dodać",
       "currentHeader": "Obserwowani streamerzy",
@@ -5146,16 +5513,25 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "Nowe",
+
+        "durationMinutes": "{{count}} min",
+
+        "durationHours": "{{count}} godz.",
+
+        "durationHoursShort": "{{h}} godz. {{m}}",
+
+        
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
         "countPlural": "{{count}} lives",
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
-        "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
+        "emptyBody": "Gdy obserwowany streamer kończy transmisję, której nie oglądałeś, pojawia się tutaj razem z powtórką.",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "Usuń {{name}} z listy",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -5290,10 +5666,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "Dodaj pierwszego streamera",
+
+        "reorderHint": "Zmiana kolejności: Alt + ↑ ↓",
+
+        "rowMoved": "Przeniesiono {{name}} na pozycję {{position}}",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -5372,6 +5756,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "Odtwarzacz",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -5421,7 +5806,7 @@ export const translations = {
         "all": "wszystko",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "Dodaj streamera",
       "addStreamerTitlePlatform": "Dodaj streamera {{platform}}",
@@ -5432,7 +5817,7 @@ export const translations = {
       "placeholders": {
         "twitch": "np. Minos",
         "kick": "np. wrak pociągu",
-        "youtube": "@pseudo lub link do kanału YouTube"
+        "youtube": "@pseudo lub link do kanału YouTube",
       },
       "emptyState": "Żaden streamer jeszcze nie obserwuje. Dodaj jeden, aby rozpocząć.",
       "sort": {
@@ -5449,18 +5834,15 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ aktywny: Twój kolor jest widoczny dla wszystkich użytkowników StreamPulse.",
         "badgePlusOff": "Ze StreamPulse+ Twój kolor jest widoczny dla wszystkich użytkowników StreamPulse.",
         "liveNotificationsTitle": "Powiadomienia Firefox",
-        "liveNotificationsDescription": "Otrzymuj powiadomienia, gdy obserwowany streamer rozpocznie transmisję na żywo.",
+        "liveNotificationsDescription": "Dotyczy wszystkich obserwowanych streamerów: możesz potem dostosować dla każdego z nich.",
         "gameAlertsTitle": "Alerty o zmianie kategorii",
-        "gameAlertsDescription": "Otrzymuj powiadomienia, gdy streamer zmieni grę na Twitchu.",
+        "gameAlertsDescription": "Dotyczy wszystkich obserwowanych streamerów: możesz potem dostosować dla każdego z nich.",
         "titleAlertsTitle": "Alerty o zmianie tytułu",
-        "titleAlertsDescription": "Otrzymuj powiadomienie, gdy streamer zmieni tytuł transmisji.",
+        "titleAlertsDescription": "Dotyczy wszystkich obserwowanych streamerów: możesz potem dostosować dla każdego z nich.",
         "soundsTitle": "Dźwięk powiadomienia",
-
         "alertsPerStreamerNote": "Te alerty ustawia się dla każdego streamera na jego karcie: powiadomienia, zmiany kategorii i tytułu.",
         "soundsDescription": "Odtwórz lub wycisz dźwięk po uruchomieniu alertów.",
-
         "backgroundRaidAlertsTitle": "Alerty nadchodzących raidów (beta)",
-
         "backgroundRaidAlertsDescription": "Obserwuj wszystkie obserwowane kanały Twitch i powiadom, gdy tylko przybędzie raid : nawet poza stroną.",
         "autoClaimTitle": "Automatyczne odbieranie punktów kanału",
         "autoClaimDescription": "Automatycznie klikaj premie punktowe dla kanału Twitch.",
@@ -5498,10 +5880,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Automatycznie anuluj przekierowanie podczas rajdu na Twitchu. Wyłącza się, gdy alerty rajdów w tle są aktywne: punkty zdobywa się, dołączając do rajdu.",
         "hideTwitchExtensionsTitle": "Ukryj rozszerzenia Twitcha",
         "hideTwitchExtensionsDescription": "Ukryj nakładki rozszerzeń Twitcha w odtwarzaczu wideo.",
+        "keepQualityTitle": "Zachowaj jakość w tle",
+        "keepQualityDescription": "Nie pozwala Twitchowi obniżać jakości ani wstrzymywać odtwarzania, gdy karta nie jest widoczna. Zużywa więcej zasobów. Działa od następnego wczytania karty.",
+        "autoRefreshTitle": "Napraw odtwarzacz przy błędzie",
+        "autoRefreshDescription": "Klika za Ciebie „Spróbuj ponownie” przy błędach #1000–#5000 i przeładowuje kartę, gdy to nie wystarczy.",
+        "pipButtonTitle": "Przycisk obrazu w obrazie",
+        "pipButtonDescription": "Dodaje do odtwarzacza przycisk oglądania transmisji w mini oknie.",
+        "playerQualityTitle": "Jakość odtwarzacza",
+        "playerQualityDescription": "Otwiera każdą transmisję w tej jakości. Auto pozostawia wybór Twitchowi.",
+        "playerQualityAuto": "Auto",
+        "playerQualitySource": "Źródło",
+        "clipDownloadTitle": "Pobieranie klipów",
+        "clipDownloadDescription": "Dodaje na stronach klipów przycisk zapisu w MP4. StreamPulse+.",
         "preventTabDiscardTitle": "Zapobiegaj odrzucaniu zakładek",
-        "preventTabDiscardDescription": "Uniemożliwiaj Firefox odrzucanie nieaktywnych zakładek Twitch/Kick.",
-        "autoRefreshTitle": "Automatyczne odświeżanie",
-        "autoRefreshDescription": "Załaduj ponownie odtwarzacz Twitch, gdy pojawi się komunikat o błędzie (#1000, #2000, #3000, #4000 lub #5000).",
+        "preventTabDiscardDescription": "Uniemożliwiaj Firefox odrzucanie nieaktywnych zakładek Twitch, Kick i YouTube.",
         "fastForwardTitle": "Przycisk przewijania do przodu",
         "fastForwardDescription": "Dodaj przycisk, aby natychmiast nadrobić zaległości w transmisji na żywo, gdy transmisja jest opóźniona.",
         "communityBadgeTitle": "Odznaka społeczności",
@@ -5575,7 +5967,7 @@ export const translations = {
       },
       "supportDev": "Zaoferuj deweloperowi herbatę bąbelkową",
       "testNotification": "Wyślij powiadomienie testowe",
-      "notifBlockedBody": "Firefox blokuje powiadomienia StreamPulse: nie dostaniesz informacji o transmisjach.",
+      "notifBlockedBody": "Chrome blokuje powiadomienia StreamPulse: nie dostaniesz informacji o transmisjach.",
       "notifBlockedAction": "Ustawienia",
       "card": {
         "offline": "Nieaktywny",
@@ -5611,8 +6003,14 @@ export const translations = {
         "soundsDisabled": "Dźwięk powiadomienia wyłączony.",
         "autoClaimEnabled": "Włączono automatyczne zgłaszanie punktów kanału.",
         "autoClaimDisabled": "Automatyczne zgłaszanie punktów kanału wyłączone.",
-        "autoRefreshEnabled": "Włączono automatyczne odświeżanie odtwarzacza.",
-        "autoRefreshDisabled": "Automatyczne odświeżanie odtwarzacza wyłączone.",
+        "keepQualityEnabled": "Jakość w tle zachowana. Odśwież kartę Twitcha, aby zastosować.",
+        "keepQualityDisabled": "Jakością w tle zarządza Twitch.",
+        "autoRefreshEnabled": "Automatyczna naprawa odtwarzacza włączona.",
+        "autoRefreshDisabled": "Automatyczna naprawa odtwarzacza wyłączona.",
+        "pipButtonEnabled": "Przycisk obrazu w obrazie włączony.",
+        "pipButtonDisabled": "Przycisk obrazu w obrazie wyłączony.",
+        "clipDownloadEnabled": "Pobieranie klipów włączone.",
+        "clipDownloadDisabled": "Pobieranie klipów wyłączone.",
         "fastForwardEnabled": "Włączono przycisk przewijania do przodu.",
         "fastForwardDisabled": "Przycisk przewijania do przodu wyłączony.",
         "watchTimeEnabled": "Włączono śledzenie czasu oglądania.",
@@ -5662,6 +6060,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}} jest na żywo",
+        "startupBatchTitle": "Na żywo teraz",
+        "startupBatchBody": "Już na żywo: {{names}}",
         "liveMessage": "{{game}} • {{viewers}} widzów",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} widzów",
@@ -5671,9 +6071,7 @@ export const translations = {
         "dropMessage": "Drop na Twitchu został odebrany automatycznie.",
         "raidTitle": "StreamPulse · Anulowano raid",
         "raidMessage": "Przeniesienie na kanał raidu zostało anulowane.",
-
         "raidIncomingTitle": "Nadchodzący raid na {{name}}",
-
         "raidIncomingMessage": "{{raider}} nadchodzi z {{viewers}} widzów. Kliknij: zostaniesz przeniesiony do celu wraz z raidem : punkty zdobywa się, przychodząc z jego streamu!",
         "unknownCategory": "Kategoria nieznana",
         "titleChangeTitle": "{{name}} zmienił tytuł",
@@ -5681,6 +6079,7 @@ export const translations = {
         "unknownTitle": "Nowy tytuł",
         "newCategory": "Nowa kategoria",
         "testSimpleMessage": "To jest powiadomienie testowe.",
+        "testTitleMessage": "Oto przykładowy nowy tytuł, jak prawdziwy alert.",
         "plusThanksTitle": "Dziękuję z całego serca ❤️",
         "plusThanksMessage": "Twoja subskrypcja StreamPulse+ naprawdę wiele dla mnie znaczy. Dzięki Tobie mogę dalej rozwijać rozszerzenie. Dziękuję! Alexis",
       },
@@ -5688,6 +6087,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}} na żywo"
       }
     },
     "recap": {
@@ -5715,6 +6116,7 @@ export const translations = {
       "formatMobile": "Telefon · 9:16",
       "loading": "Wczytywanie statystyk…",
       "emptyTitle": "Brak danych dla tego okresu.",
+      "canvasSummary": "Obraz podsumowania: {{time}} oglądania w tym okresie. Najczęściej oglądany kanał: {{top}}.",
       "emptyBody": "Watch Time Tracker nic nie zarejestrował w tym okresie. Sprawdź, czy jest włączony w ustawieniach.",
       "download": "Pobierz obraz",
       "share": "Udostępnij na X",
@@ -5791,6 +6193,14 @@ export const translations = {
       "noNotesBody": "Uwagi do tej wersji nie zostały jeszcze opublikowane."
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "Przejdź na żywo (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "Ulubione StreamPulse",
         "pin": "Dodaj do ulubionych StreamPulse",
@@ -5844,6 +6254,12 @@ export const translations = {
       "player": {
         "skipToLive": "Przejdź do transmisji na żywo",
         "holdToFastForward": "Przytrzymaj, aby przewinąć do przodu x2",
+        "volumeBoostLabel": "Wzmocnij głośność",
+        "volumeBoostHint": "Klik: włącz lub wyłącz · kółko lub strzałki: do 200%",
+        "pictureInPicture": "Obraz w obrazie",
+        "clipDownload": "Pobierz klip (MP4)",
+        "clipDownloading": "Pobieranie klipu…",
+        "clipDownloadFailed": "Pobieranie nie powiodło się, spróbuj ponownie",
         "latencyEmpty": "Opóźnienie: --",
         "latencyValue": "Opóźnienie: {{value}} s",
         "offline": "OFFLINE"
@@ -5872,6 +6288,28 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "Yeni",
+
+
+
+      "badgePreviewMessage": "Bak, bu benim StreamPulse rozetim!",
+
+
+      "welcomeTitle": "Artık hiçbir canlı yayını kaçırmayacaksın.",
+
+
+      "skipStep": "Bu adımı atla",
+
+
+      "badgePrivacyNote": "Varsayılan olarak kapalı. Etkinleştirirsen: kullanıcı adının şifreli bir özeti günde en fazla bir kez streampulse.fr adresine gönderilir. Başka hiçbir veri tarayıcıdan çıkmaz.",
+
+
+      "advancedSettings": "Gelişmiş ayarlar",
+
+
+      "removeStreamerName": "{{name}} kişisini kaldır",
+
+      
       "htmlLang": "tr",
       "stepProfile": "Kullanıcı adı",
       "profileTitle": "Twitch kullanıcı adınız.",
@@ -5880,17 +6318,10 @@ export const translations = {
       "profileHintIdle": "Takma adını gir: Twitch profilini arayacağız.",
       "profileHintSearching": "Aranıyor…",
       "profileHintFound": "✓ Bulundu: {{handle}}",
-      "profileHintNotFound": "Twitch profili bulunamadı. Yine de devam edebilirsiniz.",
+      "profileHintKept": "Twitch profili bulunamadı: sorun değil, bu kullanıcı adını olduğu gibi tutuyoruz. Bu adımı atlayabilirsin.",
       "profilePreviewSuffix": "İşte şu anda çevrimiçi olanlar.",
       "documentTitle": "İlk kurulum",
       "welcomeTagline": "FIREFOX UZANTISI · TWITCH · KICK · YOUTUBE",
-      "welcomeWord1": "Asla",
-      "welcomeWord2": "özlemek",
-      "welcomeWord3": "a",
-      "welcomeWord4": "canlı",
-      "welcomeWord5": "hiç",
-      "welcomeWord6": "yine.",
-      "welcomeTitle": "StreamPulse’a hoş geldiniz",
       "welcomeDescription": "Bildirimlerini almaya başlamak için ilk streamer’ınızı ekleyin. Daha sonra doğrudan StreamPulse üzerinden başka streamer’lar da ekleyebilirsiniz.",
       "languagePrompt": "Uzantı dilini seçin",
       "languageHint": "Bunu daha sonra ayarlardan değiştirebilirsiniz.",
@@ -5923,8 +6354,6 @@ export const translations = {
       "qualityGroupHint": "Tekrarlayan görevleri otomatikleştirerek zamandan tasarruf edin.",
       "autoClaimTitle": "Kanal puanlarını otomatik olarak talep et",
       "autoClaimDescription": "Twitch kanal puan bonuslarını sizin adınıza otomatik olarak tıklasın.",
-      "autoRefreshTitle": "Otomatik yenileme",
-      "autoRefreshDescription": "Bir hata mesajı görüntülendiğinde (#1000, #2000, #3000, #4000 veya #5000) Twitch oynatıcısını yeniden yükleyin.",
       "fastForwardTitle": "Hızlı ileri sarma düğmesi",
       "fastForwardDescription": "Oynatıcıya, canlı yayını anında yakalamak için bir düğme ekleyin.",
       "chatFilterTitle": "Sohbet Filtresi",
@@ -5942,7 +6371,7 @@ export const translations = {
       "placeholders": {
         "twitch": "örn. minos",
         "kick": "örn. trainwreckstv",
-        "youtube": "@kullanıcı adı veya YouTube kanal bağlantısı"
+        "youtube": "@kullanıcı adı veya YouTube kanal bağlantısı",
       },
       "submit": "Ekle",
       "currentHeader": "Takip ettiğim yayıncılar",
@@ -5978,16 +6407,25 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "Yeni",
+
+        "durationMinutes": "{{count}} dk",
+
+        "durationHours": "{{count}} sa",
+
+        "durationHoursShort": "{{h}} sa {{m}}",
+
+        
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
         "countPlural": "{{count}} lives",
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
-        "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
+        "emptyBody": "Takip ettiğin bir yayıncı, izlemediğin bir yayını bitirdiğinde, tekrarıyla birlikte burada görünür.",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "{{name}} öğesini listeden kaldır",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -6122,10 +6560,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "İlk streamerını ekle",
+
+        "reorderHint": "Sırala: Alt + ↑ ↓",
+
+        "rowMoved": "{{name}}, {{position}}. konuma taşındı",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -6204,6 +6650,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "Oynatıcı",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -6253,7 +6700,7 @@ export const translations = {
         "all": "hepsi",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "Bir flama ekle",
       "addStreamerTitlePlatform": "Bir {{platform}} yayıncısı ekle",
@@ -6264,7 +6711,7 @@ export const translations = {
       "placeholders": {
         "twitch": "örn. minos",
         "kick": "örn. trainwreckstv",
-        "youtube": "@kullanıcı adı veya YouTube kanal bağlantısı"
+        "youtube": "@kullanıcı adı veya YouTube kanal bağlantısı",
       },
       "emptyState": "Henüz takip ettiğiniz yayıncı yok. Başlamak için birini ekleyin.",
       "sort": {
@@ -6281,18 +6728,15 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ etkin: özel rengin tüm StreamPulse kullanıcılarına görünür.",
         "badgePlusOff": "StreamPulse+ ile özel rengin tüm StreamPulse kullanıcılarına görünür.",
         "liveNotificationsTitle": "Firefox bildirimleri",
-        "liveNotificationsDescription": "Takip ettiğiniz bir yayıncı canlı yayına başladığında bildirim alın.",
+        "liveNotificationsDescription": "Takip ettiğin tüm yayıncılara uygulanır: daha sonra yayıncı başına ayarlayabilirsin.",
         "gameAlertsTitle": "Kategori değişikliği uyarıları",
-        "gameAlertsDescription": "Bir yayıncı Twitch'te oyun değiştirdiğinde bildirim al.",
+        "gameAlertsDescription": "Takip ettiğin tüm yayıncılara uygulanır: daha sonra yayıncı başına ayarlayabilirsin.",
         "titleAlertsTitle": "Başlık değişikliği uyarıları",
-        "titleAlertsDescription": "Bir yayıncı yayın başlığını değiştirdiğinde bildirim al.",
+        "titleAlertsDescription": "Takip ettiğin tüm yayıncılara uygulanır: daha sonra yayıncı başına ayarlayabilirsin.",
         "soundsTitle": "Bildirim sesi",
-
         "alertsPerStreamerNote": "Bu uyarılar her yayıncı için, kartından ayarlanır: bildirimler, kategori ve başlık değişiklikleri.",
         "soundsDescription": "Uyarılar geldiğinde sesi çal ya da sessize al.",
-
         "backgroundRaidAlertsTitle": "Gelen raid bildirimleri (beta)",
-
         "backgroundRaidAlertsDescription": "İzlediğin tüm Twitch kanallarını gözetle ve raid geldiği anda, sayfa kapalıyken bile haber ver.",
         "autoClaimTitle": "Kanal puanlarını otomatik olarak talep et",
         "autoClaimDescription": "Twitch kanal puan bonuslarını sizin adınıza otomatik olarak tıklasın.",
@@ -6330,10 +6774,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Twitch raidinde yönlendirmeyi otomatik iptal et. Arka plan raid uyarıları etkin olduğunda kapanır: puanlar raidi takip ederek kazanılır.",
         "hideTwitchExtensionsTitle": "Twitch uzantılarını gizle",
         "hideTwitchExtensionsDescription": "Video oynatıcıda Twitch uzantısı üst katmanlarını gizle.",
+        "keepQualityTitle": "Arka planda kaliteyi koru",
+        "keepQualityDescription": "Sekme görünür değilken Twitch'in kaliteyi düşürmesini veya duraklatmasını engeller. Daha fazla kaynak kullanır. Sekme bir sonraki yüklendiğinde uygulanır.",
+        "autoRefreshTitle": "Hata olunca oynatıcıyı kurtar",
+        "autoRefreshDescription": "#1000 ile #5000 arası hatalarda senin yerine \"Tekrar dene\"ye basar, yetmezse sekmeyi yeniler.",
+        "pipButtonTitle": "Resim içinde resim düğmesi",
+        "pipButtonDescription": "Yayını küçük bir pencerede izlemek için oynatıcıya bir düğme ekler.",
+        "playerQualityTitle": "Oynatıcı kalitesi",
+        "playerQualityDescription": "Her yayını bu kalitede açar. Auto seçiminde kararı Twitch verir.",
+        "playerQualityAuto": "Auto",
+        "playerQualitySource": "Kaynak",
+        "clipDownloadTitle": "Klip indirme",
+        "clipDownloadDescription": "Klip sayfalarına klipleri MP4 olarak kaydetmek için bir düğme ekler. StreamPulse+.",
         "preventTabDiscardTitle": "Sekmenin kapatılmasını önle",
-        "preventTabDiscardDescription": "Firefox’un etkin olmayan Twitch/Kick sekmelerini kapatmasını engelleyin.",
-        "autoRefreshTitle": "Otomatik yenileme",
-        "autoRefreshDescription": "Bir hata mesajı görüntülendiğinde (#1000, #2000, #3000, #4000 veya #5000) Twitch oynatıcısını yeniden yükleyin.",
+        "preventTabDiscardDescription": "Firefox’un etkin olmayan Twitch/Kick/YouTube sekmelerini kapatmasını engelleyin.",
         "fastForwardTitle": "Hızlı ileri sarma düğmesi",
         "fastForwardDescription": "Yayın gecikmesi yaşandığında anında canlı yayına yetişmek için bir düğme ekleyin.",
         "communityBadgeTitle": "Topluluk rozeti",
@@ -6407,7 +6861,7 @@ export const translations = {
       },
       "supportDev": "Geliştiriciye bir Bubble Tea ikram et",
       "testNotification": "Deneme bildirimi gönder",
-      "notifBlockedBody": "Firefox, StreamPulse bildirimlerini engelliyor: yayınlardan haberdar olmayacaksın.",
+      "notifBlockedBody": "Chrome, StreamPulse bildirimlerini engelliyor: yayınlardan haberdar olmayacaksın.",
       "notifBlockedAction": "Ayarlar",
       "card": {
         "offline": "Çevrimdışı",
@@ -6443,8 +6897,14 @@ export const translations = {
         "soundsDisabled": "Bildirim sesi devre dışı bırakıldı.",
         "autoClaimEnabled": "Kanal noktası otomatik talep özelliği etkinleştirildi.",
         "autoClaimDisabled": "Kanal noktası otomatik talep özelliği devre dışı bırakıldı.",
-        "autoRefreshEnabled": "Oynatıcının otomatik yenilenmesi etkinleştirildi.",
-        "autoRefreshDisabled": "Oynatıcının otomatik yenilenmesi devre dışı bırakıldı.",
+        "keepQualityEnabled": "Arka plan kalitesi korunuyor. Uygulamak için Twitch sekmesini yenile.",
+        "keepQualityDisabled": "Arka plan kalitesini Twitch yönetiyor.",
+        "autoRefreshEnabled": "Oynatıcının otomatik kurtarılması açıldı.",
+        "autoRefreshDisabled": "Oynatıcının otomatik kurtarılması kapatıldı.",
+        "pipButtonEnabled": "Resim içinde resim düğmesi açıldı.",
+        "pipButtonDisabled": "Resim içinde resim düğmesi kapatıldı.",
+        "clipDownloadEnabled": "Klip indirme açıldı.",
+        "clipDownloadDisabled": "Klip indirme kapatıldı.",
         "fastForwardEnabled": "Hızlı ileri sarma düğmesi etkinleştirildi.",
         "fastForwardDisabled": "Hızlı ileri sarma düğmesi devre dışı bırakıldı.",
         "watchTimeEnabled": "Watch Time Tracker özelliği etkinleştirildi.",
@@ -6494,6 +6954,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}} yayında",
+        "startupBatchTitle": "Şu anda canlı",
+        "startupBatchBody": "Hâlihazırda canlı: {{names}}",
         "liveMessage": "{{game}} • {{viewers}} izleyici",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} izleyici",
@@ -6503,9 +6965,7 @@ export const translations = {
         "dropMessage": "Bir Twitch Drop'u otomatik olarak alındı.",
         "raidTitle": "StreamPulse · Raid iptal edildi",
         "raidMessage": "Raid yapılan kanala aktarım iptal edildi.",
-
         "raidIncomingTitle": "{{name}} kanalına gelen raid",
-
         "raidIncomingMessage": "{{raider}}, {{viewers}} izleyiciyle geliyor. Tıkla: raidi takip ederek hedefine bırakılacaksın : puanlar onun yayınından gelerek kazanılır!",
         "unknownCategory": "Bilinmeyen kategori",
         "titleChangeTitle": "{{name}} başlığı değiştirdi",
@@ -6513,6 +6973,7 @@ export const translations = {
         "unknownTitle": "Yeni başlık",
         "newCategory": "Yeni kategori",
         "testSimpleMessage": "Bu bir test bildirimi.",
+        "testTitleMessage": "Gerçek bir uyarı gibi, örnek bir yeni başlık.",
         "plusThanksTitle": "Yürekten teşekkürler ❤️",
         "plusThanksMessage": "StreamPulse+ aboneliğin benim için gerçekten çok değerli. Senin sayende eklentiyi geliştirmeye devam edebiliyorum. Teşekkürler! Alexis",
       },
@@ -6520,6 +6981,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}} canlı"
       }
     },
     "recap": {
@@ -6547,6 +7010,7 @@ export const translations = {
       "formatMobile": "Mobil · 9:16",
       "loading": "İstatistiklerin yükleniyor…",
       "emptyTitle": "Bu dönem için gösterilecek bir şey yok.",
+      "canvasSummary": "Özet görseli: dönemde {{time}} izleme. En çok izlenen kanal: {{top}}.",
       "emptyBody": "Watch Time Tracker bu dönemde hiçbir şey kaydetmedi. Ayarlarda açık olduğundan emin ol.",
       "download": "Görseli indir",
       "share": "X'te paylaş",
@@ -6623,6 +7087,14 @@ export const translations = {
       "noNotesBody": "Bu sürümün notları henüz yayınlanmamıştır."
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "Canlı yayına git (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "StreamPulse favorileri",
         "pin": "StreamPulse favorilerine ekle",
@@ -6676,6 +7148,12 @@ export const translations = {
       "player": {
         "skipToLive": "Canlı yayına atla",
         "holdToFastForward": "Hızlı ileri sarma için basılı tutun x2",
+        "volumeBoostLabel": "Sesi güçlendir",
+        "volumeBoostHint": "Tık: aç veya kapat · tekerlek veya oklar: %200'e kadar ayarla",
+        "pictureInPicture": "Resim içinde resim",
+        "clipDownload": "Klibi indir (MP4)",
+        "clipDownloading": "Klip indiriliyor…",
+        "clipDownloadFailed": "İndirme başarısız, tekrar dene",
         "latencyEmpty": "Gecikme: --",
         "latencyValue": "Gecikme süresi: {{value}} saniye",
         "offline": "ÇEVRİMDIŞI"
@@ -6704,6 +7182,28 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "Новое",
+
+
+
+      "badgePreviewMessage": "Смотри, это мой значок StreamPulse!",
+
+
+      "welcomeTitle": "Не пропусти больше ни одного эфира.",
+
+
+      "skipStep": "Пропустить этот шаг",
+
+
+      "badgePrivacyNote": "По умолчанию выключено. При включении: хеш вашего имени отправляется на streampulse.fr не чаще раза в день. Больше ничего не покидает браузер.",
+
+
+      "advancedSettings": "Дополнительные настройки",
+
+
+      "removeStreamerName": "Удалить {{name}}",
+
+      
       "htmlLang": "ru",
       "stepProfile": "Имя пользователя",
       "profileTitle": "Ваш логин на Twitch.",
@@ -6712,17 +7212,10 @@ export const translations = {
       "profileHintIdle": "Введите свой ник: мы найдем ваш профиль на Twitch.",
       "profileHintSearching": "Поиск…",
       "profileHintFound": "✓ Найден: {{handle}}",
-      "profileHintNotFound": "Профиль на Twitch не найден. Вы всё равно можете продолжить.",
+      "profileHintKept": "Профиль Twitch не найден: ничего страшного, оставим этот ник как есть. Можно также пропустить этот шаг.",
       "profilePreviewSuffix": "Вот кто сейчас в сети.",
       "documentTitle": "Первоначальная настройка",
       "welcomeTagline": "РАСШИРЕНИЕ ДЛЯ FIREFOX · TWITCH · KICK · YOUTUBE",
-      "welcomeWord1": "Никогда",
-      "welcomeWord2": "промахнуться",
-      "welcomeWord3": "а",
-      "welcomeWord4": "в прямом эфире",
-      "welcomeWord5": "когда-либо",
-      "welcomeWord6": "снова.",
-      "welcomeTitle": "Добро пожаловать в StreamPulse",
       "welcomeDescription": "Добавьте своего первого стримера, чтобы начать получать уведомления от него. Позже вы сможете добавить других стримеров прямо из StreamPulse.",
       "languagePrompt": "Выберите язык расширения",
       "languageHint": "Вы сможете изменить это позже в настройках.",
@@ -6755,8 +7248,6 @@ export const translations = {
       "qualityGroupHint": "Автоматизируйте повторяющиеся задачи, чтобы сэкономить время.",
       "autoClaimTitle": "Автоматическое начисление баллов по каналу «Auto-claim»",
       "autoClaimDescription": "Автоматически набирать для вас бонусные очки на канале Twitch.",
-      "autoRefreshTitle": "Автоматическое обновление",
-      "autoRefreshDescription": "Перезагрузите плеер Twitch при появлении сообщения об ошибке (#1000, #2000, #3000, #4000 или #5000).",
       "fastForwardTitle": "Кнопка «Перемотка вперед»",
       "fastForwardDescription": "Добавьте в плеер кнопку, чтобы мгновенно перейти к текущему моменту прямой трансляции.",
       "chatFilterTitle": "Фильтр чата",
@@ -6774,7 +7265,7 @@ export const translations = {
       "placeholders": {
         "twitch": "например, миносы",
         "kick": "например, trainwreckstv",
-        "youtube": "@ник или ссылка на канал YouTube"
+        "youtube": "@ник или ссылка на канал YouTube",
       },
       "submit": "Добавить",
       "currentHeader": "Следующие стримеры",
@@ -6810,16 +7301,25 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "Новое",
+
+        "durationMinutes": "{{count}} мин",
+
+        "durationHours": "{{count}} ч",
+
+        "durationHoursShort": "{{h}} ч {{m}}",
+
+        
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
         "countPlural": "{{count}} lives",
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
-        "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
+        "emptyBody": "Когда стример, за которым ты следишь, заканчивает эфир, который ты не посмотрел, он появляется здесь вместе с записью.",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "Убрать {{name}} из списка",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -6954,10 +7454,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "Добавьте первого стримера",
+
+        "reorderHint": "Порядок: Alt + ↑ ↓",
+
+        "rowMoved": "{{name}} перемещён на позицию {{position}}",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -7036,6 +7544,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "Плеер",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -7085,7 +7594,7 @@ export const translations = {
         "all": "все",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "Добавить серпантин",
       "addStreamerTitlePlatform": "Добавить стримера {{platform}}",
@@ -7096,7 +7605,7 @@ export const translations = {
       "placeholders": {
         "twitch": "например, миносы",
         "kick": "например, trainwreckstv",
-        "youtube": "@ник или ссылка на канал YouTube"
+        "youtube": "@ник или ссылка на канал YouTube",
       },
       "emptyState": "Пока никто не подписался на стримеров. Добавьте одного, чтобы начать.",
       "sort": {
@@ -7113,18 +7622,15 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ активен: ваш цвет виден всем пользователям StreamPulse.",
         "badgePlusOff": "Со StreamPulse+ ваш цвет виден всем пользователям StreamPulse.",
         "liveNotificationsTitle": "Уведомления Firefox",
-        "liveNotificationsDescription": "Получайте уведомления, когда стример, на которого вы подписаны, выходит в прямой эфир.",
+        "liveNotificationsDescription": "Применяется ко всем отслеживаемым стримерам: потом можно настроить для каждого.",
         "gameAlertsTitle": "Уведомления об изменении категории",
-        "gameAlertsDescription": "Получайте уведомления, когда стример переключается на другую игру на Twitch.",
+        "gameAlertsDescription": "Применяется ко всем отслеживаемым стримерам: потом можно настроить для каждого.",
         "titleAlertsTitle": "Оповещения об изменении названия",
-        "titleAlertsDescription": "Получать уведомление, когда стример меняет название трансляции.",
+        "titleAlertsDescription": "Применяется ко всем отслеживаемым стримерам: потом можно настроить для каждого.",
         "soundsTitle": "Звук уведомления",
-
         "alertsPerStreamerNote": "Эти оповещения настраиваются для каждого стримера на его карточке: уведомления, смены категории и названия.",
         "soundsDescription": "Воспроизводить или отключать звук при появлении уведомлений.",
-
         "backgroundRaidAlertsTitle": "Оповещения о входящих рейдах (бета)",
-
         "backgroundRaidAlertsDescription": "Следить за всеми каналами Twitch из StreamPulse и уведомлять о рейде, даже когда страница закрыта.",
         "autoClaimTitle": "Автоматическое начисление баллов по каналу «Auto-claim»",
         "autoClaimDescription": "Автоматически набирать для вас бонусные очки на канале Twitch.",
@@ -7162,10 +7668,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Автоматически отменять перенаправление при рейде на Twitch. Отключается, когда активны фоновые оповещения о рейдах: баллы начисляются за присоединение к рейду.",
         "hideTwitchExtensionsTitle": "Скрыть расширения Twitch",
         "hideTwitchExtensionsDescription": "Скрыть оверлеи расширений Twitch в видеоплеере.",
+        "keepQualityTitle": "Сохранять качество в фоне",
+        "keepQualityDescription": "Не даёт Twitch снижать качество или ставить на паузу, когда вкладка не видна. Использует больше ресурсов. Применяется при следующей загрузке вкладки.",
+        "autoRefreshTitle": "Восстанавливать плеер при ошибке",
+        "autoRefreshDescription": "Нажимает «Повторить» за вас при ошибках с #1000 по #5000 и перезагружает вкладку, если этого мало.",
+        "pipButtonTitle": "Кнопка «Картинка в картинке»",
+        "pipButtonDescription": "Добавляет в плеер кнопку для просмотра трансляции в мини-окне.",
+        "playerQualityTitle": "Качество плеера",
+        "playerQualityDescription": "Открывать каждую трансляцию в этом качестве. «Авто» оставляет выбор за Twitch.",
+        "playerQualityAuto": "Авто",
+        "playerQualitySource": "Источник",
+        "clipDownloadTitle": "Скачивание клипов",
+        "clipDownloadDescription": "Добавляет на страницы клипов кнопку для сохранения в MP4. StreamPulse+.",
         "preventTabDiscardTitle": "Предотвратить сброс вкладки",
-        "preventTabDiscardDescription": "Не позволяйте Firefox закрывать неактивные вкладки Twitch/Kick.",
-        "autoRefreshTitle": "Автоматическое обновление",
-        "autoRefreshDescription": "Перезагрузите плеер Twitch при появлении сообщения об ошибке (#1000, #2000, #3000, #4000 или #5000).",
+        "preventTabDiscardDescription": "Не позволяйте Firefox закрывать неактивные вкладки Twitch, Kick и YouTube.",
         "fastForwardTitle": "Кнопка «Перемотка вперед»",
         "fastForwardDescription": "Добавьте кнопку, чтобы мгновенно наверстать отставание от прямой трансляции, когда она начинает задерживаться.",
         "communityBadgeTitle": "Значок сообщества",
@@ -7239,7 +7755,7 @@ export const translations = {
       },
       "supportDev": "Предложите разработчику чашку «бабл-ти»",
       "testNotification": "Отправить тестовое уведомление",
-      "notifBlockedBody": "Firefox блокирует уведомления StreamPulse: ты не узнаешь о начале трансляций.",
+      "notifBlockedBody": "Chrome блокирует уведомления StreamPulse: ты не узнаешь о начале трансляций.",
       "notifBlockedAction": "Настройки",
       "card": {
         "offline": "В автономном режиме",
@@ -7275,8 +7791,14 @@ export const translations = {
         "soundsDisabled": "Звук уведомлений отключен.",
         "autoClaimEnabled": "Включена функция автоматического получения точек канала.",
         "autoClaimDisabled": "Автоматическое присвоение точек канала отключено.",
-        "autoRefreshEnabled": "Включена автоматическая обновка списка воспроизведения.",
-        "autoRefreshDisabled": "Автоматическое обновление списка воспроизведения отключено.",
+        "keepQualityEnabled": "Качество в фоне сохраняется. Перезагрузите вкладку Twitch, чтобы применить.",
+        "keepQualityDisabled": "Качеством в фоне управляет Twitch.",
+        "autoRefreshEnabled": "Автовосстановление плеера включено.",
+        "autoRefreshDisabled": "Автовосстановление плеера выключено.",
+        "pipButtonEnabled": "Кнопка «Картинка в картинке» включена.",
+        "pipButtonDisabled": "Кнопка «Картинка в картинке» выключена.",
+        "clipDownloadEnabled": "Скачивание клипов включено.",
+        "clipDownloadDisabled": "Скачивание клипов выключено.",
         "fastForwardEnabled": "Кнопка «Перемотка вперед» включена.",
         "fastForwardDisabled": "Кнопка «Перемотка вперед» отключена.",
         "watchTimeEnabled": "Включена функция отслеживания времени просмотра.",
@@ -7326,6 +7848,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}} в эфире",
+        "startupBatchTitle": "Сейчас в эфире",
+        "startupBatchBody": "Уже в эфире: {{names}}",
         "liveMessage": "{{game}} • {{viewers}} зрителей",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} зрителей",
@@ -7335,9 +7859,7 @@ export const translations = {
         "dropMessage": "Дроп Twitch получен автоматически.",
         "raidTitle": "StreamPulse · Рейд отменён",
         "raidMessage": "Переход на канал рейда отменён.",
-
         "raidIncomingTitle": "Входящий рейд на {{name}}",
-
         "raidIncomingMessage": "{{raider}} прибывает с {{viewers}} зрителями. Кликни: вас доставят к цели вместе с рейдом : очки начисляются, если прийти с его стрима!",
         "unknownCategory": "Неизвестная категория",
         "titleChangeTitle": "{{name}} изменил название",
@@ -7345,6 +7867,7 @@ export const translations = {
         "unknownTitle": "Новое название",
         "newCategory": "Новая категория",
         "testSimpleMessage": "Это тестовое уведомление.",
+        "testTitleMessage": "Вот пример нового названия, как в настоящем оповещении.",
         "plusThanksTitle": "Спасибо от всего сердца ❤️",
         "plusThanksMessage": "Твоя подписка StreamPulse+ очень много для меня значит. Благодаря тебе я могу и дальше развивать расширение. Спасибо! Alexis",
       },
@@ -7352,6 +7875,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}} в эфире"
       }
     },
     "recap": {
@@ -7379,6 +7904,7 @@ export const translations = {
       "formatMobile": "Телефон · 9:16",
       "loading": "Загрузка статистики…",
       "emptyTitle": "За этот период нечего показать.",
+      "canvasSummary": "Изображение-рекап: {{time}} просмотра за период. Самый просматриваемый канал: {{top}}.",
       "emptyBody": "Watch Time Tracker ничего не записал за этот период. Проверь, что он включён в настройках.",
       "download": "Скачать изображение",
       "share": "Поделиться в X",
@@ -7455,6 +7981,14 @@ export const translations = {
       "noNotesBody": "Примечания к этой версии пока не опубликованы."
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "Перейти к прямому эфиру (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "Избранное StreamPulse",
         "pin": "Добавить в избранное StreamPulse",
@@ -7508,6 +8042,12 @@ export const translations = {
       "player": {
         "skipToLive": "Перейти к трансляции",
         "holdToFastForward": "Удерживайте для ускоренного просмотра в 2 раза",
+        "volumeBoostLabel": "Усилить громкость",
+        "volumeBoostHint": "Клик: вкл или выкл · колесо или стрелки: до 200 %",
+        "pictureInPicture": "Картинка в картинке",
+        "clipDownload": "Скачать клип (MP4)",
+        "clipDownloading": "Скачивание клипа…",
+        "clipDownloadFailed": "Не удалось скачать, попробуйте снова",
         "latencyEmpty": "Задержка: --",
         "latencyValue": "Задержка: {{value}} с",
         "offline": "ОФЛАЙН"
@@ -7536,6 +8076,28 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "新着",
+
+
+
+      "badgePreviewMessage": "見て、これが私のStreamPulseバッジ！",
+
+
+      "welcomeTitle": "もうライブを見逃さない。",
+
+
+      "skipStep": "このステップをスキップ",
+
+
+      "badgePrivacyNote": "デフォルトはオフです。有効にすると、ユーザー名のハッシュが1日に最大1回 streampulse.fr へ送信されます。他のデータは送信されません。",
+
+
+      "advancedSettings": "詳細設定",
+
+
+      "removeStreamerName": "{{name}}を削除",
+
+      
       "htmlLang": "ja",
       "stepProfile": "ユーザー名",
       "profileTitle": "Twitchのユーザー名。",
@@ -7544,17 +8106,10 @@ export const translations = {
       "profileHintIdle": "ハンドルネームを入力してください。Twitchのプロフィールを検索します。",
       "profileHintSearching": "検索中…",
       "profileHintFound": "✓ 見つかりました：{{handle}}",
-      "profileHintNotFound": "Twitchのプロフィールが見つかりませんでした。それでも続行できます。",
+      "profileHintKept": "Twitchのプロフィールが見つかりません：大丈夫、このユーザー名をそのまま使います。このステップをスキップしても構いません。",
       "profilePreviewSuffix": "現在オンライン中のユーザーはこちらです。",
       "documentTitle": "初回設定",
       "welcomeTagline": "Firefox拡張機能 · Twitch · Kick · YouTube",
-      "welcomeWord1": "決して",
-      "welcomeWord2": "ミス",
-      "welcomeWord3": "a",
-      "welcomeWord4": "ライブ",
-      "welcomeWord5": "かつて",
-      "welcomeWord6": "また。",
-      "welcomeTitle": "StreamPulseへようこそ",
       "welcomeDescription": "最初のストリーマーを追加して、そのストリーマーからの通知を受け取り始めましょう。後でStreamPulseから直接、さらにストリーマーを追加することもできます。",
       "languagePrompt": "拡張機能の言語を選択してください",
       "languageHint": "後で設定から変更できます。",
@@ -7587,8 +8142,6 @@ export const translations = {
       "qualityGroupHint": "反復的な作業を自動化して、時間を節約しましょう。",
       "autoClaimTitle": "チャンネルポイントの自動獲得",
       "autoClaimDescription": "Twitchチャンネルのポイントボーナスを自動的にクリックします。",
-      "autoRefreshTitle": "自動更新",
-      "autoRefreshDescription": "エラーメッセージ（#1000、#2000、#3000、#4000、または#5000）が表示された場合は、Twitchプレイヤーを再読み込みしてください。",
       "fastForwardTitle": "早送りボタン",
       "fastForwardDescription": "プレイヤーにボタンを追加して、ライブ放送を即座に追いつけるようにします。",
       "chatFilterTitle": "チャットフィルター",
@@ -7606,7 +8159,7 @@ export const translations = {
       "placeholders": {
         "twitch": "例：ミノス",
         "kick": "例：trainwreckstv",
-        "youtube": "@ハンドルまたはYouTubeチャンネルのURL"
+        "youtube": "@ハンドルまたはYouTubeチャンネルのURL",
       },
       "submit": "追加",
       "currentHeader": "フォローしているストリーマー",
@@ -7642,16 +8195,25 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "新着",
+
+        "durationMinutes": "{{count}}分",
+
+        "durationHours": "{{count}}時間",
+
+        "durationHoursShort": "{{h}}時間{{m}}分",
+
+        
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
         "countPlural": "{{count}} lives",
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
-        "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
+        "emptyBody": "フォロー中のストリーマーが、あなたが見ていない配信を終えると、そのアーカイブとともにここに表示されます。",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "{{name}}をリストから削除",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -7786,10 +8348,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "最初のストリーマーを追加",
+
+        "reorderHint": "並べ替え：Alt + ↑ ↓",
+
+        "rowMoved": "{{name}}を{{position}}番目に移動しました",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -7868,6 +8438,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "プレーヤー",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -7917,7 +8488,7 @@ export const translations = {
         "all": "すべて",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "YouTube"
       },
       "addStreamerTitleBase": "ストリーマーを追加する",
       "addStreamerTitlePlatform": "{{platform}}のストリーマーを追加する",
@@ -7928,7 +8499,7 @@ export const translations = {
       "placeholders": {
         "twitch": "例：ミノス",
         "kick": "例：trainwreckstv",
-        "youtube": "@ハンドルまたはYouTubeチャンネルのURL"
+        "youtube": "@ハンドルまたはYouTubeチャンネルのURL",
       },
       "emptyState": "まだフォローしているストリーマーはいません。1人フォローして始めましょう。",
       "sort": {
@@ -7945,18 +8516,15 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ 有効：カスタムカラーはすべての StreamPulse ユーザーに表示されます。",
         "badgePlusOff": "StreamPulse+ なら、カスタムカラーがすべての StreamPulse ユーザーに表示されます。",
         "liveNotificationsTitle": "Firefoxの通知",
-        "liveNotificationsDescription": "フォローしているストリーマーがライブ配信を開始した際に通知を受け取る。",
+        "liveNotificationsDescription": "フォロー中のすべてのストリーマーに適用。後からストリーマーごとに調整できます。",
         "gameAlertsTitle": "カテゴリ変更の通知",
-        "gameAlertsDescription": "Twitchでストリーマーがゲームを切り替えた際に通知を受け取る。",
+        "gameAlertsDescription": "フォロー中のすべてのストリーマーに適用。後からストリーマーごとに調整できます。",
         "titleAlertsTitle": "タイトル変更の通知",
-        "titleAlertsDescription": "配信者が配信タイトルを変更したときに通知を受け取ります。",
+        "titleAlertsDescription": "フォロー中のすべてのストリーマーに適用。後からストリーマーごとに調整できます。",
         "soundsTitle": "通知音",
-
         "alertsPerStreamerNote": "これらの通知はストリーマーごとに、そのカードから設定します：通知、カテゴリ変更、タイトル変更。",
         "soundsDescription": "アラートが発生した際に、音を再生するか、ミュートにするかを選択します。",
-
         "backgroundRaidAlertsTitle": "レイド検知アラート（ベータ版）",
-
         "backgroundRaidAlertsDescription": "StreamPulseに追加したすべてのTwitchチャンネルを監視し、ページを開いていなくてもレイド到着時に通知します。",
         "autoClaimTitle": "チャンネルポイントの自動獲得",
         "autoClaimDescription": "Twitchチャンネルのポイントボーナスを自動的にクリックします。",
@@ -7994,10 +8562,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Twitch のレイドで自動的にリダイレクトをキャンセルします。バックグラウンドのレイド通知が有効な場合はオフになります。ポイントはレイドをフォローすることで獲得できます。",
         "hideTwitchExtensionsTitle": "Twitchの拡張機能を非表示にする",
         "hideTwitchExtensionsDescription": "ビデオプレーヤー上のTwitch拡張機能のオーバーレイを非表示にする。",
+        "keepQualityTitle": "バックグラウンドでも画質を維持",
+        "keepQualityDescription": "タブが表示されていないときに Twitch が画質を下げたり一時停止したりするのを防ぎます。より多くのリソースを使います。次にタブを読み込んだときに適用されます。",
+        "autoRefreshTitle": "エラー時にプレーヤーを復帰させる",
+        "autoRefreshDescription": "#1000〜#5000 のエラーで代わりに「再試行」を押し、それでも直らなければタブを再読み込みします。",
+        "pipButtonTitle": "ピクチャー・イン・ピクチャーボタン",
+        "pipButtonDescription": "配信を小さなウィンドウで見るためのボタンをプレーヤーに追加します。",
+        "playerQualityTitle": "プレーヤーの画質",
+        "playerQualityDescription": "すべての配信をこの画質で開きます。自動では Twitch が選びます。",
+        "playerQualityAuto": "自動",
+        "playerQualitySource": "ソース",
+        "clipDownloadTitle": "クリップのダウンロード",
+        "clipDownloadDescription": "クリップページに MP4 で保存するボタンを追加します。StreamPulse+。",
         "preventTabDiscardTitle": "タブの破棄を防ぐ",
-        "preventTabDiscardDescription": "Firefoxが非アクティブなTwitch/Kickのタブを閉じないようにする。",
-        "autoRefreshTitle": "自動更新",
-        "autoRefreshDescription": "エラーメッセージ（#1000、#2000、#3000、#4000、または#5000）が表示された場合は、Twitchプレイヤーを再読み込みしてください。",
+        "preventTabDiscardDescription": "Firefoxが非アクティブなTwitch/Kick/YouTubeのタブを閉じないようにする。",
         "fastForwardTitle": "早送りボタン",
         "fastForwardDescription": "配信に遅れが生じた際に、即座にライブ配信に追いつけるボタンを追加します。",
         "communityBadgeTitle": "コミュニティバッジ",
@@ -8071,7 +8649,7 @@ export const translations = {
       },
       "supportDev": "開発者にバブルティーをご馳走する",
       "testNotification": "テスト通知を送信する",
-      "notifBlockedBody": "Firefox が StreamPulse の通知をブロックしています。配信開始の通知が届きません。",
+      "notifBlockedBody": "Chrome が StreamPulse の通知をブロックしています。配信開始の通知が届きません。",
       "notifBlockedAction": "設定",
       "card": {
         "offline": "オフライン",
@@ -8107,8 +8685,14 @@ export const translations = {
         "soundsDisabled": "通知音がオフになっています。",
         "autoClaimEnabled": "チャンネルポイントの自動獲得が有効になっています。",
         "autoClaimDisabled": "チャンネルポイントの自動獲得が無効になっています。",
-        "autoRefreshEnabled": "プレイヤーの自動更新が有効になっています。",
-        "autoRefreshDisabled": "プレイヤーの自動更新が無効になっています。",
+        "keepQualityEnabled": "バックグラウンドの画質を維持します。適用するには Twitch のタブを再読み込みしてください。",
+        "keepQualityDisabled": "バックグラウンドの画質は Twitch が管理します。",
+        "autoRefreshEnabled": "プレーヤーの自動復帰をオンにしました。",
+        "autoRefreshDisabled": "プレーヤーの自動復帰をオフにしました。",
+        "pipButtonEnabled": "ピクチャー・イン・ピクチャーボタンをオンにしました。",
+        "pipButtonDisabled": "ピクチャー・イン・ピクチャーボタンをオフにしました。",
+        "clipDownloadEnabled": "クリップのダウンロードをオンにしました。",
+        "clipDownloadDisabled": "クリップのダウンロードをオフにしました。",
         "fastForwardEnabled": "早送りボタンが有効になりました。",
         "fastForwardDisabled": "早送りボタンが無効になっています。",
         "watchTimeEnabled": "「視聴時間トラッカー」が有効になっています。",
@@ -8158,6 +8742,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}}が配信中です",
+        "startupBatchTitle": "配信中",
+        "startupBatchBody": "すでに配信中：{{names}}",
         "liveMessage": "{{game}} • {{viewers}}人の視聴者",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} 視聴者",
@@ -8167,9 +8753,7 @@ export const translations = {
         "dropMessage": "Twitch のドロップを自動で受け取りました。",
         "raidTitle": "StreamPulse · レイドをキャンセルしました",
         "raidMessage": "レイド先チャンネルへの移動をキャンセルしました。",
-
         "raidIncomingTitle": "{{name}} にレイド到着",
-
         "raidIncomingMessage": "{{raider}} が {{viewers}} 人の視聴者と到着中。クリックするとレイドに乗ったまま目標の配信へ移動します。ポイントはレイド経由で参加したときに獲得できます！",
         "unknownCategory": "カテゴリ不明",
         "titleChangeTitle": "{{name}} がタイトルを変更しました",
@@ -8177,6 +8761,7 @@ export const translations = {
         "unknownTitle": "新しいタイトル",
         "newCategory": "新しいカテゴリ",
         "testSimpleMessage": "これはテスト通知です。",
+        "testTitleMessage": "実際の通知と同じように、新しいタイトルのサンプルです。",
         "plusThanksTitle": "心から感謝します ❤️",
         "plusThanksMessage": "StreamPulse+ へのご登録、本当に嬉しいです。おかげで拡張機能をさらに良くしていけます。ありがとうございます！ Alexis",
       },
@@ -8184,6 +8769,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "{{count}}件の配信"
       }
     },
     "recap": {
@@ -8211,6 +8798,7 @@ export const translations = {
       "formatMobile": "モバイル · 9:16",
       "loading": "統計を読み込み中…",
       "emptyTitle": "この期間に表示するデータはありません。",
+      "canvasSummary": "リキャップ画像：期間の視聴時間は{{time}}。最も視聴したチャンネル：{{top}}。",
       "emptyBody": "この期間、Watch Time Trackerは何も記録していません。設定で有効になっているか確認してください。",
       "download": "画像をダウンロード",
       "share": "Xでシェア",
@@ -8287,6 +8875,14 @@ export const translations = {
       "noNotesBody": "このバージョンのリリースノートはまだ公開されていません。"
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "ライブに移動 (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "StreamPulse お気に入り",
         "pin": "StreamPulse お気に入りに追加",
@@ -8340,6 +8936,12 @@ export const translations = {
       "player": {
         "skipToLive": "ライブへスキップ",
         "holdToFastForward": "長押しで早送り（2倍速）",
+        "volumeBoostLabel": "音量をブースト",
+        "volumeBoostHint": "クリック：オン/オフ · ホイールや矢印：最大200%まで調整",
+        "pictureInPicture": "ピクチャー・イン・ピクチャー",
+        "clipDownload": "クリップをダウンロード (MP4)",
+        "clipDownloading": "クリップをダウンロード中…",
+        "clipDownloadFailed": "ダウンロードに失敗しました。もう一度お試しください",
         "latencyEmpty": "レイテンシー：--",
         "latencyValue": "遅延：{{value}}秒",
         "offline": "オフライン"
@@ -8368,6 +8970,28 @@ export const translations = {
       "youtube": "YouTube"
     },
     "onboarding": {
+      "newBadge": "새 항목",
+
+
+
+      "badgePreviewMessage": "보세요, 제 StreamPulse 배지예요!",
+
+
+      "welcomeTitle": "이제 라이브를 놓치지 마세요.",
+
+
+      "skipStep": "이 단계 건너뛰기",
+
+
+      "badgePrivacyNote": "기본값은 꺼짐입니다. 켜면 사용자 이름의 해시가 하루 최대 1회 streampulse.fr로 전송됩니다. 다른 데이터는 전송되지 않습니다.",
+
+
+      "advancedSettings": "고급 설정",
+
+
+      "removeStreamerName": "{{name}} 삭제",
+
+      
       "htmlLang": "ko",
       "stepProfile": "사용자 이름",
       "profileTitle": "Twitch 사용자 이름.",
@@ -8376,17 +9000,10 @@ export const translations = {
       "profileHintIdle": "닉네임을 입력해 주세요. 귀하의 Twitch 프로필을 조회해 드리겠습니다.",
       "profileHintSearching": "검색 중…",
       "profileHintFound": "✓ 발견됨: {{handle}}",
-      "profileHintNotFound": "Twitch 프로필을 찾을 수 없습니다. 그래도 계속 진행할 수 있습니다.",
+      "profileHintKept": "Twitch 프로필을 찾을 수 없습니다: 괜찮아요, 이 사용자 이름을 그대로 사용합니다. 이 단계를 건너뛰어도 됩니다.",
       "profilePreviewSuffix": "현재 온라인 상태인 사용자는 다음과 같습니다.",
       "documentTitle": "초기 설정",
       "welcomeTagline": "파이어폭스 확장 프로그램 · 트위치 · 킥 · 유튜브",
-      "welcomeWord1": "절대",
-      "welcomeWord2": "놓치다",
-      "welcomeWord3": "a",
-      "welcomeWord4": "라이브",
-      "welcomeWord5": "언제라도",
-      "welcomeWord6": "또.",
-      "welcomeTitle": "StreamPulse에 오신 것을 환영합니다",
       "welcomeDescription": "첫 번째 스트리머를 추가하면 해당 스트리머의 알림을 받기 시작할 수 있습니다. 나중에 StreamPulse에서 직접 더 많은 스트리머를 추가할 수 있습니다.",
       "languagePrompt": "확장 언어 선택",
       "languageHint": "나중에 설정에서 변경할 수 있습니다.",
@@ -8419,8 +9036,6 @@ export const translations = {
       "qualityGroupHint": "반복적인 작업을 자동화하여 시간을 절약하세요.",
       "autoClaimTitle": "채널 포인트 자동 적립",
       "autoClaimDescription": "Twitch 채널 포인트 보너스를 자동으로 클릭해 드립니다.",
-      "autoRefreshTitle": "자동 새로고침",
-      "autoRefreshDescription": "오류 메시지(#1000, #2000, #3000, #4000 또는 #5000)가 표시되면 Twitch 플레이어를 다시 불러오세요.",
       "fastForwardTitle": "빨리 감기 버튼",
       "fastForwardDescription": "플레이어에 버튼을 추가하여 실시간으로 바로 따라잡을 수 있게 하세요.",
       "chatFilterTitle": "채팅 필터",
@@ -8438,7 +9053,7 @@ export const translations = {
       "placeholders": {
         "twitch": "예: 미노스",
         "kick": "예: trainwreckstv",
-        "youtube": "@핸들 또는 YouTube 채널 링크"
+        "youtube": "@핸들 또는 YouTube 채널 링크",
       },
       "submit": "추가",
       "currentHeader": "팔로우 중인 스트리머",
@@ -8474,16 +9089,25 @@ export const translations = {
     },
     "popup": {
       "history": {
+        "newBadge": "새 항목",
+
+        "durationMinutes": "{{count}}분",
+
+        "durationHours": "{{count}}시간",
+
+        "durationHoursShort": "{{h}}시간 {{m}}분",
+
+        
         "filterLabel": "Filter by platform",
         "filterAll": "All",
         "countSingular": "1 live",
         "countPlural": "{{count}} lives",
         "summary": "missed in the last 14 days · {{duration}} of content",
         "emptyTitle": "No missed lives",
-        "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
-        "newBadge": "New",
+        "emptyBody": "팔로우한 스트리머가 당신이 보지 않은 방송을 끝내면, 다시보기와 함께 여기에 표시됩니다.",
         "watchVod": "Watch {{name}}'s replay",
         "openChannel": "Open {{name}}'s videos",
+        "dismiss": "목록에서 {{name}} 제거",
         "agoMinutes": "{{count}} min ago",
         "agoHours": "{{count}} h ago",
         "agoDays": "{{count}} d ago"
@@ -8618,10 +9242,18 @@ export const translations = {
         "noStreamers": "Add a streamer from the home screen first."
       },
       "cplus": {
+
+
+        "emptyCta": "첫 스트리머 추가하기",
+
+        "reorderHint": "순서 변경: Alt + ↑ ↓",
+
+        "rowMoved": "{{name}}을(를) {{position}}번째로 이동했습니다",
+
+        
         "liveOf": "{{live}} of {{total}}",
         "justStarted": "{{name}} just went live",
         "since": "for {{duration}}",
-        "newBadge": "New",
         "prev": "Previous live",
         "next": "Next live",
         "activityLabel": "Today's activity",
@@ -8700,6 +9332,7 @@ export const translations = {
         "menuLabel": "Settings sections",
         "menuAlerts": "Alerts",
         "menuAutomation": "Automation",
+        "menuPlayer": "플레이어",
         "menuPreviews": "Previews",
         "menuChat": "Chat",
         "menuData": "Time and data",
@@ -8749,7 +9382,7 @@ export const translations = {
         "all": "모두",
         "twitch": "twitch",
         "kick": "kick",
-        "youtube": "youtube"
+            "youtube": "유튜브",
       },
       "addStreamerTitleBase": "스트리머 추가하기",
       "addStreamerTitlePlatform": "{{platform}} 스트리머 추가하기",
@@ -8760,7 +9393,7 @@ export const translations = {
       "placeholders": {
         "twitch": "예: 미노스",
         "kick": "예: trainwreckstv",
-        "youtube": "@핸들 또는 YouTube 채널 링크"
+        "youtube": "@핸들 또는 YouTube 채널 링크",
       },
       "emptyState": "아직 팔로우한 스트리머가 없습니다. 시작하려면 한 명을 추가하세요.",
       "sort": {
@@ -8777,18 +9410,15 @@ export const translations = {
         "badgePlusOn": "StreamPulse+ 활성: 내 맞춤 색상이 모든 StreamPulse 사용자에게 보입니다.",
         "badgePlusOff": "StreamPulse+를 사용하면 내 맞춤 색상이 모든 StreamPulse 사용자에게 보입니다.",
         "liveNotificationsTitle": "Firefox 알림",
-        "liveNotificationsDescription": "팔로우 중인 스트리머가 생방송을 시작하면 알림을 받아보세요.",
+        "liveNotificationsDescription": "팔로우하는 모든 스트리머에게 적용됩니다. 이후 스트리머별로 조정할 수 있습니다.",
         "gameAlertsTitle": "카테고리 변경 알림",
-        "gameAlertsDescription": "Twitch에서 스트리머가 게임을 변경할 때 알림을 받으세요.",
+        "gameAlertsDescription": "팔로우하는 모든 스트리머에게 적용됩니다. 이후 스트리머별로 조정할 수 있습니다.",
         "titleAlertsTitle": "제목 변경 알림",
-        "titleAlertsDescription": "스트리머가 방송 제목을 변경하면 알림을 받습니다.",
+        "titleAlertsDescription": "팔로우하는 모든 스트리머에게 적용됩니다. 이후 스트리머별로 조정할 수 있습니다.",
         "soundsTitle": "알림 소리",
-
         "alertsPerStreamerNote": "이 알림은 각 스트리머의 카드에서 설정합니다: 알림, 카테고리 변경, 제목 변경.",
         "soundsDescription": "알림이 울릴 때 소리를 재생하거나 음소거합니다.",
-
         "backgroundRaidAlertsTitle": "들어오는 레이드 알림(베타)",
-
         "backgroundRaidAlertsDescription": "StreamPulse에 추가한 모든 Twitch 채널을 감시하여 페이지를 벗어나 있어도 레이드가 도착하면 알립니다.",
         "autoClaimTitle": "채널 포인트 자동 적립",
         "autoClaimDescription": "Twitch 채널 포인트 보너스를 자동으로 클릭해 드립니다.",
@@ -8826,10 +9456,20 @@ export const translations = {
         "autoCancelRaidsDescription": "Twitch 레이드 시 리디렉션을 자동으로 취소합니다. 백그라운드 레이드 알림이 활성화되면 꺼집니다: 포인트는 레이드를 따라가야 받을 수 있습니다.",
         "hideTwitchExtensionsTitle": "Twitch 확장 프로그램 숨기기",
         "hideTwitchExtensionsDescription": "비디오 플레이어에서 Twitch 확장 프로그램 오버레이를 숨깁니다.",
+        "keepQualityTitle": "백그라운드에서 화질 유지",
+        "keepQualityDescription": "탭이 보이지 않을 때 Twitch가 화질을 낮추거나 일시정지하지 않도록 합니다. 리소스를 더 사용합니다. 다음에 탭을 불러올 때 적용됩니다.",
+        "autoRefreshTitle": "오류 시 플레이어 복구",
+        "autoRefreshDescription": "#1000~#5000 오류에서 대신 \"다시 시도\"를 누르고, 그래도 안 되면 탭을 새로고침합니다.",
+        "pipButtonTitle": "PIP 버튼",
+        "pipButtonDescription": "방송을 작은 창으로 볼 수 있는 버튼을 플레이어에 추가합니다.",
+        "playerQualityTitle": "플레이어 화질",
+        "playerQualityDescription": "모든 방송을 이 화질로 엽니다. 자동은 Twitch가 결정합니다.",
+        "playerQualityAuto": "자동",
+        "playerQualitySource": "소스",
+        "clipDownloadTitle": "클립 다운로드",
+        "clipDownloadDescription": "클립 페이지에 MP4로 저장하는 버튼을 추가합니다. StreamPulse+.",
         "preventTabDiscardTitle": "탭 삭제 방지",
-        "preventTabDiscardDescription": "Firefox이 활동이 없는 Twitch/Kick 탭을 닫지 못하도록 방지합니다.",
-        "autoRefreshTitle": "자동 새로고침",
-        "autoRefreshDescription": "오류 메시지(#1000, #2000, #3000, #4000 또는 #5000)가 표시되면 Twitch 플레이어를 다시 불러오세요.",
+        "preventTabDiscardDescription": "Firefox이 활동이 없는 Twitch/Kick/YouTube 탭을 닫지 못하도록 방지합니다.",
         "fastForwardTitle": "빨리 감기 버튼",
         "fastForwardDescription": "스트림이 지연될 때 실시간으로 바로 따라잡을 수 있는 버튼을 추가하세요.",
         "communityBadgeTitle": "커뮤니티 배지",
@@ -8903,7 +9543,7 @@ export const translations = {
       },
       "supportDev": "개발자에게 버블티 한 잔을 대접하세요",
       "testNotification": "테스트 알림 보내기",
-      "notifBlockedBody": "Firefox이 StreamPulse 알림을 차단하고 있어요. 방송 시작 알림을 받을 수 없습니다.",
+      "notifBlockedBody": "Chrome이 StreamPulse 알림을 차단하고 있어요. 방송 시작 알림을 받을 수 없습니다.",
       "notifBlockedAction": "설정",
       "card": {
         "offline": "오프라인",
@@ -8939,8 +9579,14 @@ export const translations = {
         "soundsDisabled": "알림 소리가 꺼져 있습니다.",
         "autoClaimEnabled": "채널 포인트 자동 청구 기능이 활성화되었습니다.",
         "autoClaimDisabled": "채널 포인트 자동 획득 기능이 비활성화되었습니다.",
-        "autoRefreshEnabled": "플레이어 자동 새로고침이 활성화되었습니다.",
-        "autoRefreshDisabled": "플레이어 자동 새로고침이 비활성화되었습니다.",
+        "keepQualityEnabled": "백그라운드 화질이 유지됩니다. 적용하려면 Twitch 탭을 새로고침하세요.",
+        "keepQualityDisabled": "백그라운드 화질은 Twitch가 관리합니다.",
+        "autoRefreshEnabled": "플레이어 자동 복구가 켜졌습니다.",
+        "autoRefreshDisabled": "플레이어 자동 복구가 꺼졌습니다.",
+        "pipButtonEnabled": "PIP 버튼이 켜졌습니다.",
+        "pipButtonDisabled": "PIP 버튼이 꺼졌습니다.",
+        "clipDownloadEnabled": "클립 다운로드가 켜졌습니다.",
+        "clipDownloadDisabled": "클립 다운로드가 꺼졌습니다.",
         "fastForwardEnabled": "빨리 감기 버튼이 활성화되었습니다.",
         "fastForwardDisabled": "빨리 감기 버튼이 비활성화되었습니다.",
         "watchTimeEnabled": "시청 시간 추적 기능이 활성화되었습니다.",
@@ -8990,6 +9636,8 @@ export const translations = {
       },
       "notifications": {
         "liveTitle": "{{name}}이(가) 생방송 중입니다",
+        "startupBatchTitle": "지금 라이브 중",
+        "startupBatchBody": "이미 라이브 중: {{names}}",
         "liveMessage": "{{game}} • {{viewers}} 명의 시청자",
         "liveMessageNoViewers": "{{game}}",
         "liveMessageNoGame": "{{viewers}} 명의 시청자",
@@ -8999,9 +9647,7 @@ export const translations = {
         "dropMessage": "트위치 드롭을 자동으로 수령했습니다.",
         "raidTitle": "StreamPulse · 레이드 취소",
         "raidMessage": "레이드 대상 채널로의 이동을 취소했습니다.",
-
         "raidIncomingTitle": "{{name}}에 들어오는 레이드",
-
         "raidIncomingMessage": "{{raider}}가 시청자 {{viewers}}명과 함께 도착합니다. 클릭하면 레이드를 따라 대상 채널로 이동합니다. 포인트는 레이드를 타고 이동할 때만 받을 수 있습니다!",
         "unknownCategory": "분류 미지정",
         "titleChangeTitle": "{{name}} 님이 제목을 변경했습니다",
@@ -9009,6 +9655,7 @@ export const translations = {
         "unknownTitle": "새 제목",
         "newCategory": "새로운 카테고리",
         "testSimpleMessage": "이것은 테스트 알림입니다.",
+        "testTitleMessage": "실제 알림처럼 새 제목의 예시입니다.",
         "plusThanksTitle": "진심으로 감사합니다 ❤️",
         "plusThanksMessage": "StreamPulse+ 구독이 저에게 정말 큰 의미가 있어요. 덕분에 확장 프로그램을 계속 발전시킬 수 있습니다. 감사합니다! Alexis",
       },
@@ -9016,6 +9663,8 @@ export const translations = {
       },
       "badge": {
         "idle": "StreamPulse"
+    ,
+        "live": "라이브 {{count}}개"
       }
     },
     "recap": {
@@ -9043,6 +9692,7 @@ export const translations = {
       "formatMobile": "모바일 · 9:16",
       "loading": "통계를 불러오는 중…",
       "emptyTitle": "이 기간에 표시할 내용이 없습니다.",
+      "canvasSummary": "요약 이미지: 기간 동안 {{time}} 시청. 가장 많이 시청한 채널: {{top}}.",
       "emptyBody": "이 기간 동안 Watch Time Tracker가 기록한 내용이 없습니다. 설정에서 켜져 있는지 확인하세요.",
       "download": "이미지 다운로드",
       "share": "X에 공유",
@@ -9119,6 +9769,14 @@ export const translations = {
       "noNotesBody": "이 버전에 대한 변경 내역은 아직 공개되지 않았습니다."
     },
     "inject": {
+
+      "enhancer": {
+
+      "jumpToLive": "라이브로 이동 (StreamPulse)"
+
+      },
+
+      
       "twitchUi": {
         "favorites": "StreamPulse 즐겨찾기",
         "pin": "StreamPulse 즐겨찾기에 추가",
@@ -9172,6 +9830,12 @@ export const translations = {
       "player": {
         "skipToLive": "라이브로 건너뛰기",
         "holdToFastForward": "길게 누르면 2배속으로 빨리 감기",
+        "volumeBoostLabel": "음량 증폭",
+        "volumeBoostHint": "클릭: 켜기/끄기 · 휠 또는 화살표: 최대 200%까지 조절",
+        "pictureInPicture": "PIP 모드",
+        "clipDownload": "클립 다운로드 (MP4)",
+        "clipDownloading": "클립 다운로드 중…",
+        "clipDownloadFailed": "다운로드에 실패했습니다. 다시 시도하세요",
         "latencyEmpty": "지연 시간: --",
         "latencyValue": "지연 시간: {{value}}초",
         "offline": "오프라인"
@@ -9180,7 +9844,7 @@ export const translations = {
         "replacement": "StreamPulse에 의해 메시지가 삭제되었습니다."
       }
     }
-  },
+  }
 };
 
 export const DEFAULT_LANGUAGE = "en";

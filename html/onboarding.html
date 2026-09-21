@@ -16,29 +16,28 @@
           <img class="brand-mark" src="../images/photos/logosp.png" alt="" />
           <span>StreamPulse</span>
         </span>
-        <span id="ob-sys-version" hidden></span>
 
         <nav class="stepper" id="stepper" aria-label="Progression">
-          <div class="step-pill active" data-step="0">
+          <button type="button" class="step-pill active" data-step="0">
             <span class="step-num">1</span>
             <span class="step-label" data-i18n="onboarding.stepLanguage">Langue</span>
-          </div>
-          <div class="step-pill" data-step="1">
+          </button>
+          <button type="button" class="step-pill" data-step="1">
             <span class="step-num">2</span>
             <span class="step-label" data-i18n="onboarding.stepProfile">Pseudo</span>
-          </div>
-          <div class="step-pill" data-step="2">
+          </button>
+          <button type="button" class="step-pill" data-step="2">
             <span class="step-num">3</span>
             <span class="step-label" data-i18n="onboarding.stepStreamers">Streamers</span>
-          </div>
-          <div class="step-pill" data-step="3">
+          </button>
+          <button type="button" class="step-pill" data-step="3">
             <span class="step-num">4</span>
             <span class="step-label" data-i18n="onboarding.stepSettings">Réglages</span>
-          </div>
-          <div class="step-pill" data-step="4">
+          </button>
+          <button type="button" class="step-pill" data-step="4">
             <span class="step-num">5</span>
             <span class="step-label" data-i18n="onboarding.stepFinish">Lancement</span>
-          </div>
+          </button>
         </nav>
 
         <span class="step-counter" aria-hidden="true">
@@ -52,13 +51,7 @@
           <div class="step-frame step-frame-single">
             <div class="welcome-frame">
               <h1 class="display welcome-display">
-                <span class="word" data-i18n="onboarding.welcomeWord1">Ne</span>
-                <span class="word" data-i18n="onboarding.welcomeWord2">rate</span>
-                <span class="word" data-i18n="onboarding.welcomeWord3">plus</span>
-                <span class="word italic" data-i18n="onboarding.welcomeWord4">jamais</span>
-                <br />
-                <span class="word" data-i18n="onboarding.welcomeWord5">un</span>
-                <span class="word italic" data-i18n="onboarding.welcomeWord6">live.</span>
+                <span class="welcome-line" data-i18n="onboarding.welcomeTitle">Ne rate plus jamais un live.</span>
               </h1>
               <p class="lede welcome-sub" data-i18n="onboarding.welcomeDescription">Une extension pour suivre tes streamers en un coup d'œil. Commence par choisir la langue de l'interface.</p>
 
@@ -78,7 +71,7 @@
         <section class="wizard-step" data-step="1">
           <div class="step-frame">
             <div class="step-header">
-              <h1 class="headline step-title" data-i18n="onboarding.profileTitle" data-i18n-mode="html">Quel est ton <span class="accent">pseudo</span> ?</h1>
+              <h2 class="headline step-title" data-i18n="onboarding.profileTitle" data-i18n-mode="html">Quel est ton <span class="accent">pseudo</span> ?</h2>
               <p class="step-desc" data-i18n="onboarding.profileDescription">Renseigne ton pseudo Twitch : on récupère ta photo de profil pour t'accueillir comme il faut à chaque ouverture.</p>
             </div>
 
@@ -107,6 +100,19 @@
                     <span class="input-counter"><span id="profile-input-count">0</span>/32</span>
                   </div>
                 </div>
+
+                <div class="badge-setting">
+                  <label class="settings-toggle">
+                    <span class="settings-text"><span class="settings-title" data-i18n="popup.settings.communityBadgeTitle"></span><span class="settings-description" data-i18n="popup.settings.communityBadgeDescription"></span></span>
+                    <input id="onboarding-community-badge" type="checkbox" role="switch" />
+                  </label>
+                  <div class="badge-preview" aria-hidden="true">
+                    <span class="badge-preview-badge"></span>
+                    <span class="badge-preview-name" id="badge-preview-name">@toi</span>
+                    <span class="badge-preview-msg" data-i18n="onboarding.badgePreviewMessage">Regarde, c'est mon badge StreamPulse !</span>
+                  </div>
+                  <p class="settings-privacy" data-i18n="onboarding.badgePrivacyNote">Désactivé par défaut. Si tu l'actives : une empreinte de ton pseudo est envoyée à streampulse.fr au maximum une fois par jour. Rien d'autre ne quitte ton navigateur.</p>
+                </div>
               </div>
 
               <div class="step-nav">
@@ -114,6 +120,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
                   <span data-i18n="onboarding.backBtn">Retour</span>
                 </button>
+                <button class="btn btn-ghost btn-skip" id="btn-skip-1" type="button" data-i18n="onboarding.skipStep">Passer cette étape</button>
                 <button class="btn btn-primary" id="btn-next-1" type="button" disabled>
                   <span data-i18n="onboarding.continueBtn">Continuer</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
@@ -127,7 +134,7 @@
         <section class="wizard-step" data-step="2">
           <div class="step-frame">
             <div class="step-header">
-              <h1 class="headline step-title" data-i18n="onboarding.formLabelBase" data-i18n-mode="html">Tes <span class="accent">streamers</span><br />à suivre.</h1>
+              <h2 class="headline step-title" data-i18n="onboarding.formLabelBase" data-i18n-mode="html">Tes <span class="accent">streamers</span><br />à suivre.</h2>
               <p class="step-desc" data-i18n="onboarding.helperTextBase">Saisis un identifiant ou colle le lien d'une chaîne. Tu pourras toujours en ajouter plus tard.</p>
             </div>
 
@@ -159,6 +166,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
                   <span data-i18n="onboarding.backBtn">Retour</span>
                 </button>
+                <button class="btn btn-ghost btn-skip" id="btn-skip-2" type="button" data-i18n="onboarding.skipStep">Passer cette étape</button>
                 <button class="btn btn-primary" id="btn-next-2" type="button" disabled>
                   <span data-i18n="onboarding.continueBtn">Continuer</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
@@ -172,7 +180,7 @@
         <section class="wizard-step" data-step="3">
           <div class="step-frame">
             <div class="step-header">
-              <h1 class="headline step-title" data-i18n="onboarding.preferencesTitle" data-i18n-mode="html">Quelques <span class="accent">préférences</span>.</h1>
+              <h2 class="headline step-title" data-i18n="onboarding.preferencesTitle" data-i18n-mode="html">Quelques <span class="accent">préférences</span>.</h2>
               <p class="step-desc" data-i18n="onboarding.preferencesDescription">Active ce qui t'intéresse : tout est modifiable plus tard depuis les réglages.</p>
             </div>
 
@@ -198,17 +206,13 @@
                 </label>
                 <label class="settings-toggle">
                   <span class="settings-text"><span class="settings-title" data-i18n="popup.settings.autoCancelRaidsTitle"></span><span class="settings-description" data-i18n="popup.settings.autoCancelRaidsDescription"></span></span>
-                  <input id="onboarding-auto-cancel-raids" type="checkbox" role="switch" checked />
+                  <input id="onboarding-auto-cancel-raids" type="checkbox" role="switch" />
                 </label>
               </div>
 
               <div class="settings-group">
                 <h2 class="group-title" data-i18n="onboarding.playerGroupTitle">Lecteur Twitch</h2>
                 <p class="settings-group-hint" data-i18n="onboarding.playerGroupHint">Optimise le lecteur pour rattraper le direct et masquer le superflu.</p>
-                <label class="settings-toggle">
-                  <span class="settings-text"><span class="settings-title" data-i18n="popup.settings.autoRefreshTitle"></span><span class="settings-description" data-i18n="popup.settings.autoRefreshDescription"></span></span>
-                  <input id="onboarding-auto-refresh" type="checkbox" role="switch" checked />
-                </label>
                 <label class="settings-toggle">
                   <span class="settings-text"><span class="settings-title" data-i18n="popup.settings.fastForwardTitle"></span><span class="settings-description" data-i18n="popup.settings.fastForwardDescription"></span></span>
                   <input id="onboarding-fast-forward" type="checkbox" role="switch" checked />
@@ -219,8 +223,10 @@
                 </label>
               </div>
 
-              <div class="settings-group">
-                <h2 class="group-title" data-i18n="onboarding.tabsGroupLabel">Onglets et arrière-plan</h2>
+              <details class="settings-advanced">
+                <summary data-i18n="onboarding.advancedSettings">Réglages avancés</summary>
+                <div class="settings-group">
+                  <h2 class="group-title" data-i18n="onboarding.tabsGroupLabel">Onglets et arrière-plan</h2>
                 <p class="settings-group-hint" data-i18n="onboarding.tabsGroupHint">Gestion visuelle et maintien de l'activité des onglets.</p>
                 <label class="settings-toggle">
                   <span class="settings-text"><span class="settings-title" data-i18n="onboarding.streamerFaviconTitle">Avatar du streamer sur l'onglet</span><span class="settings-description" data-i18n="onboarding.streamerFaviconDescription">Remplacer l'icône de l'onglet par la photo du streamer en direct.</span></span>
@@ -251,7 +257,8 @@
                   <span class="settings-text"><span class="settings-title" data-i18n="popup.settings.soundsTitle"></span><span class="settings-description" data-i18n="popup.settings.soundsDescription"></span></span>
                   <input id="onboarding-sounds" type="checkbox" role="switch" checked />
                 </label>
-              </div>
+                </div>
+              </details>
 
               <div class="step-nav">
                 <button class="btn btn-ghost" id="btn-back-3" type="button">
@@ -274,7 +281,7 @@
               <div class="finish-check" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>
               </div>
-              <h1 class="display finish-title" data-i18n="onboarding.finishTitle" data-i18n-mode="html">Tout est prêt<span class="name-suffix" id="finish-name-suffix"></span>.</h1>
+              <h2 class="display finish-title" data-i18n="onboarding.finishTitle" data-i18n-mode="html">Tout est prêt<span class="name-suffix" id="finish-name-suffix"></span>.</h2>
               <p class="lede welcome-sub" data-i18n="onboarding.finishDescription">StreamPulse va te prévenir dès qu'un streamer suivi se lance. Pense à épingler l'extension.</p>
 
               <div class="glass pin-instructions">
