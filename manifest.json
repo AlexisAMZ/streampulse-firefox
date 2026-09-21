@@ -32,7 +32,8 @@
     "https://images.kick.com/*",
     "https://stream.kick.com/*",
     "https://id.kick.com/*",
-    "https://api.kick.com/*"
+    "https://api.kick.com/*",
+    "https://www.youtube.com/*"
   ],
   "author": "AlexisAMZ",
   "background": {

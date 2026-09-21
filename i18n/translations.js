@@ -44,7 +44,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "htmlLang": "fr",
@@ -116,7 +117,8 @@ export const translations = {
       "helperTextPlatform": "Ajoute un créateur disponible sur {{platform}}.",
       "placeholders": {
         "twitch": "ex: AlexisAMZ",
-        "kick": "ex: Teuf"
+        "kick": "ex: Teuf",
+        "youtube": "@handle ou lien de chaîne YouTube"
       },
       "submit": "Ajouter",
       "currentHeader": "Streamers suivis",
@@ -426,7 +428,8 @@ export const translations = {
       "platformFilter": {
         "all": "tous",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "Ajouter un streamer",
       "addStreamerTitlePlatform": "Ajouter un streamer {{platform}}",
@@ -436,7 +439,8 @@ export const translations = {
       "platformSelectorLabel": "Plateforme du streamer",
       "placeholders": {
         "twitch": "ex: AlexisAMZ",
-        "kick": "ex: Teuf"
+        "kick": "ex: Teuf",
+        "youtube": "@handle ou lien de chaîne YouTube"
       },
       "emptyState": "Aucun streamer suivi. Ajoutez-en un pour commencer.",
       "sort": {
@@ -872,7 +876,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "htmlLang": "en",
@@ -944,7 +949,8 @@ export const translations = {
       "helperTextPlatform": "Add a creator available on {{platform}}.",
       "placeholders": {
         "twitch": "e.g. minos",
-        "kick": "e.g. trainwreckstv"
+        "kick": "e.g. trainwreckstv",
+        "youtube": "@handle or YouTube channel URL"
       },
       "submit": "Add",
       "currentHeader": "Followed streamers",
@@ -1254,7 +1260,8 @@ export const translations = {
       "platformFilter": {
         "all": "all",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "Add a streamer",
       "addStreamerTitlePlatform": "Add a {{platform}} streamer",
@@ -1264,7 +1271,8 @@ export const translations = {
       "platformSelectorLabel": "Streamer platform",
       "placeholders": {
         "twitch": "e.g. minos",
-        "kick": "e.g. trainwreckstv"
+        "kick": "e.g. trainwreckstv",
+        "youtube": "@handle or YouTube channel URL"
       },
       "emptyState": "No streamers followed yet. Add one to get started.",
       "sort": {
@@ -1700,7 +1708,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "stepProfile": "Usuario",
@@ -1771,7 +1780,8 @@ export const translations = {
       "helperTextPlatform": "Añade un creador disponible en {{platform}}.",
       "placeholders": {
         "twitch": "ej.: AlexisAMZ",
-        "kick": "ej.: Teuf"
+        "kick": "ej.: Teuf",
+        "youtube": "@usuario o enlace de canal de YouTube"
       },
       "submit": "Añadir",
       "currentHeader": "Streamers seguidos",
@@ -2081,7 +2091,8 @@ export const translations = {
       "platformFilter": {
         "all": "todos",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "Añadir un streamer",
       "addStreamerTitlePlatform": "Añadir un streamer de {{platform}}",
@@ -2091,7 +2102,8 @@ export const translations = {
       "platformSelectorLabel": "Plataforma del streamer",
       "placeholders": {
         "twitch": "ej.: AlexisAMZ",
-        "kick": "ej.: Teuf"
+        "kick": "ej.: Teuf",
+        "youtube": "@usuario o enlace de canal de YouTube"
       },
       "emptyState": "Aún no sigues a ningún streamer. Añade uno para empezar.",
       "sort": {
@@ -2528,7 +2540,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "stepProfile": "Usuário",
@@ -2599,7 +2612,8 @@ export const translations = {
       "helperTextPlatform": "Adicione um criador disponível na {{platform}}.",
       "placeholders": {
         "twitch": "ex.: AlexisAMZ",
-        "kick": "ex.: Teuf"
+        "kick": "ex.: Teuf",
+        "youtube": "@usuário ou link de canal do YouTube"
       },
       "submit": "Adicionar",
       "currentHeader": "Streamers seguidos",
@@ -2909,7 +2923,8 @@ export const translations = {
       "platformFilter": {
         "all": "todos",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "Adicionar um streamer",
       "addStreamerTitlePlatform": "Adicionar um streamer de {{platform}}",
@@ -2919,7 +2934,8 @@ export const translations = {
       "platformSelectorLabel": "Plataforma do streamer",
       "placeholders": {
         "twitch": "ex.: AlexisAMZ",
-        "kick": "ex.: Teuf"
+        "kick": "ex.: Teuf",
+        "youtube": "@usuário ou link de canal do YouTube"
       },
       "emptyState": "Você ainda não segue nenhum streamer. Adicione um para começar.",
       "sort": {
@@ -3356,7 +3372,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "htmlLang": "de",
@@ -3428,7 +3445,8 @@ export const translations = {
       "helperTextPlatform": "Fügen Sie einen auf {{platform}} verfügbaren Ersteller hinzu.",
       "placeholders": {
         "twitch": "z.B. Minos",
-        "kick": "z.B. trainwreckstv"
+        "kick": "z.B. trainwreckstv",
+        "youtube": "@Name oder YouTube-Kanal-Link"
       },
       "submit": "Hinzufügen",
       "currentHeader": "Streamern gefolgt",
@@ -3738,7 +3756,8 @@ export const translations = {
       "platformFilter": {
         "all": "alle",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "Fügen Sie einen Streamer hinzu",
       "addStreamerTitlePlatform": "Fügen Sie einen {{platform}}-Streamer hinzu",
@@ -3748,7 +3767,8 @@ export const translations = {
       "platformSelectorLabel": "Streamer-Plattform",
       "placeholders": {
         "twitch": "z.B. Minos",
-        "kick": "z.B. trainwreckstv"
+        "kick": "z.B. trainwreckstv",
+        "youtube": "@Name oder YouTube-Kanal-Link"
       },
       "emptyState": "Es sind noch keine Streamer gefolgt. Fügen Sie eines hinzu, um loszulegen.",
       "sort": {
@@ -4184,7 +4204,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "htmlLang": "it",
@@ -4256,7 +4277,8 @@ export const translations = {
       "helperTextPlatform": "Aggiungi un creatore disponibile su {{platform}}.",
       "placeholders": {
         "twitch": "per esempio. mino",
-        "kick": "per esempio. trainwreckstv"
+        "kick": "per esempio. trainwreckstv",
+        "youtube": "@handle o link del canale YouTube"
       },
       "submit": "Aggiungi",
       "currentHeader": "Streamer seguiti",
@@ -4566,7 +4588,8 @@ export const translations = {
       "platformFilter": {
         "all": "tutto",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "Aggiungi uno streamer",
       "addStreamerTitlePlatform": "Aggiungi uno streamer {{platform}}",
@@ -4576,7 +4599,8 @@ export const translations = {
       "platformSelectorLabel": "Piattaforma di streaming",
       "placeholders": {
         "twitch": "per esempio. mino",
-        "kick": "per esempio. trainwreckstv"
+        "kick": "per esempio. trainwreckstv",
+        "youtube": "@handle o link del canale YouTube"
       },
       "emptyState": "Nessuno streamer è stato ancora seguito. Aggiungine uno per iniziare.",
       "sort": {
@@ -5012,7 +5036,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "htmlLang": "pl",
@@ -5084,7 +5109,8 @@ export const translations = {
       "helperTextPlatform": "Dodaj twórcę dostępnego na {{platform}}.",
       "placeholders": {
         "twitch": "np. Minos",
-        "kick": "np. wrak pociągu"
+        "kick": "np. wrak pociągu",
+        "youtube": "@pseudo lub link do kanału YouTube"
       },
       "submit": "Dodać",
       "currentHeader": "Obserwowani streamerzy",
@@ -5394,7 +5420,8 @@ export const translations = {
       "platformFilter": {
         "all": "wszystko",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "Dodaj streamera",
       "addStreamerTitlePlatform": "Dodaj streamera {{platform}}",
@@ -5404,7 +5431,8 @@ export const translations = {
       "platformSelectorLabel": "Platforma streamerów",
       "placeholders": {
         "twitch": "np. Minos",
-        "kick": "np. wrak pociągu"
+        "kick": "np. wrak pociągu",
+        "youtube": "@pseudo lub link do kanału YouTube"
       },
       "emptyState": "Żaden streamer jeszcze nie obserwuje. Dodaj jeden, aby rozpocząć.",
       "sort": {
@@ -5840,7 +5868,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "htmlLang": "tr",
@@ -5912,7 +5941,8 @@ export const translations = {
       "helperTextPlatform": "{{platform}}'da bulunan bir içerik oluşturucuyu ekleyin.",
       "placeholders": {
         "twitch": "örn. minos",
-        "kick": "örn. trainwreckstv"
+        "kick": "örn. trainwreckstv",
+        "youtube": "@kullanıcı adı veya YouTube kanal bağlantısı"
       },
       "submit": "Ekle",
       "currentHeader": "Takip ettiğim yayıncılar",
@@ -6222,7 +6252,8 @@ export const translations = {
       "platformFilter": {
         "all": "hepsi",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "Bir flama ekle",
       "addStreamerTitlePlatform": "Bir {{platform}} yayıncısı ekle",
@@ -6232,7 +6263,8 @@ export const translations = {
       "platformSelectorLabel": "Canlı yayın platformu",
       "placeholders": {
         "twitch": "örn. minos",
-        "kick": "örn. trainwreckstv"
+        "kick": "örn. trainwreckstv",
+        "youtube": "@kullanıcı adı veya YouTube kanal bağlantısı"
       },
       "emptyState": "Henüz takip ettiğiniz yayıncı yok. Başlamak için birini ekleyin.",
       "sort": {
@@ -6668,7 +6700,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "htmlLang": "ru",
@@ -6740,7 +6773,8 @@ export const translations = {
       "helperTextPlatform": "Добавить автора, доступного на {{platform}}.",
       "placeholders": {
         "twitch": "например, миносы",
-        "kick": "например, trainwreckstv"
+        "kick": "например, trainwreckstv",
+        "youtube": "@ник или ссылка на канал YouTube"
       },
       "submit": "Добавить",
       "currentHeader": "Следующие стримеры",
@@ -7050,7 +7084,8 @@ export const translations = {
       "platformFilter": {
         "all": "все",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "Добавить серпантин",
       "addStreamerTitlePlatform": "Добавить стримера {{platform}}",
@@ -7060,7 +7095,8 @@ export const translations = {
       "platformSelectorLabel": "Платформа для стримеров",
       "placeholders": {
         "twitch": "например, миносы",
-        "kick": "например, trainwreckstv"
+        "kick": "например, trainwreckstv",
+        "youtube": "@ник или ссылка на канал YouTube"
       },
       "emptyState": "Пока никто не подписался на стримеров. Добавьте одного, чтобы начать.",
       "sort": {
@@ -7496,7 +7532,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "htmlLang": "ja",
@@ -7568,7 +7605,8 @@ export const translations = {
       "helperTextPlatform": "{{platform}}で利用可能なクリエイターを追加する。",
       "placeholders": {
         "twitch": "例：ミノス",
-        "kick": "例：trainwreckstv"
+        "kick": "例：trainwreckstv",
+        "youtube": "@ハンドルまたはYouTubeチャンネルのURL"
       },
       "submit": "追加",
       "currentHeader": "フォローしているストリーマー",
@@ -7878,7 +7916,8 @@ export const translations = {
       "platformFilter": {
         "all": "すべて",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "ストリーマーを追加する",
       "addStreamerTitlePlatform": "{{platform}}のストリーマーを追加する",
@@ -7888,7 +7927,8 @@ export const translations = {
       "platformSelectorLabel": "ストリーミングプラットフォーム",
       "placeholders": {
         "twitch": "例：ミノス",
-        "kick": "例：trainwreckstv"
+        "kick": "例：trainwreckstv",
+        "youtube": "@ハンドルまたはYouTubeチャンネルのURL"
       },
       "emptyState": "まだフォローしているストリーマーはいません。1人フォローして始めましょう。",
       "sort": {
@@ -8324,7 +8364,8 @@ export const translations = {
     },
     "platforms": {
       "twitch": "Twitch",
-      "kick": "Kick"
+      "kick": "Kick",
+      "youtube": "YouTube"
     },
     "onboarding": {
       "htmlLang": "ko",
@@ -8396,7 +8437,8 @@ export const translations = {
       "helperTextPlatform": "{{platform}}에서 활동 중인 크리에이터를 추가하세요.",
       "placeholders": {
         "twitch": "예: 미노스",
-        "kick": "예: trainwreckstv"
+        "kick": "예: trainwreckstv",
+        "youtube": "@핸들 또는 YouTube 채널 링크"
       },
       "submit": "추가",
       "currentHeader": "팔로우 중인 스트리머",
@@ -8706,7 +8748,8 @@ export const translations = {
       "platformFilter": {
         "all": "모두",
         "twitch": "twitch",
-        "kick": "kick"
+        "kick": "kick",
+        "youtube": "youtube"
       },
       "addStreamerTitleBase": "스트리머 추가하기",
       "addStreamerTitlePlatform": "{{platform}} 스트리머 추가하기",
@@ -8716,7 +8759,8 @@ export const translations = {
       "platformSelectorLabel": "스트리밍 플랫폼",
       "placeholders": {
         "twitch": "예: 미노스",
-        "kick": "예: trainwreckstv"
+        "kick": "예: trainwreckstv",
+        "youtube": "@핸들 또는 YouTube 채널 링크"
       },
       "emptyState": "아직 팔로우한 스트리머가 없습니다. 시작하려면 한 명을 추가하세요.",
       "sort": {

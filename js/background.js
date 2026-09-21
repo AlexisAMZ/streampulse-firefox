@@ -15,6 +15,7 @@ import {
   getPlatformLabelKey,
   normalizePlatform,
   platformSupportsLiveStatus,
+  isYoutubeChannelId,
   sanitizeHandle,
 } from "./platforms.js";
 import { HISTORY_KEY, addSession, emptyHistory, markSeen, patchSession } from "./history-data.js";
@@ -1350,6 +1351,150 @@ class PlatformChecker {
     return this.extractKickStatus(channel, handle);
   }
 
+  /* ─── YouTube v1 : alertes de live, sans clé API ────────────────────────
+     Détection : la page youtube.com/@handle/live (ou /channel/ID/live) a une
+     URL canonique qui pointe vers watch?v=… quand la chaîne diffuse, vers la
+     chaîne sinon. Le titre et la vignette viennent ensuite de oEmbed (public,
+     sans clé). Non officiel : si YouTube change ce comportement, la
+     plateforme retombe proprement en « hors ligne » sans casser le reste. */
+
+  static _youtubeCache = new Map(); // handle → { id, avatar, name }
+  static _youtubeCacheLoaded = false;
+
+  static async loadYoutubeCache() {
+    if (this._youtubeCacheLoaded) return;
+    this._youtubeCacheLoaded = true;
+    try {
+      const stored = (await chrome.storage.local.get("streampulse:youtubeChannels"))[
+        "streampulse:youtubeChannels"
+      ];
+      Object.entries(stored || {}).forEach(([handle, entry]) => {
+        if (entry?.id) this._youtubeCache.set(handle, entry);
+      });
+    } catch { /* cache perdu : on re-résoudra */ }
+  }
+
+  static async saveYoutubeCache() {
+    try {
+      await chrome.storage.local.set({
+        "streampulse:youtubeChannels": Object.fromEntries(this._youtubeCache),
+      });
+    } catch { /* best effort */ }
+  }
+
+  static async resolveYoutubeChannel(handle) {
+    const sanitized = sanitizeHandle("youtube", handle);
+    if (!sanitized) return null;
+    await this.loadYoutubeCache();
+    const cached = this._youtubeCache.get(sanitized);
+    if (cached?.id) return cached;
+    if (isYoutubeChannelId(sanitized)) {
+      const entry = { id: sanitized, avatar: "", name: sanitized };
+      this._youtubeCache.set(sanitized, entry);
+      this.saveYoutubeCache();
+      return entry;
+    }
+    // Handle → ID : la page de la chaîne embarque "channelId"/"externalId".
+    try {
+      const resp = await fetch(
+        `https://www.youtube.com/@${encodeURIComponent(sanitized)}`,
+        { redirect: "follow" }
+      );
+      if (!resp.ok) return null;
+      const html = await resp.text();
+      const id =
+        /"?(?:channelId|externalId)"?\s*:\s*"(UC[A-Za-z0-9_-]{10,32})"/.exec(html)?.[1] || "";
+      const name =
+        /<meta property="og:title" content="([^"]+)"/.exec(html)?.[1] || sanitized;
+      const avatar =
+        /<meta property="og:image" content="([^"]+)"/.exec(html)?.[1] || "";
+      if (!id) return null;
+      const entry = { id, avatar, name };
+      this._youtubeCache.set(sanitized, entry);
+      this.saveYoutubeCache();
+      return entry;
+    } catch {
+      return null;
+    }
+  }
+
+  static async getYoutubeStatus(handle) {
+    const sanitized = sanitizeHandle("youtube", handle);
+    const base = {
+      platform: "youtube",
+      url: buildProfileUrl("youtube", sanitized),
+    };
+    const channel = await this.resolveYoutubeChannel(sanitized);
+    if (!channel?.id) return { isLive: false, ...base };
+
+    let videoId;
+    let viewers = 0;
+    try {
+      /* Ancienne astuce embed/live_stream morte : YouTube sert désormais un
+         shell JS sans l'ID. Le signal fiable gratuit est la page /live : sa
+         URL canonique pointe vers watch?v=… si la chaîne diffuse, vers la
+         chaîne sinon (404 si le handle n'existe pas). La même page porte le
+         compteur de viewers simultanés ("viewCount" du videoDetails). */
+      const liveUrl = isYoutubeChannelId(sanitized)
+        ? `https://www.youtube.com/channel/${encodeURIComponent(channel.id)}/live`
+        : `https://www.youtube.com/@${encodeURIComponent(sanitized)}/live`;
+      const res = await fetch(liveUrl, { redirect: "follow" });
+      if (res.ok) {
+        const html = await res.text();
+        videoId =
+          /<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{6,20})"/.exec(
+            html
+          )?.[1] || "";
+        if (videoId) {
+          // Sur un live, viewCount du lecteur = viewers simultanés.
+          viewers = Number(/"viewCount":"(\d+)"/.exec(html)?.[1]) || 0;
+        }
+      }
+    } catch (error) {
+      return { isLive: false, platform: "youtube", error: error?.message, isError: true };
+    }
+    if (!videoId) return { isLive: false, ...base };
+
+    // En direct : oEmbed donne titre et nom affiché, sans clé. La vignette
+    // est celle du lecteur live (i.ytimg.com) : YouTube la rafraîchit côté
+    // serveur pendant le stream, le cache-buster par minute la rend quasi
+    // live dans la popup.
+    let title = "";
+    let displayName = channel.name && channel.name !== sanitized ? channel.name : "";
+    try {
+      const res = await fetch(
+        `https://www.youtube.com/oembed?url=${encodeURIComponent(
+          `https://www.youtube.com/watch?v=${videoId}`
+        )}&format=json`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        title = data.title || "";
+        displayName = data.author_name || displayName;
+      }
+    } catch { /* titre optionnel */ }
+
+    const cb = Math.floor(Date.now() / 60000); // 1-minute cache bucket
+    const thumbnailUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+    return {
+      isLive: true,
+      ...base,
+      displayName: displayName || sanitized,
+      avatarUrl: channel.avatar || "",
+      title,
+      game: "",
+      viewers,
+      startedAt: null,
+      // L'ID de vidéo fait office de session : un nouveau live = un nouvel id,
+      // la logique sessionChanged des notifications fonctionne telle quelle.
+      sessionId: videoId,
+      thumbnailUrl,
+      thumbnailCandidates: [`${thumbnailUrl}?cb=${cb}`],
+      supportsLiveStatus: true,
+    };
+  }
+
   static async getStatus(streamer) {
     const platform = normalizePlatform(streamer?.platform);
     const supportsLive = platformSupportsLiveStatus(platform);
@@ -1365,6 +1510,14 @@ class PlatformChecker {
     }
     if (platform === "kick") {
       const status = await this.getKickStatus(streamer.handle || streamer.id);
+      return {
+        ...status,
+        platform,
+        supportsLiveStatus: supportsLive,
+      };
+    }
+    if (platform === "youtube") {
+      const status = await this.getYoutubeStatus(streamer.handle || streamer.id);
       return {
         ...status,
         platform,
@@ -2880,6 +3033,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               "https://files.kick.com"
             ),
             handle: channel?.slug || handle,
+          };
+        } else if (platform === "youtube") {
+          // La chaîne doit exister : on résout handle → channelId (et on
+          // garde l'avatar et le nom au passage). Échec = chaîne inconnue.
+          const channel = await PlatformChecker.resolveYoutubeChannel(handle);
+          if (!channel?.id) {
+            sendResponse({
+              error: translateWithPrefs(
+                preferences,
+                "background.errors.streamerNotFound",
+                {
+                  platform: translateWithPrefs(
+                    preferences,
+                    getPlatformLabelKey(platform)
+                  ),
+                }
+              ),
+            });
+            return;
+          }
+          sourceData = {
+            ...sourceData,
+            displayName: channel.name || formatHandleForDisplay(platform, handle),
+            avatarUrl: channel.avatar || "",
           };
         } else {
           sourceData = {
