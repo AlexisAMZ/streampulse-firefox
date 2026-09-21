@@ -50,7 +50,9 @@ const STORAGE_KEYS = {
 // ─── Remote config (credentials hosted on Vercel, never in the zip) ──────────
 const REMOTE_CONFIG_URL = "https://streampulse.fr/api/streampulse-config";
 const REMOTE_CONFIG_CACHE_KEY = "streampulse:remoteConfig";
-const REMOTE_CONFIG_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const REMOTE_CONFIG_TTL_MS = 30 * 60 * 1000; // 30 min, plafond avant re-check ;
+// un token mort est de toute facon detecte au premier 401/403 (fetchTwitchJson
+// recharge alors la config immediatement), ce TTL ne borne que le pire cas.
 
 let CONFIG = { ...LOCAL_CONFIG };
 let _configReady = null;
@@ -96,6 +98,48 @@ function ensureConfig() {
     });
   }
   return _configReady;
+}
+
+/**
+ * Rotation de token : quand Twitch rejette le jeton en cache (401/403), on
+ * re-fetch la config serveur en ignorant le cache de 30 min. Une rotation
+ * cote streampulse.fr devient donc effective en quelques secondes chez tous
+ * les utilisateurs, au lieu d'attendre l'expiration du TTL.
+ */
+async function refreshRemoteConfigForce() {
+  try {
+    const res = await fetch(REMOTE_CONFIG_URL, { cache: "no-store" });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (!data?.clientId) return false;
+    CONFIG = { ...LOCAL_CONFIG, ...data };
+    await chrome.storage.local.set({
+      [REMOTE_CONFIG_CACHE_KEY]: { data, fetchedAt: Date.now() },
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * fetchJson pour l'API Twitch : rejoue la requete une fois si Twitch repond
+ * 401/403 apres avoir recharge la config distante (token expire ou revoque
+ * pendant que le cache local le croyait encore bon). Le garde ensureConfig
+ * reste indispensable ici : la page d'arriere-plan Firefox se decharge comme
+ * un service worker, donc CONFIG peut etre revenu au fallback local sans
+ * accessToken a chaque reveil.
+ */
+async function fetchTwitchJson(url, options = {}, timeoutMs = 15000) {
+  await ensureConfig();
+  try {
+    return await fetchJson(url, options, timeoutMs);
+  } catch (error) {
+    if (!/^(401|403) /.test(String(error?.message || ""))) throw error;
+    const refreshed = await refreshRemoteConfigForce();
+    if (!refreshed) throw error;
+    return fetchJson(url, options, timeoutMs);
+  }
 }
 
 const WATCHER_ALARM = "streampulseWatcher";
@@ -723,8 +767,7 @@ async function resolveChannelAvatar(platform, channel) {
   // 4. API lookup (one-shot, cached)
   try {
     if (platform === "twitch") {
-      await ensureConfig();
-      const data = await fetchJson(
+      const data = await fetchTwitchJson(
         `https://api.twitch.tv/helix/users?login=${encodeURIComponent(channel)}`,
         { headers: twitchHeaders() }
       );
@@ -833,7 +876,7 @@ class HistoryStore {
   static async attachTwitchVod(entry) {
     const user = await PlatformChecker.getTwitchUser(entry.handle);
     if (!user?.id) return;
-    const data = await fetchJson(
+    const data = await fetchTwitchJson(
       `https://api.twitch.tv/helix/videos?user_id=${encodeURIComponent(user.id)}&type=archive&first=1`,
       { headers: twitchHeaders() }
     );
@@ -1041,6 +1084,49 @@ class WatchTimeStore {
   }
 }
 
+/** Les requetes /helix/streams acceptent jusqu'a 100 user_login par appel. */
+const TWITCH_STREAMS_BATCH_SIZE = 100;
+
+function twitchStreamToStatus(stream) {
+  if (!stream) return { isLive: false };
+  return {
+    isLive: true,
+    platform: "twitch",
+    game: stream.game_name || "",
+    viewers: stream.viewer_count || 0,
+    title: stream.title || "",
+    startedAt: stream.started_at,
+    sessionId: stream.id,
+    thumbnailUrl: stream.thumbnail_url,
+  };
+}
+
+/**
+ * Sonde tous les logins Twitch suivis en un minimum de requetes Helix (1 appel
+ * par tranche de 100, au lieu d'1 appel par streamer) : c'est ce qui evite de
+ * saturer le quota 800 req/min du client ID quand la base d'utilisateurs
+ * grandit. Renvoie une Map login -> stream Helix (les chaines hors ligne n'y
+ * figurent simplement pas).
+ */
+async function fetchTwitchStreamsBatch(logins) {
+  const streams = new Map();
+  for (let i = 0; i < logins.length; i += TWITCH_STREAMS_BATCH_SIZE) {
+    const chunk = logins.slice(i, i + TWITCH_STREAMS_BATCH_SIZE);
+    const query = chunk
+      .map((login) => `user_login=${encodeURIComponent(login)}`)
+      .join("&");
+    const data = await fetchTwitchJson(
+      `https://api.twitch.tv/helix/streams?${query}`,
+      { headers: twitchHeaders() }
+    );
+    for (const stream of data?.data || []) {
+      const login = String(stream.user_login || "").toLowerCase();
+      if (login) streams.set(login, stream);
+    }
+  }
+  return streams;
+}
+
 function twitchHeaders() {
   const headers = {
     "Client-ID": CONFIG.clientId,
@@ -1056,9 +1142,8 @@ class PlatformChecker {
   static async getTwitchUser(login) {
     const sanitized = sanitizeLogin(login);
     if (!sanitized) return null;
-    await ensureConfig();
     try {
-      const data = await fetchJson(
+      const data = await fetchTwitchJson(
         `https://api.twitch.tv/helix/users?login=${sanitized}`,
         { headers: twitchHeaders() }
       );
@@ -1072,26 +1157,12 @@ class PlatformChecker {
   static async getTwitchStatus(login) {
     const sanitized = sanitizeLogin(login);
     if (!sanitized) return { isLive: false };
-    await ensureConfig();
     try {
-      const data = await fetchJson(
+      const data = await fetchTwitchJson(
         `https://api.twitch.tv/helix/streams?user_login=${sanitized}`,
         { headers: twitchHeaders() }
       );
-      const stream = data.data?.[0];
-      if (!stream) {
-        return { isLive: false };
-      }
-      return {
-        isLive: true,
-        platform: "twitch",
-        game: stream.game_name || "",
-        viewers: stream.viewer_count || 0,
-        title: stream.title || "",
-        startedAt: stream.started_at,
-        sessionId: stream.id,
-        thumbnailUrl: stream.thumbnail_url,
-      };
+      return twitchStreamToStatus(data.data?.[0]);
     } catch (error) {
       console.warn("Twitch status error:", error.message);
       return { isLive: false, error: error.message, isError: true };
@@ -1831,9 +1902,32 @@ function lastSeenOf(streamerId) {
   };
 }
 
-async function buildStreamerStatus(streamer) {
+/**
+ * Construit le statut d'un streamer. `twitchBatch` est le resultat de la
+ * sonde groupee (voir pollStreamers) : { streams: Map|null, error } ; quand
+ * il est fourni, aucune requete Helix individuelle n'est emise pour ce
+ * streamer. Un echec du batch marque tous les streamers Twitch en erreur (la
+ * boucle de sondage preserve alors leur etat live precedent).
+ */
+async function buildStreamerStatus(streamer, twitchBatch = null) {
   const platform = streamer.platform || "twitch";
-  const status = await PlatformChecker.getStatus(streamer);
+  let status;
+  if (twitchBatch && platform === "twitch") {
+    const login = sanitizeLogin(streamer.twitch || streamer.handle);
+    if (!login) {
+      status = { isLive: false };
+    } else if (twitchBatch.error) {
+      status = { isLive: false, error: twitchBatch.error, isError: true };
+    } else {
+      status = {
+        ...twitchStreamToStatus(twitchBatch.streams.get(login)),
+        url: buildProfileUrl(platform, streamer.twitch || streamer.handle),
+        supportsLiveStatus: platformSupportsLiveStatus(platform),
+      };
+    }
+  } else {
+    status = await PlatformChecker.getStatus(streamer);
+  }
   const activeStatus = status.isLive
     ? { ...status, platform, supportsLiveStatus: status.supportsLiveStatus }
     : {
@@ -1958,12 +2052,32 @@ async function _pollStreamersImpl({ forceNotification = false } = {}) {
     streamerById.set(streamer.id, streamer);
   });
 
-  // Cap concurrency to 3 parallel fetches: lighter on RAM & network
+  // Sonde groupee Twitch : 1 requete Helix par tranche de 100 streamers au
+  // lieu d'1 requete par streamer. Un echec du batch est propage tel quel
+  // (chaque streamer Twitch repart en isError, l'etat live precedent est
+  // conserve par la boucle ci-dessous).
+  const twitchBatch = { streams: new Map(), error: "" };
+  const twitchLogins = streamers
+    .filter((streamer) => normalizePlatform(streamer.platform || "twitch") === "twitch")
+    .map((streamer) => sanitizeLogin(streamer.twitch || streamer.handle))
+    .filter(Boolean);
+  if (twitchLogins.length > 0) {
+    try {
+      twitchBatch.streams = await fetchTwitchStreamsBatch(twitchLogins);
+    } catch (error) {
+      twitchBatch.error = error?.message || "batch_failed";
+      console.warn("Twitch batched status error:", twitchBatch.error);
+    }
+  }
+
+  // Kick reste sonde par chaine (pas d'API batch) : on borne la concurrence.
   const statuses = [];
   const CONCURRENCY = 3;
   for (let i = 0; i < streamers.length; i += CONCURRENCY) {
     const batch = streamers.slice(i, i + CONCURRENCY);
-    const results = await Promise.all(batch.map(buildStreamerStatus));
+    const results = await Promise.all(
+      batch.map((streamer) => buildStreamerStatus(streamer, twitchBatch))
+    );
     statuses.push(...results);
   }
 
