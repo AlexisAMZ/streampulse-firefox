@@ -3,7 +3,7 @@
   "default_locale": "en",
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "26.9.17",
+  "version": "26.9.18",
   "browser_specific_settings": {
     "gecko": {
       "id": "streampulse@alexisamz.fr",
@@ -18,8 +18,7 @@
   "permissions": [
     "storage",
     "alarms",
-    "notifications",
-    "tabs"
+    "notifications"
   ],
   "host_permissions": [
     "https://api.twitch.tv/*",

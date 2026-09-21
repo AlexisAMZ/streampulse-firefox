@@ -48,6 +48,118 @@ export const FALLBACK_LANGUAGE = "en";
 
 export const RELEASES = [
   {
+    version: "26.9.18",
+    date: "2026-09-15",
+    title: {
+      fr: "Moins de permissions demandées",
+      en: "Fewer permissions requested",
+      es: "Menos permisos solicitados",
+      "pt-BR": "Menos permissões solicitadas",
+      de: "Weniger Berechtigungen nötig",
+      it: "Meno autorizzazioni richieste",
+      pl: "Mniej wymaganych uprawnień",
+      tr: "Daha az izin isteniyor",
+      ru: "Меньше запрашиваемых разрешений",
+      ja: "必要な権限を削減",
+      ko: "요청 권한 축소",
+    },
+    subtitle: {
+      fr: "StreamPulse n'a plus besoin d'accéder aux onglets du navigateur.",
+      en: "StreamPulse no longer needs access to your browser tabs.",
+      es: "StreamPulse ya no necesita acceder a las pestañas del navegador.",
+      "pt-BR": "O StreamPulse não precisa mais acessar as abas do navegador.",
+      de: "StreamPulse braucht keinen Zugriff mehr auf die Browser-Tabs.",
+      it: "StreamPulse non ha più bisogno di accedere alle schede del browser.",
+      pl: "StreamPulse nie potrzebuje już dostępu do kart przeglądarki.",
+      tr: "StreamPulse artık tarayıcı sekmelerine erişmeye ihtiyaç duymuyor.",
+      ru: "StreamPulse больше не нужен доступ к вкладкам браузера.",
+      ja: "StreamPulse はブラウザのタブへのアクセスが不要になりました。",
+      ko: "StreamPulse가 더 이상 브라우저 탭에 접근할 필요가 없습니다.",
+    },
+    changes: [
+      {
+        type: "fix",
+        text: {
+          fr: "Les aperçus au survol fonctionnent de nouveau sur vos favoris StreamPulse dans la barre latérale de Twitch.",
+          en: "Hover previews work again on your StreamPulse favorites in the Twitch sidebar.",
+          es: "Las vistas previas al pasar el cursor vuelven a funcionar en tus favoritos de StreamPulse en la barra lateral de Twitch.",
+          "pt-BR": "As prévias ao passar o mouse voltaram a funcionar nos seus favoritos do StreamPulse na barra lateral da Twitch.",
+          de: "Die Vorschau beim Überfahren funktioniert wieder bei deinen StreamPulse-Favoriten in der Twitch-Seitenleiste.",
+          it: "Le anteprime al passaggio del mouse funzionano di nuovo sui tuoi preferiti StreamPulse nella barra laterale di Twitch.",
+          pl: "Podgląd po najechaniu kursorem znów działa na Twoich ulubionych StreamPulse na pasku bocznym Twitcha.",
+          tr: "Üzerine gelince önizleme, Twitch kenar çubuğundaki StreamPulse favorilerinde yeniden çalışıyor.",
+          ru: "Предпросмотр при наведении снова работает для ваших избранных StreamPulse на боковой панели Twitch.",
+          ja: "Twitch のサイドバーにある StreamPulse のお気に入りで、ホバープレビューが再び表示されるようになりました。",
+          ko: "Twitch 사이드바의 StreamPulse 즐겨찾기에서 마우스를 올리면 미리보기가 다시 표시됩니다.",
+        }
+      },
+      {
+        type: "improved",
+        text: {
+          fr: "Le badge communautaire est désormais désactivé par défaut et ne s'active qu'avec votre accord, à l'installation ou dans les réglages, car il envoie une empreinte de votre pseudo à streampulse.fr.",
+          en: "The community badge is now off by default and only turns on with your consent, at install or in settings, since it sends a fingerprint of your username to streampulse.fr.",
+          es: "La insignia de la comunidad ahora está desactivada por defecto y solo se activa con tu consentimiento, al instalar o en los ajustes, porque envía una huella de tu nombre de usuario a streampulse.fr.",
+          "pt-BR": "O emblema da comunidade agora vem desativado por padrão e só é ativado com o seu consentimento, na instalação ou nas configurações, porque envia uma impressão do seu nome de usuário para streampulse.fr.",
+          de: "Das Community-Abzeichen ist jetzt standardmäßig aus und wird nur mit deiner Zustimmung aktiviert, bei der Installation oder in den Einstellungen, da es einen Fingerabdruck deines Benutzernamens an streampulse.fr sendet.",
+          it: "Il badge della community ora è disattivato di default e si attiva solo con il tuo consenso, all'installazione o nelle impostazioni, perché invia un'impronta del tuo nome utente a streampulse.fr.",
+          pl: "Odznaka społeczności jest teraz domyślnie wyłączona i włącza się tylko za Twoją zgodą, podczas instalacji lub w ustawieniach, ponieważ wysyła odcisk Twojej nazwy użytkownika do streampulse.fr.",
+          tr: "Topluluk rozeti artık varsayılan olarak kapalı ve yalnızca senin onayınla, kurulumda veya ayarlardan açılıyor, çünkü kullanıcı adının bir parmak izini streampulse.fr'ye gönderiyor.",
+          ru: "Значок сообщества теперь по умолчанию выключен и включается только с вашего согласия, при установке или в настройках, так как он отправляет отпечаток вашего имени пользователя на streampulse.fr.",
+          ja: "コミュニティバッジは初期設定でオフになり、インストール時または設定で同意した場合のみオンになります。ユーザー名のフィンガープリントを streampulse.fr に送信するためです。",
+          ko: "커뮤니티 배지는 이제 기본적으로 꺼져 있으며, 사용자 이름의 지문을 streampulse.fr로 보내기 때문에 설치 시 또는 설정에서 동의한 경우에만 켜집니다.",
+        }
+      },
+      {
+        type: "improved",
+        text: {
+          fr: "L'annulation automatique des raids est désormais désactivée par défaut : suivre un raid permet de récupérer les points de chaîne liés au raid. Elle reste activable dans les réglages.",
+          en: "Automatic raid cancel is now off by default: following a raid lets you collect the channel points that come with it. You can still turn it on in settings.",
+          es: "La cancelación automática de raids ahora está desactivada por defecto: seguir un raid permite conseguir los puntos de canal que lo acompañan. Se puede activar en los ajustes.",
+          "pt-BR": "O cancelamento automático de raids agora vem desativado por padrão: seguir um raid permite coletar os pontos de canal que vêm com ele. Dá para ativar nas configurações.",
+          de: "Das automatische Abbrechen von Raids ist jetzt standardmäßig aus: Wer einem Raid folgt, sammelt die dazugehörigen Kanalpunkte. In den Einstellungen lässt es sich weiterhin einschalten.",
+          it: "L'annullamento automatico dei raid è ora disattivato di default: seguire un raid permette di ottenere i punti canale che lo accompagnano. Si può attivare nelle impostazioni.",
+          pl: "Automatyczne anulowanie rajdów jest teraz domyślnie wyłączone: podążanie za rajdem pozwala zdobyć związane z nim punkty kanału. Nadal można je włączyć w ustawieniach.",
+          tr: "Baskınları otomatik iptal etme artık varsayılan olarak kapalı: bir baskını takip etmek, onunla gelen kanal puanlarını toplamanı sağlar. Ayarlardan yine açılabilir.",
+          ru: "Автоматическая отмена рейдов теперь по умолчанию выключена: переход вместе с рейдом позволяет получить связанные с ним баллы канала. Её можно включить в настройках.",
+          ja: "レイドの自動キャンセルは初期設定でオフになりました。レイドについていくと、それに伴うチャンネルポイントを獲得できます。設定から引き続きオンにできます。",
+          ko: "레이드 자동 취소가 이제 기본적으로 꺼져 있습니다. 레이드를 따라가면 함께 제공되는 채널 포인트를 받을 수 있습니다. 설정에서 다시 켤 수 있습니다.",
+        }
+      },
+      {
+        type: "improved",
+        text: {
+          fr: "Permission « onglets » retirée : Chrome n'affiche plus « Lire l'historique de navigation » à l'installation. Toutes les fonctions restent identiques.",
+          en: "\"Tabs\" permission removed: Chrome no longer shows \"Read your browsing history\" at install. Every feature works the same.",
+          es: "Permiso de «pestañas» eliminado: Chrome ya no muestra «Leer tu historial de navegación» al instalar. Todas las funciones siguen igual.",
+          "pt-BR": "Permissão de \"abas\" removida: o Chrome não mostra mais \"Ler seu histórico de navegação\" na instalação. Todos os recursos continuam iguais.",
+          de: "Berechtigung „Tabs“ entfernt: Chrome zeigt bei der Installation nicht mehr „Browserverlauf lesen“ an. Alle Funktionen bleiben gleich.",
+          it: "Autorizzazione «schede» rimossa: Chrome non mostra più «Leggere la cronologia di navigazione» all'installazione. Tutte le funzioni restano uguali.",
+          pl: "Usunięto uprawnienie „karty”: Chrome nie wyświetla już „Odczytywanie historii przeglądania” podczas instalacji. Wszystkie funkcje działają tak samo.",
+          tr: "\"Sekmeler\" izni kaldırıldı: Chrome kurulumda artık \"Tarama geçmişinizi okuma\" uyarısını göstermiyor. Tüm özellikler aynı şekilde çalışıyor.",
+          ru: "Разрешение «вкладки» удалено: Chrome больше не показывает «Просмотр истории браузера» при установке. Все функции работают как прежде.",
+          ja: "「タブ」権限を削除：インストール時に Chrome が「閲覧履歴の読み取り」を表示しなくなりました。機能はすべてそのままです。",
+          ko: "\"탭\" 권한 제거: 설치할 때 Chrome이 더 이상 \"방문 기록 읽기\"를 표시하지 않습니다. 모든 기능은 그대로입니다.",
+        }
+      },
+      {
+        type: "improved",
+        text: {
+          fr: "Les fichiers internes de l'extension (son, notes de version) ne sont plus lisibles par les sites web, et ses logos seulement sur Twitch.",
+          en: "The extension's internal files (sound, release notes) can no longer be read by websites, and its logos only on Twitch.",
+          es: "Los archivos internos de la extensión (sonido, notas de versión) ya no los pueden leer los sitios web, y sus logotipos solo en Twitch.",
+          "pt-BR": "Os arquivos internos da extensão (som, notas de versão) não podem mais ser lidos por sites, e os logotipos só no Twitch.",
+          de: "Interne Dateien der Erweiterung (Ton, Versionshinweise) sind für Websites nicht mehr lesbar, die Logos nur noch auf Twitch.",
+          it: "I file interni dell'estensione (suono, note di versione) non sono più leggibili dai siti web, e i loghi solo su Twitch.",
+          pl: "Wewnętrzne pliki rozszerzenia (dźwięk, informacje o wersji) nie są już dostępne dla stron internetowych, a logo tylko na Twitchu.",
+          tr: "Eklentinin dahili dosyaları (ses, sürüm notları) artık web siteleri tarafından okunamıyor, logolar ise yalnızca Twitch'te.",
+          ru: "Внутренние файлы расширения (звук, заметки о версии) больше недоступны сайтам, а логотипы — только на Twitch.",
+          ja: "拡張機能の内部ファイル（サウンド、リリースノート）はウェブサイトから読み取れなくなり、ロゴは Twitch 上のみになりました。",
+          ko: "확장 프로그램의 내부 파일(소리, 릴리스 노트)은 더 이상 웹사이트에서 읽을 수 없으며, 로고는 Twitch에서만 사용됩니다.",
+        }
+      },
+    ]
+  },
+  {
     version: "26.9.17",
     date: "2026-09-15",
     title: {
