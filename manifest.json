@@ -124,6 +124,7 @@
         "js/watchTimeTracker.js",
         "js/tabEnhancer.js",
         "js/inject/predictionsOverlay.js",
+        "js/inject/predictions-data-inline.js",
         "js/inject/predictionsAssist.js"
       ],
       "run_at": "document_idle",
@@ -186,14 +187,6 @@
       "matches": [
         "https://www.twitch.tv/*",
         "https://clips.twitch.tv/*"
-      ]
-    },
-    {
-      "resources": [
-        "js/predictions-data.js"
-      ],
-      "matches": [
-        "https://www.twitch.tv/*"
       ]
     }
   ]

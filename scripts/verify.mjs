@@ -512,6 +512,39 @@ if (!exists(CHANGELOG_DATA)) {
   }
 }
 
+// predictionsAssist.js est un content script : il ne peut pas importer le
+// module ES des prédictions, il lit le jumeau généré. Si le jumeau manque ou a
+// dérivé, l'assistance tourne avec une vieille logique, ou pas du tout.
+try {
+  const predPath = "js/inject/predictions-data-inline.js";
+  if (!exists(predPath)) {
+    fail(`${predPath} is missing. Run: node scripts/build-inline-predictions.mjs`);
+  } else {
+    const sandbox = {};
+    new Function("window", fs.readFileSync(abs(predPath), "utf8"))(sandbox);
+    const twin = sandbox.__SP_PREDICTIONS__;
+    const mod = await import(new URL("../js/predictions-data.js", import.meta.url).href);
+    if (!twin) {
+      fail(`${predPath} does not expose window.__SP_PREDICTIONS__`);
+    } else {
+      const drifted = Object.keys(mod).filter((name) => {
+        const a = mod[name];
+        const b = twin[name];
+        return typeof a === "function"
+          ? String(a) !== String(b)
+          : JSON.stringify(a) !== JSON.stringify(b);
+      });
+      if (drifted.length) {
+        fail(`${predPath} is stale, drifted: ${drifted.join(", ")}. Run: node scripts/build-inline-predictions.mjs`);
+      } else {
+        pass(`${predPath} matches js/predictions-data.js (${Object.keys(mod).length} exports)`);
+      }
+    }
+  }
+} catch (e) {
+  fail(`js/predictions-data.js could not be analysed: ${e.message}`);
+}
+
 function report() {
   console.log(ok.map((m) => `  PASS  ${m}`).join("\n"));
   if (warnings.length) console.log("\n" + warnings.map((m) => `  WARN  ${m}`).join("\n"));

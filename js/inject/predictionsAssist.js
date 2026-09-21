@@ -102,10 +102,11 @@
     }
   }
 
-  import(chrome.runtime.getURL("js/predictions-data.js"))
-    .then((module) => {
-      data = module;
-      setTimeout(tick, 4_000);
-    })
-    .catch(() => {});
+  // js/inject/predictions-data-inline.js est declare juste avant ce fichier
+  // dans content_scripts : il pose window.__SP_PREDICTIONS__. On ne charge
+  // plus le module par import() dynamique, que Firefox refuse dans un content
+  // script (la promesse etait rejetee et l'assistance ne demarrait jamais).
+  data = window.__SP_PREDICTIONS__;
+  if (data) setTimeout(tick, 4_000);
+  else console.warn("StreamPulse: predictions-data-inline.js absent, assistance desactivee.");
 })();

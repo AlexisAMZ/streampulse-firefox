@@ -160,6 +160,22 @@ export const RELEASES = [
           ko: "Twitch 사이드바의 StreamPulse 즐겨찾기 영역은 이제 방송 중인 채널만 보여주고, 아무도 방송하지 않으면 사라집니다. 오프라인 채널은 바로 아래 Twitch의 \"팔로우 중인 채널\" 목록에 계속 보입니다.",
         },
       },
+      {
+        type: "fix",
+        text: {
+          fr: "L'assistance aux prédictions (StreamPulse+) ne démarrait pas du tout : elle chargeait ses règles d'une façon que Firefox refuse dans une page Twitch, et échouait sans le moindre message. Elle fonctionne de nouveau. Au passage, un fichier interne de l'extension n'est plus lisible par les sites web.",
+          en: "Prediction assistance (StreamPulse+) never started: it loaded its rules in a way Firefox rejects inside a Twitch page, and failed without a single message. It works again. Along the way, one internal extension file is no longer readable by websites.",
+          es: "La asistencia de predicciones (StreamPulse+) no arrancaba: cargaba sus reglas de una forma que Firefox rechaza dentro de una página de Twitch, y fallaba sin mostrar ningún mensaje. Vuelve a funcionar. De paso, un archivo interno de la extensión ya no es legible por los sitios web.",
+          "pt-BR": "A assistência de previsões (StreamPulse+) não iniciava: ela carregava suas regras de um jeito que o Firefox recusa dentro de uma página da Twitch, e falhava sem nenhuma mensagem. Voltou a funcionar. De quebra, um arquivo interno da extensão não é mais legível pelos sites.",
+          de: "Die Vorhersage-Unterstützung (StreamPulse+) startete überhaupt nicht: Sie lud ihre Regeln auf eine Weise, die Firefox innerhalb einer Twitch-Seite ablehnt, und scheiterte ohne jede Meldung. Sie funktioniert wieder. Nebenbei ist eine interne Datei der Erweiterung für Webseiten nicht mehr lesbar.",
+          it: "L'assistenza alle previsioni (StreamPulse+) non partiva affatto: caricava le sue regole in un modo che Firefox rifiuta dentro una pagina Twitch, e falliva senza alcun messaggio. Ora funziona di nuovo. Nel frattempo, un file interno dell'estensione non è più leggibile dai siti web.",
+          pl: "Asystent przewidywań (StreamPulse+) w ogóle się nie uruchamiał: wczytywał swoje reguły w sposób, który Firefox odrzuca wewnątrz strony Twitcha, i zawodził bez żadnego komunikatu. Znowu działa. Przy okazji jeden wewnętrzny plik rozszerzenia nie jest już czytelny dla stron internetowych.",
+          tr: "Tahmin yardımı (StreamPulse+) hiç başlamıyordu: kurallarını Firefox'un bir Twitch sayfası içinde kabul etmediği bir yoldan yüklüyor ve tek bir mesaj bile vermeden başarısız oluyordu. Yeniden çalışıyor. Bu arada eklentinin bir iç dosyası artık web siteleri tarafından okunamıyor.",
+          ru: "Помощник по прогнозам (StreamPulse+) вообще не запускался: он загружал свои правила способом, который Firefox не допускает внутри страницы Twitch, и падал без единого сообщения. Теперь он снова работает. Заодно один внутренний файл расширения больше не доступен сайтам для чтения.",
+          ja: "予測アシスト（StreamPulse+）がまったく起動していませんでした。Twitch のページ内で Firefox が認めない方法でルールを読み込んでいて、何のメッセージも出さずに失敗していました。再び動作します。あわせて、拡張機能の内部ファイル 1 つがウェブサイトから読めなくなりました。",
+          ko: "예측 도우미(StreamPulse+)가 아예 시작되지 않았습니다. Twitch 페이지 안에서 Firefox가 허용하지 않는 방식으로 규칙을 불러오다가, 아무 메시지 없이 실패하고 있었습니다. 다시 동작합니다. 겸사겸사 확장 프로그램의 내부 파일 하나가 웹사이트에서 읽히지 않게 되었습니다.",
+        },
+      },
     ],
   },
   {

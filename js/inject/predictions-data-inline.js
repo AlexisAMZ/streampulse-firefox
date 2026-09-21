@@ -1,18 +1,20 @@
+/* GÉNÉRÉ par scripts/build-inline-predictions.mjs. Ne pas éditer à la main.
+   Source : js/predictions-data.js */
+(function () {
 // Prédictions assistées (StreamPulse+). Module pur : règle de mise, choix de
 // l'option, historique et statistiques. Aucun accès à chrome.* ni au DOM.
-// Testé par tests/predictions-data.test.mjs. Les content scripts en reçoivent
-// un jumeau en script classique, généré par scripts/build-inline-predictions.mjs.
+// Testé par tests/predictions-data.test.mjs, chargé par predictionsAssist.js.
 
-export const PREDICTION_RULE_KEY = "streamPulsePredictionRule";
-export const PREDICTION_HISTORY_KEY = "streamPulsePredictionHistory";
-export const HISTORY_LIMIT = 200;
+const PREDICTION_RULE_KEY = "streamPulsePredictionRule";
+const PREDICTION_HISTORY_KEY = "streamPulsePredictionHistory";
+const HISTORY_LIMIT = 200;
 /** Mise minimale acceptée par Twitch. */
-export const MIN_BET = 10;
+const MIN_BET = 10;
 /** Sans nouvelle lecture de la chaîne pendant ce délai, le résultat est inconnu. */
-export const STALE_MS = 10 * 60 * 1000;
-export const STRATEGIES = ["majority", "underdog"];
+const STALE_MS = 10 * 60 * 1000;
+const STRATEGIES = ["majority", "underdog"];
 
-export const DEFAULT_RULE = Object.freeze({
+const DEFAULT_RULE = Object.freeze({
   enabled: false,
   strategy: "majority",
   percent: 5,
@@ -26,7 +28,7 @@ function clampInt(value, min, max, fallback) {
   return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
 }
 
-export function normalizeRule(input) {
+function normalizeRule(input) {
   const rule = input && typeof input === "object" ? input : {};
   return {
     enabled: rule.enabled === true,
@@ -39,7 +41,7 @@ export function normalizeRule(input) {
 }
 
 /** Événement renvoyé par Twitch (ChannelPointsPredictionContext) vers la forme interne. */
-export function parseEvent(raw) {
+function parseEvent(raw) {
   if (!raw || !raw.id || !Array.isArray(raw.outcomes) || raw.outcomes.length < 2) return null;
   const createdAt = Date.parse(raw.createdAt || "");
   const windowSeconds = Number(raw.predictionWindowSeconds) || 0;
@@ -56,7 +58,7 @@ export function parseEvent(raw) {
   };
 }
 
-export function secondsLeft(event, now = Date.now()) {
+function secondsLeft(event, now = Date.now()) {
   return event && event.endsAt ? Math.floor((event.endsAt - now) / 1000) : -1;
 }
 
@@ -64,7 +66,7 @@ export function secondsLeft(event, now = Date.now()) {
  * Option retenue : la plus jouée (la plus probable selon le tchat) ou la moins
  * jouée (la meilleure cote). Sans aucune mise, rien ne permet de choisir.
  */
-export function chooseOutcome(event, rule) {
+function chooseOutcome(event, rule) {
   const outcomes = (event && event.outcomes) || [];
   if (outcomes.length < 2) return null;
   const sorted = outcomes.slice().sort((a, b) => b.totalPoints - a.totalPoints);
@@ -73,7 +75,7 @@ export function chooseOutcome(event, rule) {
 }
 
 /** Mise en points : pourcentage du solde, plafonnée, sans entamer la réserve. */
-export function stakeFor(balance, rule) {
+function stakeFor(balance, rule) {
   const total = Math.floor(Number(balance) || 0);
   const available = total - rule.reserve;
   if (available < MIN_BET) return 0;
@@ -82,7 +84,7 @@ export function stakeFor(balance, rule) {
 }
 
 /** Décision pour un événement : { outcome, points }, ou null s'il ne faut pas miser. */
-export function decideBet(event, balance, rule, history, now = Date.now()) {
+function decideBet(event, balance, rule, history, now = Date.now()) {
   if (!rule.enabled || !event || event.status !== "ACTIVE") return null;
   if ((history || []).some((bet) => bet.eventId === event.id)) return null;
   const left = secondsLeft(event, now);
@@ -92,7 +94,7 @@ export function decideBet(event, balance, rule, history, now = Date.now()) {
   return outcome && points ? { outcome, points } : null;
 }
 
-export function addBet(history, bet) {
+function addBet(history, bet) {
   return [bet, ...(history || []).filter((item) => item.eventId !== bet.eventId)].slice(0, HISTORY_LIMIT);
 }
 
@@ -100,7 +102,7 @@ export function addBet(history, bet) {
  * Résultat estimé d'après le solde, faute de résultat renvoyé par Twitch : un
  * remboursement rend exactement la mise, un gain rapporte davantage.
  */
-export function resolveBet(bet, balance) {
+function resolveBet(bet, balance) {
   const delta = Math.floor(Number(balance) || 0) - bet.balanceAfter;
   if (Math.abs(delta - bet.points) <= 1) return { ...bet, status: "refunded", payout: bet.points };
   if (delta > bet.points) return { ...bet, status: "won", payout: delta };
@@ -112,7 +114,7 @@ export function resolveBet(bet, balance) {
  * le solde de référence suit les bonus récupérés ; une fois disparu, le résultat
  * est estimé, ou déclaré inconnu si la chaîne n'a pas été lue depuis longtemps.
  */
-export function settle(history, channel, liveEventIds, balance, now = Date.now()) {
+function settle(history, channel, liveEventIds, balance, now = Date.now()) {
   const live = new Set(liveEventIds || []);
   const known = Number.isFinite(balance);
   return (history || []).map((bet) => {
@@ -123,7 +125,7 @@ export function settle(history, channel, liveEventIds, balance, now = Date.now()
   });
 }
 
-export function summarize(history) {
+function summarize(history) {
   const stats = { bets: 0, won: 0, lost: 0, refunded: 0, pending: 0, unknown: 0, failed: 0, net: 0, rate: null };
   for (const bet of history || []) {
     if (!(bet.status in stats)) continue;
@@ -136,3 +138,24 @@ export function summarize(history) {
   stats.rate = decided ? stats.won / decided : null;
   return stats;
 }
+
+  window.__SP_PREDICTIONS__ = {
+    PREDICTION_RULE_KEY,
+    PREDICTION_HISTORY_KEY,
+    HISTORY_LIMIT,
+    MIN_BET,
+    STALE_MS,
+    STRATEGIES,
+    DEFAULT_RULE,
+    normalizeRule,
+    parseEvent,
+    secondsLeft,
+    chooseOutcome,
+    stakeFor,
+    decideBet,
+    addBet,
+    resolveBet,
+    settle,
+    summarize,
+  };
+})();
