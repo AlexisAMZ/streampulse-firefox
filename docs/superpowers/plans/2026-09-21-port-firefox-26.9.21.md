@@ -437,7 +437,17 @@ Attendu : les deux contrôles « préférences survivent à sanitize » et « up
 
 Recharger, ouvrir la popup, ouvrir la carte d'un streamer : les bascules notifications / catégorie / titre doivent y être, et le panneau de réglages ne doit plus les proposer globalement.
 
-- [ ] **Étape 7 : vérifier et committer**
+- [ ] **Étape 7 : note de version 26.9.19 dans les 11 langues**
+
+La contrainte globale impose que toute modification visible parte avec sa note. Les tâches 6 et 7 achèvent la phase 2, donc l'entrée `26.9.19` est ajoutée ici :
+
+```bash
+cd ~/dev/StreamPulseExtension && node -e 'import("./js/changelog-data.js").then(m=>{const r=m.RELEASES.find(r=>r.version==="26.9.19");console.log(JSON.stringify(r,null,2));})'
+```
+
+Copier le bloc en tête de `RELEASES`, en retirant les quatre langues supprimées en tâche 2.
+
+- [ ] **Étape 8 : vérifier et committer**
 
 ```bash
 cd ~/dev/StreampulseFirefox && npm run lint && npm test && npm run verify && git add -A && git commit -m "improved: alertes réglées sur la carte du streamer, et raids détectés 90 s plus tôt"
@@ -482,7 +492,15 @@ Chaque appel listé doit être précédé, dans sa fonction, d'un `await ensureC
 
 Recharger, ajouter une dizaine de streamers Twitch, ouvrir la console de l'extension et observer le sondage : attendu une seule requête Helix, pas une par chaîne.
 
-- [ ] **Étape 6 : vérifier et committer**
+- [ ] **Étape 6 : note de version 26.9.20 dans les 11 langues**
+
+```bash
+cd ~/dev/StreamPulseExtension && node -e 'import("./js/changelog-data.js").then(m=>{const r=m.RELEASES.find(r=>r.version==="26.9.20");console.log(JSON.stringify(r,null,2));})'
+```
+
+Copier le bloc en tête de `RELEASES`, en retirant les quatre langues supprimées en tâche 2.
+
+- [ ] **Étape 7 : vérifier et committer**
 
 ```bash
 cd ~/dev/StreampulseFirefox && npm run lint && npm test && npm run verify && git add -A && git commit -m "perf+fix: sondage Helix groupé et autoréparation des identifiants"
@@ -704,9 +722,15 @@ cd ~/dev/StreampulseFirefox && grep -m1 '"version"' manifest.json package.json
 
 Porter les deux à `26.9.21`. Côté Chrome, ces deux fichiers avaient dérivé : ne pas reproduire l'erreur.
 
-- [ ] **Étape 2 : porter les notes de version manquantes**
+- [ ] **Étape 2 : porter la note de version 26.9.21**
 
-Ajouter les entrées `26.9.19`, `26.9.20` et `26.9.21` en tête de `RELEASES`, dans les 11 langues, en retirant les quatre langues supprimées. **Retirer de l'entrée 26.9.21 la ligne sur les 354 Ko de hls.js** : elle décrit une optimisation qui n'existe pas dans ce port.
+Les entrées `26.9.18`, `26.9.19` et `26.9.20` ont été ajoutées par les tâches 3, 7 et 8. Il ne reste que `26.9.21` :
+
+```bash
+cd ~/dev/StreamPulseExtension && node -e 'import("./js/changelog-data.js").then(m=>{const r=m.RELEASES.find(r=>r.version==="26.9.21");console.log(JSON.stringify(r,null,2));})'
+```
+
+Copier le bloc en tête de `RELEASES`, en retirant les quatre langues supprimées. **Retirer de l'entrée 26.9.21 la ligne sur les 354 Ko de hls.js** : elle décrit une optimisation qui n'existe pas dans ce port.
 
 - [ ] **Étape 3 : documenter la divergence**
 
