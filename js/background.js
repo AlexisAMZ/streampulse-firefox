@@ -165,6 +165,8 @@ const NOTIFICATION_NAMESPACE = "streampulse";
 
 const BADGE_COLOR_LIVE = "#f7f4e3";
 const BADGE_COLOR_IDLE = "#6C5CE7";
+const BADGE_COLOR_UPDATE = "#9146ff";
+const BADGE_LIVE_COUNT_KEY = "streampulse:badgeLiveCount";
 
 const PREFERENCES_KEY = "betaGeneralPreferences";
 
@@ -2030,13 +2032,54 @@ class ActionBadge {
   }
 
   static async update(liveCount, preferences = null) {
+    // Le compteur survit au dechargement de la page d'arriere-plan : sans lui,
+    // un rendu declenche par une autre source (notes de version, demarrage)
+    // n'aurait aucun moyen de savoir combien de streamers sont en direct et
+    // effacerait le badge.
+    try {
+      await chrome.storage.local.set({ [BADGE_LIVE_COUNT_KEY]: liveCount });
+    } catch { /* le rendu retombera sur 0 */ }
+    await this.render(preferences);
+  }
+
+  /**
+   * Unique ecrivain du badge. Deux sources veulent l'ecrire : le nombre de
+   * streamers en direct et la pastille « notes de version non lues ». Elles
+   * s'ecrasaient mutuellement, et la resynchronisation tournant a chaque
+   * reveil de la page d'arriere-plan, le compteur disparaissait a des moments
+   * arbitraires. Le direct l'emporte, puisque c'est la question a laquelle le
+   * badge repond ; la pastille des notes n'apparait que quand personne n'est
+   * en direct.
+   */
+  static async render(preferences = null) {
     const prefs = preferences || (await PreferenceStore.get());
+    let stored = {};
+    try {
+      stored = await chrome.storage.local.get([BADGE_LIVE_COUNT_KEY, "patchNotesUnread"]);
+    } catch { /* valeurs par defaut ci-dessous */ }
+    const liveCount = Number(stored[BADGE_LIVE_COUNT_KEY]) || 0;
     if (liveCount > 0) {
       await this.setLive(liveCount, prefs);
-    } else {
-      await this.clear(prefs);
+      return;
     }
+    if (stored.patchNotesUnread) {
+      try {
+        await chrome.action.setBadgeText({ text: "1" });
+        await chrome.action.setBadgeBackgroundColor({ color: BADGE_COLOR_UPDATE });
+        await chrome.action.setTitle({
+          title: translateWithPrefs(prefs, "background.badge.idle"),
+        });
+      } catch (error) {
+        console.warn("Badge update marker failed:", error.message);
+      }
+      return;
+    }
+    await this.clear(prefs);
   }
+}
+
+async function syncUpdateBadge() {
+  await ActionBadge.render();
 }
 
 /**
@@ -2648,6 +2691,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       await chrome.storage.local.set({ patchNotesUnread: true });
     }
   }
+  await syncUpdateBadge();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
@@ -2660,6 +2704,9 @@ chrome.runtime.onStartup.addListener(async () => {
   setupAutoOpenInventoryAlarm(prefs);
   await NotificationCenter.init();
   await pollStreamers({ forceNotification: false });
+  // Le texte de badge peut survivre a un redemarrage du navigateur avec une
+  // valeur perimee : on le resynchronise avec l'etat reel du stockage.
+  await syncUpdateBadge();
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
@@ -2758,6 +2805,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           patchNotesUnread: false,
           seenPatchNotesVersion: chrome.runtime.getManifest().version,
         });
+        await syncUpdateBadge();
         await openPatchNotes();
         sendResponse({ success: true });
       })();

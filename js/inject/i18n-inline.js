@@ -97,7 +97,7 @@
         "previewsSurfaceDirectory": "Répertoire",
         "previewsSurfaceSidebar": "Sidebar",
         "previewsAudioTitle": "Audio (mode vidéo)",
-        "liveNotificationsTitle": "Notifications Chrome",
+        "liveNotificationsTitle": "Notifications Firefox",
         "gameAlertsTitle": "Alertes changement de catégorie",
         "titleAlertsTitle": "Alertes changement de titre",
         "soundsTitle": "Son des notifications"
@@ -207,7 +207,7 @@
         "previewsSurfaceDirectory": "Directory",
         "previewsSurfaceSidebar": "Sidebar",
         "previewsAudioTitle": "Audio (video mode)",
-        "liveNotificationsTitle": "Chrome notifications",
+        "liveNotificationsTitle": "Firefox notifications",
         "gameAlertsTitle": "Category change alerts",
         "titleAlertsTitle": "Title change alerts",
         "soundsTitle": "Notification sound"
@@ -317,7 +317,7 @@
         "previewsSurfaceDirectory": "Directorio",
         "previewsSurfaceSidebar": "Barra lateral",
         "previewsAudioTitle": "Audio (modo vídeo)",
-        "liveNotificationsTitle": "Notificaciones de Chrome",
+        "liveNotificationsTitle": "Notificaciones de Firefox",
         "gameAlertsTitle": "Alertas de cambio de categoría",
         "titleAlertsTitle": "Alertas de cambio de título",
         "soundsTitle": "Sonido de las notificaciones"
@@ -427,7 +427,7 @@
         "previewsSurfaceDirectory": "Diretório",
         "previewsSurfaceSidebar": "Barra lateral",
         "previewsAudioTitle": "Áudio (modo vídeo)",
-        "liveNotificationsTitle": "Notificações do Chrome",
+        "liveNotificationsTitle": "Notificações do Firefox",
         "gameAlertsTitle": "Alertas de mudança de categoria",
         "titleAlertsTitle": "Alertas de mudança de título",
         "soundsTitle": "Som das notificações"
@@ -537,7 +537,7 @@
         "previewsSurfaceDirectory": "Verzeichnis",
         "previewsSurfaceSidebar": "Seitenleiste",
         "previewsAudioTitle": "Audio (Videomodus)",
-        "liveNotificationsTitle": "Chrome-Benachrichtigungen",
+        "liveNotificationsTitle": "Firefox-Benachrichtigungen",
         "gameAlertsTitle": "Benachrichtigungen zu Kategorieänderungen",
         "titleAlertsTitle": "Benachrichtigungen bei Titeländerung",
         "soundsTitle": "Benachrichtigungston"
@@ -647,7 +647,7 @@
         "previewsSurfaceDirectory": "Elenco",
         "previewsSurfaceSidebar": "Barra laterale",
         "previewsAudioTitle": "Audio (modalità video)",
-        "liveNotificationsTitle": "Notifiche di Chrome",
+        "liveNotificationsTitle": "Notifiche di Firefox",
         "gameAlertsTitle": "Avvisi di cambio di categoria",
         "titleAlertsTitle": "Avvisi di cambio titolo",
         "soundsTitle": "Suono di notifica"
@@ -757,7 +757,7 @@
         "previewsSurfaceDirectory": "Katalog",
         "previewsSurfaceSidebar": "Pasek boczny",
         "previewsAudioTitle": "Dźwięk (tryb wideo)",
-        "liveNotificationsTitle": "Powiadomienia Chrome",
+        "liveNotificationsTitle": "Powiadomienia Firefox",
         "gameAlertsTitle": "Alerty o zmianie kategorii",
         "titleAlertsTitle": "Alerty o zmianie tytułu",
         "soundsTitle": "Dźwięk powiadomienia"
@@ -867,7 +867,7 @@
         "previewsSurfaceDirectory": "Dizin",
         "previewsSurfaceSidebar": "Kenar çubuğu",
         "previewsAudioTitle": "Ses (video modu)",
-        "liveNotificationsTitle": "Chrome bildirimleri",
+        "liveNotificationsTitle": "Firefox bildirimleri",
         "gameAlertsTitle": "Kategori değişikliği uyarıları",
         "titleAlertsTitle": "Başlık değişikliği uyarıları",
         "soundsTitle": "Bildirim sesi"
@@ -977,7 +977,7 @@
         "previewsSurfaceDirectory": "Справочник",
         "previewsSurfaceSidebar": "Боковая панель",
         "previewsAudioTitle": "Аудио (режим видео)",
-        "liveNotificationsTitle": "Уведомления Chrome",
+        "liveNotificationsTitle": "Уведомления Firefox",
         "gameAlertsTitle": "Уведомления об изменении категории",
         "titleAlertsTitle": "Оповещения об изменении названия",
         "soundsTitle": "Звук уведомления"
@@ -1087,7 +1087,7 @@
         "previewsSurfaceDirectory": "ディレクトリ",
         "previewsSurfaceSidebar": "サイドバー",
         "previewsAudioTitle": "音声（動画モード）",
-        "liveNotificationsTitle": "Chromeの通知",
+        "liveNotificationsTitle": "Firefoxの通知",
         "gameAlertsTitle": "カテゴリ変更の通知",
         "titleAlertsTitle": "タイトル変更の通知",
         "soundsTitle": "通知音"
@@ -1197,7 +1197,7 @@
         "previewsSurfaceDirectory": "목록",
         "previewsSurfaceSidebar": "사이드바",
         "previewsAudioTitle": "오디오 (동영상 모드)",
-        "liveNotificationsTitle": "Chrome 알림",
+        "liveNotificationsTitle": "Firefox 알림",
         "gameAlertsTitle": "카테고리 변경 알림",
         "titleAlertsTitle": "제목 변경 알림",
         "soundsTitle": "알림 소리"
