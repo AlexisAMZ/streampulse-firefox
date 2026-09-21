@@ -352,7 +352,7 @@ dom.js, player-tip.js, playerQuality.js et twitchPlayerButtons.js."
 
 **Interfaces :**
 - Consomme : `js/inject/dom.js` et `js/inject/playerQuality.js` de la tâche 5.
-- Produit : les préférences `autoRefreshPlayerErrors`, `enableFastForwardButton` et `playerVolumeBoost`, lues par la tâche 8.
+- Produit : les préférences `autoRefreshPlayerErrors` et `enableFastForwardButton`. `playerVolumeBoost` n'appartient PAS à cette tâche : elle arrive avec l'amplification du volume, en tâche 11.
 
 - [ ] **Étape 1 : porter la récupération après erreur et la qualité en arrière-plan**
 
