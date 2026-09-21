@@ -48,7 +48,8 @@
       ],
       "all_frames": false,
       "js": [
-        "js/inject/preventPause.js"
+        "js/inject/preventPause.js",
+        "js/inject/playerQuality.js"
       ],
       "run_at": "document_start"
     },
@@ -112,8 +113,11 @@
       "all_frames": false,
       "js": [
         "js/inject/i18n-inline.js",
+        "js/inject/dom.js",
+        "js/inject/player-tip.js",
         "js/channelPointsClaimer.js",
         "js/twitchPlayerEnhancer.js",
+        "js/twitchPlayerButtons.js",
         "js/chatFilter.js",
         "js/watchTimeTracker.js",
         "js/tabEnhancer.js",
