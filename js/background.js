@@ -2049,31 +2049,17 @@ class NotificationSystem {
 class SoundManager {
   static async play(filePath = "sons/notification.mp3") {
     if (!filePath) return;
+    // Chrome n'a pas de DOM dans son service worker et passe par un document
+    // offscreen. La page d'arriere-plan Firefox, elle, est une vraie page :
+    // Audio() y est disponible, on joue donc le son sur place. L'appel a
+    // chrome.offscreen levait un TypeError avale par le try/catch, puis le
+    // sendMessage ne trouvait personne : le son ne sortait jamais.
     try {
-      await chrome.offscreen.createDocument({
-        url: "html/audio-handler.html",
-        reasons: ["AUDIO_PLAYBACK"],
-        justification: "Lecture d'une notification audio",
-      });
-    } catch (creationError) {
-      if (
-        !creationError?.message?.includes("Only a single offscreen") &&
-        !creationError?.message?.includes("already created")
-      ) {
-        console.warn("Offscreen creation error:", creationError.message);
-      }
-    }
-
-    try {
-      await chrome.runtime.sendMessage({
-        audioCommand: {
-          action: "play",
-          file: filePath,
-          volume: 1.0,
-        },
-      });
+      const audio = new Audio(chrome.runtime.getURL(filePath));
+      audio.volume = 1;
+      await audio.play();
     } catch (error) {
-      console.warn("Audio playback error:", error.message);
+      console.warn("Audio playback error:", error?.message);
     }
   }
 }

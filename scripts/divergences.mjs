@@ -77,6 +77,52 @@ export const PATCHES = [
     ],
   },
   {
+    file: "js/background.js",
+    why: "chrome.offscreen n'existe pas sur Firefox. Inutile ici : la page d'arriere-plan Firefox est une vraie page, elle a un DOM et joue le son elle-meme.",
+    edits: [
+      {
+        find: `    try {
+      await chrome.offscreen.createDocument({
+        url: "html/audio-handler.html",
+        reasons: ["AUDIO_PLAYBACK"],
+        justification: "Lecture d'une notification audio",
+      });
+    } catch (creationError) {
+      if (
+        !creationError?.message?.includes("Only a single offscreen") &&
+        !creationError?.message?.includes("already created")
+      ) {
+        console.warn("Offscreen creation error:", creationError.message);
+      }
+    }
+
+    try {
+      await chrome.runtime.sendMessage({
+        audioCommand: {
+          action: "play",
+          file: filePath,
+          volume: 1.0,
+        },
+      });
+    } catch (error) {
+      console.warn("Audio playback error:", error.message);
+    }`,
+        replace: `    // Chrome n'a pas de DOM dans son service worker et passe par un document
+    // offscreen. La page d'arriere-plan Firefox, elle, est une vraie page :
+    // Audio() y est disponible, on joue donc le son sur place. L'appel a
+    // chrome.offscreen levait un TypeError avale par le try/catch, puis le
+    // sendMessage ne trouvait personne : le son ne sortait jamais.
+    try {
+      const audio = new Audio(chrome.runtime.getURL(filePath));
+      audio.volume = 1;
+      await audio.play();
+    } catch (error) {
+      console.warn("Audio playback error:", error?.message);
+    }`,
+      },
+    ],
+  },
+  {
     file: "js/inject/predictionsAssist.js",
     why: "Même raison : le module est livré en jumeau classique, généré par scripts/build-inline-predictions.mjs.",
     edits: [
