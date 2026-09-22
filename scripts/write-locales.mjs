@@ -29,22 +29,6 @@ const locales = {
   ko: {
     appName: "StreamPulse: Twitch 및 Kick 확장 프로그램",
     appDesc: "Twitch 및 Kick용 채널 포인트 자동 획득, 라이브 알림, 미리보기 및 채팅 필터."
-  },
-  id: {
-    appName: "StreamPulse: Ekstensi Twitch & Kick",
-    appDesc: "Klaim otomatis Channel Points, peringatan live, pratinjau & filter obrolan untuk Twitch & Kick."
-  },
-  nl: {
-    appName: "StreamPulse: Twitch & Kick extensie",
-    appDesc: "Automatisch claimen van kanaalpunten, live meldingen, voorvertoningen & chatfilters voor Twitch & Kick."
-  },
-  sv: {
-    appName: "StreamPulse: Twitch & Kick-tillägg",
-    appDesc: "Automatisk insamling av kanalpoäng, livevarningar, förhandsvisningar & chattfilter för Twitch & Kick."
-  },
-  cs: {
-    appName: "StreamPulse: Rozšíření pro Twitch a Kick",
-    appDesc: "Automatické sbírání bodů, živá upozornění, náhledy a filtry chatu pro Twitch a Kick."
   }
 };
 

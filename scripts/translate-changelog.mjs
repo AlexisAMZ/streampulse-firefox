@@ -8,7 +8,7 @@ async function translateDeepl(texts, targetLang) {
     const langMap = {
         "pt-br": "PT-BR", "es": "ES", "de": "DE", "it": "IT",
         "pl": "PL", "tr": "TR", "ru": "RU", "ja": "JA",
-        "ko": "KO", "id": "ID", "nl": "NL", "sv": "SV", "cs": "CS"
+        "ko": "KO"
     };
     const target = langMap[targetLang.toLowerCase()] || targetLang.toUpperCase();
     

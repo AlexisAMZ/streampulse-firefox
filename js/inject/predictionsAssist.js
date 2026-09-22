@@ -11,10 +11,6 @@
   const POLL_MS = 10_000;
   const FAST_POLL_MS = 3_000;
   const REQUEST_TIMEOUT_MS = 8_000;
-  const IGNORED_ROUTES = new Set([
-    "directory", "settings", "subscriptions", "drops", "wallet", "u", "search",
-    "videos", "moderator", "inventory", "friends", "popout", "turbo",
-  ]);
 
   let data = null;
   let sequence = 0;
@@ -22,7 +18,7 @@
 
   function channelLogin() {
     const segment = (window.location.pathname.split("/").filter(Boolean)[0] || "").toLowerCase();
-    return /^[a-z0-9_]{2,25}$/.test(segment) && !IGNORED_ROUTES.has(segment) ? segment : "";
+    return window.__SP_DOM__.isChannelLogin(segment) ? segment.toLowerCase() : "";
   }
 
   /** Même règle que js/plus.js : à vie toujours active, mensuelle 30 jours après la dernière vérification. */
@@ -76,7 +72,13 @@
         if (event.status === "ACTIVE" && left > 0 && left <= rule.secondsBeforeEnd + 15) delay = FAST_POLL_MS;
         const decision = data.decideBet(event, balance, rule, history, now);
         if (!decision) continue;
-        const result = await ask("bet", { eventId: event.id, outcomeId: decision.outcome.id, points: decision.points });
+        const result = await ask("bet", {
+          eventId: event.id,
+          outcomeId: decision.outcome.id,
+          // Le repli hors GraphQL retrouve l'option par son libellé.
+          outcomeTitle: decision.outcome.title,
+          points: decision.points,
+        });
         history = data.addBet(history, {
           eventId: event.id,
           channel,
@@ -102,10 +104,11 @@
     }
   }
 
-  import(chrome.runtime.getURL("js/predictions-data.js"))
-    .then((module) => {
-      data = module;
-      setTimeout(tick, 4_000);
-    })
-    .catch(() => {});
+  // js/inject/predictions-data-inline.js est declare juste avant ce fichier
+  // dans content_scripts : il pose window.__SP_PREDICTIONS__. On ne charge
+  // plus le module par import() dynamique, que Firefox refuse dans un content
+  // script (la promesse etait rejetee et l'assistance ne demarrait jamais).
+  data = window.__SP_PREDICTIONS__;
+  if (data) setTimeout(tick, 4_000);
+  else console.warn("StreamPulse: predictions-data-inline.js absent, assistance desactivee.");
 })();

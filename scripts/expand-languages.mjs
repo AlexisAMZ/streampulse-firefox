@@ -29,11 +29,6 @@ const LANGUAGES = [
   { code: "ru", label: "Русский" },
   { code: "ja", label: "日本語" },
   { code: "ko", label: "한국어" },
-  { code: "id", label: "Bahasa Indonesia" },
-  { code: "nl", label: "Nederlands" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "sv", label: "Svenska" },
-  { code: "cs", label: "Čeština" },
 ];
 
 /** Langues déjà rédigées à la main : ne jamais les écraser. */

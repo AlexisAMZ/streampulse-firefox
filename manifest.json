@@ -3,7 +3,7 @@
   "default_locale": "en",
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "26.9.17",
+  "version": "26.9.22",
   "browser_specific_settings": {
     "gecko": {
       "id": "streampulse@alexisamz.fr",
@@ -18,8 +18,7 @@
   "permissions": [
     "storage",
     "alarms",
-    "notifications",
-    "tabs"
+    "notifications"
   ],
   "host_permissions": [
     "https://api.twitch.tv/*",
@@ -33,7 +32,8 @@
     "https://images.kick.com/*",
     "https://stream.kick.com/*",
     "https://id.kick.com/*",
-    "https://api.kick.com/*"
+    "https://api.kick.com/*",
+    "https://www.youtube.com/*"
   ],
   "author": "AlexisAMZ",
   "background": {
@@ -49,9 +49,11 @@
       ],
       "all_frames": false,
       "js": [
-        "js/inject/preventPause.js"
+        "js/inject/preventPause.js",
+        "js/inject/playerQuality.js"
       ],
-      "run_at": "document_start"
+      "run_at": "document_start",
+      "world": "MAIN"
     },
     {
       "matches": [
@@ -113,12 +115,16 @@
       "all_frames": false,
       "js": [
         "js/inject/i18n-inline.js",
+        "js/inject/dom.js",
+        "js/inject/player-tip.js",
         "js/channelPointsClaimer.js",
         "js/twitchPlayerEnhancer.js",
+        "js/twitchPlayerButtons.js",
         "js/chatFilter.js",
         "js/watchTimeTracker.js",
         "js/tabEnhancer.js",
         "js/inject/predictionsOverlay.js",
+        "js/inject/predictions-data-inline.js",
         "js/inject/predictionsAssist.js"
       ],
       "run_at": "document_idle",
@@ -161,14 +167,11 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "html/audio-handler.html",
-        "html/changelog.html",
-        "sons/notification.mp3",
         "images/photos/128px.png",
         "images/photos/logosp.png"
       ],
       "matches": [
-        "<all_urls>"
+        "https://www.twitch.tv/*"
       ]
     },
     {
@@ -181,14 +184,6 @@
       "matches": [
         "https://www.twitch.tv/*",
         "https://clips.twitch.tv/*"
-      ]
-    },
-    {
-      "resources": [
-        "js/predictions-data.js"
-      ],
-      "matches": [
-        "https://www.twitch.tv/*"
       ]
     }
   ]

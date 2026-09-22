@@ -31,12 +31,7 @@
     return api ? api.get(state.lang, "twitchUi." + key) : key;
   }
 
-  function el(tag, cls, text) {
-    var node = document.createElement(tag);
-    if (cls) node.className = cls;
-    if (text != null) node.textContent = text;
-    return node;
-  }
+  var el = window.__SP_DOM__.el;
 
   function alive() {
     return !!(chrome.runtime && chrome.runtime.id);
@@ -84,6 +79,7 @@
   }
 
   function setPins(next) {
+    if (!alive()) return teardown();
     state.pins = next;
     chrome.storage.local.set({ [PINS_KEY]: next });
     render();
@@ -121,8 +117,14 @@
         return { s: s, st: raw.active || raw };
       })
       .filter(Boolean)
+      // Choix produit : la section ne montre que les favoris EN DIRECT. Les
+      // chaînes hors ligne restent visibles dans la liste « Chaînes suivies »
+      // native de Twitch juste en dessous — les doubler ici n'apportait rien.
+      .filter(function (entry) {
+        return !!entry.st.isLive;
+      })
       .sort(function (a, b) {
-        return (Number(!!b.st.isLive) - Number(!!a.st.isLive)) || ((b.st.viewers || 0) - (a.st.viewers || 0));
+        return (b.st.viewers || 0) - (a.st.viewers || 0);
       });
   }
 
@@ -188,13 +190,11 @@
     section.appendChild(head);
 
     var list = favorites();
-    if (!list.length) {
-      section.appendChild(el("p", "sp-fav-empty", tr("emptyFavorites")));
-    } else {
-      list.forEach(function (entry) {
-        section.appendChild(row(entry));
-      });
-    }
+    // Personne en direct : pas de section du tout (pas de bloc vide inutile).
+    if (!list.length) return null;
+    list.forEach(function (entry) {
+      section.appendChild(row(entry));
+    });
     return section;
   }
 
@@ -226,6 +226,7 @@
   }
 
   function render() {
+    if (!alive()) return teardown();
     var header = document.querySelector(FOLLOWED_HEADER);
     var followed = header && header.closest(".side-nav-section");
     var existing = document.getElementById(SECTION_ID);
@@ -235,6 +236,11 @@
     }
     var collapsed = followed.getBoundingClientRect().width < 120;
     var next = buildSection();
+    if (!next) {
+      if (existing) existing.remove();
+      decorateCards(followed.parentElement);
+      return;
+    }
     next.classList.toggle("is-collapsed", collapsed);
     if (existing && existing.parentElement === followed.parentElement) existing.replaceWith(next);
     else {
@@ -245,11 +251,21 @@
   }
 
   // ---- cycle de vie ------------------------------------------------------------
+  // Extension rechargée/mise à jour : ce script devient orphelin (chrome.runtime
+  // disparaît). On coupe tout pour ne pas planter en boucle à chaque mutation Twitch.
+  function teardown() {
+    if (timer) clearTimeout(timer);
+    timer = null;
+    if (typeof observer !== "undefined") observer.disconnect();
+  }
+
   var timer = null;
   function schedule(reload) {
     if (timer) return;
     timer = setTimeout(function () {
       timer = null;
+      // Extension rechargée/mise à jour : ce script est orphelin, chrome.runtime n'existe plus.
+      if (!alive()) return teardown();
       if (reload) load(render);
       else render();
     }, 400);
@@ -258,6 +274,7 @@
   // Twitch re-rend la barre latérale en continu : on ne reconstruit que si le
   // bloc a disparu ou si de nouvelles cartes n'ont pas encore leur étoile.
   var observer = new MutationObserver(function () {
+    if (!alive()) return teardown();
     if (!document.getElementById(SECTION_ID) || document.querySelector(CARD + ":not(.sp-fav-host)")) schedule(false);
   });
 

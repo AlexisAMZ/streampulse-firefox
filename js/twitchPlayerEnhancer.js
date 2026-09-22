@@ -1,9 +1,8 @@
 (() => {
   const PREFERENCES_KEY = "betaGeneralPreferences";
-  const AUTO_REFRESH_FIELD = "autoRefreshPlayerErrors";
   const FAST_FORWARD_FIELD = "enableFastForwardButton";
+  const AUTO_REFRESH_FIELD = "autoRefreshPlayerErrors";
 
-  const ERROR_CODES = ["1000", "2000", "3000", "4000", "5000"];
   const FAST_FORWARD_BUTTON_ID = "streampulse-fast-forward-btn";
   const FAST_FORWARD_STYLE_ID = "streampulse-fast-forward-style";
   const SHARED_STYLE_ID = "streampulse-enhancer-styles";
@@ -33,16 +32,11 @@
 
   };
 
+  // Seul `features` est consomme : ne pas demander (ni garder en memoire) les
+  // identifiants Twitch du service worker, dont ce script n'a aucun usage.
   let extensionConfig = {
-    clientId: "",
-    accessToken: "",
     features: DEFAULT_FEATURE_CONFIG,
   };
-
-  let autoRefreshEnabled = false;
-  let errorCheckTimeoutId = null;
-  let observedVideo = null;
-  let videoAbortHandler = null;
 
   let fastForwardEnabled = false;
   let fastForwardEnsureIntervalId = null;
@@ -94,6 +88,15 @@
     }
     .streampulse-latency-button.is-disabled:hover {
       color: #dedee3;
+      transform: none;
+    }
+    .streampulse-latency-button.is-metadata {
+      align-self: center;
+      padding: 0 10px 0 0;
+      font-size: 13px;
+      gap: 6px;
+    }
+    .streampulse-latency-button.is-metadata:hover {
       transform: none;
     }
     .dPOHRS {
@@ -192,47 +195,114 @@
     return null;
   }
 
-  function attemptRecovery() {
-    const button = document.querySelector(
-      ".content-overlay-gate__allow-pointers button"
-    );
+  // Relance du lecteur sur erreur (codes 1000-5000, dont le fameux #2000).
+  //
+  // On clique « Reessayer » a la place de l'utilisateur. Si l'overlay n'offre
+  // aucun bouton, ou si le clic n'a pas suffi au tour precedent, on recharge —
+  // mais jamais sur un onglet cache (on attend son retour), jamais deux fois
+  // pour la meme page, et jamais moins de 45 s apres un rechargement.
+  //
+  // Reglable : autoRefreshPlayerErrors, active par defaut. Une extension ne
+  // doit pas imposer un rechargement de page sans laisser couper la fonction.
+
+  const ERROR_GATE_SELECTOR =
+    '[data-a-target="player-overlay-content-gate"], .content-overlay-gate';
+  const ERROR_CODES = ["1000", "2000", "3000", "4000", "5000"];
+  const RETRY_GRACE_MS = 6000;
+  const RETRY_POLL_MS = 4000;
+
+  const RELOAD_STAMP_KEY = "streampulsePlayerReloadAt";
+  const RELOAD_COOLDOWN_MS = 45000;
+
+  let errorCheckTimeoutId = null;
+  let observedVideo = null;
+  let videoAbortHandler = null;
+  let retryClickAttempted = false;
+  // Faux au depart : c'est setAutoRefresh(), appele par applyPreferences au
+  // chargement des reglages, qui demarre reellement la detection. Le mettre a
+  // vrai ici ferait sortir setAutoRefresh par son garde d'egalite, et plus
+  // rien n'aurait jamais lance le sondage.
+  let autoRefreshEnabled = false;
+  let reloadPendingUntilVisible = false;
+  let reloadAttempted = false;
+
+  function hasPlayerError() {
+    const gate = document.querySelector(ERROR_GATE_SELECTOR);
+    if (!gate) return false;
+    const text = gate.textContent || "";
+    return ERROR_CODES.some((code) => text.includes(code));
+  }
+
+  function clickRetryButton() {
+    const button = document.querySelector(`${ERROR_GATE_SELECTOR} button`);
     if (button instanceof HTMLElement) {
       button.click();
+      return true;
+    }
+    return false;
+  }
+
+  /** Dernier recours : recharger, sous trois garde-fous cumules. */
+  function reloadPlayerPage() {
+    if (document.hidden) {
+      // Recharger un onglet que personne ne regarde couperait un stream
+      // ecoute en fond : on attend son retour au premier plan.
+      reloadPendingUntilVisible = true;
+      return;
+    }
+    reloadPendingUntilVisible = false;
+    if (reloadAttempted) return;
+    reloadAttempted = true;
+    try {
+      // sessionStorage survit au rechargement : c'est lui qui empeche la boucle.
+      const last = Number(sessionStorage.getItem(RELOAD_STAMP_KEY)) || 0;
+      if (Date.now() - last < RELOAD_COOLDOWN_MS) return;
+      sessionStorage.setItem(RELOAD_STAMP_KEY, String(Date.now()));
+    } catch (_error) {
+      return; // Stockage bloque : pas de garde-fou, donc pas de rechargement.
+    }
+    window.location.reload();
+  }
+
+  function attemptRecovery() {
+    // Un seul clic par erreur : si le lecteur re-affiche l'overlay, le tour
+    // de sondage suivant passera au rechargement. Re-cliquer en boucle sur un
+    // bouton qui ne repond pas ne sert a rien.
+    if (!retryClickAttempted) {
+      retryClickAttempted = clickRetryButton();
+      if (!retryClickAttempted) {
+        // Overlay sans bouton : le clic est impossible, on recharge.
+        reloadPlayerPage();
+        return;
+      }
+    } else {
+      // Le clic du tour precedent n'a pas suffi.
+      reloadPlayerPage();
+      return;
     }
 
     window.setTimeout(() => {
       const video = findVideoElement();
-      if (!video) return;
-      if (video.paused) {
+      if (video?.paused) {
         video.play().catch(() => {});
       }
-      window.setTimeout(() => {
-        seekToBufferedEnd(video);
-      }, 120);
-    }, 2000);
+      window.setTimeout(() => seekToBufferedEnd(video), 120);
+    }, RETRY_GRACE_MS);
   }
 
   function checkForPlayerErrors() {
     errorCheckTimeoutId = null;
-    if (!autoRefreshEnabled) {
+    if (!autoRefreshEnabled) return;
+    ensureVideoAbortListener();
+
+    if (hasPlayerError()) {
+      attemptRecovery();
+      scheduleErrorCheck(RETRY_GRACE_MS + RETRY_POLL_MS);
       return;
     }
 
-    ensureVideoAbortListener();
-
-    const gate = document.querySelector(
-      'div[data-a-target="player-overlay-content-gate"]'
-    );
-    if (gate) {
-      const text = (gate.textContent || "").toLowerCase();
-      if (ERROR_CODES.some((code) => text.includes(code))) {
-        attemptRecovery();
-        scheduleErrorCheck(10000);
-        return;
-      }
-    }
-
-    scheduleErrorCheck(8000);
+    retryClickAttempted = false;
+    scheduleErrorCheck(RETRY_POLL_MS);
   }
 
   function scheduleErrorCheck(delay = 2000) {
@@ -259,27 +329,9 @@
     detachVideoAbortListener();
     observedVideo = video;
     videoAbortHandler = () => {
-      if (autoRefreshEnabled) {
-        scheduleErrorCheck(100);
-      }
+      scheduleErrorCheck(100);
     };
     video.addEventListener("abort", videoAbortHandler);
-  }
-
-  function enableAutoRefresh() {
-    if (autoRefreshEnabled) return;
-    autoRefreshEnabled = true;
-    ensureVideoAbortListener();
-    scheduleErrorCheck(500);
-  }
-
-  function disableAutoRefresh() {
-    autoRefreshEnabled = false;
-    if (errorCheckTimeoutId != null) {
-      clearTimeout(errorCheckTimeoutId);
-      errorCheckTimeoutId = null;
-    }
-    detachVideoAbortListener();
   }
 
   function insertFastForwardStyle() {
@@ -294,14 +346,14 @@
         justify-content: center;
         background: transparent;
         border: none;
-        border-radius: 4px;
+        border-radius: 9000px;
         color: #ffffff;
         cursor: pointer;
         display: inline-flex;
-        width: 3rem;
-        height: 3rem;
+        width: 32px;
+        height: 32px;
         padding: 0;
-        margin: 0 6px 0 0;
+        margin: 0 4px 0 0;
         background-repeat: no-repeat;
         background-size: contain;
         transition: background-color 0.2s ease, color 0.2s ease;
@@ -317,8 +369,9 @@
         background-color: rgba(38, 38, 38, 1);
       }
       #${FAST_FORWARD_BUTTON_ID} svg {
-        width: 100%;
-        height: 100%;
+        width: 20px;
+        height: 20px;
+        display: block;
         pointer-events: none;
         fill: currentColor;
       }
@@ -338,8 +391,9 @@
       button.type = "button";
       button.className = "streampulse-fast-forward-button";
       button.innerHTML = `
-      <svg viewBox="0 0 1024 1024" aria-hidden="true">
-        <path d="M825.8 498 538.4 249.9c-10.7-9.2-26.4-.9-26.4 14v496.3c0 14.9 15.7 23.2 26.4 14L825.8 526c8.3-7.2 8.3-20.8 0-28zm-320 0L218.4 249.9c-10.7-9.2-26.4-.9-26.4 14v496.3c0 14.9 15.7 23.2 26.4 14L505.8 526c4.1-3.6 6.2-8.8 6.2-14 0-5.2-2.1-10.4-6.2-14z"></path>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 5.5v13l8-6.5-8-6.5Zm9 0v13l8-6.5-8-6.5Z"></path>
+        <path d="M21 5h2v14h-2V5Z"></path>
       </svg>
     `;
 
@@ -433,7 +487,8 @@
       });
     }
     button.setAttribute("aria-label", texts.tooltip);
-    button.title = tooltip;
+    button.dataset.spLabel = tooltip;
+    window.__SP_TIP__?.attach(button, () => button.dataset.spLabel || "");
     return button;
   }
 
@@ -509,13 +564,307 @@
     }
   }
 
-  function applyPreferences(preferences = {}) {
-    const shouldAutoRefresh = preferences[AUTO_REFRESH_FIELD] !== false;
-    if (shouldAutoRefresh && !autoRefreshEnabled) {
-      enableAutoRefresh();
-    } else if (!shouldAutoRefresh && autoRefreshEnabled) {
-      disableAutoRefresh();
+  /* ══════════════════════════════════════════════════════════════
+     VOLUME BOOST
+     Le slider natif s'arrête à 100 % ; la zone StreamPulse greffée
+     à sa droite prolonge la course jusqu'à 200 % : le remplissage
+     passe du vert LCD à l'orange puis au rouge. À la souris : glisser
+     dans la zone ou molette. Au clavier : flèches / Début / Fin.
+     L'amplification elle-même est un GainNode Web Audio branché sur
+     le <video> ; le volume natif continue de s'appliquer en amont.
+     ══════════════════════════════════════════════════════════════ */
+
+  const VOLUME_BOOST_FIELD = "playerVolumeBoost";
+  const BOOST_BUTTON_ID = "streampulse-volume-boost-btn";
+  const BOOST_STYLE_ID = "streampulse-volume-boost-style";
+  const BOOST_MAX = 2.0;
+
+  let volumeBoostEnabled = false;
+  let boostEnsureIntervalId = null;
+  let boostLevel = 1.0;
+  let lastBoostLevel = 1.5;
+
+  let boostAudioCtx = null;
+  let boostSourceNode = null;
+  let boostGainNode = null;
+  let boostWiredVideo = null;
+
+  function insertBoostStyles() {
+    if (document.getElementById(BOOST_STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = BOOST_STYLE_ID;
+    style.textContent = `
+    /* Typo de marque StreamPulse (Onest), chargée depuis le paquet. */
+    @font-face {
+      font-family: "SP Onest";
+      font-weight: 400 700;
+      font-display: swap;
+      src: url("${chrome.runtime.getURL("font/onest-latin-6.woff2")}") format("woff2");
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
     }
+    @font-face {
+      font-family: "SP Onest";
+      font-weight: 400 700;
+      font-display: swap;
+      src: url("${chrome.runtime.getURL("font/onest-latin-ext-5.woff2")}") format("woff2");
+      unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    /* Bouton « Boost » StreamPulse : fantôme comme les boutons du player
+       Twitch (transparent, halo au survol), le mot en typo Onest. */
+    .sp-vboost-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      flex: 0 0 auto;
+      align-self: center;
+      height: 30px;
+      margin-left: 8px;
+      padding: 0 7px;
+      border: 0;
+      border-radius: 0.4rem;
+      background: transparent;
+      color: #c4a3ff;
+      font-family: "SP Onest", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      cursor: pointer;
+      transition: background-color 0.1s ease, color 0.1s ease;
+      vertical-align: middle;
+    }
+    .sp-vboost-btn:hover { background: rgba(255, 255, 255, 0.1); color: #d9c2ff; }
+    .sp-vboost-btn:focus-visible { outline: 2px solid #c6d4a0; outline-offset: 1px; }
+    /* Niveau de boost : LCD vers 115 %, orange vers 150 %, rouge au-delà. */
+    .sp-vboost-btn.is-low { color: #c6d4a0; }
+    .sp-vboost-btn.is-mid { color: #ffb020; }
+    .sp-vboost-btn.is-high { color: #ff4d4d; }
+    .sp-vboost-pct { display: none; }
+    .sp-vboost-btn.is-low .sp-vboost-pct,
+    .sp-vboost-btn.is-mid .sp-vboost-pct,
+    .sp-vboost-btn.is-high .sp-vboost-pct { display: inline; }
+    @media (prefers-reduced-motion: reduce) {
+      .sp-vboost-btn { transition: none; }
+    }
+    `;
+    document.head?.appendChild(style);
+  }
+
+  function findVolumeSlider() {
+    return (
+      document.querySelector('[data-a-target="player-volume-slider"]') ||
+      document.querySelector(".video-slider__slider-container") ||
+      document.querySelector(".video-slider")
+    );
+  }
+
+  /**
+   * Point d'insertion stable : le bouton Paramètres du player
+   * ([data-a-target="player-settings-button"]) vit dans la même rangée que le
+   * volume, sur tous les players. « Boost » s'insère juste avant lui, donc
+   * entre le volume et les autres contrôles. Repli : remonter depuis le
+   * slider jusqu'au premier conteneur flex horizontal.
+   */
+  function findBoostAnchor(slider) {
+    const settingsButton = document.querySelector('[data-a-target="player-settings-button"]');
+    if (settingsButton?.parentElement) {
+      return { row: settingsButton.parentElement, volumeBlock: settingsButton, before: true };
+    }
+    let node = slider;
+    for (let depth = 0; depth < 5 && node.parentElement; depth++) {
+      const parent = node.parentElement;
+      const display = getComputedStyle(parent).display || "";
+      const direction = getComputedStyle(parent).flexDirection || "row";
+      if (parent.children.length > 1 && display.includes("flex") && !display.includes("inline") && direction === "row") {
+        return { row: parent, volumeBlock: node, before: false };
+      }
+      node = parent;
+    }
+    return { row: null, volumeBlock: slider.parentElement, before: false };
+  }
+
+  function boostAriaLabel() {
+    return tr("volumeBoostLabel");
+  }
+
+  function boostHintText() {
+    return tr("volumeBoostHint");
+  }
+
+  function ensureBoostAudio(video) {
+    // Routé une seule fois par élément vidéo : le volume natif de Twitch
+    // s'applique toujours en amont du graphe, le gain ne fait qu'amplifier.
+    if (typeof AudioContext === "undefined") return false;
+    if (!boostAudioCtx) boostAudioCtx = new AudioContext();
+    if (boostAudioCtx.state === "suspended") {
+      boostAudioCtx.resume().catch(() => {});
+    }
+    if (boostWiredVideo === video && boostGainNode) {
+      boostGainNode.gain.value = boostLevel;
+      return true;
+    }
+    try {
+      boostSourceNode?.disconnect();
+      boostGainNode?.disconnect();
+      boostSourceNode = boostAudioCtx.createMediaElementSource(video);
+      boostGainNode = boostAudioCtx.createGain();
+      boostGainNode.gain.value = boostLevel;
+      boostSourceNode.connect(boostGainNode);
+      boostGainNode.connect(boostAudioCtx.destination);
+      boostWiredVideo = video;
+      return true;
+    } catch (_error) {
+      // MediaElementSource impossible (flux exotique) : le bouton reste
+      // mais le son n'est pas amplifié.
+      boostWiredVideo = null;
+      boostGainNode = null;
+      return false;
+    }
+  }
+
+  function renderBoostButton(button) {
+    const pct = Math.round(boostLevel * 100);
+    // Libellés rafraîchis au rendu : ils suivent les changements de langue.
+    button.setAttribute("aria-label", boostAriaLabel());
+    button.title = boostHintText();
+    button.setAttribute("aria-pressed", boostLevel > 1.001 ? "true" : "false");
+    button.classList.toggle("is-low", boostLevel > 1.001 && boostLevel <= 1.15);
+    button.classList.toggle("is-mid", boostLevel > 1.15 && boostLevel <= 1.5);
+    button.classList.toggle("is-high", boostLevel > 1.5);
+    const pctEl = button.querySelector(".sp-vboost-pct");
+    pctEl.textContent = `+${pct - 100} %`;
+  }
+
+  function setBoostLevel(value) {
+    boostLevel = Math.min(BOOST_MAX, Math.max(1, value));
+    if (boostLevel > 1.001) lastBoostLevel = boostLevel;
+    const video = findVideoElement();
+    if (boostLevel > 1.001 && video) {
+      ensureBoostAudio(video);
+    } else if (boostGainNode) {
+      boostGainNode.gain.value = 1;
+    }
+    const button = document.getElementById(BOOST_BUTTON_ID);
+    if (button) renderBoostButton(button);
+  }
+
+  function toggleBoost() {
+    setBoostLevel(boostLevel > 1.001 ? 1 : lastBoostLevel);
+  }
+
+  function wireBoostButton(button) {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleBoost();
+    });
+    button.addEventListener(
+      "wheel",
+      (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setBoostLevel(boostLevel + (event.deltaY < 0 ? 0.1 : -0.1));
+      },
+      { passive: false }
+    );
+    button.addEventListener("keydown", (event) => {
+      const steps = { ArrowRight: 0.1, ArrowUp: 0.1, ArrowLeft: -0.1, ArrowDown: -0.1 };
+      if (event.key in steps) {
+        event.preventDefault();
+        event.stopPropagation();
+        setBoostLevel(boostLevel + steps[event.key]);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        setBoostLevel(1);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        setBoostLevel(BOOST_MAX);
+      }
+    });
+  }
+
+  function ensureVolumeBoostButton() {
+    if (!volumeBoostEnabled || !isStreamPage()) return;
+    const slider = findVolumeSlider();
+    if (!slider) return;
+    let button = document.getElementById(BOOST_BUTTON_ID);
+    if (!button) {
+      insertBoostStyles();
+      button = document.createElement("button");
+      button.id = BOOST_BUTTON_ID;
+      button.type = "button";
+      button.className = "sp-vboost-btn";
+      button.setAttribute("aria-pressed", "false");
+      /* Le mot « Boost » dans la typo StreamPulse : reconnaissable de tous
+         les players, compris dans toutes les langues. */
+      button.innerHTML = '<span class="sp-vboost-word">Boost</span><span class="sp-vboost-pct"></span>';
+      wireBoostButton(button);
+    }
+    const anchor = findBoostAnchor(slider);
+    const targetParent = anchor.row || anchor.volumeBlock.parentElement;
+    const inPlace =
+      button.parentElement === targetParent &&
+      (anchor.before
+        ? button.nextElementSibling === anchor.volumeBlock
+        : button.previousElementSibling === anchor.volumeBlock);
+    if (!inPlace) {
+      // Avant le bouton Paramètres (même rangée que le volume, jamais dans
+      // le wrapper du slider), ou après le bloc volume en repli.
+      if (anchor.before) anchor.volumeBlock.before(button);
+      else anchor.volumeBlock.after(button);
+    }
+    // Twitch peut recréer aussi l'élément <video> (changement de chaîne) :
+    // on rebranche le graphe si l'élément amplifié n'est plus le bon.
+    if (boostLevel > 1.001) {
+      const video = findVideoElement();
+      if (video && video !== boostWiredVideo) ensureBoostAudio(video);
+    }
+    renderBoostButton(button);
+  }
+
+  function enableVolumeBoost() {
+    if (volumeBoostEnabled) return;
+    volumeBoostEnabled = true;
+    ensureVolumeBoostButton();
+    if (boostEnsureIntervalId == null) {
+      boostEnsureIntervalId = window.setInterval(ensureVolumeBoostButton, 4000);
+    }
+  }
+
+  function disableVolumeBoost() {
+    volumeBoostEnabled = false;
+    if (boostEnsureIntervalId != null) {
+      clearInterval(boostEnsureIntervalId);
+      boostEnsureIntervalId = null;
+    }
+    document.getElementById(BOOST_BUTTON_ID)?.remove();
+    if (boostGainNode) boostGainNode.gain.value = 1;
+    boostLevel = 1;
+  }
+
+  function setVolumeBoost(enabled) {
+    if (enabled) enableVolumeBoost();
+    else disableVolumeBoost();
+  }
+
+  function setAutoRefresh(enabled) {
+    if (enabled === autoRefreshEnabled) return;
+    autoRefreshEnabled = enabled;
+    if (enabled) {
+      ensureVideoAbortListener();
+      scheduleErrorCheck(500);
+      return;
+    }
+    if (errorCheckTimeoutId != null) {
+      clearTimeout(errorCheckTimeoutId);
+      errorCheckTimeoutId = null;
+    }
+    detachVideoAbortListener();
+  }
+
+  function applyPreferences(preferences = {}) {
+    setAutoRefresh(preferences[AUTO_REFRESH_FIELD] !== false);
 
     const shouldFastForward = preferences[FAST_FORWARD_FIELD] !== false;
     if (shouldFastForward && !fastForwardEnabled) {
@@ -525,7 +874,40 @@
     }
 
     setHideTwitchExtensions(preferences.hideTwitchExtensions === true);
-    setAutoCancelRaids(preferences.autoCancelRaids !== false);
+    setAutoCancelRaids(preferences.autoCancelRaids === true);
+    syncKeepQualityFlag(preferences.keepQualityInBackground === true);
+    syncPlayerQuality(preferences.playerQuality);
+    setVolumeBoost(preferences[VOLUME_BOOST_FIELD] !== false);
+  }
+
+  // preventPause.js runs in the MAIN world and cannot read chrome.storage,
+  // so the opt-in is mirrored into page localStorage. Applies on next load.
+  const PLAYER_QUALITY_KEY = "streampulse:playerQuality";
+  const PLAYER_QUALITIES = ["auto", "source", "1440", "1080", "720", "480", "360"];
+
+  // playerQuality.js tourne dans le monde MAIN et ne lit pas chrome.storage :
+  // le reglage transite par le localStorage de la page, applique sans rechargement.
+  function syncPlayerQuality(value) {
+    const quality = PLAYER_QUALITIES.includes(value) ? value : "auto";
+    try {
+      window.localStorage.setItem(PLAYER_QUALITY_KEY, quality);
+      window.dispatchEvent(new Event("streampulse:quality-changed"));
+    } catch (_error) {
+      // Stockage bloque : Twitch garde la main sur la qualite.
+    }
+  }
+
+  const KEEP_QUALITY_FLAG_KEY = "streampulse:keepQualityInBackground";
+  function syncKeepQualityFlag(enable) {
+    try {
+      if (enable) {
+        window.localStorage.setItem(KEEP_QUALITY_FLAG_KEY, "1");
+      } else {
+        window.localStorage.removeItem(KEEP_QUALITY_FLAG_KEY);
+      }
+    } catch (_error) {
+      // Storage can be blocked (privacy mode): the feature simply stays off.
+    }
   }
 
   const HIDE_EXTENSIONS_STYLE_ID = "streampulse-hide-extensions-style";
@@ -560,20 +942,14 @@
   let raidCheckIntervalId = null;
   let raidObserver = null;
 
-  // Twitch routes whose first path segment is a feature name, not a login.
-  const NON_CHANNEL_ROUTES = new Set([
-    "directory", "settings", "drops", "downloads", "subscriptions", "wallet",
-    "inventory", "friends", "u", "videos", "search", "prime", "turbo", "store",
-    "jobs", "p",
-  ]);
 
   function getCurrentChannel() {
     try {
       const segment = location.pathname.replace(/^\//, "").split("/")[0] || "";
-      const candidate = segment.toLowerCase();
-      if (!candidate || NON_CHANNEL_ROUTES.has(candidate)) return "";
-      if (!/^[a-z0-9_]{3,25}$/.test(candidate)) return "";
-      return candidate;
+      // Liste canonique + test de login partages (js/inject/dom.js, charge
+      // avant ce script via le manifest) : l'ancien plancher {3,25} rejetait
+      // des logins courts legitimes.
+      return window.__SP_DOM__.isChannelLogin(segment) ? segment.toLowerCase() : "";
     } catch (_) {
       return "";
     }
@@ -815,8 +1191,6 @@
       const loadedConfig =
         (await chrome.runtime.sendMessage({ type: "getConfig" })) || {};
       extensionConfig = {
-        clientId: loadedConfig.clientId || "",
-        accessToken: loadedConfig.accessToken || "",
         features: mergeFeatureConfig(
           DEFAULT_FEATURE_CONFIG,
           loadedConfig.features || {}
@@ -828,8 +1202,6 @@
         error
       );
       extensionConfig = {
-        clientId: "",
-        accessToken: "",
         features: DEFAULT_FEATURE_CONFIG,
       };
     }
@@ -855,7 +1227,18 @@
         this.headerCheckIntervalId = window.setInterval(() => this.ensureHeader(), 3000);
       }
       if (this.updateIntervalId == null) {
-        this.updateIntervalId = window.setInterval(() => this.update(), 1000);
+        this.updateIntervalId = window.setInterval(() => {
+          // Inutile de mesurer la latence quand l'onglet est en arrière-plan ;
+          // au retour, update() recalcule tout depuis la vidéo, et le listener
+          // visibilitychange ci-dessous rafraîchit immédiatement.
+          if (!document.hidden) this.update();
+        }, 1000);
+        if (!this._visibilityBound) {
+          this._visibilityBound = true;
+          document.addEventListener("visibilitychange", () => {
+            if (!document.hidden) this.update(true);
+          });
+        }
       }
       this.update(true);
     }
@@ -872,17 +1255,28 @@
       this.detach();
     }
 
+    /**
+     * Barre d'infos sous le lecteur : le conteneur qui aligne le nombre de
+     * spectateurs et la duree du live. Repere par ".live-time", la seule classe
+     * stable du lot (les autres sont generees par Twitch a chaque build).
+     */
+    findMetadataBar() {
+      const liveTime = document.querySelector(".live-time");
+      const holder = liveTime?.parentElement?.parentElement;
+      return holder instanceof HTMLElement ? holder : null;
+    }
+
     findHeader() {
-      const selectors = [
-        ".stream-chat-header__left",
-        ".stream-chat-header",
-        '[data-a-target="chat-room-header"]',
-        '[data-test-selector="chat-room-header"]',
-      ];
-      for (const selector of selectors) {
-        const element = document.querySelector(selector);
-        if (element) return element;
+      const metadata = this.findMetadataBar();
+      if (metadata) {
+        this.headerMode = "metadata";
+        return metadata;
       }
+      // Plus de repli sur l'en-tete du chat : la barre d'infos du lecteur
+      // apparait quelques secondes apres le chargement de la page, et le
+      // bouton s'y teleportait depuis le chat, ce qui etait desagreable a
+      // l'oeil. On prefere attendre (le sondage de 3 s reessaie) et poser le
+      // bouton directement a sa place definitive.
       return null;
     }
 
@@ -926,7 +1320,12 @@
 
       this.button.append(this.dot, this.text);
       this.button.addEventListener("click", () => this.handleClick());
-      this.header.appendChild(this.button);
+      if (this.headerMode === "metadata") {
+        this.button.classList.add("is-metadata");
+        this.header.insertBefore(this.button, this.header.firstElementChild);
+      } else {
+        this.header.appendChild(this.button);
+      }
     }
 
     handleClick() {
@@ -1015,6 +1414,7 @@
     }
 
     if (isTopWindow) {
+      // La detection demarre via applyPreferences, selon le reglage.
       initPreferences();
     }
   }
@@ -1023,11 +1423,16 @@
     if (document.hidden) return;
 
     if (isTopWindow) {
-      if (autoRefreshEnabled) {
-        scheduleErrorCheck(500);
+      if (autoRefreshEnabled && reloadPendingUntilVisible && hasPlayerError()) {
+        reloadPlayerPage();
+        return;
       }
+      scheduleErrorCheck(500);
       if (fastForwardEnabled) {
         ensureFastForwardButton();
+      }
+      if (volumeBoostEnabled) {
+        ensureVolumeBoostButton();
       }
       latencyFeature?.update(true);
 

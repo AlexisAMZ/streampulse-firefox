@@ -1,4 +1,5 @@
 import { BACKUP_KEYS, buildBackup, backupFileName } from "./backup.js";
+import { DEFAULT_PREFERENCES } from "./preferences-data.js";
 import {
   initI18n,
   applyTranslations,
@@ -8,7 +9,6 @@ import {
   getCurrentLanguage,
   t,
   syncDocumentLanguage,
-  DEFAULT_LANGUAGE,
   resolveLocale,
 } from "./i18n.js";
 import {
@@ -27,17 +27,7 @@ import { initFeatures, renderHistory } from "./popup-features.js";
 
 const PREFERENCES_STORAGE_KEY = "betaGeneralPreferences";
 
-const defaultPreferences = {
-  liveNotifications: true,
-  gameNotifications: false,
-  soundsEnabled: true,
-  autoClaimChannelPoints: true,
-  autoRefreshPlayerErrors: true,
-  enableFastForwardButton: true,
-  watchTimeTracker: true,
-  language: DEFAULT_LANGUAGE,
-  sortOrder: "live",
-};
+const defaultPreferences = DEFAULT_PREFERENCES;
 
 const state = {
   streamers: [],
@@ -72,10 +62,8 @@ const sheetListEl = document.getElementById("sheet-list");
 const sheetSearchEl = document.getElementById("sheet-search");
 const sheetGroupsEl = document.getElementById("sheet-groups");
 const sheetTotalEl = document.getElementById("sheet-total");
-const liveNotificationsToggle = document.getElementById("pref-live-notifications");
-const gameAlertsToggle = document.getElementById("pref-game-alerts");
-const titleAlertsToggle = document.getElementById("pref-title-alerts");
 const soundsToggle = document.getElementById("pref-sounds");
+const backgroundRaidAlertsToggle = document.getElementById("pref-background-raid-alerts");
 const autoClaimToggle = document.getElementById("pref-auto-claim");
 const autoClaimDropsToggle = document.getElementById("pref-auto-claim-drops");
 const autoClaimMomentsToggle = document.getElementById("pref-auto-claim-moments");
@@ -86,7 +74,11 @@ const autoCancelRaidsToggle = document.getElementById("pref-auto-cancel-raids");
 const preventTabDiscardToggle = document.getElementById("pref-prevent-tab-discard");
 const streamerFaviconToggle = document.getElementById("pref-enable-streamer-favicon");
 const tabLiveIconToggle = document.getElementById("pref-enable-tab-live-icon");
+const keepQualityToggle = document.getElementById("pref-keep-quality");
+const pipButtonToggle = document.getElementById("pref-pip-button");
 const autoRefreshToggle = document.getElementById("pref-auto-refresh");
+const clipDownloadToggle = document.getElementById("pref-clip-download");
+const playerQualitySelect = document.getElementById("pref-player-quality");
 const fastForwardToggle = document.getElementById("pref-fast-forward");
 const previewsEnabledToggle = document.getElementById("pref-previews-enabled");
 const previewsModeGroup = document.getElementById("previews-mode-group");
@@ -102,7 +94,6 @@ const previewsAnimationsToggle = document.getElementById("pref-previews-animatio
 const chatKeywordsInput = document.getElementById("pref-chat-keywords");
 const blockedUsersInput = document.getElementById("pref-blocked-users");
 const saveChatFilterButton = document.getElementById("save-chat-filter");
-const saveBlockedUsersButton = document.getElementById("save-blocked-users");
 const testNotificationButton = document.getElementById("test-notification");
 const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
 const languageOptions = document.getElementById("language-options-popup");
@@ -349,6 +340,30 @@ function clearDropMarkers() {
   });
 }
 
+async function reorderStreamers(from, to) {
+  if (!Number.isInteger(from) || !Number.isInteger(to) || from === to) return false;
+  if (from < 0 || to < 0 || from >= state.streamers.length || to >= state.streamers.length) return false;
+  const reordered = [...state.streamers];
+  const [moved] = reordered.splice(from, 1);
+  reordered.splice(to, 0, moved);
+  state.streamers = reordered;
+  await chrome.storage.local.set({ betaGeneralStreamers: reordered });
+  renderStreamers();
+  return true;
+}
+
+/** Échange deux emplacements de stockage : déplacement visuel adjacent dans le panneau. */
+async function swapStreamers(indexA, indexB) {
+  if (!Number.isInteger(indexA) || !Number.isInteger(indexB)) return false;
+  if (indexA < 0 || indexB < 0 || indexA >= state.streamers.length || indexB >= state.streamers.length) return false;
+  const reordered = [...state.streamers];
+  [reordered[indexA], reordered[indexB]] = [reordered[indexB], reordered[indexA]];
+  state.streamers = reordered;
+  await chrome.storage.local.set({ betaGeneralStreamers: reordered });
+  renderStreamers();
+  return true;
+}
+
 function initDragAndDrop() {
   if (!sheetListEl || sheetListEl._dragInit) return;
   sheetListEl._dragInit = true;
@@ -386,14 +401,38 @@ function initDragAndDrop() {
     let to = Number(row.dataset.index) + (row.classList.contains("drop-after") ? 1 : 0);
     if (to > from) to -= 1;
     clearDropMarkers();
-    if (!Number.isInteger(from) || !Number.isInteger(to) || from === to) return;
+    await reorderStreamers(from, to);
+  });
 
-    const reordered = [...state.streamers];
-    const [moved] = reordered.splice(from, 1);
-    reordered.splice(to, 0, moved);
-    state.streamers = reordered;
-    await chrome.storage.local.set({ betaGeneralStreamers: reordered });
-    renderStreamers();
+  // Alternative clavier au glisser-déposer : Alt + flèches haut/bas sur une
+  // ligne focusée (tri personnalisé uniquement, comme la souris). On raisonne
+  // dans l'ordre VISUEL du panneau (lives d'abord) : on échange la ligne avec
+  // sa voisine visuelle en échangeant leurs deux emplacements de stockage.
+  // Échanger un live avec un hors-ligne n'a pas d'effet visuel (la partition
+  // lives-d'abord est stable) : on ignore ce cas pour ne pas mentir.
+  sheetListEl.addEventListener("keydown", async (event) => {
+    if (!event.altKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return;
+    const row = event.target.closest?.(".channel-row");
+    if (!row || !row.querySelector(".row-grip")) return;
+    const rows = [...sheetListEl.querySelectorAll(".channel-row")];
+    const from = rows.indexOf(row);
+    const to = from + (event.key === "ArrowUp" ? -1 : 1);
+    const target = rows[to];
+    if (!target) return;
+    if (row.classList.contains("live") !== target.classList.contains("live")) return;
+    event.preventDefault();
+
+    const storageFrom = Number(row.dataset.index);
+    const storageTo = Number(target.dataset.index);
+    const streamer = state.streamers[storageFrom];
+    const moved = await swapStreamers(storageFrom, storageTo);
+    if (moved) {
+      document.getElementById("sheet-live").textContent = t("popup.cplus.rowMoved", {
+        name: nameFor(streamer.id),
+        position: to + 1,
+      });
+      sheetListEl.querySelector(`.channel-row[data-index="${storageTo}"] button`)?.focus();
+    }
   });
 }
 
@@ -553,6 +592,7 @@ const miniCallbacks = {
     renderStreamers();
   },
   onTogglePin: togglePin,
+  onRemove: streamerCallbacks.onRemove,
 };
 
 const rowCallbacks = {
@@ -622,11 +662,15 @@ function renderFeatured() {
       offlineCount: state.streamers.length,
       avatarUrl: safeAvatarUrl(state.userProfile?.avatarUrl),
       onOpenSheet: openSheet,
+      // Premier contact : le CTA place le curseur dans le champ d'ajout.
+      onAddStreamer: () => {
+        document.getElementById("tab-streamers")?.click();
+        document.getElementById("streamer-input")?.focus();
+      },
     });
     return;
   }
   renderStage(stageEl, stageMediaEl, stageFeatureEl, streamer, state.statuses[streamer.id], {
-    isNew: justLiveIds.has(streamer.id),
   }, streamerCallbacks);
 }
 
@@ -668,13 +712,20 @@ function renderStreamers() {
     fragment.appendChild(createMiniCard(streamer, state.statuses[streamer.id], {
       selected: streamer.id === state.selectedId,
       pinned: isPinned(streamer.id),
-      isNew: justLiveIds.has(streamer.id),
     }, miniCallbacks));
   });
   if (state.streamers.length) {
     fragment.appendChild(createAllChannelsTile(offline.slice(0, 3), offline.length, openSheet));
   }
   streamerListEl.replaceChildren(fragment);
+
+  // Garde la carte du streamer affiché sur la scène visible dans la bande,
+  // sinon la carte sélectionnée reste coupée au bord du scroll.
+  const selectedCard = streamerListEl.querySelector(".mini.is-selected");
+  if (selectedCard) {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    selectedCard.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+  }
 
   const liveCountEl = document.getElementById("live-count");
   if (liveCountEl) liveCountEl.textContent = t("popup.cplus.liveOf", { live: live.length, total: state.streamers.length });
@@ -708,25 +759,42 @@ async function renderActivity() {
   midnight.setHours(0, 0, 0, 0);
   const today = logs.filter((log) => log.timestamp >= midnight.getTime());
   const points = today.filter((log) => log.type === "points").reduce((sum, log) => sum + (Number(log.value) || 0), 0);
-  const drops = today.filter((log) => log.type === "drop").length;
   setChip("activity-points", points > 0, t("popup.cplus.pointsToday", { count: formatNumber(points) }));
   // Compteur de Drops du jour masqué : il comptait mal (bug à corriger avant de le réafficher).
-  void drops;
   setChip("activity-drops", false, "");
 }
 
 // --- All channels sheet ---
+const SHEET_FOCUSABLE = 'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
+
+function trapSheetFocus(event) {
+  if (event.key !== "Tab") return;
+  const focusable = [...sheetEl.querySelectorAll(SHEET_FOCUSABLE)].filter((el) => el.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && (document.activeElement === first || !sheetEl.contains(document.activeElement))) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
 function openSheet() {
   if (!sheetEl) return;
   sheetEl.hidden = false;
   if (sheetScrimEl) sheetScrimEl.hidden = false;
   renderSheet();
+  sheetEl.addEventListener("keydown", trapSheetFocus);
   sheetSearchEl?.focus();
 }
 
 function closeSheet({ restoreFocus = true } = {}) {
   if (!sheetEl || sheetEl.hidden) return;
   sheetEl.hidden = true;
+  sheetEl.removeEventListener("keydown", trapSheetFocus);
   if (sheetScrimEl) sheetScrimEl.hidden = true;
   state.sheetQuery = "";
   if (sheetSearchEl) sheetSearchEl.value = "";
@@ -881,17 +949,11 @@ async function handleSavePseudo() {
 
 function renderPreferences() {
   const prefs = state.preferences || defaultPreferences;
-  if (liveNotificationsToggle) {
-    liveNotificationsToggle.checked = prefs.liveNotifications !== false;
-  }
-  if (gameAlertsToggle) {
-    gameAlertsToggle.checked = Boolean(prefs.gameNotifications);
-  }
-  if (titleAlertsToggle) {
-    titleAlertsToggle.checked = Boolean(prefs.titleNotifications);
-  }
   if (soundsToggle) {
     soundsToggle.checked = prefs.soundsEnabled !== false;
+  }
+  if (backgroundRaidAlertsToggle) {
+    backgroundRaidAlertsToggle.checked = prefs.backgroundRaidAlerts === true;
   }
   if (autoClaimToggle) {
     autoClaimToggle.checked = prefs.autoClaimChannelPoints !== false;
@@ -912,7 +974,7 @@ function renderPreferences() {
     hideTwitchExtensionsToggle.checked = Boolean(prefs.hideTwitchExtensions);
   }
   if (autoCancelRaidsToggle) {
-    autoCancelRaidsToggle.checked = prefs.autoCancelRaids !== false;
+    autoCancelRaidsToggle.checked = prefs.autoCancelRaids === true;
   }
   if (preventTabDiscardToggle) {
     preventTabDiscardToggle.checked = prefs.preventTabDiscard !== false;
@@ -923,8 +985,20 @@ function renderPreferences() {
   if (tabLiveIconToggle) {
     tabLiveIconToggle.checked = prefs.enableTabLiveIcon !== false;
   }
+  if (keepQualityToggle) {
+    keepQualityToggle.checked = prefs.keepQualityInBackground === true;
+  }
+  if (pipButtonToggle) {
+    pipButtonToggle.checked = prefs.enablePipButton !== false;
+  }
   if (autoRefreshToggle) {
     autoRefreshToggle.checked = prefs.autoRefreshPlayerErrors !== false;
+  }
+  if (clipDownloadToggle) {
+    clipDownloadToggle.checked = prefs.enableClipDownload !== false;
+  }
+  if (playerQualitySelect) {
+    playerQualitySelect.value = prefs.playerQuality || "auto";
   }
   if (fastForwardToggle) {
     fastForwardToggle.checked = prefs.enableFastForwardButton !== false;
@@ -943,7 +1017,7 @@ function renderPreferences() {
     }
   }
   if (communityBadgeToggle) {
-    communityBadgeToggle.checked = prefs.communityBadge !== false;
+    communityBadgeToggle.checked = prefs.communityBadge === true;
   }
   if (previewsEnabledToggle) {
     previewsEnabledToggle.checked = prefs.previewsEnabled !== false;
@@ -1499,56 +1573,26 @@ async function updatePreferences(updates) {
     ...(result?.preferences || payload),
   };
   renderPreferences();
-  showFeedback(t("popup.settings.saved"));
 
-  if ("liveNotifications" in updates) {
-    const messageKey = updates.liveNotifications
-      ? "popup.preferences.liveEnabled"
-      : "popup.preferences.liveDisabled";
-    showFeedback(t(messageKey), "success");
-  }
-
-  if ("gameNotifications" in updates) {
-    const messageKey = updates.gameNotifications
-      ? "popup.preferences.gameEnabled"
-      : "popup.preferences.gameDisabled";
-    showFeedback(t(messageKey), "success");
-  }
-
-  if ("soundsEnabled" in updates) {
-    const messageKey = updates.soundsEnabled
-      ? "popup.preferences.soundsEnabled"
-      : "popup.preferences.soundsDisabled";
-    showFeedback(t(messageKey), "success");
-  }
-
-  if ("autoClaimChannelPoints" in updates) {
-    const messageKey = updates.autoClaimChannelPoints
-      ? "popup.preferences.autoClaimEnabled"
-      : "popup.preferences.autoClaimDisabled";
-    showFeedback(t(messageKey), "success");
-  }
-
-  if ("autoRefreshPlayerErrors" in updates) {
-    const messageKey = updates.autoRefreshPlayerErrors
-      ? "popup.preferences.autoRefreshEnabled"
-      : "popup.preferences.autoRefreshDisabled";
-    showFeedback(t(messageKey), "success");
-  }
-
-  if ("enableFastForwardButton" in updates) {
-    const messageKey = updates.enableFastForwardButton
-      ? "popup.preferences.fastForwardEnabled"
-      : "popup.preferences.fastForwardDisabled";
-    showFeedback(t(messageKey), "success");
-  }
-
-  if ("watchTimeTracker" in updates) {
-    const messageKey = updates.watchTimeTracker
-      ? "popup.preferences.watchTimeEnabled"
-      : "popup.preferences.watchTimeDisabled";
-    showFeedback(t(messageKey), "success");
-  }
+  // Un seul toast par reglage : le message specifique quand la cle en a un,
+  // le « Reglage enregistre » generique sinon (avant, les deux s'empilaient).
+  const SPECIFIC_TOASTS = {
+    liveNotifications: ["popup.preferences.liveEnabled", "popup.preferences.liveDisabled"],
+    gameNotifications: ["popup.preferences.gameEnabled", "popup.preferences.gameDisabled"],
+    soundsEnabled: ["popup.preferences.soundsEnabled", "popup.preferences.soundsDisabled"],
+    autoClaimChannelPoints: ["popup.preferences.autoClaimEnabled", "popup.preferences.autoClaimDisabled"],
+    autoRefreshPlayerErrors: ["popup.preferences.autoRefreshEnabled", "popup.preferences.autoRefreshDisabled"],
+    enablePipButton: ["popup.preferences.pipButtonEnabled", "popup.preferences.pipButtonDisabled"],
+    enableClipDownload: ["popup.preferences.clipDownloadEnabled", "popup.preferences.clipDownloadDisabled"],
+    keepQualityInBackground: ["popup.preferences.keepQualityEnabled", "popup.preferences.keepQualityDisabled"],
+    enableFastForwardButton: ["popup.preferences.fastForwardEnabled", "popup.preferences.fastForwardDisabled"],
+    watchTimeTracker: ["popup.preferences.watchTimeEnabled", "popup.preferences.watchTimeDisabled"],
+  };
+  const specificKey = Object.keys(SPECIFIC_TOASTS).find((key) => key in updates);
+  const toastKey = specificKey
+    ? SPECIFIC_TOASTS[specificKey][updates[specificKey] ? 0 : 1]
+    : "popup.settings.saved";
+  showFeedback(t(toastKey));
 
   return true;
 }
@@ -1742,6 +1786,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         setActiveTab(tabName);
       });
     });
+    // Motif ARIA tabs : flèches + Home/End avec tabindex itinérant (setActiveTab
+    // gère déjà tabIndex), sur le modèle du menu latéral des réglages.
+    document.querySelector(".tabs")?.addEventListener("keydown", (event) => {
+      const list = Array.from(tabs);
+      const index = list.indexOf(document.activeElement);
+      if (index === -1) return;
+      const targets = {
+        ArrowRight: list[(index + 1) % list.length],
+        ArrowLeft: list[(index - 1 + list.length) % list.length],
+        Home: list[0],
+        End: list[list.length - 1],
+      };
+      const next = targets[event.key];
+      if (!next) return;
+      event.preventDefault();
+      setActiveTab(next.dataset.tab);
+      next.focus();
+    });
     initMenuNav();
     initHomeInteractions();
     initFeatures().catch((error) => console.warn("[popup] features init failed:", error));
@@ -1819,17 +1881,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     addStreamerForm?.addEventListener("submit", handleAddStreamer);
-    liveNotificationsToggle?.addEventListener("change", (e) => {
-      updatePreferences({ liveNotifications: e.target.checked });
-    });
-    gameAlertsToggle?.addEventListener("change", (e) => {
-      updatePreferences({ gameNotifications: e.target.checked });
-    });
-    titleAlertsToggle?.addEventListener("change", (e) => {
-      updatePreferences({ titleNotifications: e.target.checked });
-    });
     soundsToggle?.addEventListener("change", (e) => {
       updatePreferences({ soundsEnabled: e.target.checked });
+    });
+    backgroundRaidAlertsToggle?.addEventListener("change", (e) => {
+      // Suivre les raids rapporte des points : activer le détecteur coupe
+      // l'annulation automatique, qui annulerait le raid avant qu'on le suive.
+      const enableRaidAlerts = e.target.checked;
+      updatePreferences({
+        backgroundRaidAlerts: enableRaidAlerts,
+        ...(enableRaidAlerts ? { autoCancelRaids: false } : {}),
+      });
+      if (enableRaidAlerts && autoCancelRaidsToggle) {
+        autoCancelRaidsToggle.checked = false;
+      }
     });
     autoClaimToggle?.addEventListener("change", (e) => {
       updatePreferences({ autoClaimChannelPoints: e.target.checked });
@@ -1861,8 +1926,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     tabLiveIconToggle?.addEventListener("change", (e) => {
       updatePreferences({ enableTabLiveIcon: e.target.checked });
     });
+    keepQualityToggle?.addEventListener("change", (e) => {
+      updatePreferences({ keepQualityInBackground: e.target.checked });
+    });
+    pipButtonToggle?.addEventListener("change", (e) => {
+      updatePreferences({ enablePipButton: e.target.checked });
+    });
     autoRefreshToggle?.addEventListener("change", (e) => {
       updatePreferences({ autoRefreshPlayerErrors: e.target.checked });
+    });
+    clipDownloadToggle?.addEventListener("change", (e) => {
+      updatePreferences({ enableClipDownload: e.target.checked });
+    });
+    playerQualitySelect?.addEventListener("change", (e) => {
+      updatePreferences({ playerQuality: e.target.value });
     });
     previewsEnabledToggle?.addEventListener("change", (e) => {
       updatePreferences({ previewsEnabled: e.target.checked });
@@ -1928,7 +2005,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const custom = mode === "custom";
         if (badgeColorValue) badgeColorValue.hidden = !custom;
         updatePreferences({
-          communityBadgeColor: custom ? badgeColorValue?.value || "#9147ff" : mode,
+          communityBadgeColor: custom ? badgeColorValue?.value || "#9146ff" : mode,
         });
       });
       // "change" et non "input" : le selecteur de couleur emet en continu
@@ -1975,19 +2052,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-    if (saveBlockedUsersButton) {
-      saveBlockedUsersButton.addEventListener("click", async () => {
-        const blocked = blockedUsersInput?.value || "";
-        const ok = await updatePreferences({
-          chatBlockedUsers: blocked,
-        });
-        if (ok) {
-          showFeedback(t("popup.feedback.blockedUsersSaved"), "success");
-          markButtonSuccess(saveBlockedUsersButton);
-        }
-      });
-    }
-
     languageOptions?.addEventListener("click", handleLanguageClick);
 
     testNotificationButton?.addEventListener("click", async () => {
@@ -2022,8 +2086,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 4. Background Sync (Silent)
     sendMessage({ type: "getStreamers" }).catch(() => {});
 
-    // Free Kick embed connections immediately on popup close so the next
-    // open isn't delayed by lingering network streams.
+    // Libère les connexions de l'embed Kick dès la fermeture de la popup pour
+    // que la prochaine ouverture ne soit pas ralentie par des flux résiduels.
     window.addEventListener("pagehide", () => {
       document.querySelectorAll(".hover-player-wrap iframe").forEach((f) => {
         f.src = "about:blank";

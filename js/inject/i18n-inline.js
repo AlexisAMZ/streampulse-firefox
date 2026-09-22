@@ -16,6 +16,9 @@
 
   var STRINGS = {
   "fr": {
+    "enhancer": {
+      "jumpToLive": "Aller au direct (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Favoris StreamPulse",
       "pin": "Ajouter aux favoris StreamPulse",
@@ -69,6 +72,12 @@
     "player": {
       "skipToLive": "Rattraper le direct",
       "holdToFastForward": "Maintenir pour avance x2",
+      "volumeBoostLabel": "Amplifier le volume",
+      "volumeBoostHint": "Clic : marche arrêt · molette ou flèches : régler, jusqu'à 200 %",
+      "pictureInPicture": "Picture-in-Picture",
+      "clipDownload": "Télécharger le clip (MP4)",
+      "clipDownloading": "Téléchargement du clip…",
+      "clipDownloadFailed": "Échec du téléchargement, réessayez",
       "latencyEmpty": "Latence : --",
       "latencyValue": "Latence : {{value}}s",
       "offline": "HORS LIGNE"
@@ -86,7 +95,7 @@
         "autoClaimDropsTitle": "Auto-claim Drops Twitch",
         "autoClaimMomentsTitle": "Auto-claim Moments Twitch",
         "autoCancelRaidsTitle": "Annulation automatique des Raids",
-        "autoRefreshTitle": "Actualisation automatique",
+        "autoRefreshTitle": "Relancer le lecteur en cas d'erreur",
         "fastForwardTitle": "Bouton d'avance rapide",
         "hideTwitchExtensionsTitle": "Masquer les extensions Twitch",
         "communityBadgeTitle": "Badge communautaire",
@@ -97,7 +106,7 @@
         "previewsSurfaceDirectory": "Répertoire",
         "previewsSurfaceSidebar": "Sidebar",
         "previewsAudioTitle": "Audio (mode vidéo)",
-        "liveNotificationsTitle": "Notifications Chrome",
+        "liveNotificationsTitle": "Notifications Firefox",
         "gameAlertsTitle": "Alertes changement de catégorie",
         "titleAlertsTitle": "Alertes changement de titre",
         "soundsTitle": "Son des notifications"
@@ -126,6 +135,9 @@
     }
   },
   "en": {
+    "enhancer": {
+      "jumpToLive": "Jump to Live (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse favorites",
       "pin": "Add to StreamPulse favorites",
@@ -179,6 +191,12 @@
     "player": {
       "skipToLive": "Skip to live",
       "holdToFastForward": "Hold to fast-forward x2",
+      "volumeBoostLabel": "Boost the volume",
+      "volumeBoostHint": "Click: on/off · scroll or arrows: adjust, up to 200%",
+      "pictureInPicture": "Picture-in-Picture",
+      "clipDownload": "Download clip (MP4)",
+      "clipDownloading": "Downloading clip…",
+      "clipDownloadFailed": "Download failed, try again",
       "latencyEmpty": "Latency: --",
       "latencyValue": "Latency: {{value}}s",
       "offline": "OFFLINE"
@@ -196,7 +214,7 @@
         "autoClaimDropsTitle": "Auto-claim Twitch Drops",
         "autoClaimMomentsTitle": "Auto-claim Twitch Moments",
         "autoCancelRaidsTitle": "Auto-cancel Raids",
-        "autoRefreshTitle": "Automatic refresh",
+        "autoRefreshTitle": "Recover the player on errors",
         "fastForwardTitle": "Fast-forward button",
         "hideTwitchExtensionsTitle": "Hide Twitch extensions",
         "communityBadgeTitle": "Community badge",
@@ -207,7 +225,7 @@
         "previewsSurfaceDirectory": "Directory",
         "previewsSurfaceSidebar": "Sidebar",
         "previewsAudioTitle": "Audio (video mode)",
-        "liveNotificationsTitle": "Chrome notifications",
+        "liveNotificationsTitle": "Firefox notifications",
         "gameAlertsTitle": "Category change alerts",
         "titleAlertsTitle": "Title change alerts",
         "soundsTitle": "Notification sound"
@@ -236,6 +254,9 @@
     }
   },
   "es": {
+    "enhancer": {
+      "jumpToLive": "Ir al directo (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Favoritos de StreamPulse",
       "pin": "Añadir a favoritos de StreamPulse",
@@ -289,6 +310,12 @@
     "player": {
       "skipToLive": "Volver al directo",
       "holdToFastForward": "Mantén pulsado para avanzar x2",
+      "volumeBoostLabel": "Amplificar el volumen",
+      "volumeBoostHint": "Clic: activar o desactivar · rueda o flechas: ajustar, hasta 200 %",
+      "pictureInPicture": "Imagen en imagen",
+      "clipDownload": "Descargar clip (MP4)",
+      "clipDownloading": "Descargando clip…",
+      "clipDownloadFailed": "Error en la descarga, inténtalo de nuevo",
       "latencyEmpty": "Latencia: --",
       "latencyValue": "Latencia: {{value}}s",
       "offline": "DESCONECTADO"
@@ -306,7 +333,7 @@
         "autoClaimDropsTitle": "Reclamar Drops de Twitch automáticamente",
         "autoClaimMomentsTitle": "Reclamar Moments de Twitch automáticamente",
         "autoCancelRaidsTitle": "Cancelar raids automáticamente",
-        "autoRefreshTitle": "Actualización automática",
+        "autoRefreshTitle": "Recuperar el reproductor si falla",
         "fastForwardTitle": "Botón de avance rápido",
         "hideTwitchExtensionsTitle": "Ocultar extensiones de Twitch",
         "communityBadgeTitle": "Insignia comunitaria",
@@ -317,7 +344,7 @@
         "previewsSurfaceDirectory": "Directorio",
         "previewsSurfaceSidebar": "Barra lateral",
         "previewsAudioTitle": "Audio (modo vídeo)",
-        "liveNotificationsTitle": "Notificaciones de Chrome",
+        "liveNotificationsTitle": "Notificaciones de Firefox",
         "gameAlertsTitle": "Alertas de cambio de categoría",
         "titleAlertsTitle": "Alertas de cambio de título",
         "soundsTitle": "Sonido de las notificaciones"
@@ -346,6 +373,9 @@
     }
   },
   "pt-BR": {
+    "enhancer": {
+      "jumpToLive": "Ir para o ao vivo (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Favoritos do StreamPulse",
       "pin": "Adicionar aos favoritos do StreamPulse",
@@ -399,6 +429,12 @@
     "player": {
       "skipToLive": "Voltar ao ao vivo",
       "holdToFastForward": "Segure para avançar x2",
+      "volumeBoostLabel": "Amplificar o volume",
+      "volumeBoostHint": "Clique: liga ou desliga · roda ou setas: ajustar, até 200%",
+      "pictureInPicture": "Picture-in-Picture",
+      "clipDownload": "Baixar clipe (MP4)",
+      "clipDownloading": "Baixando clipe…",
+      "clipDownloadFailed": "Falha no download, tente novamente",
       "latencyEmpty": "Latência: --",
       "latencyValue": "Latência: {{value}}s",
       "offline": "OFFLINE"
@@ -416,7 +452,7 @@
         "autoClaimDropsTitle": "Resgatar Drops da Twitch automaticamente",
         "autoClaimMomentsTitle": "Resgatar Moments da Twitch automaticamente",
         "autoCancelRaidsTitle": "Cancelar raids automaticamente",
-        "autoRefreshTitle": "Atualização automática",
+        "autoRefreshTitle": "Recuperar o player em caso de erro",
         "fastForwardTitle": "Botão de avanço rápido",
         "hideTwitchExtensionsTitle": "Ocultar extensões da Twitch",
         "communityBadgeTitle": "Distintivo comunitário",
@@ -427,7 +463,7 @@
         "previewsSurfaceDirectory": "Diretório",
         "previewsSurfaceSidebar": "Barra lateral",
         "previewsAudioTitle": "Áudio (modo vídeo)",
-        "liveNotificationsTitle": "Notificações do Chrome",
+        "liveNotificationsTitle": "Notificações do Firefox",
         "gameAlertsTitle": "Alertas de mudança de categoria",
         "titleAlertsTitle": "Alertas de mudança de título",
         "soundsTitle": "Som das notificações"
@@ -456,6 +492,9 @@
     }
   },
   "de": {
+    "enhancer": {
+      "jumpToLive": "Zum Live-Stream springen (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse-Favoriten",
       "pin": "Zu StreamPulse-Favoriten hinzufügen",
@@ -509,6 +548,12 @@
     "player": {
       "skipToLive": "Weiter zum Leben",
       "holdToFastForward": "Halten Sie die Taste gedrückt, um x2",
+      "volumeBoostLabel": "Lautstärke verstärken",
+      "volumeBoostHint": "Klick: ein oder aus · Scrollen oder Pfeile: bis 200 %",
+      "pictureInPicture": "Bild-in-Bild",
+      "clipDownload": "Clip herunterladen (MP4)",
+      "clipDownloading": "Clip wird heruntergeladen…",
+      "clipDownloadFailed": "Download fehlgeschlagen, versuche es erneut",
       "latencyEmpty": "vorzuspulen Latenz: --",
       "latencyValue": "Latenz: {{value}}s",
       "offline": "OFFLINE"
@@ -526,7 +571,7 @@
         "autoClaimDropsTitle": "Beanspruchen Sie Twitch Drops automatisch",
         "autoClaimMomentsTitle": "Beanspruchen Sie automatisch Twitch-Momente",
         "autoCancelRaidsTitle": "Raids automatisch abbrechen",
-        "autoRefreshTitle": "Automatische Aktualisierung",
+        "autoRefreshTitle": "Player bei Fehlern wiederherstellen",
         "fastForwardTitle": "Schnellvorlauf-Taste",
         "hideTwitchExtensionsTitle": "Twitch-Erweiterungen ausblenden",
         "communityBadgeTitle": "Community-Abzeichen",
@@ -537,7 +582,7 @@
         "previewsSurfaceDirectory": "Verzeichnis",
         "previewsSurfaceSidebar": "Seitenleiste",
         "previewsAudioTitle": "Audio (Videomodus)",
-        "liveNotificationsTitle": "Chrome-Benachrichtigungen",
+        "liveNotificationsTitle": "Firefox-Benachrichtigungen",
         "gameAlertsTitle": "Benachrichtigungen zu Kategorieänderungen",
         "titleAlertsTitle": "Benachrichtigungen bei Titeländerung",
         "soundsTitle": "Benachrichtigungston"
@@ -566,6 +611,9 @@
     }
   },
   "it": {
+    "enhancer": {
+      "jumpToLive": "Vai alla diretta (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Preferiti StreamPulse",
       "pin": "Aggiungi ai preferiti StreamPulse",
@@ -619,6 +667,12 @@
     "player": {
       "skipToLive": "Passa alla diretta",
       "holdToFastForward": "Tieni premuto per avanzare velocemente x2",
+      "volumeBoostLabel": "Amplifica il volume",
+      "volumeBoostHint": "Clic: attiva o disattiva · rotella o frecce: regola, fino al 200%",
+      "pictureInPicture": "Picture-in-Picture",
+      "clipDownload": "Scarica clip (MP4)",
+      "clipDownloading": "Download della clip…",
+      "clipDownloadFailed": "Download non riuscito, riprova",
       "latencyEmpty": "Latenza: --",
       "latencyValue": "Latenza: {{value}}s",
       "offline": "NON IN LINEA"
@@ -636,7 +690,7 @@
         "autoClaimDropsTitle": "Riscuoti automaticamente i Twitch Drops",
         "autoClaimMomentsTitle": "Rivendica automaticamente i momenti Twitch",
         "autoCancelRaidsTitle": "Annulla automaticamente i raid",
-        "autoRefreshTitle": "Aggiornamento automatico",
+        "autoRefreshTitle": "Ripristina il player in caso di errore",
         "fastForwardTitle": "Pulsante di avanzamento veloce",
         "hideTwitchExtensionsTitle": "Nascondi le estensioni Twitch",
         "communityBadgeTitle": "Badge della comunità",
@@ -647,7 +701,7 @@
         "previewsSurfaceDirectory": "Elenco",
         "previewsSurfaceSidebar": "Barra laterale",
         "previewsAudioTitle": "Audio (modalità video)",
-        "liveNotificationsTitle": "Notifiche di Chrome",
+        "liveNotificationsTitle": "Notifiche di Firefox",
         "gameAlertsTitle": "Avvisi di cambio di categoria",
         "titleAlertsTitle": "Avvisi di cambio titolo",
         "soundsTitle": "Suono di notifica"
@@ -676,6 +730,9 @@
     }
   },
   "pl": {
+    "enhancer": {
+      "jumpToLive": "Przejdź na żywo (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Ulubione StreamPulse",
       "pin": "Dodaj do ulubionych StreamPulse",
@@ -729,6 +786,12 @@
     "player": {
       "skipToLive": "Przejdź do transmisji na żywo",
       "holdToFastForward": "Przytrzymaj, aby przewinąć do przodu x2",
+      "volumeBoostLabel": "Wzmocnij głośność",
+      "volumeBoostHint": "Klik: włącz lub wyłącz · kółko lub strzałki: do 200%",
+      "pictureInPicture": "Obraz w obrazie",
+      "clipDownload": "Pobierz klip (MP4)",
+      "clipDownloading": "Pobieranie klipu…",
+      "clipDownloadFailed": "Pobieranie nie powiodło się, spróbuj ponownie",
       "latencyEmpty": "Opóźnienie: --",
       "latencyValue": "Opóźnienie: {{value}} s",
       "offline": "OFFLINE"
@@ -746,7 +809,7 @@
         "autoClaimDropsTitle": "Automatyczne odbieranie Twitch Drops",
         "autoClaimMomentsTitle": "Automatyczne odbieranie chwil Twitch",
         "autoCancelRaidsTitle": "Automatyczne anulowanie nalotów",
-        "autoRefreshTitle": "Automatyczne odświeżanie",
+        "autoRefreshTitle": "Napraw odtwarzacz przy błędzie",
         "fastForwardTitle": "Przycisk przewijania do przodu",
         "hideTwitchExtensionsTitle": "Ukryj rozszerzenia Twitcha",
         "communityBadgeTitle": "Odznaka społeczności",
@@ -757,7 +820,7 @@
         "previewsSurfaceDirectory": "Katalog",
         "previewsSurfaceSidebar": "Pasek boczny",
         "previewsAudioTitle": "Dźwięk (tryb wideo)",
-        "liveNotificationsTitle": "Powiadomienia Chrome",
+        "liveNotificationsTitle": "Powiadomienia Firefox",
         "gameAlertsTitle": "Alerty o zmianie kategorii",
         "titleAlertsTitle": "Alerty o zmianie tytułu",
         "soundsTitle": "Dźwięk powiadomienia"
@@ -786,6 +849,9 @@
     }
   },
   "tr": {
+    "enhancer": {
+      "jumpToLive": "Canlı yayına git (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse favorileri",
       "pin": "StreamPulse favorilerine ekle",
@@ -839,6 +905,12 @@
     "player": {
       "skipToLive": "Canlı yayına atla",
       "holdToFastForward": "Hızlı ileri sarma için basılı tutun x2",
+      "volumeBoostLabel": "Sesi güçlendir",
+      "volumeBoostHint": "Tık: aç veya kapat · tekerlek veya oklar: %200'e kadar ayarla",
+      "pictureInPicture": "Resim içinde resim",
+      "clipDownload": "Klibi indir (MP4)",
+      "clipDownloading": "Klip indiriliyor…",
+      "clipDownloadFailed": "İndirme başarısız, tekrar dene",
       "latencyEmpty": "Gecikme: --",
       "latencyValue": "Gecikme süresi: {{value}} saniye",
       "offline": "ÇEVRİMDIŞI"
@@ -856,7 +928,7 @@
         "autoClaimDropsTitle": "Twitch Drops'u otomatik olarak talep et",
         "autoClaimMomentsTitle": "Twitch Moments'ı otomatik olarak talep et",
         "autoCancelRaidsTitle": "Baskınları Otomatik Olarak İptal Et",
-        "autoRefreshTitle": "Otomatik yenileme",
+        "autoRefreshTitle": "Hata olunca oynatıcıyı kurtar",
         "fastForwardTitle": "Hızlı ileri sarma düğmesi",
         "hideTwitchExtensionsTitle": "Twitch uzantılarını gizle",
         "communityBadgeTitle": "Topluluk rozeti",
@@ -867,7 +939,7 @@
         "previewsSurfaceDirectory": "Dizin",
         "previewsSurfaceSidebar": "Kenar çubuğu",
         "previewsAudioTitle": "Ses (video modu)",
-        "liveNotificationsTitle": "Chrome bildirimleri",
+        "liveNotificationsTitle": "Firefox bildirimleri",
         "gameAlertsTitle": "Kategori değişikliği uyarıları",
         "titleAlertsTitle": "Başlık değişikliği uyarıları",
         "soundsTitle": "Bildirim sesi"
@@ -896,6 +968,9 @@
     }
   },
   "ru": {
+    "enhancer": {
+      "jumpToLive": "Перейти к прямому эфиру (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "Избранное StreamPulse",
       "pin": "Добавить в избранное StreamPulse",
@@ -949,6 +1024,12 @@
     "player": {
       "skipToLive": "Перейти к трансляции",
       "holdToFastForward": "Удерживайте для ускоренного просмотра в 2 раза",
+      "volumeBoostLabel": "Усилить громкость",
+      "volumeBoostHint": "Клик: вкл или выкл · колесо или стрелки: до 200 %",
+      "pictureInPicture": "Картинка в картинке",
+      "clipDownload": "Скачать клип (MP4)",
+      "clipDownloading": "Скачивание клипа…",
+      "clipDownloadFailed": "Не удалось скачать, попробуйте снова",
       "latencyEmpty": "Задержка: --",
       "latencyValue": "Задержка: {{value}} с",
       "offline": "ОФЛАЙН"
@@ -966,7 +1047,7 @@
         "autoClaimDropsTitle": "Автоматическое получение призов Twitch Drops",
         "autoClaimMomentsTitle": "Автоматическое добавление моментов Twitch",
         "autoCancelRaidsTitle": "Автоматическая отмена рейдов",
-        "autoRefreshTitle": "Автоматическое обновление",
+        "autoRefreshTitle": "Восстанавливать плеер при ошибке",
         "fastForwardTitle": "Кнопка «Перемотка вперед»",
         "hideTwitchExtensionsTitle": "Скрыть расширения Twitch",
         "communityBadgeTitle": "Значок сообщества",
@@ -977,7 +1058,7 @@
         "previewsSurfaceDirectory": "Справочник",
         "previewsSurfaceSidebar": "Боковая панель",
         "previewsAudioTitle": "Аудио (режим видео)",
-        "liveNotificationsTitle": "Уведомления Chrome",
+        "liveNotificationsTitle": "Уведомления Firefox",
         "gameAlertsTitle": "Уведомления об изменении категории",
         "titleAlertsTitle": "Оповещения об изменении названия",
         "soundsTitle": "Звук уведомления"
@@ -1006,6 +1087,9 @@
     }
   },
   "ja": {
+    "enhancer": {
+      "jumpToLive": "ライブに移動 (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse お気に入り",
       "pin": "StreamPulse お気に入りに追加",
@@ -1059,6 +1143,12 @@
     "player": {
       "skipToLive": "ライブへスキップ",
       "holdToFastForward": "長押しで早送り（2倍速）",
+      "volumeBoostLabel": "音量をブースト",
+      "volumeBoostHint": "クリック：オン/オフ · ホイールや矢印：最大200%まで調整",
+      "pictureInPicture": "ピクチャー・イン・ピクチャー",
+      "clipDownload": "クリップをダウンロード (MP4)",
+      "clipDownloading": "クリップをダウンロード中…",
+      "clipDownloadFailed": "ダウンロードに失敗しました。もう一度お試しください",
       "latencyEmpty": "レイテンシー：--",
       "latencyValue": "遅延：{{value}}秒",
       "offline": "オフライン"
@@ -1076,7 +1166,7 @@
         "autoClaimDropsTitle": "Twitch Dropsの自動受け取り",
         "autoClaimMomentsTitle": "Twitch Momentsの自動申請",
         "autoCancelRaidsTitle": "レイドの自動キャンセル",
-        "autoRefreshTitle": "自動更新",
+        "autoRefreshTitle": "エラー時にプレーヤーを復帰させる",
         "fastForwardTitle": "早送りボタン",
         "hideTwitchExtensionsTitle": "Twitchの拡張機能を非表示にする",
         "communityBadgeTitle": "コミュニティバッジ",
@@ -1087,7 +1177,7 @@
         "previewsSurfaceDirectory": "ディレクトリ",
         "previewsSurfaceSidebar": "サイドバー",
         "previewsAudioTitle": "音声（動画モード）",
-        "liveNotificationsTitle": "Chromeの通知",
+        "liveNotificationsTitle": "Firefoxの通知",
         "gameAlertsTitle": "カテゴリ変更の通知",
         "titleAlertsTitle": "タイトル変更の通知",
         "soundsTitle": "通知音"
@@ -1116,6 +1206,9 @@
     }
   },
   "ko": {
+    "enhancer": {
+      "jumpToLive": "라이브로 이동 (StreamPulse)"
+    },
     "twitchUi": {
       "favorites": "StreamPulse 즐겨찾기",
       "pin": "StreamPulse 즐겨찾기에 추가",
@@ -1169,6 +1262,12 @@
     "player": {
       "skipToLive": "라이브로 건너뛰기",
       "holdToFastForward": "길게 누르면 2배속으로 빨리 감기",
+      "volumeBoostLabel": "음량 증폭",
+      "volumeBoostHint": "클릭: 켜기/끄기 · 휠 또는 화살표: 최대 200%까지 조절",
+      "pictureInPicture": "PIP 모드",
+      "clipDownload": "클립 다운로드 (MP4)",
+      "clipDownloading": "클립 다운로드 중…",
+      "clipDownloadFailed": "다운로드에 실패했습니다. 다시 시도하세요",
       "latencyEmpty": "지연 시간: --",
       "latencyValue": "지연 시간: {{value}}초",
       "offline": "오프라인"
@@ -1186,7 +1285,7 @@
         "autoClaimDropsTitle": "Twitch Drops 자동 수령",
         "autoClaimMomentsTitle": "Twitch 모멘트 자동 클레임",
         "autoCancelRaidsTitle": "레이드 자동 취소",
-        "autoRefreshTitle": "자동 새로고침",
+        "autoRefreshTitle": "오류 시 플레이어 복구",
         "fastForwardTitle": "빨리 감기 버튼",
         "hideTwitchExtensionsTitle": "Twitch 확장 프로그램 숨기기",
         "communityBadgeTitle": "커뮤니티 배지",
@@ -1197,7 +1296,7 @@
         "previewsSurfaceDirectory": "목록",
         "previewsSurfaceSidebar": "사이드바",
         "previewsAudioTitle": "오디오 (동영상 모드)",
-        "liveNotificationsTitle": "Chrome 알림",
+        "liveNotificationsTitle": "Firefox 알림",
         "gameAlertsTitle": "카테고리 변경 알림",
         "titleAlertsTitle": "제목 변경 알림",
         "soundsTitle": "알림 소리"
@@ -1222,556 +1321,6 @@
         "neon": "네온",
         "preview": "채팅 미리보기",
         "sampleName": "내닉네임"
-      }
-    }
-  },
-  "id": {
-    "twitchUi": {
-      "favorites": "Favorit StreamPulse",
-      "pin": "Tambahkan ke favorit StreamPulse",
-      "unpin": "Hapus dari favorit StreamPulse",
-      "offline": "Offline",
-      "emptyFavorites": "Arahkan ke kanal yang diikuti lalu klik bintang.",
-      "drawerTitle": "Pengaturan",
-      "tabGeneral": "Umum",
-      "tabPreviews": "Pratinjau",
-      "tabAlerts": "Peringatan",
-      "close": "Tutup",
-      "fullPage": "Halaman penuh",
-      "plusOnly": "Khusus StreamPulse+",
-      "discoverPlus": "Lihat StreamPulse+",
-      "chatRow": "Efek StreamPulse+",
-      "chatRowNote": "Dilihat pengguna StreamPulse lain."
-    },
-    "badge": {
-      "lifetime": "Anggota seumur hidup",
-      "months": "Berlangganan {{count}} bulan",
-      "monthOne": "Berlangganan 1 bulan",
-      "newMember": "Pelanggan baru",
-      "freeLine": "Pengguna ekstensi"
-    },
-    "topbar": {
-      "previews": "Pratinjau saat mengarahkan kursor",
-      "thisChannel": "Kanal ini",
-      "badgeColor": "Warna lencana",
-      "badgeAuthor": "Nama",
-      "badgeTheme": "Tema",
-      "badgeCustom": "Khusus",
-      "liveNow": "Sedang live",
-      "noneLive": "Tidak ada yang live",
-      "watchedHere": "Ditonton di sini",
-      "follow": "Ikuti",
-      "followed": "Diikuti",
-      "autoClaim": "Poin otomatis",
-      "fastForward": "Maju cepat",
-      "more": "+{{count}} lainnya",
-      "tip": "Menawarkan Bubble Tea",
-      "settings": "Semua pengaturan"
-    },
-    "quickFollow": {
-      "add": "Tambahkan ke StreamPulse",
-      "tracked": "Dilacak",
-      "remove": "Hapus dari StreamPulse",
-      "added": "{{name}} telah ditambahkan ke StreamPulse",
-      "removed": "{{name}} telah dihapus dari StreamPulse",
-      "error": "Tindakan gagal. Coba lagi."
-    },
-    "player": {
-      "skipToLive": "Lompat ke siaran langsung",
-      "holdToFastForward": "Tahan tombol untuk memajukan cepat x2",
-      "latencyEmpty": "Latensi: --",
-      "latencyValue": "Latensi: {{value}} detik",
-      "offline": "OFFLINE"
-    },
-    "chatFilter": {
-      "replacement": "Pesan dihapus oleh StreamPulse"
-    },
-    "shared": {
-      "settings": {
-        "groupAutomation": "Otomatisasi",
-        "groupPreviews": "Pratinjau saat mengarahkan kursor",
-        "groupNotifications": "Pemberitahuan",
-        "groupChat": "Kucing",
-        "autoClaimTitle": "Klaim poin saluran secara otomatis",
-        "autoClaimDropsTitle": "Klaim Otomatis Twitch Drops",
-        "autoClaimMomentsTitle": "Klaim Otomatis Twitch Moments",
-        "autoCancelRaidsTitle": "Pembatalan Otomatis Serangan",
-        "autoRefreshTitle": "Pembaruan otomatis",
-        "fastForwardTitle": "Tombol maju cepat",
-        "hideTwitchExtensionsTitle": "Sembunyikan ekstensi Twitch",
-        "communityBadgeTitle": "Lencana komunitas",
-        "previewsEnableTitle": "Pratinjau saat mengarahkan kursor",
-        "previewsModeTitle": "Mode Pratinjau",
-        "previewsModeImage": "Gambar",
-        "previewsModeVideo": "Video",
-        "previewsSurfaceDirectory": "Daftar",
-        "previewsSurfaceSidebar": "Bilah samping",
-        "previewsAudioTitle": "Audio (video mode)",
-        "liveNotificationsTitle": "Pemberitahuan Chrome",
-        "gameAlertsTitle": "Pemberitahuan perubahan kategori",
-        "titleAlertsTitle": "Peringatan perubahan judul",
-        "soundsTitle": "Suara notifikasi"
-      },
-      "cosmetics": {
-        "badgeTitle": "Efek lencana",
-        "badgeBody": "Menganimasikan logo StreamPulse di samping namamu.",
-        "nameTitle": "Nama spesial",
-        "nameBody": "Gradasi atau efek pada namamu, dilihat oleh pengguna StreamPulse.",
-        "none": "Tidak ada",
-        "pulse": "Denyut",
-        "shine": "Kilau",
-        "rainbow": "Pelangi",
-        "glow": "Pendar",
-        "bounce": "Pantul",
-        "spin": "Putar",
-        "flicker": "Neon berkedip",
-        "aurora": "Aurora",
-        "sunset": "Senja",
-        "lcd": "Layar LCD",
-        "gold": "Emas",
-        "neon": "Neon",
-        "preview": "Pratinjau chat",
-        "sampleName": "NamaMu"
-      }
-    }
-  },
-  "nl": {
-    "twitchUi": {
-      "favorites": "StreamPulse-favorieten",
-      "pin": "Toevoegen aan StreamPulse-favorieten",
-      "unpin": "Verwijderen uit StreamPulse-favorieten",
-      "offline": "Offline",
-      "emptyFavorites": "Beweeg over een gevolgd kanaal en klik op de ster.",
-      "drawerTitle": "Instellingen",
-      "tabGeneral": "Algemeen",
-      "tabPreviews": "Voorbeelden",
-      "tabAlerts": "Meldingen",
-      "close": "Sluiten",
-      "fullPage": "Volledige pagina",
-      "plusOnly": "Alleen StreamPulse+",
-      "discoverPlus": "Ontdek StreamPulse+",
-      "chatRow": "StreamPulse+-effecten",
-      "chatRowNote": "Zichtbaar voor andere StreamPulse-gebruikers."
-    },
-    "badge": {
-      "lifetime": "Lid voor het leven",
-      "months": "{{count}} maanden abonnee",
-      "monthOne": "1 maand abonnee",
-      "newMember": "Nieuwe abonnee",
-      "freeLine": "Gebruikt de extensie"
-    },
-    "topbar": {
-      "previews": "Voorbeelden bij aanwijzen",
-      "thisChannel": "Dit kanaal",
-      "badgeColor": "Kleur van de badge",
-      "badgeAuthor": "Naam",
-      "badgeTheme": "Thema",
-      "badgeCustom": "Eigen",
-      "liveNow": "Nu live",
-      "noneLive": "Niemand is live",
-      "watchedHere": "Hier gekeken",
-      "follow": "Volgen",
-      "followed": "Gevolgd",
-      "autoClaim": "Automatische punten",
-      "fastForward": "Snel vooruit",
-      "more": "+{{count}} meer",
-      "tip": "Bied een bubble tea aan",
-      "settings": "Alle instellingen"
-    },
-    "quickFollow": {
-      "add": "Toevoegen aan StreamPulse",
-      "tracked": "Gevolgd",
-      "remove": "Uit StreamPulse verwijderen",
-      "added": "{{name}} is toegevoegd aan StreamPulse",
-      "removed": "{{name}} is verwijderd uit StreamPulse",
-      "error": "De actie is mislukt. Probeer het nog eens."
-    },
-    "player": {
-      "skipToLive": "Ga naar live",
-      "holdToFastForward": "Houd ingedrukt om 2x sneller vooruit te spoelen",
-      "latencyEmpty": "Vertraging: --",
-      "latencyValue": "Vertraging: {{value}}s",
-      "offline": "OFFLINE"
-    },
-    "chatFilter": {
-      "replacement": "Bericht verwijderd door StreamPulse"
-    },
-    "shared": {
-      "settings": {
-        "groupAutomation": "Automatisering",
-        "groupPreviews": "Voorbeelden bij aanwijzen",
-        "groupNotifications": "Meldingen",
-        "groupChat": "Kat",
-        "autoClaimTitle": "Punten automatisch via het claimkanaal verzamelen",
-        "autoClaimDropsTitle": "Twitch Drops automatisch claimen",
-        "autoClaimMomentsTitle": "Twitch Moments automatisch claimen",
-        "autoCancelRaidsTitle": "Raids automatisch annuleren",
-        "autoRefreshTitle": "Automatisch vernieuwen",
-        "fastForwardTitle": "Knop 'Snel vooruitspoelen'",
-        "hideTwitchExtensionsTitle": "Twitch-extensies verbergen",
-        "communityBadgeTitle": "Community-badge",
-        "previewsEnableTitle": "Voorbeelden bij aanwijzen",
-        "previewsModeTitle": "Voorbeeldmodus",
-        "previewsModeImage": "Afbeelding",
-        "previewsModeVideo": "Video",
-        "previewsSurfaceDirectory": "Overzicht",
-        "previewsSurfaceSidebar": "Zijbalk",
-        "previewsAudioTitle": "Audio (videomodus)",
-        "liveNotificationsTitle": "Chrome-meldingen",
-        "gameAlertsTitle": "Meldingen bij wijzigingen in categorieën",
-        "titleAlertsTitle": "Meldingen bij titelwijziging",
-        "soundsTitle": "Meldingsgeluid"
-      },
-      "cosmetics": {
-        "badgeTitle": "Badge-effect",
-        "badgeBody": "Animeert het StreamPulse-logo naast je naam.",
-        "nameTitle": "Speciale naam",
-        "nameBody": "Een verloop of effect op je naam, zichtbaar voor StreamPulse-gebruikers.",
-        "none": "Geen",
-        "pulse": "Pulseren",
-        "shine": "Glans",
-        "rainbow": "Regenboog",
-        "glow": "Gloed",
-        "bounce": "Stuiter",
-        "spin": "Draaien",
-        "flicker": "Flikkerend neon",
-        "aurora": "Aurora",
-        "sunset": "Zonsondergang",
-        "lcd": "LCD-scherm",
-        "gold": "Goud",
-        "neon": "Neon",
-        "preview": "Chatvoorbeeld",
-        "sampleName": "JouwNaam"
-      }
-    }
-  },
-  "hi": {
-    "twitchUi": {
-      "favorites": "StreamPulse favorites",
-      "pin": "Add to StreamPulse favorites",
-      "unpin": "Remove from StreamPulse favorites",
-      "offline": "Offline",
-      "emptyFavorites": "Hover a followed channel and click the star.",
-      "drawerTitle": "Settings",
-      "tabGeneral": "General",
-      "tabPreviews": "Previews",
-      "tabAlerts": "Alerts",
-      "close": "Close",
-      "fullPage": "Full page",
-      "plusOnly": "StreamPulse+ only",
-      "discoverPlus": "Discover StreamPulse+",
-      "chatRow": "StreamPulse+ effects",
-      "chatRowNote": "Seen by other StreamPulse users."
-    },
-    "badge": {
-      "lifetime": "Lifetime member",
-      "months": "Subscribed for {{count}} months",
-      "monthOne": "Subscribed for 1 month",
-      "newMember": "New subscriber",
-      "freeLine": "Extension user"
-    },
-    "topbar": {
-      "previews": "पूर्वावलोकन पर होवर करें",
-      "thisChannel": "यह चैनल",
-      "badgeColor": "बैज का रंग",
-      "badgeAuthor": "उपयोगकर्ता नाम",
-      "badgeTheme": "विषय",
-      "badgeCustom": "रिवाज़",
-      "liveNow": "अब सीधा प्रसारण हो रहा है",
-      "noneLive": "अभी कोई नहीं रहता",
-      "watchedHere": "यहाँ देखा",
-      "follow": "अनुसरण करना",
-      "followed": "पालन ​​किया",
-      "autoClaim": "ऑटो चैनल पॉइंट",
-      "fastForward": "तेजी से आगे बढ़ना",
-      "more": "+{{count}} अधिक",
-      "tip": "बबल टी पेश करें",
-      "settings": "सभी सेटिंग्स"
-    },
-    "quickFollow": {
-      "add": "StreamPulse में जोड़ें",
-      "tracked": "ट्रैक",
-      "remove": "StreamPulse से हटाएं",
-      "added": "{{name}} को StreamPulse में जोड़ा गया",
-      "removed": "{{name}} को StreamPulse से हटा दिया गया",
-      "error": "क्रिया: विफल रही है। पुनः प्रयास करें।"
-    },
-    "player": {
-      "skipToLive": "जीना छोड़ें",
-      "holdToFastForward": "तेजी से आगे बढ़ने वाले x2 को दबाए रखें",
-      "latencyEmpty": "विलंबता:--",
-      "latencyValue": "विलंबता: {{value}}s",
-      "offline": "ऑफलाइन"
-    },
-    "chatFilter": {
-      "replacement": "StreamPulse द्वारा संदेश हटा दिया गया"
-    },
-    "shared": {
-      "settings": {
-        "groupAutomation": "स्वचालन",
-        "groupPreviews": "पूर्वावलोकन पर होवर करें",
-        "groupNotifications": "सूचनाएं",
-        "groupChat": "चैट",
-        "autoClaimTitle": "स्वत: दावा चैनल अंक",
-        "autoClaimDropsTitle": "स्वतः-दावा Twitch बूँदें",
-        "autoClaimMomentsTitle": "स्वत: दावा Twitch क्षण",
-        "autoCancelRaidsTitle": "छापे स्वत: रद्द करें",
-        "autoRefreshTitle": "स्वचालित ताज़ा",
-        "fastForwardTitle": "तेजी से आगे बढ़ने वाला बटन",
-        "hideTwitchExtensionsTitle": "Twitch एक्सटेंशन छुपाएं",
-        "communityBadgeTitle": "सामुदायिक बैज",
-        "previewsEnableTitle": "पूर्वावलोकन पर होवर करें",
-        "previewsModeTitle": "पूर्वावलोकन मोड",
-        "previewsModeImage": "छवि",
-        "previewsModeVideo": "वीडियो",
-        "previewsSurfaceDirectory": "निर्देशिका",
-        "previewsSurfaceSidebar": "साइडबार",
-        "previewsAudioTitle": "ऑडियो (वीडियो मोड)",
-        "liveNotificationsTitle": "Chrome सूचनाएं",
-        "gameAlertsTitle": "श्रेणी परिवर्तन अलर्ट",
-        "titleAlertsTitle": "शीर्षक परिवर्तन अलर्ट",
-        "soundsTitle": "अधिसूचना ध्वनि"
-      },
-      "cosmetics": {
-        "badgeTitle": "Badge effect",
-        "badgeBody": "Animates the StreamPulse logo next to your name.",
-        "nameTitle": "Special name",
-        "nameBody": "A gradient or effect on your name, seen by StreamPulse users.",
-        "none": "None",
-        "pulse": "Pulse",
-        "shine": "Shine",
-        "rainbow": "Rainbow",
-        "glow": "Glow",
-        "bounce": "Bounce",
-        "spin": "Spin",
-        "flicker": "Flickering neon",
-        "aurora": "Aurora",
-        "sunset": "Sunset",
-        "lcd": "LCD screen",
-        "gold": "Gold",
-        "neon": "Neon",
-        "preview": "Chat preview",
-        "sampleName": "YourName"
-      }
-    }
-  },
-  "sv": {
-    "twitchUi": {
-      "favorites": "StreamPulse-favoriter",
-      "pin": "Lägg till i StreamPulse-favoriter",
-      "unpin": "Ta bort från StreamPulse-favoriter",
-      "offline": "Offline",
-      "emptyFavorites": "Hovra över en följd kanal och klicka på stjärnan.",
-      "drawerTitle": "Inställningar",
-      "tabGeneral": "Allmänt",
-      "tabPreviews": "Förhandsvisningar",
-      "tabAlerts": "Aviseringar",
-      "close": "Stäng",
-      "fullPage": "Hel sida",
-      "plusOnly": "Endast StreamPulse+",
-      "discoverPlus": "Upptäck StreamPulse+",
-      "chatRow": "StreamPulse+-effekter",
-      "chatRowNote": "Syns för andra StreamPulse-användare."
-    },
-    "badge": {
-      "lifetime": "Livstidsmedlem",
-      "months": "Prenumerant i {{count}} månader",
-      "monthOne": "Prenumerant i 1 månad",
-      "newMember": "Ny prenumerant",
-      "freeLine": "Använder tillägget"
-    },
-    "topbar": {
-      "previews": "Förhandsvisning vid muspekning",
-      "thisChannel": "Den här kanalen",
-      "badgeColor": "Märkets färg",
-      "badgeAuthor": "Namn",
-      "badgeTheme": "Tema",
-      "badgeCustom": "Egen",
-      "liveNow": "Sänder nu",
-      "noneLive": "Ingen sänder nu",
-      "watchedHere": "Tittat här",
-      "follow": "Följ",
-      "followed": "Följd",
-      "autoClaim": "Automatiska poäng",
-      "fastForward": "Snabbspolning",
-      "more": "+{{count}} till",
-      "tip": "Bjud på ett bubbelte",
-      "settings": "Alla inställningar"
-    },
-    "quickFollow": {
-      "add": "Lägg till i StreamPulse",
-      "tracked": "Spårad",
-      "remove": "Ta bort från StreamPulse",
-      "added": "{{name}} har lagts till i StreamPulse",
-      "removed": "{{name}} har tagits bort från StreamPulse",
-      "error": "Åtgärden misslyckades. Försök igen."
-    },
-    "player": {
-      "skipToLive": "Gå till live",
-      "holdToFastForward": "Håll ned för att spola fram x2",
-      "latencyEmpty": "Fördröjning: --",
-      "latencyValue": "Fördröjning: {{value}} sekunder",
-      "offline": "OFFLINE"
-    },
-    "chatFilter": {
-      "replacement": "Meddelandet har tagits bort av StreamPulse"
-    },
-    "shared": {
-      "settings": {
-        "groupAutomation": "Automatisering",
-        "groupPreviews": "Förhandsvisning vid muspekning",
-        "groupNotifications": "Meddelanden",
-        "groupChat": "Katt",
-        "autoClaimTitle": "Automatisk inlösen av kanalpoäng",
-        "autoClaimDropsTitle": "Automatisk hämtning av Twitch Drops",
-        "autoClaimMomentsTitle": "Automatisk hämtning av Twitch Moments",
-        "autoCancelRaidsTitle": "Automatisk avbrytning av raider",
-        "autoRefreshTitle": "Automatisk uppdatering",
-        "fastForwardTitle": "Snabbspolningsknapp",
-        "hideTwitchExtensionsTitle": "Dölj Twitch-tillägg",
-        "communityBadgeTitle": "Gemenskapsmärke",
-        "previewsEnableTitle": "Förhandsvisning vid muspekning",
-        "previewsModeTitle": "Förhandsgranskningsläge",
-        "previewsModeImage": "Bild",
-        "previewsModeVideo": "Video",
-        "previewsSurfaceDirectory": "Katalog",
-        "previewsSurfaceSidebar": "Sidomeny",
-        "previewsAudioTitle": "Ljud (videoläge)",
-        "liveNotificationsTitle": "Chrome-meddelanden",
-        "gameAlertsTitle": "Varningar om ändring av kategori",
-        "titleAlertsTitle": "Aviseringar vid titeländring",
-        "soundsTitle": "Meddelandeljud"
-      },
-      "cosmetics": {
-        "badgeTitle": "Märkeseffekt",
-        "badgeBody": "Animerar StreamPulse-loggan bredvid ditt namn.",
-        "nameTitle": "Specialnamn",
-        "nameBody": "En tonad färg eller effekt på ditt namn, synlig för StreamPulse-användare.",
-        "none": "Ingen",
-        "pulse": "Puls",
-        "shine": "Glans",
-        "rainbow": "Regnbåge",
-        "glow": "Glöd",
-        "bounce": "Studs",
-        "spin": "Snurr",
-        "flicker": "Flimrande neon",
-        "aurora": "Norrsken",
-        "sunset": "Solnedgång",
-        "lcd": "LCD-skärm",
-        "gold": "Guld",
-        "neon": "Neon",
-        "preview": "Förhandsvisning i chatten",
-        "sampleName": "DittNamn"
-      }
-    }
-  },
-  "cs": {
-    "twitchUi": {
-      "favorites": "Oblíbené StreamPulse",
-      "pin": "Přidat do oblíbených StreamPulse",
-      "unpin": "Odebrat z oblíbených StreamPulse",
-      "offline": "Offline",
-      "emptyFavorites": "Najeď na sledovaný kanál a klikni na hvězdu.",
-      "drawerTitle": "Nastavení",
-      "tabGeneral": "Obecné",
-      "tabPreviews": "Náhledy",
-      "tabAlerts": "Upozornění",
-      "close": "Zavřít",
-      "fullPage": "Celá stránka",
-      "plusOnly": "Jen StreamPulse+",
-      "discoverPlus": "Objevit StreamPulse+",
-      "chatRow": "Efekty StreamPulse+",
-      "chatRowNote": "Vidí to ostatní uživatelé StreamPulse."
-    },
-    "badge": {
-      "lifetime": "Doživotní člen",
-      "months": "Předplatitel {{count}} měs.",
-      "monthOne": "Předplatitel 1 měsíc",
-      "newMember": "Nový předplatitel",
-      "freeLine": "Uživatel rozšíření"
-    },
-    "topbar": {
-      "previews": "Náhledy při najetí myší",
-      "thisChannel": "Tento kanál",
-      "badgeColor": "Barva odznaku",
-      "badgeAuthor": "Jméno",
-      "badgeTheme": "Motiv",
-      "badgeCustom": "Vlastní",
-      "liveNow": "Právě živě",
-      "noneLive": "Nikdo nevysílá",
-      "watchedHere": "Sledováno zde",
-      "follow": "Sledovat",
-      "followed": "Sledováno",
-      "autoClaim": "Automatické body",
-      "fastForward": "Rychlé přetáčení",
-      "more": "+{{count}} dalších",
-      "tip": "Nabídněte bubble tea",
-      "settings": "Všechna nastavení"
-    },
-    "quickFollow": {
-      "add": "Přidat do StreamPulse",
-      "tracked": "Sledováno",
-      "remove": "Odstranit ze StreamPulse",
-      "added": "{{name}} byl přidán do StreamPulse",
-      "removed": "{{name}} byl odstraněn ze StreamPulse",
-      "error": "Akce se nezdařila. Zkuste to znovu."
-    },
-    "player": {
-      "skipToLive": "Přejít na živé vysílání",
-      "holdToFastForward": "Podržte pro dvojnásobné zrychlení přehrávání",
-      "latencyEmpty": "Zpoždění: --",
-      "latencyValue": "Zpoždění: {{value}} s",
-      "offline": "OFFLINE"
-    },
-    "chatFilter": {
-      "replacement": "Zpráva byla odstraněna službou StreamPulse"
-    },
-    "shared": {
-      "settings": {
-        "groupAutomation": "Automatizace",
-        "groupPreviews": "Náhledy při najetí myší",
-        "groupNotifications": "Oznámení",
-        "groupChat": "Kočka",
-        "autoClaimTitle": "Automatické získávání bodů v kanálu",
-        "autoClaimDropsTitle": "Automatické získávání odměn z Twitch Drops",
-        "autoClaimMomentsTitle": "Automatické zachycení momentů na Twitchi",
-        "autoCancelRaidsTitle": "Automatické zrušení nájezdů",
-        "autoRefreshTitle": "Automatické obnovení",
-        "fastForwardTitle": "Tlačítko pro rychlý posun vpřed",
-        "hideTwitchExtensionsTitle": "Skrýt rozšíření Twitchu",
-        "communityBadgeTitle": "Komunitní odznak",
-        "previewsEnableTitle": "Náhledy při najetí myší",
-        "previewsModeTitle": "Režim náhledu",
-        "previewsModeImage": "Obrázek",
-        "previewsModeVideo": "Video",
-        "previewsSurfaceDirectory": "Adresář",
-        "previewsSurfaceSidebar": "Postranní panel",
-        "previewsAudioTitle": "Zvuk (režim videa)",
-        "liveNotificationsTitle": "Oznámení v prohlížeči Chrome",
-        "gameAlertsTitle": "Upozornění na změnu kategorie",
-        "titleAlertsTitle": "Upozornění na změnu názvu",
-        "soundsTitle": "Zvuk upozornění"
-      },
-      "cosmetics": {
-        "badgeTitle": "Efekt odznaku",
-        "badgeBody": "Animuje logo StreamPulse vedle tvého jména.",
-        "nameTitle": "Speciální jméno",
-        "nameBody": "Přechod nebo efekt na tvém jménu, viditelný pro uživatele StreamPulse.",
-        "none": "Žádný",
-        "pulse": "Pulzování",
-        "shine": "Lesk",
-        "rainbow": "Duha",
-        "glow": "Záře",
-        "bounce": "Poskok",
-        "spin": "Otáčení",
-        "flicker": "Blikající neon",
-        "aurora": "Polární záře",
-        "sunset": "Západ slunce",
-        "lcd": "LCD displej",
-        "gold": "Zlato",
-        "neon": "Neon",
-        "preview": "Náhled v chatu",
-        "sampleName": "TvojeJméno"
       }
     }
   }

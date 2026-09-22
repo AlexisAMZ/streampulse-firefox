@@ -30,3 +30,15 @@ The only third-party minified file is `js/vendor/hls.light.min.js`, which is the
    npm run build
    ```
    The exact production archive `StreampulseFirefox_26.9.8.zip` will be produced in `~/Desktop/dev/ZIPS/` (or the folder defined by `STREAMPULSE_ZIP_DIR`).
+
+## Divergence assumée avec le port Chrome
+
+Chrome charge `js/vendor/hls.light.min.js` à la demande, par un `import()`
+dynamique depuis le monde isolé, pour éviter 354 Ko sur chaque page Twitch.
+Firefox ne supporte pas l'`import()` dynamique dans les content scripts : ce
+port garde donc hls.js déclaré dans `content_scripts`. Conséquence directe,
+il n'a besoin ni de la permission `scripting`, ni d'exposer hls.js dans
+`web_accessible_resources`.
+
+Ne pas « aligner » ce point sur Chrome sans avoir vérifié le support de
+l'`import()` dans un content script Firefox.
