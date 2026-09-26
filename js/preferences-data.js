@@ -15,6 +15,9 @@ export const DEFAULT_PREFERENCES = {
   // Bêta : détection des raids entrants en arrière-plan via IRC anonyme.
   // Opt-in explicite car elle maintient une connexion WebSocket permanente.
   backgroundRaidAlerts: false,
+  // Notification « StreamPulse a été mis à jour » : une fois par version,
+  // clic vers la page des nouveautés.
+  updateNotifications: true,
   soundsEnabled: true,
   autoClaimChannelPoints: true,
   autoClaimDrops: true,
@@ -27,6 +30,10 @@ export const DEFAULT_PREFERENCES = {
   autoRefreshPlayerErrors: true,
   enableClipDownload: true,
   playerQuality: "auto",
+  // Position de l'indicateur de latence : "viewers" = sous le lecteur, à
+  // côté du nombre de spectateurs ; "chat" = dans l'en-tête du tchat, à la
+  // place du titre « Chat du stream ».
+  latencyPlacement: "viewers",
   autoCancelRaids: false,
   preventTabDiscard: true,
   enablePredictionsPopup: true,
@@ -35,6 +42,7 @@ export const DEFAULT_PREFERENCES = {
   enableFastForwardButton: true,
   watchTimeTracker: true,
   pointsTracking: true,
+  dropsTracking: true,
   chatKeywords: "",
   chatBlockedUsers: "",
   language: DEFAULT_LANGUAGE,

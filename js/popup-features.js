@@ -5,6 +5,10 @@
 import { t, getCurrentLanguage } from "./i18n.js";
 import { thankPlusSubscriber } from "./plus-thanks.js";
 import { initPoints } from "./popup-points.js";
+import { initDrops } from "./popup-drops.js";
+import { initLayout } from "./popup-layout.js";
+import { initReviewAsk } from "./popup-review.js";
+import { IDENTITY_STORAGE_KEYS, initIdentity, renderIdentity } from "./popup-identity.js";
 import { HISTORY_KEY, formatClock, selectMissed, summarize } from "./history-data.js";
 import { PREDICTION_HISTORY_KEY, PREDICTION_RULE_KEY, normalizeRule as normalizePredictionRule, summarize as summarizePredictions } from "./predictions-data.js";
 import { PLUS_KEY, plusPageUrl, getDeviceId, isPlusActive, normalizeLicenseKey, portalUrl, releaseDevice, verifyLicense } from "./plus.js";
@@ -519,86 +523,6 @@ function renderSmart() {
   renderSmartRules();
 }
 
-// ─── Couleur d'accent et badge (StreamPulse+) ─────────────────────────────────
-
-export const ACCENT_KEY = "streamPulseAccent";
-const ACCENTS = ["violet", "lcd", "ocean", "ember", "crimson"];
-let accentChoice = "violet";
-
-function renderAccent() {
-  const active = plusActive();
-  const applied = active && ACCENTS.includes(accentChoice) ? accentChoice : "violet";
-  if (applied === "violet") delete document.body.dataset.accent;
-  else document.body.dataset.accent = applied;
-  $("accent-row")?.classList.toggle("is-locked", !active);
-  document.querySelectorAll(".accent-swatch").forEach((swatch) => {
-    swatch.setAttribute("aria-checked", String(swatch.dataset.accent === applied));
-  });
-  const note = $("badge-plus-note");
-  if (note) note.textContent = t(active ? "popup.settings.badgePlusOn" : "popup.settings.badgePlusOff");
-}
-
-export const COSMETICS_KEY = "streamPulseCosmetics";
-const BADGE_FX = ["pulse", "shine", "rainbow", "glow", "bounce", "spin", "flicker"];
-const NAME_FX = ["aurora", "sunset", "lcd", "gold", "neon", "rainbow"];
-let cosmetics = { badgeFx: "", nameFx: "" };
-
-function normalizeCosmetics(value) {
-  const input = value && typeof value === "object" ? value : {};
-  return {
-    badgeFx: BADGE_FX.includes(input.badgeFx) ? input.badgeFx : "",
-    nameFx: NAME_FX.includes(input.nameFx) ? input.nameFx : "",
-  };
-}
-
-function renderCosmetics() {
-  const shown = plusActive() ? cosmetics : { badgeFx: "", nameFx: "" };
-  if ($("cosmetic-badge-fx")) $("cosmetic-badge-fx").value = shown.badgeFx;
-  if ($("cosmetic-name-fx")) $("cosmetic-name-fx").value = shown.nameFx;
-  if ($("cosmetic-badge")) $("cosmetic-badge").className = `cosmetic-badge${shown.badgeFx ? ` sp-fx-${shown.badgeFx}` : ""}`;
-  if ($("cosmetic-name")) $("cosmetic-name").className = `cosmetic-name${shown.nameFx ? ` sp-paint sp-paint--${shown.nameFx}` : ""}`;
-}
-
-function initCosmetics() {
-  const fields = { "cosmetic-badge-fx": "badgeFx", "cosmetic-name-fx": "nameFx" };
-  Object.entries(fields).forEach(([id, field]) => {
-    $(id)?.addEventListener("change", (event) => {
-      if (!plusActive()) {
-        event.target.value = "";
-        openPlus();
-        return;
-      }
-      cosmetics = normalizeCosmetics({ ...cosmetics, [field]: event.target.value });
-      chrome.storage.local.set({ [COSMETICS_KEY]: cosmetics });
-      renderCosmetics();
-    });
-  });
-  plusListeners.add(() => renderCosmetics());
-}
-
-/**
- * La couleur personnalisée du badge est un avantage StreamPulse+ : sans licence,
- * la choisir ouvre l'écran d'abonnement. Écouté en capture, avant le gestionnaire
- * de popup.js qui enregistrerait le réglage.
- */
-function initBadgeColorLock() {
-  document.addEventListener(
-    "change",
-    (event) => {
-      const select = event.target;
-      if (select?.id !== "pref-badge-color-mode" || select.value !== "custom" || plusActive()) return;
-      event.stopImmediatePropagation();
-      select.value = "author";
-      openPlus();
-    },
-    true,
-  );
-  plusListeners.add((active) => {
-    const option = document.querySelector('#pref-badge-color-mode option[value="custom"]');
-    if (option) option.textContent = `${t("popup.settings.badgeColorCustom")}${active ? "" : " · PLUS"}`;
-  });
-}
-
 /**
  * Le téléchargement des clips est un avantage StreamPulse+ : sans licence,
  * l'activer ouvre l'écran d'abonnement. Écouté en capture, avant popup.js.
@@ -615,21 +539,6 @@ function initClipDownloadLock() {
     },
     true,
   );
-}
-
-function initAccent() {
-  $("accent-swatches")?.addEventListener("click", (event) => {
-    const swatch = event.target.closest(".accent-swatch");
-    if (!swatch) return;
-    if (!plusActive()) {
-      if (swatch.dataset.accent !== "violet") openPlus();
-      return;
-    }
-    accentChoice = swatch.dataset.accent;
-    chrome.storage.local.set({ [ACCENT_KEY]: accentChoice });
-    renderAccent();
-  });
-  plusListeners.add(() => renderAccent());
 }
 
 // ─── Prédictions assistées (StreamPulse+) ────────────────────────────────────
@@ -773,16 +682,13 @@ export async function initFeatures() {
   initHistory();
   initPlus();
   initSmartAlerts();
-  initAccent();
-  initBadgeColorLock();
   initClipDownloadLock();
-  initCosmetics();
   initPredictions();
 
-  const stored = await chrome.storage.local.get([PLUS_KEY, SMART_ALERTS_KEY, ACCENT_KEY, COSMETICS_KEY, PREDICTION_RULE_KEY, PREDICTION_HISTORY_KEY, "betaGeneralStreamers"]);
+  const stored = await chrome.storage.local.get([PLUS_KEY, SMART_ALERTS_KEY, PREDICTION_RULE_KEY, PREDICTION_HISTORY_KEY, "betaGeneralStreamers", ...IDENTITY_STORAGE_KEYS]);
   plusRecord = stored[PLUS_KEY] || null;
-  accentChoice = stored[ACCENT_KEY] || "violet";
-  cosmetics = normalizeCosmetics(stored[COSMETICS_KEY]);
+  plusListeners.add(() => renderIdentity());
+  initIdentity({ getRecord: () => plusRecord, isPlus: plusActive, openPlus, stored });
   predictionRule = normalizePredictionRule(stored[PREDICTION_RULE_KEY]);
   predictionHistory = Array.isArray(stored[PREDICTION_HISTORY_KEY]) ? stored[PREDICTION_HISTORY_KEY] : [];
   recheckOnOpen().catch(() => {});
@@ -791,6 +697,10 @@ export async function initFeatures() {
   renderPlus();
   initPoints({ isPlus: plusActive, onPlusChange: (listener) => plusListeners.add(listener), openPlus })
     .catch((error) => console.warn("[popup] points init failed:", error));
+  initReviewAsk().catch((error) => console.warn("[popup] review ask init failed:", error));
+  initLayout().catch((error) => console.warn("[popup] layout init failed:", error));
+  initDrops({ isPlus: plusActive, onPlusChange: (listener) => plusListeners.add(listener), openPlus })
+    .catch((error) => console.warn("[popup] drops init failed:", error));
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
@@ -804,10 +714,6 @@ export async function initFeatures() {
     if (changes[PREDICTION_HISTORY_KEY]) {
       predictionHistory = changes[PREDICTION_HISTORY_KEY].newValue || [];
       renderPredictions();
-    }
-    if (changes[ACCENT_KEY]) {
-      accentChoice = changes[ACCENT_KEY].newValue || "violet";
-      renderAccent();
     }
     if (changes.betaGeneralStreamers) {
       smartStreamers = changes.betaGeneralStreamers.newValue || [];

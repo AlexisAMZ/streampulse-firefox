@@ -24,6 +24,8 @@ import {
 } from "./platforms.js";
 import { createAllChannelsTile, createChannelRow, createMiniCard, formatNumber, renderStage, renderStageEmpty } from "./ui.js";
 import { initFeatures, renderHistory } from "./popup-features.js";
+import { initNews, markSeen } from "./popup-news.js";
+import { initSuggest } from "./popup-suggest.js";
 
 const PREFERENCES_STORAGE_KEY = "betaGeneralPreferences";
 
@@ -71,6 +73,7 @@ const autoOpenInventoryToggle = document.getElementById("pref-auto-open-inventor
 const autoOpenInventoryIntervalSelect = document.getElementById("pref-auto-open-inventory-interval");
 const hideTwitchExtensionsToggle = document.getElementById("pref-hide-twitch-extensions");
 const autoCancelRaidsToggle = document.getElementById("pref-auto-cancel-raids");
+const updateNotificationsToggle = document.getElementById("pref-update-notifications");
 const preventTabDiscardToggle = document.getElementById("pref-prevent-tab-discard");
 const streamerFaviconToggle = document.getElementById("pref-enable-streamer-favicon");
 const tabLiveIconToggle = document.getElementById("pref-enable-tab-live-icon");
@@ -79,6 +82,7 @@ const pipButtonToggle = document.getElementById("pref-pip-button");
 const autoRefreshToggle = document.getElementById("pref-auto-refresh");
 const clipDownloadToggle = document.getElementById("pref-clip-download");
 const playerQualitySelect = document.getElementById("pref-player-quality");
+const latencyPlacementSelect = document.getElementById("pref-latency-placement");
 const fastForwardToggle = document.getElementById("pref-fast-forward");
 const previewsEnabledToggle = document.getElementById("pref-previews-enabled");
 const previewsModeGroup = document.getElementById("previews-mode-group");
@@ -110,9 +114,8 @@ const wtTopWatched = document.getElementById("wt-top-watched");
 const wtEmpty = document.getElementById("wt-empty");
 const watchTimeToggle = document.getElementById("pref-watch-time");
 const pointsTrackingToggle = document.getElementById("pref-points-tracking");
+const dropsTrackingToggle = document.getElementById("pref-drops-tracking");
 const communityBadgeToggle = document.getElementById("pref-community-badge");
-const badgeColorMode = document.getElementById("pref-badge-color-mode");
-const badgeColorValue = document.getElementById("pref-badge-color-value");
 const patchNotesButton = document.getElementById("open-patch-notes");
 const patchNotesDot = document.getElementById("patch-notes-dot");
 
@@ -761,8 +764,7 @@ async function renderActivity() {
   const today = logs.filter((log) => log.timestamp >= midnight.getTime());
   const points = today.filter((log) => log.type === "points").reduce((sum, log) => sum + (Number(log.value) || 0), 0);
   setChip("activity-points", points > 0, t("popup.cplus.pointsToday", { count: formatNumber(points) }));
-  // Compteur de Drops du jour masqué : il comptait mal (bug à corriger avant de le réafficher).
-  setChip("activity-drops", false, "");
+  // La puce « Drops du jour » est tenue par popup-drops.js, d'après l'historique des Drops.
 }
 
 // --- All channels sheet ---
@@ -977,6 +979,9 @@ function renderPreferences() {
   if (autoCancelRaidsToggle) {
     autoCancelRaidsToggle.checked = prefs.autoCancelRaids === true;
   }
+  if (updateNotificationsToggle) {
+    updateNotificationsToggle.checked = prefs.updateNotifications !== false;
+  }
   if (preventTabDiscardToggle) {
     preventTabDiscardToggle.checked = prefs.preventTabDiscard !== false;
   }
@@ -1001,24 +1006,20 @@ function renderPreferences() {
   if (playerQualitySelect) {
     playerQualitySelect.value = prefs.playerQuality || "auto";
   }
+  if (latencyPlacementSelect) {
+    latencyPlacementSelect.value = prefs.latencyPlacement === "chat" ? "chat" : "viewers";
+  }
   if (fastForwardToggle) {
     fastForwardToggle.checked = prefs.enableFastForwardButton !== false;
   }
   if (watchTimeToggle) {
     watchTimeToggle.checked = prefs.watchTimeTracker !== false;
   }
+  if (dropsTrackingToggle) {
+    dropsTrackingToggle.checked = prefs.dropsTracking !== false;
+  }
   if (pointsTrackingToggle) {
     pointsTrackingToggle.checked = prefs.pointsTracking !== false;
-  }
-  if (badgeColorMode) {
-    // Une couleur hexadecimale stockee signifie le mode personnalise.
-    const stored = prefs.communityBadgeColor || "author";
-    const isCustom = stored !== "author" && stored !== "theme";
-    badgeColorMode.value = isCustom ? "custom" : stored;
-    if (badgeColorValue) {
-      badgeColorValue.hidden = !isCustom;
-      if (isCustom) badgeColorValue.value = stored;
-    }
   }
   if (communityBadgeToggle) {
     communityBadgeToggle.checked = prefs.communityBadge === true;
@@ -1136,14 +1137,33 @@ async function renderEventLogs() {
   }
 }
 
-function setActiveTab(tabName) {
-  currentTab = tabName;
+/**
+ * Rubriques des Réglages qui ont aussi leur onglet dans la barre du haut :
+ * l'onglet surligné suit la rubrique affichée.
+ */
+const PANEL_TABS = new Set(["drops", "badges"]);
+
+function highlightTab(tabName) {
   tabButtons.forEach((button) => {
     const isActive = button.dataset.tab === tabName;
     button.classList.toggle("active", isActive);
     button.setAttribute("aria-selected", isActive ? "true" : "false");
     button.tabIndex = isActive ? 0 : -1;
   });
+}
+
+function setActiveTab(tabName) {
+  if (PANEL_TABS.has(tabName)) {
+    showMenuPanel(tabName);
+  } else if (tabName === "settings") {
+    // « Réglages » ne rouvre pas Drops ou Badges : ils ont leur propre onglet.
+    const current = document.querySelector('.menu-nav > .menu-tab[aria-selected="true"]')?.dataset.panel;
+    const first = [...document.querySelectorAll(".menu-nav > .menu-tab")].find((tab) => !tab.hidden && !PANEL_TABS.has(tab.dataset.panel));
+    const target = current && !PANEL_TABS.has(current) ? current : first?.dataset.panel;
+    if (target) showMenuPanel(target);
+  }
+  currentTab = tabName;
+  highlightTab(tabName);
 
   document.body.classList.toggle("is-settings", tabName !== "streamers");
   if (tabName !== "streamers") closeSheet({ restoreFocus: false });
@@ -1613,6 +1633,11 @@ function showMenuPanel(panelName, { focus = false } = {}) {
   });
   const panels = document.getElementById("menu-panels");
   if (panels) panels.scrollTop = 0;
+  markSeen(panelName);
+  if (currentTab !== "streamers" && currentTab !== "history") {
+    currentTab = PANEL_TABS.has(panelName) ? panelName : "settings";
+    highlightTab(currentTab);
+  }
 }
 
 function initMenuNav() {
@@ -1623,7 +1648,7 @@ function initMenuNav() {
     if (tab) showMenuPanel(tab.dataset.panel);
   });
   nav.addEventListener("keydown", (event) => {
-    const list = Array.from(nav.querySelectorAll(".menu-tab"));
+    const list = Array.from(nav.querySelectorAll(".menu-tab")).filter((tab) => !tab.hidden);
     const index = list.indexOf(document.activeElement);
     if (index === -1) return;
     const targets = {
@@ -1793,7 +1818,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Motif ARIA tabs : flèches + Home/End avec tabindex itinérant (setActiveTab
     // gère déjà tabIndex), sur le modèle du menu latéral des réglages.
     document.querySelector(".tabs")?.addEventListener("keydown", (event) => {
-      const list = Array.from(tabs);
+      // Ordre et visibilité choisis dans « Disposition » : on relit le DOM.
+      const list = Array.from(document.querySelectorAll(".tabs > .tab-button")).filter((tab) => !tab.hidden);
       const index = list.indexOf(document.activeElement);
       if (index === -1) return;
       const targets = {
@@ -1809,6 +1835,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       next.focus();
     });
     initMenuNav();
+    initNews().catch((error) => console.warn("[popup] news init failed:", error));
+    initSuggest({ input: streamerInput, form: document.getElementById("add-streamer-form"), getPlatform: () => state.selectedPlatform, getStreamers: () => state.streamers });
     initHomeInteractions();
     initFeatures().catch((error) => console.warn("[popup] features init failed:", error));
 
@@ -1921,6 +1949,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     autoCancelRaidsToggle?.addEventListener("change", (e) => {
       updatePreferences({ autoCancelRaids: e.target.checked });
     });
+    updateNotificationsToggle?.addEventListener("change", (e) => {
+      updatePreferences({ updateNotifications: e.target.checked });
+    });
     preventTabDiscardToggle?.addEventListener("change", (e) => {
       updatePreferences({ preventTabDiscard: e.target.checked });
     });
@@ -1938,6 +1969,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     autoRefreshToggle?.addEventListener("change", (e) => {
       updatePreferences({ autoRefreshPlayerErrors: e.target.checked });
+    });
+    latencyPlacementSelect?.addEventListener("change", (e) => {
+      updatePreferences({ latencyPlacement: e.target.value });
     });
     clipDownloadToggle?.addEventListener("change", (e) => {
       updatePreferences({ enableClipDownload: e.target.checked });
@@ -2009,21 +2043,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-    if (communityBadgeToggle) {
-      badgeColorMode?.addEventListener("change", (e) => {
-        const mode = e.target.value;
-        const custom = mode === "custom";
-        if (badgeColorValue) badgeColorValue.hidden = !custom;
-        updatePreferences({
-          communityBadgeColor: custom ? badgeColorValue?.value || "#9146ff" : mode,
-        });
+    if (dropsTrackingToggle) {
+      dropsTrackingToggle.addEventListener("change", (e) => {
+        updatePreferences({ dropsTracking: e.target.checked });
       });
-      // "change" et non "input" : le selecteur de couleur emet en continu
-      // pendant le glissement, ce qui declencherait un toast par pixel.
-      badgeColorValue?.addEventListener("change", (e) => {
-        updatePreferences({ communityBadgeColor: e.target.value });
-      });
+    }
 
+    if (communityBadgeToggle) {
       communityBadgeToggle.addEventListener("change", (e) => {
         updatePreferences({ communityBadge: e.target.checked });
       });

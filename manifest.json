@@ -18,7 +18,9 @@
   "permissions": [
     "storage",
     "alarms",
-    "notifications"
+    "cookies",
+    "notifications",
+    "scripting"
   ],
   "host_permissions": [
     "https://api.twitch.tv/*",
@@ -62,7 +64,8 @@
       "all_frames": false,
       "js": [
         "js/inject/predictions-bridge.js",
-        "js/inject/points-bridge.js"
+        "js/inject/points-bridge.js",
+        "js/inject/drops-bridge.js"
       ],
       "run_at": "document_start",
       "world": "MAIN"
@@ -73,7 +76,8 @@
       ],
       "all_frames": false,
       "js": [
-        "js/pointsRecorder.js"
+        "js/pointsRecorder.js",
+        "js/dropsRecorder.js"
       ],
       "run_at": "document_start"
     },
@@ -95,6 +99,7 @@
       "css": [
         "css/topbar.css",
         "css/inject/twitch-badge.css",
+        "css/fx-effects.css",
         "css/inject/twitch-ui.css"
       ],
       "run_at": "document_idle"

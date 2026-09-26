@@ -114,5 +114,8 @@ export async function verifyLicense(input, fetchImpl, now = Date.now(), device =
   if (payload?.error === "device_limit") return { ok: false, error: "device_limit" };
   if (!payload?.valid) return { ok: false, error: "invalid" };
   const plan = PLUS_PLANS.includes(payload.plan) ? payload.plan : "monthly";
-  return { ok: true, record: { licenseKey, plan, status: "active", verifiedAt: now } };
+  const referrals = Math.max(0, Math.floor(Number(payload.referrals) || 0));
+  // Rôle posé à la main sur la licence (métadonnée Stripe sp_role) : « admin » pour le fondateur.
+  const role = payload.role === "admin" ? "admin" : "";
+  return { ok: true, record: { licenseKey, plan, status: "active", verifiedAt: now, referrals, role } };
 }

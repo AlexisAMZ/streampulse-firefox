@@ -24,6 +24,11 @@ import { thankPlusSubscriber } from "./plus-thanks.js";
 import { SMART_ALERTS_KEY, normalizeRules, decideSmartAlert } from "./smart-alerts.js";
 import { PLUS_KEY, getDeviceId, isPlusActive, needsRecheck, verifyLicense } from "./plus.js";
 import { createPointsStore } from "./points-store.js";
+import { createDropsStore } from "./drops-store.js";
+import { BADGE_AUTO_KEY, CLAIM_OK_STATUSES, isPaidBadge } from "./drops-data.js";
+import { createDropsClient } from "./drops-gql.js";
+import { createBadgeAuto } from "./badge-auto-worker.js";
+import { searchChannels } from "./channel-search.js";
 import { syncEventSubRaid, stopEventSubRaid } from "./eventsubRaid.js";
 import {
   RAID_WATCHER_ALARM,
@@ -650,6 +655,7 @@ class PreferenceStore {
   static sanitize(preferences = {}) {
     const SORT_ORDER_VALUES = ["live", "name-asc", "name-desc", "custom"];
     const PREVIEWS_SIZES = ["s", "m", "l"];
+    const LATENCY_PLACEMENTS = ["viewers", "chat"];
     const previewsDelay = Number(preferences.previewsShowDelayMs);
     return {
       liveNotifications: preferences.liveNotifications !== false,
@@ -664,6 +670,7 @@ class PreferenceStore {
       predictionAlerts: preferences.predictionAlerts !== false,
       raidAlerts: preferences.raidAlerts !== false,
       backgroundRaidAlerts: preferences.backgroundRaidAlerts === true,
+      updateNotifications: preferences.updateNotifications !== false,
       soundsEnabled: preferences.soundsEnabled !== false,
       autoClaimChannelPoints: preferences.autoClaimChannelPoints !== false,
       autoClaimDrops: preferences.autoClaimDrops !== false,
@@ -676,6 +683,9 @@ class PreferenceStore {
       autoRefreshPlayerErrors: preferences.autoRefreshPlayerErrors !== false,
       enableClipDownload: preferences.enableClipDownload !== false,
       playerQuality: PLAYER_QUALITIES.includes(preferences.playerQuality) ? preferences.playerQuality : "auto",
+      latencyPlacement: LATENCY_PLACEMENTS.includes(preferences.latencyPlacement)
+        ? preferences.latencyPlacement
+        : "viewers",
       // Les alertes de raid rapportent des points en suivant le raid : garder
       // l'annulation automatique active rendrait les deux fonctionnalités
       // contradictoires (le raid est annulé avant qu'on puisse le suivre).
@@ -689,6 +699,7 @@ class PreferenceStore {
       enableFastForwardButton: preferences.enableFastForwardButton !== false,
       watchTimeTracker: preferences.watchTimeTracker !== false,
       pointsTracking: preferences.pointsTracking !== false,
+      dropsTracking: preferences.dropsTracking !== false,
       chatKeywords: typeof preferences.chatKeywords === "string" ? preferences.chatKeywords : "",
       chatBlockedUsers: typeof preferences.chatBlockedUsers === "string" ? preferences.chatBlockedUsers : "",
       language: normalizeLanguage(preferences.language),
@@ -909,6 +920,28 @@ async function resolveChannelAvatar(platform, channel) {
   return "";
 }
 
+// ─── Suggestions de chaînes (champ d'ajout du popup) ─────────────────────────
+// Une frappe = une requête au plus toutes les 220 ms côté popup ; ce cache d'une
+// minute évite de redemander la même saisie (retour arrière, retape).
+const SUGGEST_TTL_MS = 60_000;
+const suggestCache = new Map();
+
+const channelSearchFetchers = {
+  twitch: (query) =>
+    fetchTwitchJson(`https://api.twitch.tv/helix/search/channels?query=${encodeURIComponent(query)}&first=10`, { headers: twitchHeaders() }, 8000),
+  kick: (query) => fetchJson(`https://kick.com/api/search?searched_word=${encodeURIComponent(query)}`, {}, 8000),
+};
+
+async function suggestChannels(platform, query) {
+  const key = `${platform}:${String(query || "").toLowerCase()}`;
+  const cached = suggestCache.get(key);
+  if (cached && Date.now() - cached.at < SUGGEST_TTL_MS) return cached.items;
+  const items = await searchChannels(platform, query, channelSearchFetchers);
+  if (suggestCache.size > 100) suggestCache.clear();
+  suggestCache.set(key, { at: Date.now(), items });
+  return items;
+}
+
 // ─── Suivi des points de chaîne ───────────────────────────────────────────────
 // Les gains arrivent de pointsRecorder.js ; points-store.js est le seul à les
 // écrire. Les noms des chaînes viennent de Helix, par lots de 100 identifiants.
@@ -926,6 +959,251 @@ async function resolveTwitchChannels(ids) {
 }
 
 const pointsStore = createPointsStore({ storage: chrome.storage.local, resolveChannels: resolveTwitchChannels });
+
+// ─── Suivi des Drops ──────────────────────────────────────────────────────────
+// dropsRecorder.js relaie l'inventaire, les événements et les campagnes lus
+// dans la page Twitch ; drops-store.js est le seul à les écrire. Les requêtes
+// vers Twitch partent toujours de la page : ici, on ne fait que ranger,
+// prévenir, et confier les récupérations à un onglet Twitch.
+
+const dropsStore = createDropsStore({ storage: chrome.storage.local, resolveChannels: resolveTwitchChannels });
+/** Un Drop gagné hors de la vue (lecture tardive) ne déclenche pas d'alerte. */
+const DROP_ALERT_MAX_AGE_MS = 60 * 60_000;
+const DROP_ALERTS_PER_READ = 3;
+/** Le popup ouvert ne relance pas une lecture plus récente que ce délai. */
+const DROPS_POPUP_REFRESH_MS = 2 * 60_000;
+
+/** Journal d'événements, compteur et alerte pour chaque Drop obtenu. */
+async function announceDrops(entries) {
+  if (!entries?.length) return;
+  const prefs = await PreferenceStore.get();
+  const now = Date.now();
+  let alerts = 0;
+  for (const entry of entries) {
+    const label = [entry.name, entry.game].filter(Boolean).join(" · ");
+    await StatsStore.increment("dropsClaimed", 1);
+    await EventLogStore.addLog({ type: "drop", channel: entry.channel || "", text: label || translateWithPrefs(prefs, "background.notifications.dropMessage"), value: 1 });
+    if (!prefs.dropAlerts || now - entry.at > DROP_ALERT_MAX_AGE_MS || alerts >= DROP_ALERTS_PER_READ) continue;
+    alerts += 1;
+    await NotificationCenter.show({
+      title: translateWithPrefs(prefs, "background.notifications.dropTitle"),
+      message: label
+        ? translateWithPrefs(prefs, "background.notifications.dropClaimedMessage", { reward: label })
+        : translateWithPrefs(prefs, "background.notifications.dropMessage"),
+    });
+  }
+}
+
+/** Onglets Twitch, celui qui a parlé d'abord, puis l'onglet actif. */
+async function twitchTabs(preferredId) {
+  const tabs = await chrome.tabs.query({ url: "https://www.twitch.tv/*" });
+  return tabs
+    .filter((tab) => tab.id !== undefined && tab.discarded !== true)
+    .sort((a, b) => Number(b.id === preferredId) - Number(a.id === preferredId) || Number(b.active) - Number(a.active));
+}
+
+const dropsClient = createDropsClient({ fetch: (...args) => fetch(...args), cookies: chrome.cookies });
+const DROPS_ALARM = "streampulse-drops";
+const DROPS_ALARM_MINUTES = 10;
+/** Un onglet Twitch qui vient de relire l'inventaire dispense le service worker de le faire. */
+const DROPS_WORKER_MIN_GAP_MS = 4 * 60_000;
+
+function scheduleDropsAlarm() {
+  chrome.alarms.get(DROPS_ALARM, (existing) => {
+    if (!existing) chrome.alarms.create(DROPS_ALARM, { periodInMinutes: DROPS_ALARM_MINUTES, delayInMinutes: 1 });
+  });
+}
+
+/**
+ * Relit l'inventaire des Drops sans onglet Twitch ouvert (session lue dans le
+ * cookie), puis récupère les Drops prêts si la récupération auto est active.
+ * Utile quand on regarde sur un autre appareil, et pour un popup à jour.
+ */
+async function refreshDropsFromWorker({ minGapMs = DROPS_WORKER_MIN_GAP_MS } = {}) {
+  const prefs = await PreferenceStore.get();
+  if (prefs.dropsTracking === false) return { read: false, reason: "disabled" };
+  refreshRewardsFromWorker().catch((error) => {
+    if (error.code !== "signed-out") console.warn("[StreamPulse] badges :", error.code || error.message);
+  });
+  const stored = await chrome.storage.local.get("streamPulseDropsProgress");
+  if (Date.now() - (Number(stored.streamPulseDropsProgress?.updatedAt) || 0) < minGapMs) return { read: false, reason: "fresh" };
+  let inventory;
+  try {
+    inventory = await dropsClient.readInventory();
+  } catch (error) {
+    // Déconnecté de Twitch : rien à lire, ce n'est pas une panne.
+    if (error.code !== "signed-out") console.warn("[StreamPulse] lecture des Drops impossible :", error.code || error.message, error.detail || "");
+    return { read: false, reason: error.code || "error" };
+  }
+  const autoClaim = prefs.autoClaimDrops !== false;
+  const result = await dropsStore.recordInventory(inventory, { autoClaim });
+  announceDrops(result.added).catch(() => {});
+  for (const instanceId of result.claim) await claimDropFromWorker(instanceId, true);
+  return { read: true };
+}
+
+const REWARDS_EVERY_MS = 30 * 60_000;
+
+/** Campagnes de badges et récompenses, relues au plus toutes les 30 minutes. */
+async function refreshRewardsFromWorker() {
+  const stored = await chrome.storage.local.get(["streamPulseDropsRewards", "streamPulseDropsBadges", BADGE_AUTO_KEY]);
+  const now = Date.now();
+  // Deux délais séparés : une lecture réussie de l'un ne doit jamais bloquer l'autre.
+  const warn = (what) => (error) => {
+    if (error.code !== "signed-out") console.warn(`[StreamPulse] ${what} :`, error.code || error.message, error.detail || "");
+  };
+  if (now - (Number(stored.streamPulseDropsRewards?.updatedAt) || 0) >= REWARDS_EVERY_MS) {
+    await dropsClient.readRewards().then((list) => dropsStore.recordRewards(list), warn("campagnes de badges"));
+  }
+  // En mode auto, les badges obtenus se relisent à chaque passage pour fermer l'onglet au plus vite.
+  if (stored[BADGE_AUTO_KEY] || now - (Number(stored.streamPulseDropsBadges?.updatedAt) || 0) >= REWARDS_EVERY_MS) {
+    await dropsClient.readBadges()
+      .then((raw) => dropsStore.recordBadges(raw))
+      .then(({ added }) => announceBadges(added), warn("badges globaux"));
+  }
+  await checkBadgeAuto();
+}
+
+// ─── Mode auto des badges ─────────────────────────────────────────────────────
+// File de badges regardée par un onglet épinglé et muet, un jeu à la fois :
+// voir js/badge-auto-worker.js et js/badge-auto.js.
+
+/**
+ * Exécuté dans la page Twitch (monde MAIN) : lecteur en qualité minimale et
+ * volume à 1 %. Le lecteur n'a pas d'API publique : on le trouve dans l'arbre
+ * React, comme le font les autres extensions. Il réessaie tant qu'il n'est pas prêt.
+ */
+function lowPowerPlayer() {
+  let tries = 0;
+  const apply = () => {
+    tries += 1;
+    const root = document.querySelector(".video-player, [data-a-target='video-player']");
+    const fiberKey = root && Object.keys(root).find((key) => key.startsWith("__reactFiber$"));
+    let node = fiberKey ? root[fiberKey] : null;
+    let player = null;
+    for (let depth = 0; node && depth < 60 && !player; depth += 1, node = node.return) {
+      const props = node.memoizedProps || {};
+      player = props.mediaPlayerInstance?.core || props.mediaPlayerInstance || null;
+    }
+    const qualities = player?.getQualities?.() || [];
+    if (!player || !qualities.length) {
+      if (tries < 30) setTimeout(apply, 2000);
+      return;
+    }
+    const lowest = [...qualities].sort((a, b) => (a.bitrate || a.height || 0) - (b.bitrate || b.height || 0))[0];
+    player.setAutoSwitchQuality?.(false);
+    player.setQuality?.(lowest);
+    player.setVolume?.(0.01);
+    player.setMuted?.(false);
+  };
+  apply();
+}
+
+/** Jeu du live d'une chaîne : "" hors ligne, null si Helix ne répond pas. */
+async function streamGameOf(login) {
+  try {
+    await ensureConfig();
+    const data = await fetchTwitchJson(`https://api.twitch.tv/helix/streams?user_login=${encodeURIComponent(login)}&type=live`, { headers: twitchHeaders() });
+    return String(data?.data?.[0]?.game_id || "");
+  } catch (error) {
+    console.warn("[StreamPulse] mode auto badges :", error?.message || error);
+    return null;
+  }
+}
+
+const badgeAuto = createBadgeAuto({
+  streamUrl: dropsStreamUrl,
+  streamGameOf,
+  lowPowerPlayer,
+  translate: async (key, params) => translateWithPrefs(await PreferenceStore.get(), key, params),
+  notify: async (titleKey, messageKey, params = {}) => {
+    const prefs = await PreferenceStore.get();
+    await NotificationCenter.show({ title: translateWithPrefs(prefs, titleKey), message: translateWithPrefs(prefs, messageKey, params) });
+  },
+  // Les Drops du live doivent être suivis pour que la récupération auto passe.
+  onStart: () => scheduleDropsAlarm(),
+});
+
+function checkBadgeAuto() {
+  return badgeAuto.check();
+}
+
+function checkBadgeAfterClaim() {
+  badgeAuto.isActive()
+    .then((active) => (active ? refreshRewardsFromWorker() : null))
+    .catch((error) => console.warn("[StreamPulse] mode auto badges :", error?.code || error?.message || error));
+}
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => badgeAuto.onTabUpdated(tabId, changeInfo));
+chrome.tabs.onRemoved.addListener((tabId) => badgeAuto.onTabRemoved(tabId));
+
+/** Alerte pour les nouveaux badges gratuits (3 au plus d'un coup). */
+async function announceBadges(badges) {
+  const free = badges.filter((badge) => !isPaidBadge(badge)).slice(0, 3);
+  if (!free.length) return;
+  const prefs = await PreferenceStore.get();
+  if (!prefs.dropAlerts) return;
+  for (const badge of free) {
+    await NotificationCenter.show({
+      title: translateWithPrefs(prefs, "background.notifications.badgeTitle", { name: badge.title }),
+      message: badge.description || badge.title,
+    });
+  }
+}
+
+async function claimDropFromWorker(instanceId, auto) {
+  let status = "";
+  let ok = false;
+  try {
+    ({ status } = await dropsClient.claim(instanceId));
+    ok = true;
+  } catch (error) {
+    console.warn("[StreamPulse] récupération du Drop impossible :", error.code || error.message);
+  }
+  const result = await dropsStore.recordClaim({ instanceId, ok, status, auto });
+  if (result.entry) announceDrops([result.entry]).catch(() => {});
+  const claimed = ok && CLAIM_OK_STATUSES.includes(status);
+  if (ok && !claimed) console.warn("[StreamPulse] récupération du Drop refusée :", status || "sans statut");
+  // Récupéré mais absent de la progression locale : on relit pour remettre la liste à jour.
+  if (claimed && !result.entry) refreshDropsFromWorker({ minGapMs: 0 }).catch(() => {});
+  // Un Drop récupéré peut être le badge attendu : relecture immédiate en mode auto.
+  if (claimed) checkBadgeAfterClaim();
+  return claimed;
+}
+
+/**
+ * Live où gagner une campagne : le stream le plus regardé du jeu (Helix), sinon
+ * la catégorie filtrée sur les Drops. Les badges de « Twitch Gaming » se gagnent
+ * sur n'importe quelle chaîne du jeu qui a les Drops activés.
+ */
+async function dropsStreamUrl({ gameId, game }) {
+  const directory = `https://www.twitch.tv/directory/game/${encodeURIComponent(game || "")}?filter=drops`;
+  if (!/^\d{1,20}$/.test(String(gameId || ""))) return directory;
+  try {
+    await ensureConfig();
+    const data = await fetchTwitchJson(`https://api.twitch.tv/helix/streams?game_id=${gameId}&type=live&first=20`, { headers: twitchHeaders() });
+    // Un live avec le tag Drops fait progresser la campagne ; à défaut, le premier live du jeu.
+    const live = (data?.data || []).filter((item) => item.user_login);
+    const stream = live.find((item) => (item.tags || []).some((tag) => /drops/i.test(String(tag)))) || live[0];
+    return stream ? `https://www.twitch.tv/${encodeURIComponent(stream.user_login)}` : directory;
+  } catch (error) {
+    console.warn("[StreamPulse] recherche d'un live pour la campagne :", error?.message || error);
+    return directory;
+  }
+}
+
+/** Confie une commande au premier onglet Twitch qui a le relais des Drops. */
+async function sendDropsCommand(command, preferredId) {
+  for (const tab of await twitchTabs(preferredId)) {
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, { type: "dropsCommand", ...command });
+      if (response?.ok) return true;
+    } catch (_) {
+      // Onglet ouvert avant l'installation : pas de relais, on essaie le suivant.
+    }
+  }
+  return false;
+}
 
 // ─── Historique des lives ─────────────────────────────────────────────────────
 // Chaque fin de live d'un streamer suivi devient une entree d'historique. Une
@@ -2831,6 +3109,29 @@ async function migrateAutoCancelRaidsOff() {
   }
 }
 
+// Notification « StreamPulse a été mis à jour » : une seule fois par version.
+// Le drapeau dédié survit à un éventuel double déclenchement de onInstalled,
+// qui ne remet pas seenPatchNotesVersion à jour. Clic : ouvre la page des
+// nouveautés. Désactivable dans les Réglages, onglet Alertes.
+const UPDATE_NOTICE_VERSION_KEY = "updateNoticeShownVersion";
+
+async function notifyUpdateOnce(version) {
+  try {
+    const preferences = await PreferenceStore.get();
+    if (preferences.updateNotifications === false) return;
+    const stored = await chrome.storage.local.get(UPDATE_NOTICE_VERSION_KEY);
+    if (stored[UPDATE_NOTICE_VERSION_KEY] === version) return;
+    await chrome.storage.local.set({ [UPDATE_NOTICE_VERSION_KEY]: version });
+    await NotificationCenter.show({
+      title: translateWithPrefs(preferences, "background.notifications.updateTitle"),
+      message: translateWithPrefs(preferences, "background.notifications.updateMessage"),
+      url: chrome.runtime.getURL("html/changelog.html"),
+    });
+  } catch (error) {
+    console.warn("Update notice failed:", error?.message || error);
+  }
+}
+
 chrome.runtime.onInstalled.addListener(async (details) => {
   initDone = true;
   await fetchRemoteConfig(); // load credentials before first poll
@@ -2841,6 +3142,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   await NotificationCenter.init();
   scheduleWatcherAlarm();
   scheduleKeepAliveAlarm();
+  scheduleDropsAlarm();
 
   await pollStreamers({ forceNotification: false });
   const installReason = details?.reason || "install";
@@ -2872,9 +3174,11 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   ) {
     // Les notes ne s'ouvrent plus d'elles-memes : ouvrir un onglet sans que
     // l'utilisateur l'ait demande est intrusif. On memorise seulement la
-    // version vue, pour signaler la nouveaute sur le bouton du popup.
+    // version vue, pour signaler la nouveaute sur le bouton du popup, et la
+    // notification de mise a jour (si active) prend le relais.
     if (seenPatchNotesVersion !== currentVersion) {
       await chrome.storage.local.set({ patchNotesUnread: true });
+      await notifyUpdateOnce(currentVersion);
     }
   }
   await syncUpdateBadge();
@@ -2885,6 +3189,7 @@ chrome.runtime.onStartup.addListener(async () => {
   await fetchRemoteConfig(); // refresh credentials on browser startup
   scheduleWatcherAlarm();
   scheduleKeepAliveAlarm();
+  scheduleDropsAlarm();
 
   const prefs = await PreferenceStore.ensureDefaults();
   setupAutoOpenInventoryAlarm(prefs);
@@ -2911,6 +3216,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
         );
       }
     });
+  } else if (alarm.name === DROPS_ALARM) {
+    refreshDropsFromWorker().catch((error) => console.warn("[StreamPulse] Drops :", error?.message || error));
   } else if (alarm.name === AUTO_OPEN_INVENTORY_ALARM) {
     chrome.tabs.query({ url: "*://www.twitch.tv/drops/inventory*" }, (tabs) => {
       if (tabs && tabs.length > 0) {
@@ -3149,6 +3456,15 @@ function handleMessage(request, sender, sendResponse) {
         .catch(() => sendResponse({ user: null }));
       return true;
     }
+
+    case "searchChannels":
+      suggestChannels(String(request.platform || ""), String(request.query || ""))
+        .then((items) => sendResponse({ items }))
+        .catch((error) => {
+          console.warn("[StreamPulse] suggestions de chaînes :", error?.message || error);
+          sendResponse({ items: [], error: "unavailable" });
+        });
+      return true;
 
     case "updateUserProfile": {
       const profile = request.profile || {};
@@ -3509,6 +3825,166 @@ function handleMessage(request, sender, sendResponse) {
       );
       return true;
 
+    case "recordDropsInventory":
+      (async () => {
+        try {
+          const prefs = await PreferenceStore.get();
+          if (prefs.dropsTracking === false || request.ok !== true) {
+            sendResponse({ success: true, recorded: false, claim: [] });
+            return;
+          }
+          const result = await dropsStore.recordInventory(request.data, { autoClaim: prefs.autoClaimDrops !== false });
+          sendResponse({ success: true, recorded: result.recorded, claim: result.claim });
+          announceDrops(result.added).catch(() => {});
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
+      })();
+      return true;
+
+    case "recordDropsEvent":
+      (async () => {
+        try {
+          const prefs = await PreferenceStore.get();
+          if (prefs.dropsTracking === false) {
+            sendResponse({ success: true, recorded: false, refresh: false, claim: [] });
+            return;
+          }
+          const result = await dropsStore.recordEvent(request.data, { autoClaim: prefs.autoClaimDrops !== false });
+          sendResponse({ success: true, ...result });
+          if (result.channelId) dropsStore.resolveNames().catch(() => {});
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
+      })();
+      return true;
+
+    case "recordDropsCampaigns":
+      (async () => {
+        try {
+          const prefs = await PreferenceStore.get();
+          const result = prefs.dropsTracking === false
+            ? { recorded: false }
+            : await dropsStore.recordCampaigns(request.data, request.source);
+          sendResponse({ success: true, ...result });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
+      })();
+      return true;
+
+    case "recordDropClaim":
+      (async () => {
+        try {
+          const result = await dropsStore.recordClaim({
+            instanceId: String(request.instanceId || ""),
+            ok: request.ok === true,
+            status: String(request.status || ""),
+            auto: request.auto !== false,
+          });
+          sendResponse({ success: true, recorded: result.recorded });
+          if (result.entry) announceDrops([result.entry]).catch(() => {});
+          else if (request.ok !== true || !CLAIM_OK_STATUSES.includes(request.status)) {
+            console.warn("[StreamPulse] récupération du Drop refusée :", request.error || request.status || "sans statut");
+          }
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
+      })();
+      return true;
+
+    // Popup ouvert : relit l'inventaire (et les campagnes périmées) par un onglet Twitch.
+    case "dropsRefresh":
+      (async () => {
+        try {
+          const prefs = await PreferenceStore.get();
+          if (prefs.dropsTracking === false) {
+            sendResponse({ success: true, sent: false });
+            return;
+          }
+          const stored = await chrome.storage.local.get(["streamPulseDropsProgress", "streamPulseDropsCampaigns"]);
+          const now = Date.now();
+          const readAt = Number(stored.streamPulseDropsProgress?.updatedAt) || 0;
+          const campaignsAt = Number(stored.streamPulseDropsCampaigns?.updatedAt) || 0;
+          const sent = request.force || now - readAt >= DROPS_POPUP_REFRESH_MS
+            ? (await refreshDropsFromWorker({ minGapMs: 0 })).read || (await sendDropsCommand({ action: "inventory" }))
+            : false;
+          if (now - campaignsAt >= 30 * 60_000) sendDropsCommand({ action: "campaigns" }).catch(() => {});
+          sendResponse({ success: true, sent });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
+      })();
+      return true;
+
+    case "badgeAutoStart": {
+      // { badge } : un badge de plus dans la file ; { all: true } : tous les badges gratuits possibles.
+      const raw = request.badge || {};
+      const job = raw.badgeId ? {
+        badgeId: String(raw.badgeId),
+        title: String(raw.title || "").slice(0, 120),
+        image: String(raw.image || ""),
+        game: String(raw.game || "").slice(0, 120),
+        gameId: String(raw.gameId || ""),
+        campaignId: String(raw.campaignId || ""),
+        endsAt: Number(raw.endsAt) || 0,
+        addedAt: Date.now(),
+      } : null;
+      badgeAuto.start({ job, all: request.all === true })
+        .then((result) => sendResponse({ success: true, ...result }))
+        .catch((error) => sendResponse({ error: error?.message || String(error) }));
+      return true;
+    }
+
+    case "badgeAutoStop":
+      badgeAuto.stop(String(request.badgeId || ""))
+        .then(() => sendResponse({ success: true }))
+        .catch((error) => sendResponse({ error: error?.message || String(error) }));
+      return true;
+
+    case "openDropsStream":
+      dropsStreamUrl({ gameId: request.gameId, game: request.game })
+        .then((url) => chrome.tabs.create({ url }))
+        .then(() => sendResponse({ success: true }))
+        .catch((error) => sendResponse({ error: error?.message || String(error) }));
+      return true;
+
+    // Bouton « Récupérer » du popup : récupération auto coupée, ou refusée par Twitch.
+    case "claimDrop":
+      claimDropFromWorker(String(request.instanceId || ""), false)
+        .then(async (claimed) => {
+          if (claimed) return { sent: true };
+          if (await sendDropsCommand({ action: "claim", instanceId: String(request.instanceId || "") })) return { sent: true };
+          // Twitch refuse la récupération hors de sa page : on ouvre l'inventaire,
+          // où le Drop se récupère d'un clic.
+          await chrome.tabs.create({ url: "https://www.twitch.tv/drops/inventory", active: true });
+          return { sent: true, opened: true };
+        })
+        .then((result) => sendResponse({ success: true, ...result }))
+        .catch((error) => sendResponse({ error: error?.message || String(error) }));
+      return true;
+
+    // channelPointsClaimer.js a cliqué un bouton « Réclamer » sur la page. Avec
+    // le suivi des Drops, on relit l'inventaire de cet onglet : le Drop y sera
+    // compté avec son nom, une seule fois. Sans le suivi, on garde l'ancien
+    // compteur fondé sur le clic.
+    case "dropClaimedByClick":
+      (async () => {
+        try {
+          const prefs = await PreferenceStore.get();
+          if (prefs.dropsTracking !== false) {
+            setTimeout(() => sendDropsCommand({ action: "inventory" }, sender.tab?.id).catch(() => {}), 3000);
+            setTimeout(checkBadgeAfterClaim, 5000);
+          } else {
+            await announceDrops([{ name: "", game: "", channel: String(request.channel || ""), at: Date.now() }]);
+          }
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({ error: error?.message || String(error) });
+        }
+      })();
+      return true;
+
     case "incrementStat":
       (async () => {
         try {
@@ -3697,6 +4173,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 scheduleWatcherAlarm();
 scheduleKeepAliveAlarm();
+scheduleDropsAlarm();
 
 (async () => {
   if (initDone) return;

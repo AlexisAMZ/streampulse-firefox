@@ -6,6 +6,7 @@
     <title>StreamPulse</title>
     <link rel="stylesheet" href="../css/tokens.css" />
     <link rel="stylesheet" href="../css/popup.css" />
+    <link rel="stylesheet" href="../css/fx-effects.css" />
   </head>
   <body data-theme="dark">
     <div class="toast-container" id="toast-container" role="status" aria-live="polite"></div>
@@ -19,11 +20,9 @@
       <nav class="tabs" role="tablist" data-i18n-attr-ariaLabel="popup.osd.tabsLabel">
         <button id="tab-streamers" class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="streamers-view" data-tab="streamers" data-i18n="popup.tabs.streamers">Streamers</button>
         <button id="tab-history" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="history-view" data-tab="history" data-i18n="popup.tabs.history">Historique</button>
+        <button id="tab-drops" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-tab="drops" tabindex="-1"><span data-i18n="popup.osd.menuDrops">Drops</span><span class="new-dot" data-new="drops" hidden></span></button>
+        <button id="tab-badges" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-tab="badges" tabindex="-1"><span data-i18n="popup.osd.menuBadges">Badges</span><span class="new-dot" data-new="badges" hidden></span></button>
         <button id="tab-settings" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-tab="settings" data-i18n="popup.tabs.settings">Réglages</button>
-        <button id="header-patch-notes" class="topbar-link" type="button">
-          <span data-i18n="popup.osd.changelog">Nouveautés</span>
-          <span class="unread-dot" id="header-patch-dot" hidden></span>
-        </button>
       </nav>
       <div class="topbar-end">
         <span class="stat-pill stat-points" data-i18n-attr-title="popup.stats.pointsClaimed" title="Points récupérés">
@@ -33,6 +32,10 @@
         <span class="stat-pill stat-time" data-i18n-attr-title="popup.cplus.watchTimeLabel" title="Temps de visionnage ce mois-ci">
           <span id="stat-watchtime">--</span>
         </span>
+        <button id="header-patch-notes" type="button" class="icon-button news-button" data-i18n-attr-title="popup.osd.changelog" data-i18n-attr-ariaLabel="popup.osd.changelog" title="Nouveautés" aria-label="Nouveautés">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5a2 2 0 0 0-1.44-1.44l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.13a.5.5 0 0 1 .96 0l1.58 6.13a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3"/></svg>
+          <span class="unread-dot" id="header-patch-dot" hidden></span>
+        </button>
         <button id="refresh-button" type="button" class="icon-button" data-i18n-attr-title="popup.refresh" data-i18n-attr-ariaLabel="popup.refresh" title="Actualiser" aria-label="Actualiser">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
         </button>
@@ -43,6 +46,19 @@
       <span data-i18n="popup.notifBlockedBody">Chrome bloque les notifications de StreamPulse : tu ne seras pas prévenu des lives.</span>
       <button id="notif-blocked-open" type="button" class="button button-quiet" data-i18n="popup.notifBlockedAction">Réglages</button>
     </div>
+
+    <aside class="review-ask" id="review-ask" role="dialog" hidden>
+      <span class="review-ask-stars" aria-hidden="true">★★★★★</span>
+      <div class="review-ask-text">
+        <b data-i18n="popup.review.title">Tu aimes StreamPulse ?</b>
+        <span data-i18n="popup.review.body">Un avis sur le store aide énormément une extension indépendante. Merci d'avance !</span>
+      </div>
+      <div class="review-ask-actions">
+        <button id="review-ask-rate" type="button" class="button button-primary" data-i18n="popup.review.rate">Laisser un avis</button>
+        <button id="review-ask-later" type="button" class="button button-quiet" data-i18n="popup.review.later">Plus tard</button>
+        <button id="review-ask-never" type="button" class="button button-link" data-i18n="popup.review.never">Non merci</button>
+      </div>
+    </aside>
 
     <main id="streamers-view" class="home" role="tabpanel" aria-labelledby="tab-streamers">
       <section class="stage" id="stage" data-state="empty">
@@ -72,7 +88,7 @@
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>
           <span class="chip-label"></span>
         </span>
-        <span class="chip" id="activity-drops" hidden>
+        <span class="chip chip-drops" id="activity-drops" role="button" tabindex="0" data-i18n-attr-ariaLabel="popup.drops.bandOpen" aria-label="Ouvrir le panneau Drops" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/></svg>
           <span class="chip-label"></span>
         </span>
@@ -81,6 +97,7 @@
           <span data-i18n="popup.cplus.search">Chercher une chaîne</span>
         </button>
       </section>
+
 
       <section class="live-strip">
         <div class="strip-head">
@@ -176,9 +193,9 @@
             <span class="perk-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
             <span class="perk-text"><b data-i18n="popup.plus.perkPredictions">Prédictions assistées</b><span data-i18n="popup.plus.perkPredictionsBody">Historique de tes paris, taux de réussite, mise auto selon ta règle.</span></span>
           </li>
-          <li class="plus-perk">
-            <span class="perk-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="15.5" r="2.5"/><path d="M12 22a10 10 0 1 1 10-10c0 2-1.5 3-3 3h-2a2 2 0 0 0-1.5 3.3A1.5 1.5 0 0 1 12 22z"/></svg></span>
-            <span class="perk-text"><b data-i18n="popup.plus.perkThemes">Thèmes et badge personnalisés</b><span data-i18n="popup.plus.perkThemesBody">Couleur du badge dans le tchat, thèmes du popup.</span></span>
+          <li class="plus-perk plus-perk-fx">
+            <span class="perk-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5a2 2 0 0 0-1.44-1.44l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.13a.5.5 0 0 1 .96 0l1.58 6.13a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z"/></svg></span>
+            <span class="perk-text"><b data-i18n="popup.plus.perkFx">Effets de pseudo et de badge</b><span id="plus-fx-count"></span><span class="plus-fx-strip" id="plus-fx-strip" aria-hidden="true"></span></span>
           </li>
         </ul>
       </div>
@@ -213,6 +230,12 @@
         <button class="button button-quiet" id="plus-deactivate" type="button" data-i18n="popup.plus.deactivate">Retirer la licence de ce navigateur</button>
       </aside>
 
+      <section class="plus-referral" aria-labelledby="plus-referral-title">
+        <h3 class="plus-referral-title" id="plus-referral-title" data-i18n="popup.referral.plusTitle">Parraine tes amis</h3>
+        <p class="plus-referral-body" data-i18n="popup.referral.plusBody">Ton ami a 2,99 € offerts (1er mois gratuit, ou la formule à vie à 16 €). Toi, tu gagnes de l'argent et ces récompenses :</p>
+        <ol class="referral-tiers" id="plus-referral-tiers"></ol>
+      </section>
+
       <button class="icon-button plus-close" id="plus-close" type="button" data-i18n-attr-ariaLabel="popup.plus.close" data-i18n-attr-title="popup.plus.close" aria-label="Fermer" title="Fermer">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
@@ -221,7 +244,26 @@
     <!-- Menu: settings grouped by intent -->
     <section id="settings-section" class="menu hidden" role="tabpanel" aria-labelledby="tab-settings">
       <nav class="menu-nav" role="tablist" aria-orientation="vertical" data-i18n-attr-ariaLabel="popup.osd.menuLabel">
-        <button id="menu-tab-alerts" class="menu-tab" type="button" role="tab" aria-selected="true" aria-controls="menu-alerts" data-panel="alerts">
+        <button id="menu-tab-identity" class="menu-tab" type="button" role="tab" aria-selected="true" aria-controls="menu-identity" data-panel="identity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span data-i18n="popup.osd.menuIdentity">Pseudo et badge</span>
+          <span class="new-pill" data-new="identity" data-i18n="popup.news.new" hidden>Nouveau</span>
+        </button>
+        <button id="menu-tab-drops" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-drops" data-panel="drops" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
+          <span data-i18n="popup.osd.menuDrops">Drops</span>
+          <span class="new-pill" data-new="drops" data-i18n="popup.news.new" hidden>Nouveau</span>
+        </button>
+        <button id="menu-tab-badges" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-badges" data-panel="badges" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span data-i18n="popup.osd.menuBadges">Badges</span>
+          <span class="new-pill" data-new="badges" data-i18n="popup.news.new" hidden>Nouveau</span>
+        </button>
+        <button id="menu-tab-points" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-points" data-panel="points" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 19 9 12 22 5 9"/><line x1="5" y1="9" x2="19" y2="9"/></svg>
+          <span data-i18n="popup.osd.menuPoints">Points</span>
+        </button>
+        <button id="menu-tab-alerts" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-alerts" data-panel="alerts" tabindex="-1">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
           <span data-i18n="popup.osd.menuAlerts">Alertes</span>
         </button>
@@ -245,10 +287,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
           <span data-i18n="popup.osd.menuData">Temps et données</span>
         </button>
-        <button id="menu-tab-points" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-points" data-panel="points" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 19 9 12 22 5 9"/><line x1="5" y1="9" x2="19" y2="9"/></svg>
-          <span data-i18n="popup.osd.menuPoints">Points</span>
-        </button>
         <button id="menu-tab-plus" class="menu-tab menu-tab-plus" type="button" role="tab" aria-selected="false" aria-controls="menu-plus" data-panel="plus" tabindex="-1">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
           <span data-i18n="popup.osd.menuPlus">StreamPulse+</span>
@@ -261,7 +299,7 @@
 
       <div class="menu-panels" id="menu-panels">
         <!-- Alertes -->
-        <section class="menu-panel" id="menu-alerts" role="tabpanel" aria-labelledby="menu-tab-alerts">
+        <section class="menu-panel" id="menu-alerts" role="tabpanel" aria-labelledby="menu-tab-alerts" hidden>
           <h2 data-i18n="popup.osd.menuAlerts">Alertes</h2>
 
           <p class="settings-note" data-i18n="popup.settings.alertsPerStreamerNote">Ces alertes se règlent sur chaque streamer, depuis sa carte : notifications, changement de catégorie et de titre.</p>
@@ -287,6 +325,14 @@
               <span class="settings-description" data-i18n="popup.settings.autoCancelRaidsDescription">Annuler automatiquement la redirection lors d'un Raid Twitch. Se désactive quand les alertes de raid en arrière-plan sont actives : les points se gagnent en suivant le raid.</span>
             </span>
             <input id="pref-auto-cancel-raids" type="checkbox" role="switch" />
+          </label>
+
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.updateNotificationsTitle">Notification de mise à jour</span>
+              <span class="settings-description" data-i18n="popup.settings.updateNotificationsDescription">Prévenir quand StreamPulse est mis à jour (une seule fois par version), avec un clic vers les nouveautés.</span>
+            </span>
+            <input id="pref-update-notifications" type="checkbox" role="switch" />
           </label>
 
 
@@ -376,6 +422,13 @@
             </span>
             <input id="pref-keep-quality" type="checkbox" role="switch" />
           </label>
+          <div class="settings-sub-row" id="latency-placement-wrap">
+            <label class="settings-title" for="pref-latency-placement" data-i18n="popup.settings.latencyPlacementLabel">Position de la latence</label>
+            <select id="pref-latency-placement" class="settings-select">
+              <option value="viewers" data-i18n="popup.settings.latencyViewers">Sous le lecteur</option>
+              <option value="chat" data-i18n="popup.settings.latencyChat">Dans l'en-tête du tchat</option>
+            </select>
+          </div>
           <label class="settings-toggle">
             <span class="settings-text">
               <span class="settings-title" data-i18n="popup.settings.fastForwardTitle">Bouton d'avance rapide</span>
@@ -493,14 +546,6 @@
         <!-- Chat -->
         <section class="menu-panel" id="menu-chat" role="tabpanel" aria-labelledby="menu-tab-chat" hidden>
           <h2 data-i18n="popup.osd.menuChat">Chat</h2>
-
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.communityBadgeTitle">Badge communautaire</span>
-              <span class="settings-description" data-i18n="popup.settings.communityBadgeDescription">Affiche l'icône StreamPulse à côté des pseudos des utilisateurs dans le tchat Twitch.</span>
-            </span>
-            <input id="pref-community-badge" type="checkbox" role="switch" />
-          </label>
 
           <div class="field-stack">
             <label class="settings-title" for="pref-chat-keywords" data-i18n="onboarding.chatFilterTitle">Filtre de chat (Anti-Spoiler)</label>
@@ -627,6 +672,121 @@
           </div>
         </section>
 
+        <section class="menu-panel drops-panel" id="menu-drops" role="tabpanel" aria-labelledby="menu-tab-drops" hidden>
+          <div class="pts-head">
+            <h2 data-i18n="popup.drops.title">Drops</h2>
+            <button type="button" class="chip drops-auto" id="drops-auto" data-i18n-attr-title="popup.drops.autoHint" title="Régler dans Automatisation">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17 19 7"/></svg>
+              <span id="drops-auto-label" data-i18n="popup.drops.autoOn">Récupération auto</span>
+            </button>
+          </div>
+
+          <h3 class="drops-section"><span data-i18n="popup.drops.inProgress">En cours</span><small id="drops-updated" role="status"></small></h3>
+          <ul class="drops-list" id="drops-progress"></ul>
+          <p class="drops-empty" id="drops-progress-empty" data-i18n="popup.drops.emptyProgress" hidden>Aucun Drop en cours. Regarde un live avec les Drops activés : ta progression s'affichera ici.</p>
+
+          <h3 class="drops-section"><span data-i18n="popup.drops.campaigns">Campagnes</span><small id="drops-campaigns-meta"></small></h3>
+          <div class="drops-filters" id="drops-filters" role="group" data-i18n-attr-ariaLabel="popup.drops.filterLabel">
+            <button type="button" class="drops-filter active" aria-pressed="true" data-filter="all"><span data-i18n="popup.drops.filterAll">Toutes</span><em data-count="all"></em></button>
+            <button type="button" class="drops-filter" aria-pressed="false" data-filter="new"><span data-i18n="popup.drops.filterNew">Nouvelles</span><em data-count="new"></em></button>
+            <button type="button" class="drops-filter" aria-pressed="false" data-filter="ending"><span data-i18n="popup.drops.filterEnding">Finissent bientôt</span><em data-count="ending"></em></button>
+            <button type="button" class="drops-filter" aria-pressed="false" data-filter="upcoming"><span data-i18n="popup.drops.filterUpcoming">À venir</span><em data-count="upcoming"></em></button>
+          </div>
+          <ul class="drops-campaigns" id="drops-campaigns"></ul>
+          <div class="drops-empty drops-empty-action" id="drops-campaigns-empty" hidden>
+            <p id="drops-campaigns-empty-text"></p>
+            <button type="button" class="button button-quiet" id="drops-open-campaigns" data-i18n="popup.drops.openCampaigns">Ouvrir les campagnes</button>
+          </div>
+
+
+          <h3 class="drops-section"><span data-i18n="popup.drops.history">Historique</span><span class="plus-tag" data-i18n="popup.plus.badge">PLUS</span><small id="drops-history-meta"></small></h3>
+          <div class="drops-history" id="drops-history"></div>
+          <div class="smart-locked" id="drops-locked">
+            <p class="settings-description" data-i18n="popup.drops.lockedBody">L'historique de tous tes Drops obtenus, mois par mois, avec le jeu et la chaîne. Réservé à StreamPulse+.</p>
+            <button class="button button-primary" id="drops-unlock" type="button" data-i18n="popup.smart.unlock">Débloquer</button>
+          </div>
+
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.drops.trackingTitle">Suivre les Drops</span>
+              <span class="settings-description" data-i18n="popup.drops.trackingBody">Progression et récupération même sans onglet Twitch ouvert. La liste des campagnes se met à jour quand tu passes sur Twitch.</span>
+            </span>
+            <input id="pref-drops-tracking" type="checkbox" role="switch" />
+          </label>
+        </section>
+
+        <section class="menu-panel drops-panel" id="menu-badges" role="tabpanel" aria-labelledby="menu-tab-badges" hidden>
+          <div class="pts-head">
+            <h2 data-i18n="popup.osd.menuBadges">Badges</h2>
+          </div>
+          <div class="pts-lcd badges-lcd" id="badges-teaser" hidden>
+            <p class="pts-lcd-total"><span id="badges-teaser-total">0</span><small data-i18n="popup.drops.badgesUnit">DISPONIBLES</small></p>
+            <p class="pts-lcd-meta" id="badges-teaser-meta"></p>
+          </div>
+          <div class="smart-locked" id="badges-locked">
+            <p class="settings-description" data-i18n="popup.drops.badgesLocked">Les badges de chat obtenables en ce moment, avec comment les gagner, leur date de fin et un live pour les obtenir en un clic. Réservé à StreamPulse+.</p>
+            <button class="button button-primary" id="badges-unlock" type="button" data-i18n="popup.smart.unlock">Débloquer</button>
+          </div>
+          <div id="badges-content">
+            <div class="pts-lcd badges-lcd">
+              <p class="pts-lcd-total"><span id="badges-total">0</span><small data-i18n="popup.drops.badgesUnit">DISPONIBLES</small></p>
+              <p class="pts-lcd-meta" id="badges-lcd-meta"></p>
+            </div>
+            <div class="badges-auto-bar">
+              <button class="button button-primary badges-auto-all" id="badges-auto-all" type="button" aria-pressed="false" data-i18n="popup.drops.badgeAutoAll">Récupérer tous les badges possibles</button>
+              <p class="badges-auto-status" id="badges-auto-status" role="status" hidden></p>
+              <p class="badges-note" data-i18n="popup.drops.badgeAutoAllHint">Un onglet épinglé et muet regarde un live à la fois : Twitch ne compte qu'un live à la fois. Les paliers d'un même jeu avancent ensemble.</p>
+            </div>
+            <div class="badges-toolbar">
+              <div class="segmented" id="badges-filters" role="group" data-i18n-attr-ariaLabel="popup.drops.allBadges">
+                <button type="button" class="pf-btn active" aria-pressed="true" data-filter="all"><span data-i18n="popup.drops.filterAll">Toutes</span><em data-count="all"></em></button>
+                <button type="button" class="pf-btn" aria-pressed="false" data-filter="free"><span data-i18n="popup.drops.badgeFilterFree">Gratuits</span><em data-count="free"></em></button>
+                <button type="button" class="pf-btn" aria-pressed="false" data-filter="paid"><span data-i18n="popup.drops.badgeFilterPaid">Payants</span><em data-count="paid"></em></button>
+                <button type="button" class="pf-btn" aria-pressed="false" data-filter="missing"><span data-i18n="popup.drops.badgeFilterMissing">À obtenir</span><em data-count="missing"></em></button>
+                <button type="button" class="pf-btn" aria-pressed="false" data-filter="owned"><span data-i18n="popup.drops.badgeFilterOwned">Obtenus</span><em data-count="owned"></em></button>
+              </div>
+              <label class="badges-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <span class="visually-hidden" data-i18n="popup.drops.searchBadges">Chercher un badge</span>
+                <input id="badges-search" type="search" autocomplete="off" spellcheck="false" data-i18n-attr-placeholder="popup.drops.searchBadges" placeholder="Chercher un badge" />
+              </label>
+            </div>
+            <ul class="badge-grid" id="badges-catalog"></ul>
+            <p class="drops-empty" id="badges-catalog-empty" data-i18n="popup.drops.noBadgeMatch" hidden>Aucun badge ne correspond.</p>
+            <button id="badges-more" class="button button-quiet" type="button" data-i18n="popup.drops.showMore" hidden>Voir plus</button>
+            <p class="badges-note" data-i18n="popup.drops.catalogNote">Seuls les badges obtenables en ce moment sont listés. Clique sur un badge pour ouvrir un live où le gagner.</p>
+            <p class="badges-note" id="drops-badges-sync" role="status"></p>
+            <div hidden>
+              <ul id="drops-rewards"></ul><small id="drops-rewards-meta"></small><p id="drops-rewards-empty"></p>
+              <ul id="drops-badges"></ul><small id="drops-badges-meta"></small>
+            </div>
+          </div>
+        </section>
+
+        <section class="menu-panel" id="menu-identity" role="tabpanel" aria-labelledby="menu-tab-identity">
+          <h2 data-i18n="popup.osd.menuIdentity">Pseudo et badge</h2>
+          <p class="settings-description" data-i18n="popup.identity.intro">L'apparence de ton badge StreamPulse et de ton pseudo dans le chat Twitch, visible par les autres utilisateurs de StreamPulse.</p>
+          <p class="identity-rank" id="identity-rank" role="status" hidden></p>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.communityBadgeTitle">Badge communautaire</span>
+              <span class="settings-description" data-i18n="popup.settings.communityBadgeDescription">Affiche l'icône StreamPulse à côté des pseudos des utilisateurs dans le tchat Twitch.</span>
+            </span>
+            <input id="pref-community-badge" type="checkbox" role="switch" />
+          </label>
+          <div class="cosmetic-preview identity-preview">
+            <span class="cosmetic-preview-label" data-i18n="popup.cosmetics.preview">Aperçu dans le tchat</span>
+            <span class="cosmetic-line" aria-hidden="true"><span class="cosmetic-badge" id="cosmetic-badge"></span><b class="cosmetic-name" id="cosmetic-name" data-i18n="popup.cosmetics.sampleName">TonPseudo</b><span class="cosmetic-msg">: gg !</span></span>
+          </div>
+          <h3 class="settings-group-header" data-i18n="popup.cosmetics.nameTitle">Pseudo spécial</h3>
+          <p class="settings-description" data-i18n="popup.cosmetics.nameBody">Un dégradé ou un effet sur ton pseudo, vu par les utilisateurs de StreamPulse.</p>
+          <div class="fx-picker" id="cosmetic-name-fx" role="radiogroup" data-i18n-attr-ariaLabel="popup.cosmetics.nameTitle"></div>
+          <h3 class="settings-group-header" data-i18n="popup.cosmetics.badgeTitle">Effet du badge</h3>
+          <p class="settings-description" data-i18n="popup.cosmetics.badgeBody">Anime le logo StreamPulse à côté de ton pseudo.</p>
+          <div class="fx-picker" id="cosmetic-badge-fx" role="radiogroup" data-i18n-attr-ariaLabel="popup.cosmetics.badgeTitle"></div>
+
+        </section>
+
         <!-- StreamPulse+ -->
         <section class="menu-panel" id="menu-plus" role="tabpanel" aria-labelledby="menu-tab-plus" hidden>
           <h2 data-i18n="popup.osd.menuPlus">StreamPulse+</h2>
@@ -637,69 +797,32 @@
             <button class="button button-primary" id="plus-menu-open" type="button" data-i18n="popup.plusMenu.discover">Découvrir StreamPulse+</button>
           </div>
 
-          <h3 class="settings-group-header" data-i18n="popup.plusMenu.groupLook">Personnalisation</h3>
-          <div class="settings-row accent-row is-locked" id="accent-row">
-            <span class="settings-text">
-              <span class="settings-title" id="accent-label"><span data-i18n="popup.accent.title">Couleur d'accent</span></span>
-              <span class="settings-description" data-i18n="popup.accent.hint">Change la couleur des boutons et des repères du popup.</span>
-            </span>
-            <div class="accent-swatches" id="accent-swatches" role="radiogroup" aria-labelledby="accent-label">
-              <button class="accent-swatch" type="button" role="radio" aria-checked="true" data-accent="violet" data-i18n-attr-ariaLabel="popup.accent.violet" aria-label="Violet"></button>
-              <button class="accent-swatch" type="button" role="radio" aria-checked="false" data-accent="lcd" data-i18n-attr-ariaLabel="popup.accent.lcd" aria-label="Vert LCD"></button>
-              <button class="accent-swatch" type="button" role="radio" aria-checked="false" data-accent="ocean" data-i18n-attr-ariaLabel="popup.accent.ocean" aria-label="Bleu"></button>
-              <button class="accent-swatch" type="button" role="radio" aria-checked="false" data-accent="ember" data-i18n-attr-ariaLabel="popup.accent.ember" aria-label="Orange"></button>
-              <button class="accent-swatch" type="button" role="radio" aria-checked="false" data-accent="crimson" data-i18n-attr-ariaLabel="popup.accent.crimson" aria-label="Rouge"></button>
+          <h3 class="settings-group-header" data-i18n="popup.referral.title">Parrainage</h3>
+          <div class="referral" id="referral-block">
+            <p class="settings-description" data-i18n="popup.referral.body">Partage ton code : ton ami a 2,99 € offerts. Toi, tu touches 1 € par mois tant qu'il reste abonné, ou 5 € d'un coup s'il prend la formule à vie, versés sur PayPal.</p>
+            <div class="referral-row">
+              <span class="referral-code" id="referral-code" hidden></span>
+              <button class="button button-quiet" id="referral-copy" type="button" data-i18n="popup.referral.copy" hidden>Copier</button>
+              <button class="button button-primary" id="referral-get" type="button" data-i18n="popup.referral.get">Obtenir mon code</button>
             </div>
-          </div>
-          <div class="settings-row badge-color-row">
-            <span class="settings-text">
-              <label class="settings-title" for="pref-badge-color-mode" data-i18n="popup.settings.badgeColorTitle">Couleur du badge</label>
-              <span class="settings-description" data-i18n="popup.settings.badgeColorDescription">Choisissez la teinte de l'icône affichée dans le tchat.</span>
-            </span>
-            <span class="badge-color-controls">
-              <select id="pref-badge-color-mode" class="settings-select">
-                <option value="author" data-i18n="popup.settings.badgeColorAuthor">Couleur du pseudo</option>
-                <option value="theme" data-i18n="popup.settings.badgeColorTheme">Selon le thème Twitch</option>
-                <option value="custom" data-i18n="popup.settings.badgeColorCustom">Couleur personnalisée</option>
-              </select>
-              <input id="pref-badge-color-value" class="badge-color-input" type="color" value="#9146ff" data-i18n-attr-ariaLabel="popup.settings.badgeColorCustom" hidden />
-            </span>
-          </div>
-          <p class="settings-description badge-plus-note" id="badge-plus-note" data-i18n="popup.settings.badgePlusOff">Avec StreamPulse+, ta couleur personnalisée est visible par tous les utilisateurs de StreamPulse.</p>
-          <div class="settings-row">
-            <span class="settings-text">
-              <label class="settings-title" for="cosmetic-badge-fx" data-i18n="popup.cosmetics.badgeTitle">Effet du badge</label>
-              <span class="settings-description" data-i18n="popup.cosmetics.badgeBody">Anime le logo StreamPulse à côté de ton pseudo.</span>
-            </span>
-            <select id="cosmetic-badge-fx" class="settings-select">
-              <option value="" data-i18n="popup.cosmetics.none">Aucun</option>
-              <option value="pulse" data-i18n="popup.cosmetics.pulse">Pulsation</option>
-              <option value="shine" data-i18n="popup.cosmetics.shine">Reflet</option>
-              <option value="rainbow" data-i18n="popup.cosmetics.rainbow">Arc-en-ciel</option>
-              <option value="glow" data-i18n="popup.cosmetics.glow">Halo</option>
-              <option value="bounce" data-i18n="popup.cosmetics.bounce">Rebond</option>
-              <option value="spin" data-i18n="popup.cosmetics.spin">Rotation</option>
-              <option value="flicker" data-i18n="popup.cosmetics.flicker">Néon clignotant</option>
-            </select>
-          </div>
-          <div class="settings-row">
-            <span class="settings-text">
-              <label class="settings-title" for="cosmetic-name-fx" data-i18n="popup.cosmetics.nameTitle">Pseudo spécial</label>
-              <span class="settings-description" data-i18n="popup.cosmetics.nameBody">Un dégradé ou un effet sur ton pseudo, vu par les utilisateurs de StreamPulse.</span>
-            </span>
-            <select id="cosmetic-name-fx" class="settings-select">
-              <option value="" data-i18n="popup.cosmetics.none">Aucun</option>
-              <option value="aurora" data-i18n="popup.cosmetics.aurora">Aurore</option>
-              <option value="sunset" data-i18n="popup.cosmetics.sunset">Coucher de soleil</option>
-              <option value="lcd" data-i18n="popup.cosmetics.lcd">Écran LCD</option>
-              <option value="gold" data-i18n="popup.cosmetics.gold">Or</option>
-              <option value="neon" data-i18n="popup.cosmetics.neon">Néon</option>
-              <option value="rainbow" data-i18n="popup.cosmetics.rainbow">Arc-en-ciel</option>
-            </select>
-          </div>
-          <div class="cosmetic-preview">
-            <span class="cosmetic-preview-label" data-i18n="popup.cosmetics.preview">Aperçu dans le tchat</span>
-            <span class="cosmetic-line" aria-hidden="true"><span class="cosmetic-badge" id="cosmetic-badge"></span><b class="cosmetic-name" id="cosmetic-name" data-i18n="popup.cosmetics.sampleName">TonPseudo</b><span class="cosmetic-msg">: gg !</span></span>
+            <p class="settings-description" id="referral-status" role="status"></p>
+            <div class="referral-earnings" id="referral-earnings" hidden>
+              <div class="referral-balance-row">
+                <span class="referral-balance-label" data-i18n="popup.referral.balance">À verser</span>
+                <b class="referral-balance" id="referral-balance"></b>
+              </div>
+              <p class="settings-description" id="referral-earned"></p>
+              <p class="settings-description" id="referral-payout-rule"></p>
+              <form class="referral-paypal" id="referral-paypal-form">
+                <label class="referral-paypal-label" for="referral-paypal" data-i18n="popup.referral.paypalLabel">Adresse PayPal</label>
+                <div class="referral-row">
+                  <input class="text-input" id="referral-paypal" type="email" autocomplete="email" spellcheck="false" maxlength="200" data-i18n-attr-placeholder="popup.referral.paypalPlaceholder" placeholder="toi@exemple.fr" />
+                  <button class="button button-quiet" type="submit" data-i18n="popup.referral.paypalSave">Enregistrer</button>
+                </div>
+                <p class="settings-description" id="referral-paypal-status" role="status"></p>
+              </form>
+            </div>
+            <ol class="referral-tiers" id="referral-tiers"></ol>
           </div>
 
           <h3 class="settings-group-header smart-head"><span data-i18n="popup.smart.title">Alertes intelligentes</span></h3>
@@ -776,6 +899,20 @@
             <span class="settings-title" data-i18n="popup.settings.languageTitle">Langue de l'extension</span>
             <div class="language-options" id="language-options-popup" role="group" data-i18n-attr-ariaLabel="meta.languageSwitcherLabel"></div>
           </div>
+
+          <h3 class="settings-group-header" data-i18n="popup.layout.title">Disposition</h3>
+          <p class="settings-description" data-i18n="popup.layout.description">Choisis l'ordre des onglets et des rubriques, et masque ceux dont tu ne te sers pas.</p>
+          <div class="layout-grid">
+            <div>
+              <p class="settings-title" data-i18n="popup.layout.tabs">Barre du haut</p>
+              <ul class="layout-list" id="layout-tabs"></ul>
+            </div>
+            <div>
+              <p class="settings-title" data-i18n="popup.layout.menu">Rubriques des Réglages</p>
+              <ul class="layout-list" id="layout-menu"></ul>
+            </div>
+          </div>
+          <button id="layout-reset" class="button button-quiet" type="button" data-i18n="popup.layout.reset">Rétablir l'ordre d'origine</button>
 
           <h3 class="settings-group-header" data-i18n="popup.settings.groupFaq">Aide et FAQ</h3>
           <div class="faq">

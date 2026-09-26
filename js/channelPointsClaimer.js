@@ -131,12 +131,8 @@
     const channel = getCurrentChannel();
     setTimeout(() => {
       try {
-        chrome.runtime.sendMessage({
-          type: "incrementStat",
-          stat: "dropsClaimed",
-          value: 1,
-          channel,
-        }).catch(() => {});
+        // Le service worker relit l'inventaire pour compter ce Drop avec son nom.
+        chrome.runtime.sendMessage({ type: "dropClaimedByClick", channel }).catch(() => {});
       } catch (_) {
         // Service worker endormi, ou contexte d'extension invalide par une mise a jour : le message est perdu sans consequence ici.
       }
@@ -249,7 +245,11 @@
     if (Date.now() - lastClaimTime < 4000) return;
 
     if (isPointsActive && tryClaimChannelPoints()) return;
-    if (isDropsActive && tryClaimDrops()) return;
+    // Sur les pages Drops que l'on regarde soi-même, pas de clic : la
+    // récupération passe par Twitch (dropsRecorder.js) et l'utilisateur garde la
+    // main. Seul l'onglet d'inventaire ouvert en arrière-plan clique encore.
+    const watchingDropsPage = /^\/drops(\/|$)/.test(location.pathname) && document.visibilityState === "visible";
+    if (isDropsActive && !watchingDropsPage && tryClaimDrops()) return;
     if (isMomentsActive && tryClaimMoments()) return;
   }
 
