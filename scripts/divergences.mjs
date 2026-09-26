@@ -32,12 +32,16 @@ export const PORT_ONLY = [
   "js/inject/predictions-data-inline.js",
   "scripts/build-inline-predictions.mjs",
   "tests/predictions-inline.test.mjs",
+  "js/inject/points-bonus-inline.js",
+  "scripts/build-inline-points-bonus.mjs",
+  "tests/points-bonus-inline.test.mjs",
 ];
 
 /** Régénérés après la copie, jamais recopiés tels quels. */
 export const GENERATED = [
   { file: "js/inject/i18n-inline.js", script: "scripts/build-inline-i18n.mjs" },
   { file: "js/inject/predictions-data-inline.js", script: "scripts/build-inline-predictions.mjs" },
+  { file: "js/inject/points-bonus-inline.js", script: "scripts/build-inline-points-bonus.mjs" },
 ];
 
 /**
@@ -140,6 +144,32 @@ export const PATCHES = [
   data = window.__SP_PREDICTIONS__;
   if (data) setTimeout(tick, 4_000);
   else console.warn("StreamPulse: predictions-data-inline.js absent, assistance desactivee.");`,
+      },
+    ],
+  },
+  {
+    file: "js/channelPointsClaimer.js",
+    why: "Même raison : la règle de la caisse de bonus est livrée en jumeau classique, généré par scripts/build-inline-points-bonus.mjs.",
+    edits: [
+      {
+        find: `  /** Module js/points-bonus.js, chargé plus bas par import() dynamique. */`,
+        replace: `  /** Règles de js/points-bonus.js, posées par points-bonus-inline.js (voir plus bas). */`,
+      },
+      {
+        find: `  import(chrome.runtime.getURL("js/points-bonus.js"))
+    .then((module) => {
+      bonusRules = module;
+    })
+    .catch((error) => {
+      // Sans ces règles, les points ne sont plus récupérés ; Drops et Moments continuent.
+      console.warn("[StreamPulse] règles de la caisse de bonus indisponibles", error);
+    });`,
+        replace: `  // js/inject/points-bonus-inline.js est declare juste avant ce fichier dans
+  // content_scripts : il pose window.__SP_POINTS_BONUS__. Firefox refuse
+  // l'import() dynamique dans un content script, la recuperation des points ne
+  // demarrerait jamais. Sans ces regles, Drops et Moments continuent.
+  bonusRules = window.__SP_POINTS_BONUS__ || null;
+  if (!bonusRules) console.warn("[StreamPulse] points-bonus-inline.js absent, recuperation des points desactivee.");`,
       },
     ],
   },
