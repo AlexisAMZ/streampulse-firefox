@@ -1,6 +1,6 @@
 {
   "name": "streampulse-firefox",
-  "version": "26.9.26",
+  "version": "26.9.27",
   "private": true,
   "description": "Outillage de developpement de l'extension StreamPulse pour Firefox (AMO). Rien ici n'est package dans le zip livre.",
   "type": "module",

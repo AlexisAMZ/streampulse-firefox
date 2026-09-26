@@ -3,7 +3,7 @@
   "default_locale": "en",
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "26.9.26",
+  "version": "26.9.27",
   "browser_specific_settings": {
     "gecko": {
       "id": "streampulse@alexisamz.fr",
@@ -61,10 +61,21 @@
       ],
       "all_frames": false,
       "js": [
-        "js/inject/predictions-bridge.js"
+        "js/inject/predictions-bridge.js",
+        "js/inject/points-bridge.js"
       ],
       "run_at": "document_start",
       "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "js/pointsRecorder.js"
+      ],
+      "run_at": "document_start"
     },
     {
       "matches": [
