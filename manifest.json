@@ -3,7 +3,7 @@
   "default_locale": "en",
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "26.9.27",
+  "version": "26.9.29",
   "browser_specific_settings": {
     "gecko": {
       "id": "streampulse@alexisamz.fr",
@@ -185,6 +185,7 @@
     {
       "resources": [
         "images/photos/128px.png",
+        "images/photos/badge-mark.svg",
         "images/photos/logosp.png"
       ],
       "matches": [

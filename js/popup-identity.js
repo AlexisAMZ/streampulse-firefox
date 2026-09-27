@@ -5,7 +5,7 @@
 
 import { t } from "./i18n.js";
 import { LICENSE_VERIFY_URL, PLUS_KEY } from "./plus.js";
-import { BADGE_FX, NAME_FX, fxLock, normalizeCosmetics, rankOf, visibleFx } from "./cosmetics-data.js";
+import { BADGE_FX, NAME_FX, TENURE_STYLES, TENURE_TIERS, fxLock, normalizeCosmetics, rankOf, tenureTier, visibleFx } from "./cosmetics-data.js";
 import { isPaypalAddress, normalizeEarnings, shouldRefreshEarnings } from "./referral-data.js";
 
 export const COSMETICS_KEY = "streamPulseCosmetics";
@@ -39,7 +39,36 @@ let earnings = null;
 
 function access() {
   const record = deps.getRecord();
-  return { plus: deps.isPlus(), role: record?.role || "", referrals: Math.max(0, Number(record?.referrals) || 0) };
+  return { plus: deps.isPlus(), role: record?.role || "", referrals: Math.max(0, Number(record?.referrals) || 0), plan: record?.plan || "", since: Number(record?.since) || 0 };
+}
+
+/** Paliers affichés, du premier mois à la licence à vie. */
+const TENURE_LADDER = [...TENURE_TIERS.map(([, key]) => key).reverse(), "life"];
+
+/** Une tuile d'ancienneté avec le logo : aperçu du popup et échelle des paliers. */
+function tenureTile(tier, style = "gauge") {
+  const tile = node("span", tileClass(tier, style));
+  tile.append(node("span", "cosmetic-badge"));
+  return tile;
+}
+
+function tileClass(tier, style) {
+  return tier ? `cosmetic-tile sp-tier sp-tier--${style} sp-tier-${tier}` : "cosmetic-tile";
+}
+
+/** Échelle des paliers ; le sien est mis en avant quand StreamPulse+ est actif. */
+function renderTenure(current, style) {
+  const list = $("cosmetic-tenure");
+  if (!list) return;
+  const mine = current.plus ? tenureTier(current.plan, current.since, Date.now(), rankOf(current)) : "";
+  // Le fondateur voit son palier à lui en bout d'échelle.
+  const ladder = mine === "founder" ? [...TENURE_LADDER, "founder"] : TENURE_LADDER;
+  list.replaceChildren(...ladder.map((tier) => {
+    const item = node("li", `tenure-step${tier === mine ? " is-current" : ""}`);
+    if (tier === mine) item.setAttribute("aria-current", "true");
+    item.append(tenureTile(tier, style), node("span", "tenure-label", t(`popup.cosmetics.tier_${tier}`)));
+    return item;
+  }));
 }
 
 /** Rendu d'un effet : le pseudo (ou le texte donné) peint, ou le logo StreamPulse animé. */
@@ -47,7 +76,14 @@ function fxSample(kind, value, text) {
   if (kind === "name") {
     return node("b", `fx-sample-name${value ? ` sp-paint sp-paint--${value}` : ""}`, text || chatName || t("popup.cosmetics.sampleName"));
   }
+  // « Ancienneté » (Jauge ou Pager) : la tuile de son palier (celle d'un an en exemple sans StreamPulse+).
+  if (TENURE_STYLES[value]) return tenureTile(ownTier() || "y1", TENURE_STYLES[value]);
   return node("span", `cosmetic-badge${value ? ` sp-fx-${value}` : ""}`);
+}
+
+function ownTier() {
+  const current = access();
+  return current.plus ? tenureTier(current.plan, current.since, Date.now(), rankOf(current)) : "";
 }
 
 /**
@@ -63,7 +99,12 @@ function fxOption(kind, value, selected, current) {
   button.dataset.kind = kind;
   button.dataset.value = value;
   button.dataset.lock = lock;
-  button.append(fxSample(kind, value), node("span", "fx-label", t(`popup.cosmetics.${value || "none"}`)));
+  // Comme les « paints » de 7TV : le nom de la couleur est écrit avec la couleur
+  // elle-même ; pour le logo, le logo déjà coloré puis son nom.
+  const label = t(`popup.cosmetics.${value || "none"}`);
+  button.append(node("span", "fx-radio"));
+  if (kind === "name") button.append(fxSample("name", value, nameSample === "label" ? label : ""));
+  else button.append(fxSample("badge", value), node("span", "fx-label", label));
   if (lock === "referrals") {
     const needed = REFERRAL_TIERS.find((tier) => tier.fx?.value === value)?.count || 1;
     button.setAttribute("aria-disabled", "true");
@@ -87,16 +128,35 @@ function renderRank(current) {
   else if (rank === "ambassador") target.textContent = t("popup.identity.rankAmbassador", { count: current.referrals });
 }
 
+// Liste des pseudos : le nom de chaque couleur écrit avec elle (« label ») ou
+// son propre pseudo (« user »), comme la bascule Paint Name / Username de 7TV.
+let nameSample = "label";
+
+function renderNameSwitch() {
+  document.querySelectorAll(".look-switch-btn").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.sample === nameSample)));
+}
+
 function renderCosmetics() {
   const current = access();
   const shown = current.plus ? cosmetics : { badgeFx: "", nameFx: "" };
-  $("cosmetic-name-fx")?.replaceChildren(...["", ...visibleFx(NAME_FX, current)].map((value) => fxOption("name", value, shown.nameFx, current)));
+  // Tous les badges dans une seule liste : logo classique, logos colorés,
+  // Jauge et Pager d'ancienneté, récompenses (et les éditions spéciales à venir).
   $("cosmetic-badge-fx")?.replaceChildren(...["", ...visibleFx(BADGE_FX, current)].map((value) => fxOption("badge", value, shown.badgeFx, current)));
-  if ($("cosmetic-badge")) $("cosmetic-badge").className = `cosmetic-badge${shown.badgeFx ? ` sp-fx-${shown.badgeFx}` : ""}`;
+  $("cosmetic-name-fx")?.replaceChildren(...["", ...visibleFx(NAME_FX, current)].map((value) => fxOption("name", value, shown.nameFx, current)));
+  const style = TENURE_STYLES[shown.badgeFx] || "";
+  const tier = style ? tenureTier(current.plan, current.since, Date.now(), rankOf(current)) : "";
+  if ($("cosmetic-tenure-block")) $("cosmetic-tenure-block").hidden = !style;
+  if ($("cosmetic-badge")) {
+    $("cosmetic-badge").className = `cosmetic-badge${shown.badgeFx && !tier ? ` sp-fx-${shown.badgeFx}` : ""}`;
+    $("cosmetic-badge").hidden = Boolean(tier);
+  }
+  if ($("cosmetic-tile")) $("cosmetic-tile").className = tileClass(tier, style);
+  renderTenure(current, style || "gauge");
   if ($("cosmetic-name")) {
     $("cosmetic-name").className = `cosmetic-name${shown.nameFx ? ` sp-paint sp-paint--${shown.nameFx}` : ""}`;
     $("cosmetic-name").textContent = chatName || t("popup.cosmetics.sampleName");
   }
+  renderNameSwitch();
   renderRank(current);
 }
 
@@ -110,12 +170,15 @@ function initCosmeticsPickers() {
         return;
       }
       if (button.dataset.lock) return;
-      const field = button.dataset.kind === "name" ? "nameFx" : "badgeFx";
-      cosmetics = normalizeCosmetics({ ...cosmetics, [field]: button.dataset.value });
+      cosmetics = normalizeCosmetics({ ...cosmetics, [button.dataset.kind === "name" ? "nameFx" : "badgeFx"]: button.dataset.value });
       chrome.storage.local.set({ [COSMETICS_KEY]: cosmetics }).catch((error) => console.warn("[popup] effets :", error?.message || error));
       renderCosmetics();
     });
   }
+  document.querySelectorAll(".look-switch-btn").forEach((button) => button.addEventListener("click", () => {
+    nameSample = button.dataset.sample;
+    renderCosmetics();
+  }));
 }
 
 // ─── Parrainage ───────────────────────────────────────────────────────────────

@@ -60,6 +60,19 @@
       </div>
     </aside>
 
+    <aside class="badge-ask" id="badge-ask" role="dialog" hidden>
+      <span class="badge-ask-mark" aria-hidden="true"></span>
+      <div class="badge-ask-text">
+        <b data-i18n="popup.badgeAsk.title">Affiche ton badge dans le tchat</b>
+        <span data-i18n="popup.badgeAsk.body">Repère et sois repéré par les autres utilisateurs de StreamPulse dans le tchat Twitch. Si tu l'actives : une empreinte de ton pseudo est envoyée à streampulse.fr une fois par jour maximum.</span>
+      </div>
+      <div class="badge-ask-actions">
+        <button id="badge-ask-activate" type="button" class="button button-primary" data-i18n="popup.badgeAsk.activate">Activer le badge</button>
+        <button id="badge-ask-later" type="button" class="button button-quiet" data-i18n="popup.badgeAsk.later">Plus tard</button>
+        <button id="badge-ask-never" type="button" class="button button-link" data-i18n="popup.badgeAsk.dismiss">Non merci</button>
+      </div>
+    </aside>
+
     <main id="streamers-view" class="home" role="tabpanel" aria-labelledby="tab-streamers">
       <section class="stage" id="stage" data-state="empty">
         <div class="stage-media" id="stage-media"></div>
@@ -776,15 +789,24 @@
           </label>
           <div class="cosmetic-preview identity-preview">
             <span class="cosmetic-preview-label" data-i18n="popup.cosmetics.preview">Aperçu dans le tchat</span>
-            <span class="cosmetic-line" aria-hidden="true"><span class="cosmetic-badge" id="cosmetic-badge"></span><b class="cosmetic-name" id="cosmetic-name" data-i18n="popup.cosmetics.sampleName">TonPseudo</b><span class="cosmetic-msg">: gg !</span></span>
+            <span class="cosmetic-line" aria-hidden="true"><span class="cosmetic-badge" id="cosmetic-badge"></span><span class="cosmetic-tile" id="cosmetic-tile"><span class="cosmetic-badge"></span></span><b class="cosmetic-name" id="cosmetic-name" data-i18n="popup.cosmetics.sampleName">TonPseudo</b><span class="cosmetic-msg">: gg !</span></span>
           </div>
-          <h3 class="settings-group-header" data-i18n="popup.cosmetics.nameTitle">Pseudo spécial</h3>
-          <p class="settings-description" data-i18n="popup.cosmetics.nameBody">Un dégradé ou un effet sur ton pseudo, vu par les utilisateurs de StreamPulse.</p>
-          <div class="fx-picker" id="cosmetic-name-fx" role="radiogroup" data-i18n-attr-ariaLabel="popup.cosmetics.nameTitle"></div>
-          <h3 class="settings-group-header" data-i18n="popup.cosmetics.badgeTitle">Effet du badge</h3>
-          <p class="settings-description" data-i18n="popup.cosmetics.badgeBody">Anime le logo StreamPulse à côté de ton pseudo.</p>
-          <div class="fx-picker" id="cosmetic-badge-fx" role="radiogroup" data-i18n-attr-ariaLabel="popup.cosmetics.badgeTitle"></div>
-
+          <div class="look-head">
+            <h3 class="settings-group-header" data-i18n="popup.cosmetics.tabBadge">Badge</h3>
+          </div>
+          <div class="fx-picker is-list" id="cosmetic-badge-fx" role="radiogroup" data-i18n-attr-ariaLabel="popup.cosmetics.tabBadge"></div>
+          <div id="cosmetic-tenure-block" hidden>
+            <p class="settings-description" data-i18n="popup.cosmetics.tenureBody">Ton badge évolue avec ton ancienneté d'abonnement, avec ses propres animations.</p>
+            <ol class="tenure-ladder" id="cosmetic-tenure"></ol>
+          </div>
+          <div class="look-head">
+            <h3 class="settings-group-header" data-i18n="popup.cosmetics.tabName">Pseudo</h3>
+            <div class="look-switch" role="group" data-i18n-attr-ariaLabel="popup.cosmetics.tabName">
+              <button type="button" class="look-switch-btn" data-sample="label" aria-pressed="true" data-i18n="popup.cosmetics.showPaintName">Nom de la couleur</button>
+              <button type="button" class="look-switch-btn" data-sample="user" aria-pressed="false" data-i18n="popup.cosmetics.showUsername">Ton pseudo</button>
+            </div>
+          </div>
+          <div class="fx-picker is-list" id="cosmetic-name-fx" role="radiogroup" data-i18n-attr-ariaLabel="popup.cosmetics.tabName"></div>
         </section>
 
         <!-- StreamPulse+ -->

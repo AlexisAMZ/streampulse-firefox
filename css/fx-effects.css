@@ -87,3 +87,257 @@
   [class*="sp-chat-badge--fx-"] .sp-chat-badge-img,
   .sp-paint--fire, .sp-paint--frost, .sp-paint--glitch, .sp-paint--founder { animation: none !important; }
 }
+
+/* ── Textures (26.9.28) : mêmes fonds pour le pseudo et pour le logo ── */
+.cosmetic-badge.sp-fx-galaxy,
+.sp-chat-badge--fx-galaxy .sp-chat-badge-img,
+.sp-paint--galaxy {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='3' cy='4' r='.7' fill='%23fff'/%3E%3Ccircle cx='17' cy='2' r='.5' fill='%23fff' opacity='.7'/%3E%3Ccircle cx='11' cy='11' r='1' fill='%23fff'/%3E%3Ccircle cx='21' cy='15' r='.6' fill='%23cfe8ff'/%3E%3Ccircle cx='6' cy='19' r='.5' fill='%23fff' opacity='.8'/%3E%3Ccircle cx='14' cy='22' r='.7' fill='%23ffd6f5'/%3E%3C/svg%3E"), radial-gradient(circle at 30% 40%, #ff5fd2aa, transparent 45%), linear-gradient(100deg, #2a0f6b, #5a2bd6, #1d5bd8, #2a0f6b) !important;
+  background-size: 24px 24px, 100% 100%, 300% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-tx-drift 9s linear infinite;
+}
+.cosmetic-badge.sp-fx-holo,
+.sp-chat-badge--fx-holo .sp-chat-badge-img,
+.sp-paint--holo {
+  background-image: repeating-linear-gradient(0deg, #ffffff40 0 1px, transparent 1px 3px), linear-gradient(115deg, #ff9ad5, #a0f0ff, #fff6a0, #b8a0ff, #7dffc8, #ff9ad5) !important;
+  background-size: auto, 300% 300% !important;
+  background-repeat: repeat !important;
+  animation: sp-tx-holo 4s linear infinite;
+}
+.cosmetic-badge.sp-fx-lava,
+.sp-chat-badge--fx-lava .sp-chat-badge-img,
+.sp-paint--lava {
+  background-image: radial-gradient(circle at 20% 60%, #ffe066 0 12%, transparent 30%), radial-gradient(circle at 70% 30%, #ffb703 0 10%, transparent 28%), linear-gradient(90deg, #9d0208, #e85d04, #d00000, #9d0208) !important;
+  background-size: 40px 100%, 56px 100%, 300% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-tx-lava 5s ease-in-out infinite alternate;
+}
+.cosmetic-badge.sp-fx-marble,
+.sp-chat-badge--fx-marble .sp-chat-badge-img,
+.sp-paint--marble {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='.035 .11' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .42  0 0 0 0 .36  0 0 0 0 .62  -2.4 0 0 0 1.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%23f4f1fa'/%3E%3Crect width='100%25' height='100%25' filter='url%28%23f%29'/%3E%3C/svg%3E") !important;
+  background-size: 120px 40px !important;
+  background-repeat: repeat !important;
+  animation: sp-tx-drift-slow 20s linear infinite;
+}
+.cosmetic-badge.sp-fx-chrome,
+.sp-chat-badge--fx-chrome .sp-chat-badge-img,
+.sp-paint--chrome {
+  background-image: linear-gradient(110deg, transparent 40%, #ffffffee 50%, transparent 60%), linear-gradient(180deg, #ffffff 0%, #c9c9d6 42%, #4b4b5a 50%, #a9a9ba 58%, #ffffff 100%) !important;
+  background-size: 300% 100%, 100% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-tx-shine 3s ease-in-out infinite;
+}
+.cosmetic-badge.sp-fx-glitter,
+.sp-chat-badge--fx-glitter .sp-chat-badge-img,
+.sp-paint--glitter {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='16'%3E%3Ccircle cx='2' cy='3' r='.9' fill='%23fff'/%3E%3Ccircle cx='9' cy='7' r='.6' fill='%23fff7c2'/%3E%3Ccircle cx='14' cy='2' r='.7' fill='%23fff'/%3E%3Ccircle cx='5' cy='12' r='.6' fill='%23fff'/%3E%3Ccircle cx='12' cy='13' r='.9' fill='%23fffbe0'/%3E%3Ccircle cx='16' cy='9' r='.5' fill='%23fff'/%3E%3C/svg%3E"), linear-gradient(90deg, #c9921b, #ffd966, #fff3b0, #ffd966, #c9921b) !important;
+  background-size: 18px 16px, 300% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-tx-glitter 2.2s steps(4) infinite;
+}
+.cosmetic-badge.sp-fx-candy,
+.sp-chat-badge--fx-candy .sp-chat-badge-img,
+.sp-paint--candy {
+  background-image: repeating-linear-gradient(135deg, #ff4d8d 0 4px, #fff0f6 4px 8px) !important;
+  background-size: auto !important;
+  background-repeat: repeat !important;
+  animation: sp-tx-candy 1.6s linear infinite;
+}
+.cosmetic-badge.sp-fx-toxic,
+.sp-chat-badge--fx-toxic .sp-chat-badge-img,
+.sp-paint--toxic {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='20'%3E%3Ccircle cx='4' cy='5' r='1.6' fill='none' stroke='%23eaffb0' stroke-width='.7'/%3E%3Ccircle cx='13' cy='11' r='1.1' fill='%23eaffb0' opacity='.7'/%3E%3Ccircle cx='9' cy='16' r='.8' fill='%23fff'/%3E%3C/svg%3E"), linear-gradient(180deg, #d4ff3a, #39d353 60%, #0f9d58) !important;
+  background-size: 18px 20px, 100% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-tx-bubble 2.6s linear infinite;
+}
+.cosmetic-badge.sp-fx-ocean,
+.sp-chat-badge--fx-ocean .sp-chat-badge-img,
+.sp-paint--ocean {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='16'%3E%3Cpath d='M0 6 Q5 2 10 6 T20 6' fill='none' stroke='%23dff6ff' stroke-width='1.3'/%3E%3Cpath d='M0 13 Q5 9 10 13 T20 13' fill='none' stroke='%237fd4ff' stroke-width='1'/%3E%3C/svg%3E"), linear-gradient(180deg, #7fe7ff, #1e90ff 55%, #0b3d91) !important;
+  background-size: 20px 16px, 100% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-tx-wave 2.8s linear infinite;
+}
+@keyframes sp-tx-drift { to { background-position: 48px 24px, 0 0, -300% 0; } }
+@keyframes sp-tx-drift-slow { to { background-position: -240px 0; } }
+@keyframes sp-tx-holo { to { background-position: 0 0, -300% 0; } }
+@keyframes sp-tx-lava { to { background-position: 30px 0, -40px 0, -200% 0; } }
+@keyframes sp-tx-shine { 0% { background-position: 100% 0, 0 0; } 60%, 100% { background-position: -100% 0, 0 0; } }
+@keyframes sp-tx-glitter { to { background-position: 18px 8px, -300% 0; } }
+@keyframes sp-tx-candy { to { background-position: 11.3px 0; } }
+@keyframes sp-tx-bubble { to { background-position: 0 -20px, 0 0; } }
+@keyframes sp-tx-wave { to { background-position: -20px 0, 0 0; } }
+
+/* ── Nuancier commun (26.9.28) : chaque dégradé porte sa propre animation,
+   identique sur le logo et sur le pseudo. Plus d'animation choisie à part. ── */
+.cosmetic-badge.sp-fx-aurora,
+.sp-chat-badge--fx-aurora .sp-chat-badge-img,
+.sp-paint--aurora {
+  background-image: linear-gradient(90deg, #9146ff, #4fd1ff, #c6d4a0, #9146ff, #4fd1ff) !important;
+  background-size: 300% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-fx-slide 6s linear infinite;
+}
+.cosmetic-badge.sp-fx-sunset,
+.sp-chat-badge--fx-sunset .sp-chat-badge-img,
+.sp-paint--sunset {
+  background-image: linear-gradient(90deg, #ff7a45, #ff4d8d, #ffd166, #ff7a45, #ff4d8d) !important;
+  background-size: 300% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-fx-slide 5s linear infinite;
+}
+.cosmetic-badge.sp-fx-lcd,
+.sp-chat-badge--fx-lcd .sp-chat-badge-img,
+.sp-paint--lcd {
+  background-image: linear-gradient(180deg, transparent 40%, rgba(255, 255, 255, 0.6) 50%, transparent 60%), linear-gradient(180deg, #eaf5c2, #9fbf5a) !important;
+  background-size: 100% 300%, 100% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-fx-scan 2.8s linear infinite; filter: drop-shadow(0 0 3px rgba(198, 212, 160, 0.6));
+}
+.cosmetic-badge.sp-fx-gold,
+.sp-chat-badge--fx-gold .sp-chat-badge-img,
+.sp-paint--gold {
+  background-image: linear-gradient(100deg, #b8860b 0%, #ffe08a 42%, #fff8d6 50%, #ffe08a 58%, #b8860b 100%) !important;
+  background-size: 300% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-fx-slide 3.5s linear infinite;
+}
+.cosmetic-badge.sp-fx-rainbow,
+.sp-chat-badge--fx-rainbow .sp-chat-badge-img,
+.sp-paint--rainbow {
+  background-image: linear-gradient(90deg, #ff5f6d, #ffc371, #c6f15a, #4fd1ff, #9146ff, #ff5f6d) !important;
+  background-size: 300% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-fx-slide 4s linear infinite;
+}
+.cosmetic-badge.sp-fx-fire,
+.sp-chat-badge--fx-fire .sp-chat-badge-img,
+.sp-paint--fire {
+  background-image: linear-gradient(90deg, #ff3d2e, #ff8a3d, #ffd166, #ff8a3d, #ff3d2e) !important;
+  background-size: 300% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-fx-slide 2.4s linear infinite;
+}
+.cosmetic-badge.sp-fx-frost,
+.sp-chat-badge--fx-frost .sp-chat-badge-img,
+.sp-paint--frost {
+  background-image: linear-gradient(90deg, #8fd8ff, #ffffff, #b9e8ff, #8fd8ff) !important;
+  background-size: 300% 100% !important;
+  background-repeat: repeat !important;
+  animation: sp-fx-slide 5s linear infinite; filter: drop-shadow(0 0 3px rgba(143, 216, 255, 0.55));
+}
+@keyframes sp-fx-scan { from { background-position: 0 100%, 0 0; } to { background-position: 0 -200%, 0 0; } }
+
+/* ── Badge d'ancienneté StreamPulse+ ──
+   À la place du logo personnalisé, deux styles au choix (badgeFx) :
+   - "tenure" : Jauge, pastille ronde bleu nuit dont l'anneau se remplit ;
+   - "pager"  : Pager, écran LCD de StreamPulse dans une coque qui change de matière.
+   Le palier vient de tenureTier() (js/cosmetics-data.js), avec ses propres animations.
+   Tchat : .sp-chat-badge.sp-tier.sp-tier--<style>.sp-tier-<clé> > .sp-chat-badge-img ;
+   popup : .cosmetic-tile.sp-tier… > .cosmetic-badge. */
+.sp-chat-badge.sp-tier,
+.cosmetic-tile.sp-tier {
+  position: relative !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: none;
+  width: 18px !important;
+  height: 18px !important;
+  overflow: hidden !important;
+  vertical-align: middle !important;
+  border-radius: 4px !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  cursor: pointer;
+}
+.sp-chat-badge.sp-tier .sp-chat-badge-img,
+.cosmetic-tile.sp-tier .cosmetic-badge {
+  position: relative;
+  z-index: 1;
+  width: 13px !important;
+  height: 13px !important;
+  background-color: var(--sp-tier-ink, #ffffff) !important;
+  background-image: none !important;
+  /* Traits épaissis (ombres de la même couleur) : lisible à 18 px. */
+  filter:
+    drop-shadow(0.35px 0 0 var(--sp-tier-ink, #ffffff))
+    drop-shadow(-0.35px 0 0 var(--sp-tier-ink, #ffffff))
+    drop-shadow(0 0.35px 0 var(--sp-tier-ink, #ffffff)) !important;
+  animation: none !important;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* À vie (Jauge) : logo doré brillant sur fond noir, lisible à 16 px. Le
+   fondateur garde un logo blanc : sur son disque violet, l'or manquerait de contraste. */
+.sp-tier--gauge.sp-tier-life .sp-chat-badge-img, .sp-tier--gauge.sp-tier-life .cosmetic-badge {
+  --sp-tier-ink: #ffd23f;
+  background-image: linear-gradient(110deg, #e0a800 20%, #ffe08a 42%, #fffbe8 50%, #ffe08a 58%, #e0a800 80%) !important;
+  background-size: 300% 100% !important;
+  animation: sp-fx-slide 2.6s linear infinite !important;
+}
+/* Jauge : disque plein de la couleur du palier, anneau blanc qui se remplit
+   jusqu'à 4 ans, logo blanc ; un reflet passe à partir d'un an. */
+.sp-tier--gauge { --sp-tier-ink: #ffffff; }
+.sp-chat-badge.sp-tier--gauge, .cosmetic-tile.sp-tier--gauge { border-radius: 50% !important; }
+.sp-chat-badge.sp-tier--gauge .sp-chat-badge-img, .cosmetic-tile.sp-tier--gauge .cosmetic-badge { width: 12.5px !important; height: 12.5px !important; }
+.sp-tier--gauge.sp-tier-y1::after, .sp-tier--gauge.sp-tier-y1h::after, .sp-tier--gauge.sp-tier-y2::after,
+.sp-tier--gauge.sp-tier-y3::after, .sp-tier--gauge.sp-tier-y4::after, .sp-tier--gauge.sp-tier-life::after, .sp-tier--gauge.sp-tier-founder::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%) 0 0 / 300% 100% no-repeat;
+  animation: sp-tier-sweep 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+.sp-tier--gauge.sp-tier-m1 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%237d6bd6'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='10'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-dasharray='18.2 182.21222' transform='rotate%28-90 36 36%29'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-m3 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%239146ff'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='10'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-dasharray='36.4 182.21222' transform='rotate%28-90 36 36%29'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-m6 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%236a2bc9'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='10'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-dasharray='58.3 182.21222' transform='rotate%28-90 36 36%29'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-m9 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%23ff4d8d'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='10'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-dasharray='82.0 182.21222' transform='rotate%28-90 36 36%29'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-y1 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%232f9e6b'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='10'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-dasharray='105.7 182.21222' transform='rotate%28-90 36 36%29'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-y1h { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%231d8fd8'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='10'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-dasharray='127.5 182.21222' transform='rotate%28-90 36 36%29'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-y2 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%23e0662a'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='10'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-dasharray='145.8 182.21222' transform='rotate%28-90 36 36%29'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-y3 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%23d61f5a'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='10'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-dasharray='164.0 182.21222' transform='rotate%28-90 36 36%29'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-y4 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%23101014'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='10'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-dasharray='182.2 182.21222' transform='rotate%28-90 36 36%29'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-life { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%23111014'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23ffd23f' stroke-width='10'/%3E%3C/svg%3E") !important; }
+.sp-tier--gauge.sp-tier-founder { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Ccircle cx='36' cy='36' r='36' fill='%239146ff'/%3E%3Ccircle cx='36' cy='36' r='29' fill='none' stroke='%23ffd23f' stroke-width='10'/%3E%3C/svg%3E") !important; }
+
+/* Pager : logo à l'encre LCD sur l'écran ; un reflet balaie la coque à partir d'un an. */
+.sp-tier--pager { --sp-tier-ink: #1C2615; }
+.sp-tier--pager.sp-tier-y1::after, .sp-tier--pager.sp-tier-y1h::after, .sp-tier--pager.sp-tier-y2::after,
+.sp-tier--pager.sp-tier-y3::after, .sp-tier--pager.sp-tier-y4::after, .sp-tier--pager.sp-tier-life::after, .sp-tier--pager.sp-tier-founder::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.5) 50%, transparent 65%) 0 0 / 300% 100% no-repeat;
+  animation: sp-tier-sweep 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+.sp-tier--pager.sp-tier-m1 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Crect width='72' height='72' rx='14' fill='%239146FF'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23C6D4A0'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-m3 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Crect width='72' height='72' rx='14' fill='%231B1F4A'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23C6D4A0'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-m6 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Crect width='72' height='72' rx='14' fill='%23E6E3EC'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23C6D4A0'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-m9 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Crect width='72' height='72' rx='14' fill='%23ff4d8d'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23C6D4A0'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-y1 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Cdefs%3E%3ClinearGradient id='c' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff'/%3E%3Cstop offset='.5' stop-color='%239aa0b4'/%3E%3Cstop offset='1' stop-color='%23e8eaf2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='72' height='72' rx='14' fill='url%28%23c%29'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23C6D4A0'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-y1h { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Crect width='72' height='72' rx='14' fill='%233ddc97'/%3E%3Ccircle cx='8' cy='8' r='3' fill='%23fff' opacity='.7'/%3E%3Ccircle cx='64' cy='64' r='3' fill='%23fff' opacity='.7'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23C6D4A0'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-y2 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Cdefs%3E%3ClinearGradient id='c' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234fd1ff'/%3E%3Cstop offset='1' stop-color='%239146ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='72' height='72' rx='14' fill='url%28%23c%29'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23C6D4A0'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-y3 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Crect width='72' height='72' rx='14' fill='%2307070a'/%3E%3Crect x='2' y='2' width='68' height='68' rx='12' fill='none' stroke='%23ff4d8d' stroke-width='4'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23e9ffc2'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-y4 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Cdefs%3E%3ClinearGradient id='c' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff9ad5'/%3E%3Cstop offset='.35' stop-color='%23a0f0ff'/%3E%3Cstop offset='.65' stop-color='%23fff6a0'/%3E%3Cstop offset='1' stop-color='%23b8a0ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='72' height='72' rx='14' fill='url%28%23c%29'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23C6D4A0'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-life { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Cdefs%3E%3ClinearGradient id='c' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fff3b0'/%3E%3Cstop offset='.5' stop-color='%23ffd23f'/%3E%3Cstop offset='1' stop-color='%23b8860b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='72' height='72' rx='14' fill='url%28%23c%29'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23fff8d6'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+.sp-tier--pager.sp-tier-founder { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Cdefs%3E%3ClinearGradient id='c' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23b58bff'/%3E%3Cstop offset='1' stop-color='%236a2bc9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='72' height='72' rx='14' fill='url%28%23c%29'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='%23ffe08a'/%3E%3Crect x='5' y='10' width='62' height='52' rx='7' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E") !important; }
+@keyframes sp-tier-sweep { 0% { background-position: 100% 0; } 55%, 100% { background-position: -100% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-paint--galaxy, .sp-paint--holo, .sp-paint--lava, .sp-paint--marble, .sp-paint--chrome,
+  .sp-paint--glitter, .sp-paint--candy, .sp-paint--toxic, .sp-paint--ocean,
+  .sp-paint--aurora, .sp-paint--sunset, .sp-paint--lcd, .sp-paint--gold, .sp-paint--rainbow,
+  .sp-tier, .sp-tier::after, .sp-tier .sp-chat-badge-img, .sp-tier .cosmetic-badge { animation: none !important; }
+}

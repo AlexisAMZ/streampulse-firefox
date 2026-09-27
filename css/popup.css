@@ -644,7 +644,7 @@ body.is-settings .plus-badge:not(.is-active) { background: var(--surface-2); box
 .cosmetic-preview { display: grid; gap: 8px; padding: 12px 0; box-shadow: inset 0 -1px 0 var(--line); }
 .cosmetic-preview-label { color: var(--text-3); font-size: 12px; font-weight: 600; }
 .cosmetic-line { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 10px; background: #18181b; color: #efeff1; font-size: 13px; }
-.cosmetic-badge { --sp-badge-color: var(--violet); width: 18px; height: 18px; flex: none; background-color: var(--violet); -webkit-mask: url("../images/photos/128px.png") center / contain no-repeat; mask: url("../images/photos/128px.png") center / contain no-repeat; }
+.cosmetic-badge { --sp-badge-color: var(--violet); width: 18px; height: 18px; flex: none; background-color: var(--violet); -webkit-mask: url("../images/photos/badge-mark.svg") center / contain no-repeat; mask: url("../images/photos/badge-mark.svg") center / contain no-repeat; }
 .cosmetic-name { color: #bf94ff; font-weight: 700; }
 .cosmetic-msg { color: #efeff1; }
 .cosmetic-badge.sp-fx-pulse { animation: sp-badge-pulse 2.4s ease-in-out infinite; }
@@ -917,6 +917,19 @@ body.is-settings .review-ask { display: none; }
 /* Ni sur l'écran StreamPulse+, qu'il recouvrirait. */
 body:has(#plus-view:not(.hidden)) .review-ask { display: none; }
 
+/* ── Proposition du badge communautaire (une fois, badge désactivé) ──
+   Même gabarit que la demande d'avis : les deux ne montrent jamais ensemble. */
+.badge-ask { position: fixed; right: 16px; bottom: 72px; left: 16px; z-index: 40; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--violet-line), var(--shadow-pop); color: var(--text); }
+.badge-ask[hidden] { display: none; }
+.badge-ask-mark { width: 22px; height: 22px; flex: none; background-color: var(--violet); -webkit-mask: url("../images/photos/badge-mark.svg") center / contain no-repeat; mask: url("../images/photos/badge-mark.svg") center / contain no-repeat; }
+.badge-ask-text { display: grid; gap: 2px; font-size: 12px; }
+.badge-ask-text span { color: var(--text-2); }
+.badge-ask-actions { display: flex; align-items: center; gap: 6px; }
+.badge-ask-actions .button { height: 30px; padding: 0 12px; font-size: 12px; }
+body.is-settings .badge-ask { display: none; }
+body:has(#plus-view:not(.hidden)) .badge-ask { display: none; }
+body:has(.review-ask:not([hidden])) .badge-ask { display: none; }
+
 /* Effets d'ambassadeur */
 .cosmetic-badge.sp-fx-halo { background-color: #ffd23f; filter: drop-shadow(0 0 2px #ffd23f) drop-shadow(0 0 6px #ffd23f); animation: sp-badge-pulse 2.8s ease-in-out infinite; }
 .sp-paint--ambassador { background-image: linear-gradient(90deg, #ffd23f, #b58bff, #9146ff, #ffd23f); background-size: 260% 100%; animation: sp-paint-slide 4.5s linear infinite; }
@@ -1033,3 +1046,46 @@ body.is-settings .new-dot { background: var(--violet); box-shadow: 0 0 0 3px var
 .badges-auto-bar .badges-note { margin: 0; }
 .badge-auto.is-queued { background: var(--surface); box-shadow: inset 0 0 0 1px var(--violet-line); color: var(--text); }
 .badge-auto.is-queued svg { color: var(--violet); }
+
+/* Badge d'ancienneté (26.9.28) : à part du logo, masqué sans StreamPulse+. */
+.cosmetic-tile:not(.sp-tier) { display: none; }
+.tenure-ladder { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px 6px; margin: 8px 0 0; padding: 12px 8px; border-radius: 10px; background: #18181b; list-style: none; }
+.tenure-step { display: grid; justify-items: center; gap: 5px; min-width: 0; }
+.tenure-ladder:has(.is-current) .tenure-step:not(.is-current) { opacity: 0.5; }
+.tenure-step .cosmetic-tile.sp-tier { width: 32px !important; height: 32px !important; border-radius: 7px !important; }
+.tenure-step .sp-tier .cosmetic-badge { width: 23px !important; height: 23px !important; }
+.tenure-step.is-current .cosmetic-tile { outline: 2px solid var(--violet); outline-offset: 2px; }
+.tenure-label { overflow: hidden; max-width: 100%; color: #adadb8; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.tenure-step.is-current .tenure-label { color: #efeff1; }
+.tenure-step .cosmetic-tile.sp-tier--gauge { border-radius: 50% !important; }
+.tenure-step .cosmetic-tile.sp-tier--gauge .cosmetic-badge { width: 20px !important; height: 20px !important; }
+
+/* Pseudo et badge (26.9.28) : deux listes, Badge puis Pseudo, comme 7TV. */
+.look-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 22px 0 8px; }
+.look-head .settings-group-header { margin: 0; }
+.look-switch { display: flex; gap: 2px; padding: 3px; border-radius: 9px; background: var(--surface); }
+.look-switch-btn { height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: none; color: var(--text-2); font: 600 11.5px/1 var(--body); cursor: pointer; }
+.look-switch-btn[aria-pressed="true"] { background: var(--surface-2); color: var(--text); }
+.look-switch-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Nuancier en liste compacte (26.9.28), à la manière des « paints » de 7TV :
+   rond de sélection, puis le nom écrit dans sa couleur (pseudo) ou le logo
+   coloré et son nom (badge). */
+.fx-picker.is-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px 6px; }
+.fx-picker.is-list .fx-option { display: flex; align-items: center; justify-content: flex-start; gap: 9px; min-width: 0; height: 36px; padding: 0 10px; border-radius: 9px; background: none; box-shadow: none; }
+.fx-picker.is-list .fx-option:hover { transform: none; background: var(--surface); box-shadow: none; }
+.fx-picker.is-list .fx-option[aria-checked="true"] { background: none; box-shadow: inset 0 0 0 1.5px rgba(239, 239, 241, 0.9); }
+.fx-picker.is-list .fx-option:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.fx-radio { flex: none; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(239, 239, 241, 0.25); }
+.fx-option[aria-checked="true"] .fx-radio { box-shadow: inset 0 0 0 4px #efeff1; }
+.fx-picker.is-list .cosmetic-badge { flex: none; width: 20px; height: 20px; }
+.fx-picker.is-list .fx-label { overflow: hidden; color: #efeff1; font-size: 12.5px; font-weight: 600; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.fx-picker.is-list .fx-sample-name { font-size: 13px; }
+.fx-picker.is-list .fx-lock,
+.fx-picker.is-list .fx-plus,
+.fx-picker.is-list .fx-founder { position: static; flex: none; margin-left: auto; }
+.fx-picker.is-list .cosmetic-tile.sp-tier { width: 20px !important; height: 20px !important; border-radius: 5px !important; }
+.fx-picker.is-list .cosmetic-tile.sp-tier--gauge { border-radius: 50% !important; }
+.fx-picker.is-list .cosmetic-tile.sp-tier .cosmetic-badge { width: 14px !important; height: 14px !important; }
+.fx-picker.is-list .cosmetic-tile.sp-tier--gauge .cosmetic-badge { width: 12.5px !important; height: 12.5px !important; }
+#cosmetic-tenure-block { margin-top: 10px; }

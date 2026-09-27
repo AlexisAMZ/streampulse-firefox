@@ -18,13 +18,32 @@
   var COSMETICS_KEY = "streamPulseCosmetics";
   var PLUS_GRACE_MS = 30 * 24 * 60 * 60 * 1000;
   var PLUS_URL = "https://streampulse.fr/plus";
-  var BADGE_FX = ["pulse", "shine", "rainbow", "glow", "bounce", "spin", "flicker", "heartbeat", "float", "wobble", "prism", "glitch", "fire", "frost", "halo", "crown"];
-  var NAME_FX = ["aurora", "sunset", "lcd", "gold", "neon", "rainbow", "fire", "frost", "glitch", "ambassador", "founder"];
+  var BADGE_FX = ["tenure", "pager", "aurora", "sunset", "lcd", "gold", "rainbow", "fire", "frost", "galaxy", "holo", "lava", "marble", "chrome", "glitter", "candy", "toxic", "ocean", "halo", "crown"];
+  // Effets retires en 26.9.28 : Prisme devient Arc-en-ciel (copie de LEGACY_FX).
+  var LEGACY_FX = { prism: "rainbow" };
+  var NAME_FX = ["aurora", "sunset", "lcd", "gold", "rainbow", "fire", "frost", "galaxy", "holo", "lava", "marble", "chrome", "glitter", "candy", "toxic", "ocean", "ambassador", "founder"];
   // Même règles que js/cosmetics-data.js : filleuls requis, et effets du fondateur.
   var REFERRAL_FX = { ambassador: 1, halo: 3 };
   var FOUNDER_FX = ["crown", "founder"];
+  // Copie de TENURE_TIERS (js/cosmetics-data.js) : tuile d'anciennete de l'aperçu.
+  // Copie de TENURE_STYLES (js/cosmetics-data.js).
+  var TENURE_STYLES = { tenure: "gauge", pager: "pager" };
+  var TENURE_TIERS = [[48, "y4"], [36, "y3"], [24, "y2"], [18, "y1h"], [12, "y1"], [9, "m9"], [6, "m6"], [3, "m3"], [0, "m1"]];
+  var MONTH_MS = 30.44 * 24 * 60 * 60 * 1000;
+
+  /** Meme regle que tenureTier() dans js/cosmetics-data.js. */
+  function tenureTier(record) {
+    if (!record) return "";
+    if (record.role === "admin") return "founder";
+    if (record.plan === "lifetime") return "life";
+    var since = Number(record.since) || 0;
+    var months = since > 0 ? Math.max(0, Math.floor((Date.now() - since) / MONTH_MS)) : 0;
+    for (var i = 0; i < TENURE_TIERS.length; i++) if (months >= TENURE_TIERS[i][0]) return TENURE_TIERS[i][1];
+    return "m1";
+  }
   var LOGO_URL = chrome.runtime.getURL("images/photos/logosp.png");
-  var MARK_URL = chrome.runtime.getURL("images/photos/128px.png");
+  // Logo dessiné pour les petites tailles (badge du tchat).
+  var MARK_URL = chrome.runtime.getURL("images/photos/badge-mark.svg");
 
   // Réglages activés tant que l'utilisateur ne les a pas coupés.
   // Reglages actifs par defaut : sans cette liste, prefOn() les lit comme
@@ -119,7 +138,8 @@
   function normalizeCosmetics(value) {
     var input = value && typeof value === "object" ? value : {};
     return {
-      badgeFx: BADGE_FX.indexOf(input.badgeFx) !== -1 ? input.badgeFx : "",
+      // Jamais choisi : badge d'anciennete, comme normalizeCosmetics() du popup.
+      badgeFx: input.badgeFx === undefined ? "tenure" : BADGE_FX.indexOf(LEGACY_FX[input.badgeFx] || input.badgeFx) !== -1 ? LEGACY_FX[input.badgeFx] || input.badgeFx : "",
       nameFx: NAME_FX.indexOf(input.nameFx) !== -1 ? input.nameFx : "",
     };
   }
@@ -144,6 +164,7 @@
       ctx.plus = plusActive(r[PLUS_KEY]);
       ctx.role = ctx.plus && r[PLUS_KEY].role === "admin" ? "admin" : "";
       ctx.referrals = ctx.plus ? Math.max(0, Number(r[PLUS_KEY].referrals) || 0) : 0;
+      ctx.tier = ctx.plus ? tenureTier(r[PLUS_KEY]) : "";
       ctx.cosmetics = normalizeCosmetics(r[COSMETICS_KEY]);
       if (done) done();
     });
@@ -241,7 +262,12 @@
   function paintEditor(editor) {
     var shown = ctx.plus ? ctx.cosmetics : { badgeFx: "", nameFx: "" };
     editor.root.classList.toggle("is-locked", !ctx.plus);
-    editor.badge.className = "sp-chat-badge" + (shown.badgeFx ? " sp-chat-badge--fx-" + shown.badgeFx : "");
+    // « Anciennete » : la tuile de son palier remplace le logo personnalise.
+    var tenureStyle = TENURE_STYLES[shown.badgeFx];
+    var look = tenureStyle
+      ? (ctx.tier ? " sp-tier sp-tier--" + tenureStyle + " sp-tier-" + ctx.tier : "")
+      : (shown.badgeFx ? " sp-chat-badge--fx-" + shown.badgeFx : "");
+    editor.badge.className = "sp-chat-badge" + look;
     editor.name.className = "sp-fx-name" + (shown.nameFx ? " sp-paint sp-paint--" + shown.nameFx : "");
     editor.groups.forEach(function (group) {
       Array.prototype.forEach.call(group.chips.children, function (chip) {
