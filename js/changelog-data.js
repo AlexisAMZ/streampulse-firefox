@@ -48,6 +48,29 @@ export const FALLBACK_LANGUAGE = "en";
 
 export const RELEASES = [
   {
+    version: "26.9.30",
+    date: "2026-09-29",
+    changes: [
+      {
+        type: "new",
+        area: "plus",
+        text: {
+          fr: "Le parrainage sort de sa cachette : il est maintenant dans les Réglages généraux, et un bouton « Copier mon code » attend à la fin de ton récap.",
+          en: "Referrals step into the light: they now live in General settings, and a “Copy my code” button waits at the end of your recap.",
+          es: "El programa de amigos sale de su escondite: ahora está en los ajustes generales y un botón «Copiar mi código» te espera al final de tu resumen.",
+          "pt-BR": "O programa de indicações saiu do esconderijo: ele agora está nos ajustes gerais, e um botão “Copiar meu código” espera no final do seu resumo.",
+          de: "Das Freundschaftswerben kommt aus seinem Versteck: es gibt es jetzt in den allgemeinen Einstellungen, und am Ende deines Rückblicks wartet die Schaltfläche „Code kopieren“.",
+          it: "Il programma inviti esce dal nascondiglio: ora si trova nelle impostazioni generali e alla fine del tuo riepilogo ti aspetta il pulsante «Copia il mio codice».",
+          pl: "Polecanie wychodzi z ukrycia: znajdziesz je teraz w ogólnych ustawieniach, a na końcu podsumowania czeka przycisk „Skopiuj mój kod”.",
+          tr: "Arkadaşını davet etme artık saklanmıyor: genel ayarlarda yerini aldı, özetinin sonunda da “Kodumu kopyala” düğmesi seni bekliyor.",
+          ru: "Реферальная программа больше не прячется: она появилась в общих настройках, а в конце итогов вас ждёт кнопка «Скопировать код».",
+          ja: "紹介プログラムが見える場所に：全般設定に追加され、まとめの最後に「コードをコピー」ボタンが付きました。",
+          ko: "추천 프로그램이 드러났습니다: 일반 설정에 추가되었고, 요약 마지막에 “내 코드 복사” 버튼이 생겼습니다.",
+        },
+      },
+    ],
+  },
+  {
     version: "26.9.29",
     date: "2026-09-27",
     changes: [
