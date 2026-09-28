@@ -48,8 +48,8 @@ export const FALLBACK_LANGUAGE = "en";
 
 export const RELEASES = [
   {
-    version: "26.9.30",
-    date: "2026-09-29",
+    version: "26.9.29",
+    date: "2026-09-27",
     changes: [
       {
         type: "new",
@@ -68,12 +68,6 @@ export const RELEASES = [
           ko: "추천 프로그램이 드러났습니다: 일반 설정에 추가되었고, 요약 마지막에 “내 코드 복사” 버튼이 생겼습니다.",
         },
       },
-    ],
-  },
-  {
-    version: "26.9.29",
-    date: "2026-09-27",
-    changes: [
       {
         type: "fix",
         area: "badges",
