@@ -48,6 +48,60 @@ export const FALLBACK_LANGUAGE = "en";
 
 export const RELEASES = [
   {
+    version: "26.10.2",
+    date: "2026-10-02",
+    changes: [
+      {
+        type: "fix",
+        text: {
+          fr: "Correction du blocage de l'interface lors de l'ouverture du menu Plus : la barre supérieure et les onglets restent pleinement interactifs.",
+          en: "Fixed interface freeze when opening the Plus menu: the top bar and tabs remain fully interactive.",
+          es: "Corrección del bloqueo de la interfaz al abrir el menú Plus: la barra superior y las pestañas siguen siendo interactivas.",
+          "pt-BR": "Correção do travamento da interface ao abrir o menu Plus: a barra superior e as abas permanecem totalmente interativas.",
+          de: "Fehlerbehebung beim Einfrieren der Benutzeroberfläche beim Öffnen des Plus-Menüs: Die obere Leiste und die Tabs bleiben vollständig interaktiv.",
+          it: "Risolto il blocco dell'interfaccia all'apertura del menu Plus: la barra superiore e le schede rimangono interattive.",
+          pl: "Naprawiono blokowanie interfejsu przy otwieraniu menu Plus: górny pasek i karty pozostają w pełni interaktywne.",
+          tr: "Plus menüsü açılırken arayüzün donması düzeltildi: üst çubuk ve sekmeler tamamen etkileşimli kalır.",
+          ru: "Исправлено зависание интерфейса при открытии меню Plus: верхняя панель и вкладки остаются полностью интерактивными.",
+          ja: "Plusメニューを開いた際に画面が固まる問題を修正：トップバーとタブが正常に操作可能です。",
+          ko: "Plus 메뉴를 열 때 인터페이스가 멈추는 문제를 수정했습니다: 상단 바와 탭이 정상적으로 작동합니다.",
+        },
+      },
+      {
+        type: "improved",
+        text: {
+          fr: "Ajustement de l'alignement et de la largeur du bouton de recherche de streamer dans le popup pour éviter tout saut de ligne.",
+          en: "Adjusted alignment and width of the streamer search button in the popup to prevent line breaks.",
+          es: "Ajuste de alineación y ancho del botón de búsqueda de streamer en el popup para evitar saltos de línea.",
+          "pt-BR": "Ajuste de alinhamento e largura do botão de busca de streamer no popup para evitar quebra de linha.",
+          de: "Ausrichtung und Breite der Streamer-Suchschaltfläche im Pop-up angepasst, um Zeilenumbrüche zu verhindern.",
+          it: "Regolazione di allineamento e larghezza del pulsante di recherche streamer nel popup per evitare interruzioni di riga.",
+          pl: "Dopasowano wyrównanie i szerokość przycisku wyszukiwania streamerów w popupie, zapobiegając łamaniu linii.",
+          tr: "Satır atlamalarını önlemek için açılır penceredeki yayıncı arama düğmesinin hizalaması ve genişliği ayarlandı.",
+          ru: "Настроены выравнивание и ширина кнопки поиска стримера во всплывающем окне для предотвращения переноса строк.",
+          ja: "ポップアップ内の配信者検索ボタンの配置と幅を調整し、改行の発生を防止しました。",
+          ko: "줄바꿈을 방지하도록 팝업 내 스트리머 검색 버튼의 정렬과 너비를 조정했습니다.",
+        },
+      },
+      {
+        type: "new",
+        text: {
+          fr: "Accès direct au serveur officiel Discord StreamPulse depuis les réglages pour rejoindre la communauté et contacter le support.",
+          en: "Direct access to the official StreamPulse Discord server from settings to join the community and reach support.",
+          es: "Acceso directo al servidor oficial de Discord de StreamPulse desde los ajustes para unirse a la comunidad y contactar al soporte.",
+          "pt-BR": "Acesso direto ao servidor oficial do Discord do StreamPulse a partir das configurações para entrar na comunidade e falar com o suporte.",
+          de: "Direkter Zugriff auf den offiziellen StreamPulse-Discord-Server über die Einstellungen, um der Community beizutreten und Support zu erhalten.",
+          it: "Accesso diretto al server Discord ufficiale di StreamPulse dalle impostazioni per unirsi alla community e contattare il supporto.",
+          pl: "Bezpośredni dostęp do oficjalnego serwera Discord StreamPulse z poziomu ustawień, aby dołączyć do społeczności i uzyskać pomoc.",
+          tr: "Topluluğa katılmak ve desteğe ulaşmak için ayarlardan resmi StreamPulse Discord sunucusuna doğrudan erişim.",
+          ru: "Прямой доступ к официальному серверу Discord StreamPulse из настроек для вступления в сообщество и связи с поддержкой.",
+          ja: "設定から公式StreamPulse Discordサーバーへ直接アクセス可能になり、コミュニティ参加やサポート問い合わせが簡単になりました。",
+          ko: "커뮤니티 참여 및 지원 문의를 위해 설정에서 공식 StreamPulse Discord 서버로 바로 연결할 수 있습니다.",
+        },
+      },
+    ],
+  },
+  {
     version: "26.9.29",
     date: "2026-09-27",
     changes: [
