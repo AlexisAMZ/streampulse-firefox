@@ -321,3 +321,88 @@ test("isBadgeCampaign reconnaît les organisations de badges sans liste de réco
   assert.equal(isBadgeCampaign({ owner: "Twitch Gaming" }), true);
   assert.equal(isBadgeCampaign({ owner: "Riot Games", badgeOnly: null }), false);
 });
+
+test("watchedMinutesFor estime la progression locale d'une campagne à objectif de minutes", async () => {
+  const { watchedMinutesFor } = await import("../js/drops-data.js");
+  const HOUR = 3_600_000;
+  const start = Date.UTC(2026, 9, 1, 12); // 2026-10-01 12:00 UTC
+  const end = start + 7 * 24 * HOUR;
+  const now = end + 24 * HOUR;
+  const reward = { game: "PAYDAY 3", minutesGoal: 120, startsAt: start, endsAt: end };
+  const watchDaily = {
+    "2026-09-30": { "twitch:chan": { games: { "payday 3": 3600 } } },
+    "2026-10-01": { "twitch:chan": { games: { "PAYDAY 3": 1800 } } },
+    "2026-10-02": {
+      "twitch:chan": { games: { "payday 3": 2700, "Just Chatting": 600 } },
+      "kick:chan": { games: { "payday 3": 3600 } },
+    },
+    "2026-10-03": { "twitch:chan": { games: { " payday 3 ": 1200 } } },
+    "2026-10-09": { "twitch:chan": { games: { "payday 3": 3600 } } },
+  };
+  // Jour du lancement exclu (borne basse), Kick ignoré, fin de campagne respectée :
+  // 2700 + 1200 = 3900 s = 65 min.
+  assert.equal(watchedMinutesFor(watchDaily, reward, now), 65);
+  // Pas de jeu ou pas d'objectif : rien à estimer.
+  assert.equal(watchedMinutesFor(watchDaily, { ...reward, game: "" }, now), 0);
+  assert.equal(watchedMinutesFor(watchDaily, { ...reward, minutesGoal: 0 }, now), 0);
+  assert.equal(watchedMinutesFor("x", reward, now), 0);
+  // Sans date de lancement, tout l'historique connu compte : 9300 s = 155 min.
+  assert.equal(watchedMinutesFor(watchDaily, { ...reward, startsAt: 0 }, now), 155);
+});
+
+test("normalizeReward étiquette « Code » via le résumé de la campagne", async () => {
+  const { normalizeRewards } = await import("../js/drops-data.js");
+  const camp = (raw) => normalizeRewards([raw])[0]?.rewards[0];
+  assert.equal(
+    camp({ id: "c1", summary: "Preorder bonus: use the code in game", rewards: [{ id: "r1", name: "Sierra Helmet" }] }).type,
+    "CODE",
+  );
+  assert.equal(
+    camp({ id: "c1", name: "CONTROL Resonant rewards", rewards: [{ id: "r1", name: "Sierra Helmet" }] }).type,
+    "",
+  );
+  assert.equal(camp({ id: "c1", rewards: [{ id: "r1", name: "X" }] }).type, "");
+});
+
+test("gameFromDescription lit le jeu des badges sans lien de catégorie", async () => {
+  const { gameFromDescription } = await import("../js/badges-data.js");
+  assert.equal(
+    gameFromDescription("This badge was earned by watching Dragon's Dogma 2: Dark Arisen for 1 hour"),
+    "Dragon's Dogma 2: Dark Arisen",
+  );
+  assert.equal(
+    gameFromDescription("This badge was earned by watching 30 minutes of RuneScape: Dragonwilds category"),
+    "RuneScape: Dragonwilds",
+  );
+  assert.equal(gameFromDescription("This badge was earned by subscribing to a channel."), "");
+  assert.equal(gameFromDescription(null), "");
+});
+
+test("mergeBadges date la nouveauté quand une série de badges monte de version", async () => {
+  const { mergeBadges, newBadges, badgesFrom } = await import("../js/badges-data.js");
+  const DAY = 86_400_000;
+  const now = 1_000_000_000;
+  const v12 = { setID: "sub-badge", version: "12", title: "Sub badge", description: "12 mois", imageURL: "https://a/12.png", clickURL: null };
+  const v6 = { ...v12, version: "6", imageURL: "https://a/6.png" };
+
+  // Première lecture : les paliers existants sont tous connus d'office, rien
+  // n'est nouveau ; la ligne du catalogue retient la version la plus haute.
+  const first = mergeBadges(badgesFrom({}), { badges: [v12, v6], owned: [] }, now);
+  assert.equal(first.state.badges[0].version, "12");
+  assert.equal(first.state.badges[0].newVersionAt, 0);
+  assert.equal(first.added.length, 0);
+
+  // La série monte au palier 24 : nouveauté datée, sans être « added ».
+  const later = mergeBadges(first.state, { badges: [{ ...v12, version: "24", imageURL: "https://a/24.png" }, v12, v6], owned: [] }, now + 5_000);
+  assert.equal(later.state.badges[0].version, "24");
+  assert.equal(later.state.badges[0].newVersionAt, now + 5_000);
+  assert.equal(later.state.badges[0].firstSeen, 0);
+  assert.equal(later.added.length, 0);
+
+  // Une lecture sans montée conserve la date ; newBadges la fait sortir de la
+  // fenêtre une fois les 30 jours passés.
+  const again = mergeBadges(later.state, { badges: [v12, v6], owned: [] }, now + 9_000);
+  assert.equal(again.state.badges[0].newVersionAt, now + 5_000);
+  assert.equal(newBadges(again.state, now + 9_000).length, 1);
+  assert.equal(newBadges(again.state, now + 5_000 + 31 * DAY).length, 0);
+});

@@ -103,36 +103,30 @@ for (const { file, why, edits } of PATCHES) {
   console.log(`  correctif appliqué : ${file}`);
 }
 
-// Textes : le nom du navigateur, borné aux clés concernées.
-const i18nPath = path.join(PORT, "i18n/translations.js");
-let i18n = fs.readFileSync(i18nPath, "utf8");
+// Textes : le nom du navigateur, borné aux clés concernées. Une langue par
+// fichier (i18n/lang/<code>.js) depuis le découpage de i18n/translations.js.
+const BROWSER_KEY_RE = new RegExp(`^(\\s*)"(${BROWSER_NAME_KEYS.join("|")})": "(.*?)"(,?)$`, "gm");
 let renamed = 0;
-i18n = i18n.replace(
-  new RegExp(`^(\\s*)"(${BROWSER_NAME_KEYS.join("|")})": "(.*?)"(,?)$`, "gm"),
-  (line, indent, key, value, comma) => {
-    if (!value.includes("Chrome")) return line;
-    renamed += 1;
-    return `${indent}"${key}": "${value.replaceAll("Chrome", "Firefox")}"${comma}`;
-  },
-);
-
 let taglines = 0;
-let language = null;
-i18n = i18n
-  .split("\n")
-  .map((line) => {
-    const lang = /^ {2}"([a-zA-Z-]+)": \{$/.exec(line);
-    if (lang) language = lang[1];
-    const tag = /^(\s*)"welcomeTagline": ".*?"(,?)$/.exec(line);
-    if (!tag) return line;
-    const value = TAGLINES[language] || die(`pas de welcomeTagline Firefox pour ${language}`);
-    taglines += 1;
-    return `${tag[1]}"welcomeTagline": "${value}"${tag[2]}`;
-  })
-  .join("\n");
+for (const language of LANGUAGES) {
+  const i18nPath = path.join(PORT, `i18n/lang/${language}.js`);
+  if (!fs.existsSync(i18nPath)) die(`i18n/lang/${language}.js introuvable`);
+  const value = TAGLINES[language] || die(`pas de welcomeTagline Firefox pour ${language}`);
+  const i18n = fs
+    .readFileSync(i18nPath, "utf8")
+    .replace(BROWSER_KEY_RE, (line, indent, key, text, comma) => {
+      if (!text.includes("Chrome")) return line;
+      renamed += 1;
+      return `${indent}"${key}": "${text.replaceAll("Chrome", "Firefox")}"${comma}`;
+    })
+    .replace(/^(\s*)"welcomeTagline": ".*?"(,?)$/gm, (line, indent, comma) => {
+      taglines += 1;
+      return `${indent}"welcomeTagline": "${value}"${comma}`;
+    });
+  fs.writeFileSync(i18nPath, i18n, "utf8");
+}
 
 if (taglines !== LANGUAGES.length) die(`welcomeTagline : ${taglines} réécrits, ${LANGUAGES.length} attendus.`);
-fs.writeFileSync(i18nPath, i18n, "utf8");
 console.log(`  textes : ${renamed} mentions de navigateur et ${taglines} accroches passées à Firefox`);
 
 for (const { file, script } of GENERATED) {

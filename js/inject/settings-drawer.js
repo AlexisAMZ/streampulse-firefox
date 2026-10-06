@@ -14,9 +14,9 @@
   if (window.top !== window || window.__SP_DRAWER__) return;
 
   var PREFERENCES_KEY = "betaGeneralPreferences";
-  var PLUS_KEY = "streamPulsePlus";
+  var PLUS_RULE = window.StreamPulsePlusRule; // js/inject/plus-rule.js, chargé avant (manifest)
+  var PLUS_KEY = PLUS_RULE.PLUS_KEY;
   var COSMETICS_KEY = "streamPulseCosmetics";
-  var PLUS_GRACE_MS = 30 * 24 * 60 * 60 * 1000;
   var PLUS_URL = "https://streampulse.fr/plus";
   var BADGE_FX = ["tenure", "pager", "aurora", "sunset", "lcd", "gold", "rainbow", "fire", "frost", "galaxy", "holo", "lava", "marble", "chrome", "glitter", "candy", "toxic", "ocean", "halo", "crown"];
   // Effets retires en 26.9.28 : Prisme devient Arc-en-ciel (copie de LEGACY_FX).
@@ -25,23 +25,17 @@
   // Même règles que js/cosmetics-data.js : filleuls requis, et effets du fondateur.
   var REFERRAL_FX = { ambassador: 1, halo: 3 };
   var FOUNDER_FX = ["crown", "founder"];
-  // Copie de TENURE_TIERS (js/cosmetics-data.js) : tuile d'anciennete de l'aperçu.
-  // Copie de TENURE_STYLES (js/cosmetics-data.js).
-  var TENURE_STYLES = { tenure: "gauge", pager: "pager" };
-  var TENURE_TIERS = [[48, "y4"], [36, "y3"], [24, "y2"], [18, "y1h"], [12, "y1"], [9, "m9"], [6, "m6"], [3, "m3"], [0, "m1"]];
-  var MONTH_MS = 30.44 * 24 * 60 * 60 * 1000;
+  // Paliers et styles d'ancienneté : js/inject/plus-rule.js.
+  var TENURE_STYLES = PLUS_RULE.TENURE_STYLES;
 
-  /** Meme regle que tenureTier() dans js/cosmetics-data.js. */
+  /** Tuile d'ancienneté de l'aperçu, d'après la licence locale. */
   function tenureTier(record) {
     if (!record) return "";
     if (record.role === "admin") return "founder";
     if (record.plan === "lifetime") return "life";
-    var since = Number(record.since) || 0;
-    var months = since > 0 ? Math.max(0, Math.floor((Date.now() - since) / MONTH_MS)) : 0;
-    for (var i = 0; i < TENURE_TIERS.length; i++) if (months >= TENURE_TIERS[i][0]) return TENURE_TIERS[i][1];
-    return "m1";
+    return PLUS_RULE.tenureTier("monthly", record.since);
   }
-  var LOGO_URL = chrome.runtime.getURL("images/photos/logosp.png");
+  var LOGO_URL = chrome.runtime.getURL("images/photos/logosp-128.png");
   // Logo dessiné pour les petites tailles (badge du tchat).
   var MARK_URL = chrome.runtime.getURL("images/photos/badge-mark.svg");
 
@@ -59,22 +53,39 @@
 
   var TABS = [
     {
-      id: "general",
-      label: "twitchUi.tabGeneral",
+      id: "alerts",
+      label: "twitchUi.tabAlerts",
       groups: [
-        { title: "shared.settings.groupAutomation", keys: [
+        { title: "shared.settings.groupNotifications", keys: [
+          ["liveNotifications", "liveAlertsTitle", "liveMassHint"],
+          ["gameNotifications", "gameAlertsTitle", "liveMassHint"],
+          ["titleNotifications", "titleAlertsTitle", "liveMassHint"],
+          ["soundsEnabled", "soundsTitle"],
+        ] },
+      ],
+    },
+    {
+      id: "rewards",
+      label: "twitchUi.tabRewards",
+      groups: [
+        { title: "shared.settings.groupRewards", keys: [
           ["autoClaimChannelPoints", "autoClaimTitle"],
           ["autoClaimDrops", "autoClaimDropsTitle"],
           ["autoClaimMoments", "autoClaimMomentsTitle"],
-          ["autoCancelRaids", "autoCancelRaidsTitle"],
+          ["autoCancelRaids", "autoCancelRaidsTitle", "autoCancelRaidsHint"],
         ] },
-        { title: "shared.settings.groupChat", keys: [
-          ["keepQualityInBackground", "keepQualityTitle"],
+      ],
+    },
+    {
+      id: "player",
+      label: "twitchUi.tabPlayer",
+      groups: [
+        { title: "shared.settings.groupPlayer", keys: [
           ["enableFastForwardButton", "fastForwardTitle"],
           ["enablePipButton", "pipButtonTitle"],
+          ["keepQualityInBackground", "keepQualityTitle"],
           ["autoRefreshPlayerErrors", "autoRefreshTitle"],
           ["hideTwitchExtensions", "hideTwitchExtensionsTitle"],
-          ["communityBadge", "communityBadgeTitle"],
         ] },
       ],
     },
@@ -91,18 +102,16 @@
       ],
     },
     {
-      id: "alerts",
-      label: "twitchUi.tabAlerts",
+      id: "profile",
+      label: "twitchUi.tabProfile",
+      cosmetics: true,
       groups: [
-        { title: "shared.settings.groupNotifications", keys: [
-          ["liveNotifications", "liveNotificationsTitle"],
-          ["gameNotifications", "gameAlertsTitle"],
-          ["titleNotifications", "titleAlertsTitle"],
-          ["soundsEnabled", "soundsTitle"],
+        { title: "shared.settings.groupProfile", keys: [
+          ["communityBadge", "communityBadgeTitle"],
         ] },
       ],
     },
-    { id: "plus", label: "Plus", plus: true },
+    { id: "plus", label: "twitchUi.tabPlus", plus: true },
   ];
 
   var ICON_CLOSE =
@@ -112,7 +121,7 @@
 
   var ctx = { lang: "en", prefs: {}, plus: false, cosmetics: { badgeFx: "", nameFx: "" } };
   var drawer = null;
-  var activeTab = "general";
+  var activeTab = "alerts";
   var editors = [];
 
   // ---- utilitaires -------------------------------------------------------------
@@ -128,11 +137,8 @@
     return !!(chrome.runtime && chrome.runtime.id);
   }
 
-  /** Même règle que js/plus.js : à vie toujours active, mensuelle 30 jours après la dernière vérification. */
   function plusActive(record) {
-    if (!record || record.status !== "active" || !record.licenseKey) return false;
-    if (record.plan === "lifetime") return true;
-    return Date.now() - (Number(record.verifiedAt) || 0) <= PLUS_GRACE_MS;
+    return PLUS_RULE.isPlusActive(record);
   }
 
   function normalizeCosmetics(value) {
@@ -304,12 +310,20 @@
   }
 
   // ---- tiroir ------------------------------------------------------------------
-  function toggleRow(key, labelKey) {
+  function toggleRow(key, labelKey, hintKey) {
     var row = el("button", "sp-tb-row");
     row.type = "button";
     row.setAttribute("role", "switch");
     row.setAttribute("data-sp-pref", key);
-    row.appendChild(el("span", null, tr("shared.settings." + labelKey)));
+    var text = el("span", "sp-tb-row-text");
+    text.appendChild(el("span", null, tr("shared.settings." + labelKey)));
+    // Indices courts sous le libellé : effet en masse (« tous tes streamers »),
+    // dépendance entre réglages — ce que l'interrupteur seul ne dit pas.
+    if (hintKey) {
+      var hint = tr("twitchUi." + hintKey);
+      if (hint !== "twitchUi." + hintKey) text.appendChild(el("span", "sp-tb-hint", hint));
+    }
+    row.appendChild(text);
     row.appendChild(el("span", "sp-tb-sw"));
     row.addEventListener("click", function () {
       savePref(key, !prefOn(key));
@@ -362,11 +376,19 @@
       var section = el("div", "sp-tb-section");
       section.appendChild(el("div", "sp-tb-section-title", tr(group.title)));
       group.keys.forEach(function (pair) {
-        section.appendChild(toggleRow(pair[0], pair[1]));
+        section.appendChild(toggleRow(pair[0], pair[1], pair[2]));
       });
       if (group.mode) section.appendChild(modeRow());
       body.appendChild(section);
     });
+    // Profil et badge : les effets Plus (cadenassés hors Plus) vivent sous le
+    // badge communautaire, comme dans le popup.
+    if (tab.cosmetics) {
+      var fx = el("div", "sp-tb-section");
+      fx.appendChild(el("div", "sp-tb-section-title", tr("twitchUi.chatRow")));
+      fx.appendChild(buildCosmetics());
+      body.appendChild(fx);
+    }
     return body;
   }
 
@@ -431,8 +453,11 @@
     full.lastChild.textContent = tr("twitchUi.fullPage");
     full.addEventListener("click", function (e) {
       e.preventDefault();
+      // La page complète ouvre le popup sur la rubrique affichée (panneau
+      // cible lu par le popup dans son adresse).
+      var PANEL_BY_TAB = { alerts: "notifications", rewards: "rewards", player: "player", previews: "previews", profile: "identity", plus: "plus" };
       try {
-        chrome.runtime.sendMessage({ type: "openSettings" });
+        chrome.runtime.sendMessage({ type: "openSettings", panel: PANEL_BY_TAB[activeTab] || "" });
       } catch (_e) {
         // Contexte d'extension invalidé : rien à ouvrir.
       }

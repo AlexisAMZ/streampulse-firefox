@@ -39,18 +39,29 @@ function sandbox({ prefs = {}, stored = {}, respond = () => ({}) } = {}) {
   };
   const fakeSetTimeout = (fn) => timers.push(fn);
   new Function("window", "location", "chrome", "setTimeout", "setInterval", SOURCE)(win, { origin: ORIGIN }, chrome, fakeSetTimeout, () => {});
-  const fromPage = (data) => pageListeners.forEach((listener) => listener({ source: win, data }));
+  // Le jeton de session du READY est reporté par défaut dans les messages de
+  // la page ; un test peut le remplacer pour simuler une falsification.
+  const fromPage = (data) => pageListeners.forEach((listener) => listener({ source: win, data: { token: posted[0]?.token, ...data } }));
   const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
   const commands = () => posted.filter((message) => message.source === "streampulse:drops:cmd");
   return { posted, sent, fromPage, flush, commands, timers, storageListeners, chrome, runtime: () => runtimeListener };
 }
 
-test("le relais annonce qu'il est prêt, puis relit l'inventaire et les campagnes périmés", async () => {
+test("le relais annonce qu'il est prêt avec un jeton de session, puis relit l'inventaire et les campagnes périmés", async () => {
   const box = sandbox();
-  assert.deepEqual(box.posted[0], { source: "streampulse:drops:ready" });
+  assert.equal(box.posted[0].source, "streampulse:drops:ready");
+  assert.ok(box.posted[0].token, "un jeton de session est transmis au pont");
   assert.equal(box.timers.length, 1, "première lecture différée, le temps que la page envoie ses requêtes");
   box.timers[0]();
   assert.deepEqual(box.commands().map((command) => command.action), ["inventory", "campaigns"]);
+});
+
+test("un message sans le bon jeton de session est ignoré", async () => {
+  const box = sandbox({ respond: () => ({ refresh: true, claim: [] }) });
+  box.fromPage({ source: "streampulse:drops", v: 1, token: "jeton forgé", kind: "event", data: { type: "drop-progress", data: { drop_id: "x" } } });
+  box.fromPage({ source: "streampulse:drops", v: 1, token: undefined, kind: "event", data: { type: "drop-progress", data: { drop_id: "x" } } });
+  await box.flush();
+  assert.equal(box.sent.length, 0, "aucun événement forgé ne part au service worker");
 });
 
 test("une lecture récente d'un autre onglet évite une relecture", async () => {
@@ -113,4 +124,26 @@ test("extension rechargée : le relais s'arrête sans lever d'erreur", () => {
   box.chrome.storage.local.get = () => { throw new Error("Extension context invalidated."); };
   assert.doesNotThrow(() => box.timers[0]());
   assert.deepEqual(box.commands(), []);
+});
+
+test("le détail demandé par le service worker part vers le pont, puis au plus une fois par minute", async (t) => {
+  let clock = 1_000_000;
+  t.mock.method(Date, "now", () => clock);
+  const box = sandbox({
+    respond: (message) => (message.type === "recordDropsCampaigns" ? { details: ["c-p3", "c-ac"] } : message.type === "recordDropsCampaignDetails" ? { details: ["c-x1"] } : {}),
+  });
+  box.fromPage({ source: "streampulse:drops", v: 1, kind: "result", action: "campaigns", ok: true, data: { campaigns: [{ id: "c-p3" }], source: "gql" } });
+  await box.flush();
+  const [details] = box.commands();
+  assert.deepEqual([details.action, details.ids], ["details", ["c-p3", "c-ac"]]);
+
+  box.fromPage({ source: "streampulse:drops", v: 1, kind: "result", action: "details", ok: true, data: { campaigns: [], ids: ["c-p3", "c-ac"] } });
+  await box.flush();
+  assert.deepEqual(box.sent.at(-1), { type: "recordDropsCampaignDetails", ok: true, data: [], ids: ["c-p3", "c-ac"], error: undefined });
+  assert.equal(box.commands().length, 1, "la suite attend la minute suivante");
+
+  clock += 61_000;
+  box.timers[0]();
+  // Le passage suivant relit aussi inventaire et campagnes : on cherche la demande de détail.
+  assert.deepEqual(box.commands().filter((command) => command.action === "details").at(-1).ids, ["c-x1"]);
 });

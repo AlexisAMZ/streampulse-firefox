@@ -43,10 +43,10 @@
 
   // Couleurs publiques des abonnes StreamPulse+ : empreinte -> couleur hexa.
   var badgeColors = new Map();
-  var PLUS_KEY = "streamPulsePlus";
+  var PLUS_RULE = window.StreamPulsePlusRule; // js/inject/plus-rule.js, chargé avant (manifest)
+  var PLUS_KEY = PLUS_RULE.PLUS_KEY;
   var PUBLISHED_KEY = "streampulseBadgePublished";
   var HEX_RE = /^#[0-9a-f]{6}$/i;
-  var PLUS_GRACE_MS = 30 * 24 * 60 * 60 * 1000;
   // Effets publics des abonnes : empreinte -> { b: effet du badge, n: pseudo special }.
   var badgeStyles = new Map();
   var COSMETICS_KEY = "streamPulseCosmetics";
@@ -60,7 +60,7 @@
   var viewerPlus = false;
   var ownPlan = "";
   var badgeLang = "en";
-  var MONTH_MS = 30.44 * 24 * 60 * 60 * 1000;
+  var MONTH_MS = PLUS_RULE.MONTH_MS;
   // Reglages locaux de son propre badge : appliques tout de suite, sans attendre le serveur.
   var ownLocal = { b: "", n: "" };
   // Rang de ce navigateur (fondateur, ambassadeur), d'apres la licence locale.
@@ -68,25 +68,17 @@
   var RANKS = ["founder", "ambassador"];
   // Debut de son propre abonnement (licence locale), pour sa tuile avant la reponse du serveur.
   var ownSince = 0;
-  // Copie de TENURE_TIERS (js/cosmetics-data.js) : mois requis, cle de la tuile.
   /** Effet du badge connu, Prisme repris en Arc-en-ciel ; sinon logo classique. */
   function badgeFxOf(value) {
     var fx = LEGACY_FX[value] || value;
     return BADGE_FX.indexOf(fx) !== -1 ? fx : "";
   }
 
-  // Copie de TENURE_STYLES (js/cosmetics-data.js).
-  var TENURE_STYLES = { tenure: "gauge", pager: "pager" };
-  var TENURE_TIERS = [[48, "y4"], [36, "y3"], [24, "y2"], [18, "y1h"], [12, "y1"], [9, "m9"], [6, "m6"], [3, "m3"], [0, "m1"]];
+  // Paliers et styles d'ancienneté : js/inject/plus-rule.js.
+  var TENURE_STYLES = PLUS_RULE.TENURE_STYLES;
 
-  /** Meme regle que tenureTier() dans js/cosmetics-data.js. */
   function tenureTier(plan, since, rank) {
-    if (rank === "founder" && plan) return "founder";
-    if (plan === "lifetime") return "life";
-    if (plan !== "monthly") return "";
-    var months = Number(since) > 0 ? Math.max(0, Math.floor((Date.now() - Number(since)) / MONTH_MS)) : 0;
-    for (var i = 0; i < TENURE_TIERS.length; i++) if (months >= TENURE_TIERS[i][0]) return TENURE_TIERS[i][1];
-    return "m1";
+    return PLUS_RULE.tenureTier(plan, since, Date.now(), rank);
   }
 
   /**
@@ -303,17 +295,17 @@
           log(badgeHashes.size, "empreintes chargees,", badgeColors.size, "couleurs");
           rescanVisibleMessages();
         })
-        .catch(function () {});
+        .catch(function (error) {
+          log("service de badges indisponible :", error && error.message);
+        });
     } catch (_e) {
       // Le service de badges est optionnel : son indisponibilite ne doit pas gener le tchat.
     }
   }
 
-  /** Cle de licence si StreamPulse+ est actif (meme regle que js/plus.js). */
+  /** Clé de licence si StreamPulse+ est actif (règle de js/inject/plus-rule.js). */
   function activePlusKey(record) {
-    if (!record || record.status !== "active" || !record.licenseKey) return null;
-    if (record.plan === "lifetime") return record.licenseKey;
-    return Date.now() - (Number(record.verifiedAt) || 0) <= PLUS_GRACE_MS ? record.licenseKey : null;
+    return PLUS_RULE.isPlusActive(record) ? record.licenseKey : null;
   }
 
   /**
@@ -858,13 +850,110 @@
     attachObserver();
     // Re-check periodique : Twitch remonte un nouveau conteneur de chat a chaque
     // navigation de chaine. On evite tout travail quand l'onglet est masque.
-    setInterval(function () {
+    var attachTimer = setInterval(function () {
       if (!(chrome.runtime && chrome.runtime.id)) return;
       if (!document.hidden) attachObserver();
     }, 2000);
+    // Arret propre quand le reglage Badge communautaire est coupe : plus
+    // d'observation du tchat ni de tentative de rattachement.
+    return function stopChatObserver() {
+      clearInterval(attachTimer);
+      chatObserver.disconnect();
+    };
   }
 
   // ── Demarrage ────────────────────────────────────────────────────────────
+
+  // Timers et observateurs du badge en cours : gardes ici pour pouvoir tout
+  // arreter quand le reglage Badge communautaire est coupe, sans recharger.
+  var badgeRuntime = null;
+  var cosmeticsListenerInstalled = false;
+
+  function startCommunityBadge() {
+    if (badgeRuntime) return;
+    log("init", badgeIconUrl ? "icone OK" : "icone MANQUANTE");
+    initBadges();
+    var stopChatObserver = setupChatObserver();
+    setupBadgeCard();
+    // Les reglages des autres abonnes arrivent sans recharger la page.
+    var remoteTimer = setInterval(function () {
+      if (!(chrome.runtime && chrome.runtime.id)) return;
+      if (!document.hidden) fetchRemoteBadges();
+    }, REFRESH_MS);
+    // Enregistrement du pseudo : n'a lieu que badge actif, il envoie une
+    // empreinte. Arreter le badge doit aussi arreter cette boucle.
+    var userTimer = setInterval(function () {
+      if (document.hidden) return;
+      if (!(chrome.runtime && chrome.runtime.id)) return;
+      if (!currentTwitchUser) {
+        currentTwitchUser = detectCurrentTwitchUser();
+        if (currentTwitchUser) {
+          registerCurrentUser(currentTwitchUser);
+        }
+      }
+    }, 5000);
+    badgeRuntime = { timers: [remoteTimer, userTimer], stopChatObserver: stopChatObserver };
+
+    if (cosmeticsListenerInstalled) return;
+    cosmeticsListenerInstalled = true;
+    // Les reglages des autres abonnes arrivent sans recharger la page.
+    chrome.storage.onChanged.addListener(function (changes, area) {
+      if (area !== "local") return;
+      var cosmeticsChange = changes[COSMETICS_KEY];
+      var plusChange = changes[PLUS_KEY];
+      if (!cosmeticsChange && !plusChange) return;
+      if (plusChange) {
+        viewerPlus = !!activePlusKey(plusChange.newValue);
+        ownPlan = viewerPlus ? (plusChange.newValue.plan === "monthly" ? "monthly" : "lifetime") : "";
+        ownRank = rankOfRecord(plusChange.newValue);
+        ownSince = viewerPlus ? Number(plusChange.newValue.since) || 0 : 0;
+      }
+      chrome.storage.local.get(COSMETICS_KEY, function (res) {
+        readOwnLocal(res && res[COSMETICS_KEY]);
+        // Aucune requete ni boucle : seuls les messages deja affiches sont retouches.
+        applyOwnLocal();
+        refreshVisibleCosmetics();
+        // currentTwitchUser est vide quand le badge est arrete : plus aucune
+        // publication de couleur ne peut partir sans l'accord de l'utilisateur.
+        if (currentTwitchUser) hashLogin(currentTwitchUser).then(publishBadgeColor);
+      });
+    });
+  }
+
+  function stopCommunityBadge() {
+    if (!badgeRuntime) return;
+    badgeRuntime.timers.forEach(clearInterval);
+    badgeRuntime.stopChatObserver();
+    badgeRuntime = null;
+    // Sans pseudo courant, plus aucune publication d'empreinte ni de couleur
+    // ne peut partir, meme si un evenement cosmetique survient.
+    currentTwitchUser = "";
+    ownHash = "";
+    log("arrete (reglage desactive)");
+  }
+
+  // Suivi du reglage, enregistre sans condition : c'est lui qui permet
+  // d'activer le badge plus tard dans la session, de l'arreter sans
+  // rechargement, et de suivre le changement de langue.
+  try {
+    chrome.storage.onChanged.addListener(function (changes, area) {
+      if (area !== "local") return;
+      var prefsChange = changes["betaGeneralPreferences"];
+      if (prefsChange) {
+        var newPrefs = prefsChange.newValue || {};
+        var i18n = typeof window !== "undefined" ? window.__SP_I18N__ : null;
+        if (newPrefs.language) {
+          badgeLang = i18n ? i18n.resolve(newPrefs.language) : badgeLang;
+        }
+        // Badge desactive par defaut depuis 26.9.18 : il envoie une empreinte
+        // du pseudo, donc seule la valeur true explicite le demarre.
+        if (newPrefs.communityBadge === true) startCommunityBadge();
+        else stopCommunityBadge();
+      }
+    });
+  } catch (listenerError) {
+    console.warn("[twitch-badge] ecoute des reglages indisponible :", listenerError && listenerError.message);
+  }
 
   // Verifie la preference avant de demarrer
   try {
@@ -878,7 +967,7 @@
       ownRank = rankOfRecord(res && res[PLUS_KEY]);
       ownSince = viewerPlus ? Number(res[PLUS_KEY].since) || 0 : 0;
       var i18n = typeof window !== "undefined" ? window.__SP_I18N__ : null;
-      badgeLang = i18n ? i18n.resolve(prefs.language || navigator.language) : "en";
+      badgeLang = i18n ? i18n.resolve(prefs.language || navigator.language) : badgeLang;
       readOwnLocal(res && res[COSMETICS_KEY]);
       // Badge desactive par defaut depuis 26.9.18 : il envoie une empreinte du
       // pseudo, donc il ne demarre qu'avec l'accord explicite de l'utilisateur.
@@ -886,51 +975,11 @@
         log("desactive (non active par l utilisateur)");
         return;
       }
-
-      log("init", badgeIconUrl ? "icone OK" : "icone MANQUANTE");
-      initBadges();
-      setupChatObserver();
-      setupBadgeCard();
-      // Les reglages des autres abonnes arrivent sans recharger la page.
-      setInterval(function () {
-        if (!(chrome.runtime && chrome.runtime.id)) return;
-        if (!document.hidden) fetchRemoteBadges();
-      }, REFRESH_MS);
-
-      chrome.storage.onChanged.addListener(function (changes, area) {
-        if (area !== "local") return;
-        var cosmeticsChange = changes[COSMETICS_KEY];
-        var plusChange = changes[PLUS_KEY];
-        if (!cosmeticsChange && !plusChange) return;
-        if (plusChange) {
-          viewerPlus = !!activePlusKey(plusChange.newValue);
-          ownPlan = viewerPlus ? (plusChange.newValue.plan === "monthly" ? "monthly" : "lifetime") : "";
-          ownRank = rankOfRecord(plusChange.newValue);
-          ownSince = viewerPlus ? Number(plusChange.newValue.since) || 0 : 0;
-        }
-        chrome.storage.local.get(COSMETICS_KEY, function (res) {
-          readOwnLocal(res && res[COSMETICS_KEY]);
-          // Aucune requete ni boucle : seuls les messages deja affiches sont retouches.
-          applyOwnLocal();
-          refreshVisibleCosmetics();
-          if (currentTwitchUser) hashLogin(currentTwitchUser).then(publishBadgeColor);
-        });
-      });
-
-      setInterval(function () {
-        if (document.hidden) return;
-        if (!(chrome.runtime && chrome.runtime.id)) return;
-        if (!currentTwitchUser) {
-          currentTwitchUser = detectCurrentTwitchUser();
-          if (currentTwitchUser) {
-            registerCurrentUser(currentTwitchUser);
-          }
-        }
-      }, 5000);
+      startCommunityBadge();
     });
-  } catch (_e) {
-    // Fallback si chrome.storage indisponible : demarrer quand meme
-    initBadges();
-    setupChatObserver();
+  } catch (storageError) {
+    // Sans chrome.storage, l'opt-in est inverifiable : ne jamais demarrer la
+    // collecte (empreinte du pseudo) sans accord explicite.
+    console.warn("[twitch-badge] storage indisponible, badge communautaire inactif :", storageError && storageError.message);
   }
 })();

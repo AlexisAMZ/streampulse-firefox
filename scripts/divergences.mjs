@@ -65,7 +65,10 @@ export const PATCHES = [
       if (hlsPromise) return hlsPromise;
       hlsPromise = import(chrome.runtime.getURL("js/vendor/hls.light.min.js"))
         .then(() => NS.Hls || globalThis.Hls || null)
-        .catch(() => null);
+        .catch((error) => {
+          console.warn("[StreamPulse] aperçus : lecteur HLS indisponible", error?.message || error);
+          return null;
+        });
       return hlsPromise;
     }
 
@@ -81,7 +84,7 @@ export const PATCHES = [
     ],
   },
   {
-    file: "js/background.js",
+    file: "js/sw/notifications.js",
     why: "chrome.offscreen n'existe pas sur Firefox. Inutile ici : la page d'arriere-plan Firefox est une vraie page, elle a un DOM et joue le son elle-meme.",
     edits: [
       {
@@ -136,7 +139,7 @@ export const PATCHES = [
       data = module;
       setTimeout(tick, 4_000);
     })
-    .catch(() => {});`,
+    .catch((error) => console.warn("[StreamPulse] prédictions : module indisponible", error?.message || error));`,
         replace: `  // js/inject/predictions-data-inline.js est declare juste avant ce fichier
   // dans content_scripts : il pose window.__SP_PREDICTIONS__. On ne charge
   // plus le module par import() dynamique, que Firefox refuse dans un content

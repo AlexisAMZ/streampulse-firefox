@@ -13,23 +13,26 @@
 
     <header class="topbar">
       <div class="brand">
-        <img src="../images/photos/logosp.png" alt="" class="brand-mark" />
+        <img src="../images/photos/logosp-64.png" alt="" class="brand-mark" />
         <span class="brand-name" data-i18n="popup.title">StreamPulse</span>
         <button id="open-plus" class="plus-badge" type="button" data-i18n-attr-title="popup.plus.open" data-i18n-attr-ariaLabel="popup.plus.open" title="Découvrir StreamPulse+" aria-label="Découvrir StreamPulse+"><span data-i18n="popup.plus.badge">PLUS</span></button>
       </div>
       <nav class="tabs" role="tablist" data-i18n-attr-ariaLabel="popup.osd.tabsLabel">
         <button id="tab-streamers" class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="streamers-view" data-tab="streamers" data-i18n="popup.tabs.streamers">Streamers</button>
         <button id="tab-history" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="history-view" data-tab="history" data-i18n="popup.tabs.history">Historique</button>
-        <button id="tab-drops" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-tab="drops" tabindex="-1"><span data-i18n="popup.osd.menuDrops">Drops</span><span class="new-dot" data-new="drops" hidden></span></button>
-        <button id="tab-badges" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-tab="badges" tabindex="-1"><span data-i18n="popup.osd.menuBadges">Badges</span><span class="new-dot" data-new="badges" hidden></span></button>
+        <button id="tab-drops" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-tab="drops" tabindex="-1"><span data-i18n="popup.osd.menuDrops">Drops</span><span class="new-dot" data-new="drops" hidden><span class="visually-hidden" data-i18n="popup.news.new">Nouveau</span></span></button>
+        <button id="tab-badges" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-tab="badges" tabindex="-1"><span data-i18n="popup.osd.menuBadges">Badges</span><span class="pill-beta" data-i18n="popup.settings.betaLabel">bêta</span><span class="new-dot" data-new="badges" hidden><span class="visually-hidden" data-i18n="popup.news.new">Nouveau</span></span></button>
         <button id="tab-settings" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-tab="settings" data-i18n="popup.tabs.settings">Réglages</button>
       </nav>
       <div class="topbar-end">
         <span class="stat-pill stat-points" data-i18n-attr-title="popup.stats.pointsClaimed" title="Points récupérés">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>
+          <span class="visually-hidden" data-i18n="popup.stats.pointsClaimed">Points récupérés</span>
           <span id="header-points-value2">--</span>
         </span>
         <span class="stat-pill stat-time" data-i18n-attr-title="popup.cplus.watchTimeLabel" title="Temps de visionnage ce mois-ci">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span class="visually-hidden" data-i18n="popup.cplus.watchTimeLabel">Temps de visionnage ce mois-ci</span>
           <span id="stat-watchtime">--</span>
         </span>
         <button id="header-patch-notes" type="button" class="icon-button news-button" data-i18n-attr-title="popup.osd.changelog" data-i18n-attr-ariaLabel="popup.osd.changelog" title="Nouveautés" aria-label="Nouveautés">
@@ -43,41 +46,15 @@
     </header>
 
     <div class="notif-blocked" id="notif-blocked" role="status" hidden>
-      <span data-i18n="popup.notifBlockedBody">Chrome bloque les notifications de StreamPulse : tu ne seras pas prévenu des lives.</span>
+      <span data-i18n="popup.notifBlockedBody">Chrome bloque les notifications de StreamPulse : aucune alerte de live ne peut s'afficher.</span>
       <button id="notif-blocked-open" type="button" class="button button-quiet" data-i18n="popup.notifBlockedAction">Réglages</button>
     </div>
 
-    <aside class="review-ask" id="review-ask" role="dialog" hidden>
-      <span class="review-ask-stars" aria-hidden="true">★★★★★</span>
-      <div class="review-ask-text">
-        <b data-i18n="popup.review.title">Tu aimes StreamPulse ?</b>
-        <span data-i18n="popup.review.body">Un avis sur le store aide énormément une extension indépendante. Merci d'avance !</span>
-      </div>
-      <div class="review-ask-actions">
-        <button id="review-ask-rate" type="button" class="button button-primary" data-i18n="popup.review.rate">Laisser un avis</button>
-        <button id="review-ask-later" type="button" class="button button-quiet" data-i18n="popup.review.later">Plus tard</button>
-        <button id="review-ask-never" type="button" class="button button-link" data-i18n="popup.review.never">Non merci</button>
-      </div>
-    </aside>
-
-    <aside class="badge-ask" id="badge-ask" role="dialog" hidden>
-      <span class="badge-ask-mark" aria-hidden="true"></span>
-      <div class="badge-ask-text">
-        <b data-i18n="popup.badgeAsk.title">Affiche ton badge dans le tchat</b>
-        <span data-i18n="popup.badgeAsk.body">Repère et sois repéré par les autres utilisateurs de StreamPulse dans le tchat Twitch. Si tu l'actives : une empreinte de ton pseudo est envoyée à streampulse.fr une fois par jour maximum.</span>
-      </div>
-      <div class="badge-ask-actions">
-        <button id="badge-ask-activate" type="button" class="button button-primary" data-i18n="popup.badgeAsk.activate">Activer le badge</button>
-        <button id="badge-ask-later" type="button" class="button button-quiet" data-i18n="popup.badgeAsk.later">Plus tard</button>
-        <button id="badge-ask-never" type="button" class="button button-link" data-i18n="popup.badgeAsk.dismiss">Non merci</button>
-      </div>
-    </aside>
-
-    <main id="streamers-view" class="home" role="tabpanel" aria-labelledby="tab-streamers">
+    <main id="streamers-view" class="home" data-roster="loading" role="tabpanel" aria-labelledby="tab-streamers">
       <section class="stage" id="stage" data-state="empty">
         <div class="stage-media" id="stage-media"></div>
         <div class="greeting">
-          <h1 class="greeting-title" id="greeting-title">Bonsoir.<br /><span class="greeting-sub">Voici qui est en ligne.</span></h1>
+          <h1 class="greeting-title" id="greeting-title">Bonsoir.<br /><span class="greeting-sub greeting-sub-loading" aria-hidden="true"></span></h1>
           <p class="greeting-hint" id="greeting-live-count" role="status"></p>
         </div>
         <div class="stage-pager" id="stage-pager" hidden>
@@ -95,7 +72,7 @@
       <section class="activity" data-i18n-attr-ariaLabel="popup.cplus.activityLabel">
         <span class="chip chip-auto" id="activity-auto">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17 19 7"/></svg>
-          <span data-i18n="popup.cplus.autoClaimOn">Auto-claim actif</span>
+          <span data-i18n="popup.cplus.autoClaimOn">Récupération auto active</span>
         </span>
         <span class="chip" id="activity-points" hidden>
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>
@@ -107,10 +84,44 @@
         </span>
         <button id="open-all-channels" type="button" class="search-trigger">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <span data-i18n="popup.cplus.search">Chercher une chaîne</span>
+          <span data-i18n="popup.cplus.search">Chercher un streamer</span>
         </button>
       </section>
 
+
+      <!-- Bandeaux ponctuels (avis, badge) : ils prennent la place de la ligne
+           d'activité, dans la grille, sans recouvrir la bande des lives. Un seul à
+           la fois, jamais à la première ouverture d'une version ni pendant le coup
+           d'œil (js/popup-review.js). -->
+      <aside class="ask review-ask" id="review-ask" role="region" aria-labelledby="review-ask-title" hidden>
+        <svg class="ask-mark review-ask-mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
+        <p class="ask-text review-ask-text">
+          <b id="review-ask-title" data-i18n="popup.review.title">Tu aimes StreamPulse ?</b>
+          <span data-i18n="popup.review.body">Un avis sur le store aide énormément une extension indépendante. Merci d'avance !</span>
+        </p>
+        <div class="ask-actions review-ask-actions">
+          <button id="review-ask-rate" type="button" class="button button-primary" data-i18n="popup.review.rate">Laisser un avis</button>
+          <div class="ask-secondary">
+            <button id="review-ask-later" type="button" class="ask-link" data-i18n="popup.review.later">Plus tard</button>
+            <button id="review-ask-never" type="button" class="ask-link" data-i18n="popup.review.never">Non merci</button>
+          </div>
+        </div>
+      </aside>
+
+      <aside class="ask badge-ask" id="badge-ask" role="region" aria-labelledby="badge-ask-title" hidden>
+        <span class="ask-mark badge-ask-mark" aria-hidden="true"></span>
+        <p class="ask-text badge-ask-text">
+          <b id="badge-ask-title" data-i18n="popup.badgeAsk.title">Affiche ton badge dans le chat</b>
+          <span data-i18n="popup.badgeAsk.body">Repère les autres utilisateurs de StreamPulse dans le chat Twitch, et montre-leur ton badge. Si tu l'actives : une empreinte de ton pseudo est envoyée à streampulse.fr une fois par jour maximum.</span>
+        </p>
+        <div class="ask-actions badge-ask-actions">
+          <button id="badge-ask-activate" type="button" class="button button-primary" data-i18n="popup.badgeAsk.activate">Activer le badge</button>
+          <div class="ask-secondary">
+            <button id="badge-ask-later" type="button" class="ask-link" data-i18n="popup.badgeAsk.later">Plus tard</button>
+            <button id="badge-ask-never" type="button" class="ask-link" data-i18n="popup.badgeAsk.dismiss">Non merci</button>
+          </div>
+        </div>
+      </aside>
 
       <section class="live-strip">
         <div class="strip-head">
@@ -132,7 +143,7 @@
           <label for="streamer-input" class="visually-hidden" data-i18n="popup.addStreamerTitleBase">Ajouter un streamer</label>
           <div class="add-field">
             <span class="input-prefix" id="handle-prefix" aria-hidden="true">@</span>
-            <input id="streamer-input" name="streamer" type="text" maxlength="80" autocomplete="off" autocapitalize="none" spellcheck="false" required data-i18n-attr-placeholder="popup.addStreamerHelperBase" placeholder="Saisissez le lien ou l’identifiant du créateur." />
+            <input id="streamer-input" name="streamer" type="text" maxlength="80" autocomplete="off" autocapitalize="none" spellcheck="false" required data-i18n-attr-placeholder="popup.addStreamerHelperBase" placeholder="Colle le lien ou l’identifiant du streamer." />
             <button type="submit" class="add-submit" data-i18n="popup.addStreamerSubmit">Ajouter</button>
           </div>
           <p id="feedback-message" class="feedback-message" hidden></p>
@@ -185,7 +196,7 @@
       <div class="history-empty" id="history-empty" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
         <p class="history-empty-title" data-i18n="popup.history.emptyTitle">Aucun live raté</p>
-        <p class="history-empty-body" data-i18n="popup.history.emptyBody">Quand un streamer suivi termine un live sans que tu l'aies regardé, il apparaît ici avec sa rediffusion.</p>
+        <p class="history-empty-body" data-i18n="popup.history.emptyBody">Quand un de tes streamers termine un live sans que tu l'aies regardé, il apparaît ici avec sa rediffusion.</p>
       </div>
     </section>
 
@@ -200,7 +211,7 @@
           </li>
           <li class="plus-perk">
             <span class="perk-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>
-            <span class="perk-text"><b data-i18n="popup.plus.perkRecap">Récap avancé et Wrapped annuel</b><span data-i18n="popup.plus.perkRecapBody">Heures par catégorie, courbe de l'année, image à partager.</span></span>
+            <span class="perk-text"><b data-i18n="popup.plus.perkRecap">Récap avancé et récap de l'année</b><span data-i18n="popup.plus.perkRecapBody">Heures par catégorie, courbe de l'année, image à partager.</span></span>
           </li>
           <li class="plus-perk">
             <span class="perk-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
@@ -216,7 +227,7 @@
       <aside class="plus-offer" id="plus-offer">
         <div class="plus-plans" role="radiogroup" data-i18n-attr-ariaLabel="popup.plus.plansLabel" aria-label="Formule">
           <button class="plus-plan" type="button" role="radio" aria-checked="false" data-plan="monthly">
-            <span class="plan-text"><b data-i18n="popup.plus.monthly">Mensuel</b><small data-i18n="popup.plus.monthlyNote">Sans engagement</small></span>
+            <span class="plan-text"><b data-i18n="popup.plus.monthly">Mensuel</b><small data-i18n="popup.plus.monthlyNote">7 jours gratuits, sans engagement</small></span>
             <span class="plan-price"><span data-i18n="popup.plus.monthlyPrice">2,99 €</span><small data-i18n="popup.plus.perMonth">/mois</small></span>
           </button>
           <button class="plus-plan active" type="button" role="radio" aria-checked="true" data-plan="lifetime">
@@ -232,6 +243,13 @@
           <button class="button button-ghost" id="plus-key-activate" type="submit" data-i18n="popup.plus.activate">Activer</button>
         </form>
         <p class="plus-error" id="plus-key-error" role="alert" hidden></p>
+      </aside>
+
+      <aside class="plus-offer" id="plus-device-limited" hidden>
+        <p class="plus-active-title" data-i18n="popup.plus.deviceLimitedTitle">Cette clé est déjà active sur 2 navigateurs</p>
+        <p class="settings-description" data-i18n="popup.plus.deviceLimitedBody">Ta licence StreamPulse+ suit toujours ce navigateur, mais la limite d'appareils est atteinte. Libère une place depuis le portail client et la prochaine ouverture du popup réactivera tout.</p>
+        <button class="button button-primary" id="plus-manage-devices" type="button" data-i18n="popup.plus.deviceLimitedManage">Gérer mes appareils</button>
+        <p class="plus-error" id="plus-manage-devices-error" role="alert" hidden></p>
       </aside>
 
       <aside class="plus-offer plus-active" id="plus-active" hidden>
@@ -257,89 +275,158 @@
     <!-- Menu: settings grouped by intent -->
     <section id="settings-section" class="menu hidden" role="tabpanel" aria-labelledby="tab-settings">
       <nav class="menu-nav" role="tablist" aria-orientation="vertical" data-i18n-attr-ariaLabel="popup.osd.menuLabel">
-        <button id="menu-tab-identity" class="menu-tab" type="button" role="tab" aria-selected="true" aria-controls="menu-identity" data-panel="identity">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-          <span data-i18n="popup.osd.menuIdentity">Pseudo et badge</span>
-          <span class="new-pill" data-new="identity" data-i18n="popup.news.new" hidden>Nouveau</span>
-        </button>
-        <button id="menu-tab-drops" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-drops" data-panel="drops" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
-          <span data-i18n="popup.osd.menuDrops">Drops</span>
-          <span class="new-pill" data-new="drops" data-i18n="popup.news.new" hidden>Nouveau</span>
-        </button>
-        <button id="menu-tab-badges" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-badges" data-panel="badges" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
-          <span data-i18n="popup.osd.menuBadges">Badges</span>
-          <span class="new-pill" data-new="badges" data-i18n="popup.news.new" hidden>Nouveau</span>
-        </button>
-        <button id="menu-tab-points" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-points" data-panel="points" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 19 9 12 22 5 9"/><line x1="5" y1="9" x2="19" y2="9"/></svg>
-          <span data-i18n="popup.osd.menuPoints">Points</span>
-        </button>
-        <button id="menu-tab-alerts" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-alerts" data-panel="alerts" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          <span data-i18n="popup.osd.menuAlerts">Alertes</span>
-        </button>
-        <button id="menu-tab-automation" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-automation" data-panel="automation" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          <span data-i18n="popup.osd.menuAutomation">Automatisation</span>
-        </button>
-        <button id="menu-tab-player" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-player" data-panel="player" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
-          <span data-i18n="popup.osd.menuPlayer">Lecteur</span>
-        </button>
-        <button id="menu-tab-previews" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-previews" data-panel="previews" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="m10 8 5 3-5 3z"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
-          <span data-i18n="popup.osd.menuPreviews">Aperçus</span>
-        </button>
-        <button id="menu-tab-chat" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-chat" data-panel="chat" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span data-i18n="popup.osd.menuChat">Chat</span>
-        </button>
-        <button id="menu-tab-data" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-data" data-panel="data" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
-          <span data-i18n="popup.osd.menuData">Temps et données</span>
-        </button>
-        <button id="menu-tab-plus" class="menu-tab menu-tab-plus" type="button" role="tab" aria-selected="false" aria-controls="menu-plus" data-panel="plus" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
-          <span data-i18n="popup.osd.menuPlus">StreamPulse+</span>
-        </button>
-        <button id="menu-tab-general" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-general" data-panel="general" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-          <span data-i18n="popup.osd.menuGeneral">Général et aide</span>
-        </button>
+        <div class="menu-nav-group" id="menu-nav-settings">
+          <button id="menu-tab-notifications" class="menu-tab" type="button" role="tab" aria-selected="true" aria-controls="menu-notifications" data-panel="notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <span data-i18n="popup.settings.groupNotifications">Notifications</span>
+          </button>
+          <button id="menu-tab-rewards" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-rewards" data-panel="rewards" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
+            <span data-i18n="popup.osd.groupRewards">Récompenses</span>
+          </button>
+          <button id="menu-tab-player" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-player" data-panel="player" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+            <span data-i18n="popup.osd.menuPlayer">Lecteur</span>
+          </button>
+          <button id="menu-tab-previews" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-previews" data-panel="previews" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="m10 8 5 3-5 3z"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
+            <span data-i18n="popup.osd.menuPreviews">Aperçus</span>
+          </button>
+          <button id="menu-tab-tabs" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-tabs" data-panel="tabs" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/><path d="M6 4v4"/></svg>
+            <span data-i18n="popup.osd.groupTabs">Onglets</span>
+          </button>
+          <button id="menu-tab-chat" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-chat" data-panel="chat" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span data-i18n="popup.osd.menuChat">Chat</span>
+          </button>
+          <button id="menu-tab-identity" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-identity" data-panel="identity" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            <span data-i18n="popup.osd.menuIdentity">Profil et badge</span>
+            <span class="new-dot new-dot-inline" data-new="identity" hidden><span class="visually-hidden" data-i18n="popup.news.new">Nouveau</span></span>
+          </button>
+          <button id="menu-tab-general" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-general" data-panel="general" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+            <span data-i18n="popup.osd.menuGeneral">Général</span>
+          </button>
+        </div>
+        <div class="menu-nav-sep" role="separator" aria-hidden="true"></div>
+        <div class="menu-nav-group" id="menu-nav-tools">
+          <button id="menu-tab-drops" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-drops" data-panel="drops" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
+            <span data-i18n="popup.osd.menuDrops">Drops</span>
+          </button>
+          <button id="menu-tab-badges" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-badges" data-panel="badges" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span data-i18n="popup.osd.menuBadges">Badges</span>
+          </button>
+          <button id="menu-tab-activity" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-activity" data-panel="activity" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span data-i18n="popup.osd.menuActivity">Activité</span>
+          </button>
+          <button id="menu-tab-plus" class="menu-tab menu-tab-plus" type="button" role="tab" aria-selected="false" aria-controls="menu-plus" data-panel="plus" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
+            <span data-i18n="popup.osd.menuPlus">StreamPulse+</span>
+          </button>
+          <button id="menu-tab-help" class="menu-tab" type="button" role="tab" aria-selected="false" aria-controls="menu-help" data-panel="help" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            <span data-i18n="popup.osd.menuHelp">Aide</span>
+          </button>
+        </div>
       </nav>
 
       <div class="menu-panels" id="menu-panels">
-        <!-- Alertes -->
-        <section class="menu-panel" id="menu-alerts" role="tabpanel" aria-labelledby="menu-tab-alerts" hidden>
-          <h2 data-i18n="popup.osd.menuAlerts">Alertes</h2>
+        <!-- Notifications -->
+        <section class="menu-panel" id="menu-notifications" role="tabpanel" aria-labelledby="menu-tab-notifications">
+          <h2 data-i18n="popup.settings.groupNotifications">Notifications</h2>
 
           <p class="settings-note" data-i18n="popup.settings.alertsPerStreamerNote">Ces alertes se règlent sur chaque streamer, depuis sa carte : notifications, changement de catégorie et de titre.</p>
 
           <label class="settings-toggle">
             <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.liveAlertsTitle">Alertes de live</span>
+              <span class="settings-description" data-i18n="popup.settings.liveAlertsBody">Une notification quand un streamer démarre un live. S'applique à tous tes streamers, ajustable sur chaque carte.</span>
+            </span>
+            <input id="pref-live-notifications" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.gameAlertsTitle">Alertes changement de catégorie</span>
+              <span class="settings-description" data-i18n="popup.settings.gameAlertsDescription">Appliqué à tous tes streamers suivis : tu peux ensuite l'ajuster par streamer.</span>
+            </span>
+            <input id="pref-game-notifications" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.titleAlertsTitle">Alertes changement de titre</span>
+              <span class="settings-description" data-i18n="popup.settings.titleAlertsDescription">Appliqué à tous tes streamers suivis : tu peux ensuite l'ajuster par streamer.</span>
+            </span>
+            <input id="pref-title-notifications" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
               <span class="settings-title" data-i18n="popup.settings.soundsTitle">Son des notifications</span>
-              <span class="settings-description" data-i18n="popup.settings.soundsDescription">Activer ou couper le son lors des alertes.</span>
+              <span class="settings-description" data-i18n="popup.settings.soundsDescription">Joue un son avec les notifications de live, de catégorie et de titre. Les autres notifications restent silencieuses.</span>
             </span>
             <input id="pref-sounds" type="checkbox" role="switch" />
+          </label>
+
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.quietHoursTitle">Heures calmes</span>
+              <span class="settings-description" data-i18n="popup.settings.quietHoursBody">Aucune notification pendant cette plage ; elle peut passer minuit.</span>
+            </span>
+            <input id="pref-quiet-hours" type="checkbox" role="switch" />
+          </label>
+          <div class="settings-sub-row quiet-hours-times" id="quiet-hours-times">
+            <label class="settings-title" for="pref-quiet-hours-start" data-i18n="popup.settings.quietHoursStartLabel">Début</label>
+            <input id="pref-quiet-hours-start" type="time" value="23:00" class="settings-time" />
+            <label class="settings-title" for="pref-quiet-hours-end" data-i18n="popup.settings.quietHoursEndLabel">Fin</label>
+            <input id="pref-quiet-hours-end" type="time" value="08:00" class="settings-time" />
+          </div>
+
+          <h3 class="settings-group-header smart-head"><span data-i18n="popup.smart.title">Alertes intelligentes</span><span class="plus-tag" data-i18n="popup.plus.badge">PLUS</span></h3>
+          <div class="smart-locked" id="smart-locked">
+            <p class="settings-description" data-i18n="popup.smart.lockedBody">Choisis quand recevoir une notification : un jeu précis, un mot dans le titre, un nombre de viewers. Réservé à StreamPulse+.</p>
+            <button class="button button-primary" id="smart-unlock" type="button" data-i18n="popup.smart.unlock">Débloquer</button>
+          </div>
+          <div class="smart-editor" id="smart-editor" hidden>
+            <p class="settings-description" data-i18n="popup.smart.replacesNote">Tant qu'un streamer a une règle active, elle remplace son alerte classique.</p>
+            <div class="smart-layout">
+              <ul class="smart-streamers" id="smart-streamers" data-i18n-attr-ariaLabel="popup.smart.streamersLabel" aria-label="Streamers"></ul>
+              <div class="smart-rules" id="smart-rules"></div>
+            </div>
+          </div>
+
+          <h3 class="settings-group-header" data-i18n="popup.settings.otherNotificationsGroup">Autres notifications</h3>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.dropAlertsTitle">Drop obtenu</span>
+              <span class="settings-description" data-i18n="popup.settings.dropAlertsBody">Une notification quand un Drop est récupéré. Twitch. Notification silencieuse.</span>
+            </span>
+            <input id="pref-drop-alerts" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.badgeAlertsTitle">Nouveau badge</span>
+              <span class="settings-description" data-i18n="popup.settings.badgeAlertsBody">Une notification quand un badge de chat devient disponible. Twitch. Notification silencieuse.</span>
+            </span>
+            <input id="pref-badge-alerts" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.raidCancelledTitle">Raid annulé</span>
+              <span class="settings-description" data-i18n="popup.settings.raidCancelledBody">Une notification quand un raid est annulé automatiquement. Twitch. Notification silencieuse.</span>
+            </span>
+            <input id="pref-raid-alerts" type="checkbox" role="switch" />
           </label>
           <label class="settings-toggle">
             <span class="settings-text">
               <span class="settings-title" data-i18n="popup.settings.backgroundRaidAlertsTitle">Alertes de raids entrants (bêta)</span>
-              <span class="settings-description" data-i18n="popup.settings.backgroundRaidAlertsDescription">Surveiller tous les streamers Twitch suivis et notifier dès qu'un raid arrive, même hors de la page.</span>
+              <span class="settings-description" data-i18n="popup.settings.backgroundRaidAlertsDescription">Surveille tes streamers Twitch dans StreamPulse et t'envoie une notification dès qu'un raid arrive, même sans onglet Twitch ouvert. Coupe l'annulation automatique des Raids.</span>
             </span>
             <input id="pref-background-raid-alerts" type="checkbox" role="switch" />
           </label>
-
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.autoCancelRaidsTitle">Annulation automatique des Raids</span>
-              <span class="settings-description" data-i18n="popup.settings.autoCancelRaidsDescription">Annuler automatiquement la redirection lors d'un Raid Twitch. Se désactive quand les alertes de raid en arrière-plan sont actives : les points se gagnent en suivant le raid.</span>
-            </span>
-            <input id="pref-auto-cancel-raids" type="checkbox" role="switch" />
-          </label>
-
           <label class="settings-toggle">
             <span class="settings-text">
               <span class="settings-title" data-i18n="popup.settings.updateNotificationsTitle">Notification de mise à jour</span>
@@ -348,66 +435,306 @@
             <input id="pref-update-notifications" type="checkbox" role="switch" />
           </label>
 
-
           <div class="panel-actions">
             <button id="test-notification" type="button" class="button button-quiet" data-i18n="popup.testNotification">Tester une notification</button>
           </div>
         </section>
 
-        <!-- Automatisation -->
-        <section class="menu-panel" id="menu-automation" role="tabpanel" aria-labelledby="menu-tab-automation" hidden>
-          <h2 data-i18n="popup.osd.menuAutomation">Automatisation</h2>
+        <!-- Récompenses -->
+        <section class="menu-panel" id="menu-rewards" role="tabpanel" aria-labelledby="menu-tab-rewards" hidden>
+          <h2 data-i18n="popup.osd.groupRewards">Récompenses</h2>
 
-          <h3 class="settings-group-header" data-i18n="popup.osd.groupRewards">Récompenses</h3>
+          <h3 class="settings-group-header" data-i18n="popup.settings.pointsGroupTitle">Points de chaîne</h3>
           <label class="settings-toggle">
             <span class="settings-text">
               <span class="settings-title" data-i18n="popup.settings.autoClaimTitle">Récupération auto des points</span>
-              <span class="settings-description" data-i18n="popup.settings.autoClaimDescription">Cliquer automatiquement les bonus de points de chaîne sur Twitch.</span>
+              <span class="settings-description" data-i18n="popup.settings.autoClaimDescription">Twitch : clique pour toi sur le coffre bonus de Points de chaîne dès qu'il apparaît. Kick : affiche ton solde de points.</span>
             </span>
             <input id="pref-auto-claim" type="checkbox" role="switch" />
           </label>
           <label class="settings-toggle">
             <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.points.trackingTitle">Compter les points gagnés</span>
+              <span class="settings-description" data-i18n="popup.points.trackingBody">Actif tant qu'un onglet Twitch est ouvert, sur toutes tes chaînes. Le détail par chaîne et par jour s'affiche dans Activité.</span>
+            </span>
+            <input id="pref-points-tracking" type="checkbox" role="switch" />
+          </label>
+
+          <h3 class="settings-group-header" data-i18n="popup.osd.menuDrops">Drops</h3>
+          <label class="settings-toggle">
+            <span class="settings-text">
               <span class="settings-title" data-i18n="popup.osd.autoClaimDrops">Récupération auto des Drops</span>
-              <span class="settings-description" data-i18n="popup.settings.autoClaimDropsDescription">Réclamer automatiquement les Drops Twitch dès qu'ils sont disponibles.</span>
+              <span class="settings-description" data-i18n="popup.settings.autoClaimDropsDescription">Récupère tes Drops dès qu'ils sont prêts à être réclamés. Twitch uniquement.</span>
             </span>
             <input id="pref-auto-claim-drops" type="checkbox" role="switch" />
           </label>
           <label class="settings-toggle">
             <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.drops.trackingTitle">Historique des Drops</span>
+              <span class="settings-description" data-i18n="popup.drops.trackingBody">Progression et récupération même sans onglet Twitch ouvert. La Récupération auto des Drops s'appuie sur cet historique ; la liste des campagnes se met à jour quand tu passes sur Twitch.</span>
+            </span>
+            <input id="pref-drops-tracking" type="checkbox" role="switch" />
+          </label>
+          <details class="settings-advanced">
+            <summary data-i18n="popup.settings.advancedGroup">Avancé</summary>
+            <div class="settings-advanced-body">
+              <label class="settings-toggle">
+                <span class="settings-text">
+                  <span class="settings-title" data-i18n="popup.settings.autoOpenInventoryTitle">Ouverture auto de l'inventaire Drops</span>
+                  <span class="settings-description" data-i18n="popup.settings.autoOpenInventoryDescription">Ouvre l'inventaire Twitch dans un onglet en arrière-plan, à la fréquence choisie, pour récupérer tes Drops terminés. Twitch uniquement ; nécessite une session Twitch ouverte.</span>
+                </span>
+                <input id="pref-auto-open-inventory" type="checkbox" role="switch" />
+              </label>
+              <div class="settings-sub-row" id="auto-open-inventory-interval-wrap">
+                <label class="settings-title" for="pref-auto-open-inventory-interval" data-i18n="popup.settings.inventoryFrequencyLabel">Fréquence d'ouverture</label>
+                <select id="pref-auto-open-inventory-interval" class="settings-select">
+                  <option value="1" data-i18n="popup.settings.inventoryEvery1h">Toutes les heures</option>
+                  <option value="2" data-i18n="popup.settings.inventoryEvery2h">Toutes les 2h</option>
+                  <option value="4" data-i18n="popup.settings.inventoryEvery4h">Toutes les 4h</option>
+                  <option value="6" data-i18n="popup.settings.inventoryEvery6h">Toutes les 6h</option>
+                  <option value="12" data-i18n="popup.settings.inventoryEvery12h">Toutes les 12h</option>
+                  <option value="24" selected data-i18n="popup.settings.inventoryEvery24h">Toutes les 24h</option>
+                </select>
+              </div>
+            </div>
+          </details>
+
+          <h3 class="settings-group-header" data-i18n="popup.osd.autoClaimMoments">Récupération auto des Moments</h3>
+          <label class="settings-toggle">
+            <span class="settings-text">
               <span class="settings-title" data-i18n="popup.osd.autoClaimMoments">Récupération auto des Moments</span>
-              <span class="settings-description" data-i18n="popup.settings.autoClaimMomentsDescription">Réclamer automatiquement les Moments Twitch.</span>
+              <span class="settings-description" data-i18n="popup.settings.autoClaimMomentsDescription">Récupère les Moments dès qu'ils apparaissent sur le lecteur. Twitch uniquement.</span>
             </span>
             <input id="pref-auto-claim-moments" type="checkbox" role="switch" />
           </label>
+
+          <h3 class="settings-group-header" data-i18n="popup.osd.logRaids">Raids</h3>
           <label class="settings-toggle">
             <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.autoOpenInventoryTitle">Ouverture auto de l'inventaire Drops</span>
-              <span class="settings-description" data-i18n="popup.settings.autoOpenInventoryDescription">Ouvrir l'inventaire Twitch en arrière-plan pour réclamer automatiquement vos Drops.</span>
+              <span class="settings-title" data-i18n="popup.settings.autoCancelRaidsTitle">Annulation automatique des Raids</span>
+              <span class="settings-description" data-i18n="popup.settings.autoCancelRaidsDescription">Reste sur la chaîne quand un Raid Twitch veut t'emmener ailleurs. Se coupe quand les alertes de raids entrants sont actives : les points se gagnent en suivant le raid.</span>
             </span>
-            <input id="pref-auto-open-inventory" type="checkbox" role="switch" />
+            <input id="pref-auto-cancel-raids" type="checkbox" role="switch" />
           </label>
-          <div class="settings-sub-row" id="auto-open-inventory-interval-wrap">
-            <label class="settings-title" for="pref-auto-open-inventory-interval" data-i18n="popup.settings.inventoryFrequencyLabel">Fréquence d'ouverture</label>
-            <select id="pref-auto-open-inventory-interval" class="settings-select">
-              <option value="1" data-i18n="popup.settings.inventoryEvery1h">Toutes les 1h</option>
-              <option value="2" data-i18n="popup.settings.inventoryEvery2h">Toutes les 2h</option>
-              <option value="4" data-i18n="popup.settings.inventoryEvery4h">Toutes les 4h</option>
-              <option value="6" data-i18n="popup.settings.inventoryEvery6h">Toutes les 6h</option>
-              <option value="12" data-i18n="popup.settings.inventoryEvery12h">Toutes les 12h</option>
-              <option value="24" selected data-i18n="popup.settings.inventoryEvery24h">Toutes les 24h</option>
+          <p class="settings-description dependency-status" id="raid-dependency-status" role="status" hidden></p>
+
+          <h3 class="settings-group-header" data-i18n="popup.pred.title">Prédictions assistées</h3>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.predictionsWidgetTitle">Widget de prédictions</span>
+              <span class="settings-description" data-i18n="popup.settings.predictionsWidgetBody">Affiche le widget des prédictions sur les pages de chaîne Twitch.</span>
+            </span>
+            <input id="pref-predictions-popup" type="checkbox" role="switch" />
+          </label>
+          <div class="smart-locked" id="pred-locked">
+            <p class="settings-description" data-i18n="popup.pred.lockedBody">Mise automatique selon ta règle, historique de tes paris et taux de réussite. Réservé à StreamPulse+.</p>
+            <button class="button button-primary" id="pred-unlock" type="button" data-i18n="popup.smart.unlock">Débloquer</button>
+          </div>
+          <div class="pred-editor" id="pred-editor" hidden>
+            <label class="settings-toggle">
+              <span class="settings-text">
+                <span class="settings-title" data-i18n="popup.pred.autoTitle">Miser automatiquement</span>
+                <span class="settings-description" data-i18n="popup.pred.autoBody">StreamPulse mise quelques secondes avant la fin de chaque prédiction, sur la chaîne ouverte dans un onglet Twitch.</span>
+              </span>
+              <input id="pred-enabled" type="checkbox" role="switch" />
+            </label>
+            <div class="settings-row">
+              <label class="settings-title" for="pred-strategy" data-i18n="popup.pred.strategy">Option choisie</label>
+              <select id="pred-strategy" class="settings-select">
+                <option value="majority" data-i18n="popup.pred.majority">La plus jouée</option>
+                <option value="underdog" data-i18n="popup.pred.underdog">La moins jouée (meilleure cote)</option>
+              </select>
+            </div>
+            <div class="pred-numbers">
+              <label class="pred-field"><span data-i18n="popup.pred.percent">Mise (% du solde)</span><input id="pred-percent" class="text-input" type="number" min="1" max="50" step="1" inputmode="numeric" /></label>
+              <label class="pred-field"><span data-i18n="popup.pred.max">Mise maximum</span><input id="pred-max" class="text-input" type="number" min="10" step="50" inputmode="numeric" /></label>
+              <label class="pred-field"><span data-i18n="popup.pred.reserve">Toujours garder</span><input id="pred-reserve" class="text-input" type="number" min="0" step="100" inputmode="numeric" /></label>
+            </div>
+            <dl class="pred-stats">
+              <div><dt data-i18n="popup.pred.bets">Paris</dt><dd id="pred-stat-bets">0</dd></div>
+              <div><dt data-i18n="popup.pred.rate">Réussite</dt><dd id="pred-stat-rate">–</dd></div>
+              <div><dt data-i18n="popup.pred.net">Gain net</dt><dd id="pred-stat-net">0</dd></div>
+            </dl>
+            <ol class="pred-history" id="pred-history"></ol>
+            <p class="settings-description" data-i18n="popup.pred.note">Résultats estimés d'après l'évolution de ton solde de points.</p>
+          </div>
+        </section>
+
+        <!-- Lecteur Twitch -->
+        <section class="menu-panel" id="menu-player" role="tabpanel" aria-labelledby="menu-tab-player" hidden>
+          <h2 data-i18n="popup.osd.menuPlayer">Lecteur</h2>
+
+          <h3 class="settings-group-header" data-i18n="popup.settings.playerButtonsGroup">Boutons</h3>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.fastForwardTitle">Bouton d'avance rapide</span>
+              <span class="settings-description" data-i18n="popup.settings.fastForwardDescription">Ajoute un bouton au lecteur Twitch et Kick pour rattraper le direct quand la vidéo a pris du retard.</span>
+            </span>
+            <input id="pref-fast-forward" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.pipButtonTitle">Bouton Picture-in-Picture</span>
+              <span class="settings-description" data-i18n="popup.settings.pipButtonDescription">Ajouter un bouton au lecteur pour regarder le live dans une mini-fenêtre.</span>
+            </span>
+            <input id="pref-pip-button" type="checkbox" role="switch" />
+          </label>
+          <div class="field-stack">
+            <div class="field-head">
+              <label class="settings-title" for="pref-volume-boost" data-i18n="popup.settings.volumeBoostTitle">Amplification du volume</label>
+              <span class="field-value"><span id="volume-boost-value">100</span> %</span>
+            </div>
+            <input id="pref-volume-boost" type="range" min="100" max="300" step="10" value="100" class="settings-range" />
+            <span class="settings-description" data-i18n="popup.settings.volumeBoostBody">Monte le son du lecteur au-delà de 100 %. Twitch et Kick.</span>
+          </div>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.clipDownloadTitle">Téléchargement des clips<span class="plus-tag" id="clip-download-lock" data-i18n="popup.plus.badge" hidden>PLUS</span></span>
+              <span class="settings-description" data-i18n="popup.settings.clipDownloadDescription">Ajoute un bouton sur les pages de clips Twitch pour les enregistrer en MP4. Réservé à StreamPulse+.</span>
+            </span>
+            <input id="pref-clip-download" type="checkbox" role="switch" />
+          </label>
+
+          <h3 class="settings-group-header" data-i18n="popup.settings.playerQualityGroup">Qualité</h3>
+          <div class="settings-sub-row">
+            <label class="settings-title" for="pref-player-quality" data-i18n="popup.settings.playerQualityTitle">Qualité du lecteur</label>
+            <select id="pref-player-quality" class="settings-select">
+              <option value="auto" selected data-i18n="popup.settings.playerQualityAuto">Auto</option>
+              <option value="source" data-i18n="popup.settings.playerQualitySource">Source</option>
+              <option value="1440">1440p (2K)</option>
+              <option value="1080">1080p</option>
+              <option value="720">720p</option>
+              <option value="480">480p</option>
+              <option value="360">360p</option>
             </select>
           </div>
-
-
-          <h3 class="settings-group-header" data-i18n="popup.osd.groupTabs">Onglets</h3>
+          <p class="settings-description dependency-status" data-i18n="popup.settings.playerQualityDescription">Ouvrir chaque live dans cette qualité. Auto laisse Twitch décider.</p>
           <label class="settings-toggle">
             <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.preventTabDiscardTitle">Empêcher la mise en veille de l'onglet</span>
-              <span class="settings-description" data-i18n="popup.settings.preventTabDiscardDescription">Empêcher Chrome de fermer ou décharger les onglets Twitch/Kick inactifs.</span>
+              <span class="settings-title" data-i18n="popup.settings.keepQualityTitle">Garder la qualité en arrière-plan</span>
+              <span class="settings-description" data-i18n="popup.settings.keepQualityDescription">Empêche Twitch de baisser la qualité ou de mettre en pause quand l'onglet n'est pas affiché. Utilise plus de ressources ; s'applique au prochain chargement de la page.</span>
             </span>
-            <input id="pref-prevent-tab-discard" type="checkbox" role="switch" />
+            <input id="pref-keep-quality" type="checkbox" role="switch" />
           </label>
+
+          <h3 class="settings-group-header" data-i18n="popup.settings.playerDisplayGroup">Affichage</h3>
+          <div class="settings-sub-row">
+            <label class="settings-title" for="pref-latency-placement" data-i18n="popup.settings.latencyPlacementLabel">Position de la latence</label>
+            <select id="pref-latency-placement" class="settings-select">
+              <option value="viewers" data-i18n="popup.settings.latencyViewers">Sous le lecteur</option>
+              <option value="chat" data-i18n="popup.settings.latencyChat">Dans l'en-tête du chat</option>
+            </select>
+          </div>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.hideTwitchExtensionsTitle">Masquer les extensions Twitch</span>
+              <span class="settings-description" data-i18n="popup.settings.hideTwitchExtensionsDescription">Masque les extensions de streamers affichées par-dessus la vidéo Twitch (sondages, classements, boutiques…).</span>
+            </span>
+            <input id="pref-hide-twitch-extensions" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.autoRefreshTitle">Relancer le lecteur en cas d'erreur</span>
+              <span class="settings-description" data-i18n="popup.settings.autoRefreshDescription">Quand le lecteur Twitch s'arrête sur une erreur, StreamPulse clique « Réessayer » pour toi, puis recharge l'onglet si ça ne suffit pas.</span>
+            </span>
+            <input id="pref-auto-refresh" type="checkbox" role="switch" />
+          </label>
+        </section>
+
+        <!-- Aperçus -->
+        <section class="menu-panel" id="menu-previews" role="tabpanel" aria-labelledby="menu-tab-previews" hidden>
+          <h2 data-i18n="popup.osd.previewsTitle">Aperçus au survol</h2>
+
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.osd.previewsTitle">Aperçus au survol</span>
+              <span class="settings-description" data-i18n="popup.settings.previewsEnableDescription">Affiche un aperçu du live quand tu survoles une chaîne ou un clip sur Twitch.</span>
+            </span>
+            <input id="pref-previews-enabled" type="checkbox" role="switch" />
+          </label>
+
+          <div id="previews-sub">
+            <div class="settings-row">
+              <span class="settings-title" id="previews-mode-label" data-i18n="popup.settings.previewsModeTitle">Mode d'aperçu</span>
+              <div class="segmented seg-group" id="previews-mode-group" role="group" aria-labelledby="previews-mode-label">
+                <button type="button" class="seg-btn" aria-pressed="false" data-previews-mode="image" data-i18n="popup.settings.previewsModeImage">Image</button>
+                <button type="button" class="seg-btn" aria-pressed="false" data-previews-mode="video" data-i18n="popup.settings.previewsModeVideo">Vidéo</button>
+              </div>
+            </div>
+
+            <label class="settings-toggle">
+              <span class="settings-text">
+                <span class="settings-title" data-i18n="popup.settings.previewsAudioTitle">Audio (mode vidéo)</span>
+                <span class="settings-description" data-i18n="popup.settings.previewsAudioDescription">Joue le son dans les aperçus en mode Vidéo.</span>
+              </span>
+              <input id="pref-previews-audio" type="checkbox" role="switch" />
+            </label>
+
+            <div class="field-stack">
+              <span class="settings-title" data-i18n="popup.settings.previewsSurfacesTitle">Afficher sur</span>
+              <div class="previews-surfaces">
+                <label class="chip-check"><input type="checkbox" id="pref-previews-directory" /><span data-i18n="popup.settings.previewsSurfaceDirectory">Répertoire</span></label>
+                <label class="chip-check"><input type="checkbox" id="pref-previews-sidebar" /><span data-i18n="popup.osd.previewsSidebar">Barre latérale</span></label>
+                <label class="chip-check"><input type="checkbox" id="pref-previews-clips" /><span data-i18n="popup.settings.previewsSurfaceClips">Clips</span></label>
+                <label class="chip-check"><input type="checkbox" id="pref-previews-search" /><span data-i18n="popup.settings.previewsSurfaceSearch">Recherche</span></label>
+              </div>
+            </div>
+
+            <details class="settings-advanced">
+              <summary data-i18n="popup.settings.advancedGroup">Avancé</summary>
+              <div class="settings-advanced-body">
+                <div class="settings-row">
+                  <span class="settings-title" id="previews-size-label" data-i18n="popup.settings.previewsSizeTitle">Taille</span>
+                  <div class="segmented seg-group" id="previews-size-group" role="group" aria-labelledby="previews-size-label">
+                    <button type="button" class="seg-btn" aria-pressed="false" data-previews-size="s" data-i18n="popup.osd.sizeS">Petit</button>
+                    <button type="button" class="seg-btn" aria-pressed="false" data-previews-size="m" data-i18n="popup.osd.sizeM">Moyen</button>
+                    <button type="button" class="seg-btn" aria-pressed="false" data-previews-size="l" data-i18n="popup.osd.sizeL">Grand</button>
+                  </div>
+                </div>
+
+                <div class="field-stack">
+                  <div class="field-head">
+                    <label class="settings-title" for="pref-previews-delay" data-i18n="popup.settings.previewsDelayTitle">Délai d'apparition</label>
+                    <span class="field-value"><span id="previews-delay-value">200</span> ms</span>
+                  </div>
+                  <input id="pref-previews-delay" type="range" min="0" max="800" step="50" value="200" class="settings-range" />
+                </div>
+
+                <label class="settings-toggle">
+                  <span class="settings-text">
+                    <span class="settings-title" data-i18n="popup.settings.previewsAnimationsTitle">Animations</span>
+                    <span class="settings-description" data-i18n="popup.settings.previewsAnimationsDescription">Fait apparaître et disparaître l'aperçu en douceur. Désactive pour un affichage immédiat.</span>
+                  </span>
+                  <input id="pref-previews-animations" type="checkbox" role="switch" />
+                </label>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- Chat -->
+        <section class="menu-panel" id="menu-chat" role="tabpanel" aria-labelledby="menu-tab-chat" hidden>
+          <h2 data-i18n="popup.osd.menuChat">Chat</h2>
+
+          <p class="settings-note" data-i18n="popup.settings.chatAutoSaveNote">C'est enregistré dès que tu quittes le champ.</p>
+          <div class="field-stack">
+            <label class="settings-title" for="pref-chat-keywords" data-i18n="onboarding.chatFilterTitle">Mots-clés masqués</label>
+            <span class="settings-description" data-i18n="popup.settings.chatFilterDescription">Masque dans le chat Twitch et Kick les messages qui contiennent ces mots (séparés par des virgules).</span>
+            <textarea id="pref-chat-keywords" rows="3" class="settings-textarea" placeholder="Ex : spoiler, mot1, mot2" data-i18n-attr-placeholder="onboarding.chatFilterPlaceholder"></textarea>
+          </div>
+
+          <div class="field-stack">
+            <label class="settings-title" for="pref-blocked-users" data-i18n="onboarding.blockedUsersTitle">Utilisateurs masqués</label>
+            <span class="settings-description" data-i18n="onboarding.blockedUsersDescription">Masque dans le chat Twitch et Kick les messages de ces utilisateurs (séparés par des virgules).</span>
+            <textarea id="pref-blocked-users" rows="3" class="settings-textarea" placeholder="bot, spammer" data-i18n-attr-placeholder="onboarding.blockedUsersPlaceholder"></textarea>
+          </div>
+          <p class="settings-description dependency-status" id="chat-save-status" role="status"></p>
+        </section>
+
+        <!-- Onglets -->
+        <section class="menu-panel" id="menu-tabs" role="tabpanel" aria-labelledby="menu-tab-tabs" hidden>
+          <h2 data-i18n="popup.osd.groupTabs">Onglets</h2>
+
           <label class="settings-toggle">
             <span class="settings-text">
               <span class="settings-title" data-i18n="popup.settings.streamerFaviconTitle">Avatar du streamer sur l'onglet</span>
@@ -422,227 +749,21 @@
             </span>
             <input id="pref-enable-tab-live-icon" type="checkbox" role="switch" />
           </label>
-        </section>
-
-        <!-- Lecteur -->
-        <section class="menu-panel" id="menu-player" role="tabpanel" aria-labelledby="menu-tab-player" hidden>
-          <h2 data-i18n="popup.osd.menuPlayer">Lecteur</h2>
-
           <label class="settings-toggle">
             <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.keepQualityTitle">Garder la qualité en arrière-plan</span>
-              <span class="settings-description" data-i18n="popup.settings.keepQualityDescription">Empêcher Twitch de baisser la qualité quand l'onglet n'est pas affiché.</span>
+              <span class="settings-title" data-i18n="popup.settings.preventTabDiscardTitle">Empêcher la mise en veille de l'onglet</span>
+              <span class="settings-description" data-i18n="popup.settings.preventTabDiscardDescription">Empêche Chrome de mettre en veille les pages de chaîne Twitch et Kick, pour que les points et les Drops continuent de tomber. Désactivé, les onglets déjà protégés retrouvent leur comportement normal.</span>
             </span>
-            <input id="pref-keep-quality" type="checkbox" role="switch" />
-          </label>
-          <div class="settings-sub-row" id="latency-placement-wrap">
-            <label class="settings-title" for="pref-latency-placement" data-i18n="popup.settings.latencyPlacementLabel">Position de la latence</label>
-            <select id="pref-latency-placement" class="settings-select">
-              <option value="viewers" data-i18n="popup.settings.latencyViewers">Sous le lecteur</option>
-              <option value="chat" data-i18n="popup.settings.latencyChat">Dans l'en-tête du tchat</option>
-            </select>
-          </div>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.fastForwardTitle">Bouton d'avance rapide</span>
-              <span class="settings-description" data-i18n="popup.settings.fastForwardDescription">Ajouter un bouton pour rattraper instantanément le direct.</span>
-            </span>
-            <input id="pref-fast-forward" type="checkbox" role="switch" />
-          </label>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.pipButtonTitle">Bouton Picture-in-Picture</span>
-              <span class="settings-description" data-i18n="popup.settings.pipButtonDescription">Ajouter un bouton au lecteur pour regarder le live dans une mini-fenêtre.</span>
-            </span>
-            <input id="pref-pip-button" type="checkbox" role="switch" />
-          </label>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.autoRefreshTitle">Relancer le lecteur en cas d'erreur</span>
-              <span class="settings-description" data-i18n="popup.settings.autoRefreshDescription">Cliquer « Réessayer » à votre place sur les erreurs #1000 à #5000, et recharger l'onglet si cela ne suffit pas.</span>
-            </span>
-            <input id="pref-auto-refresh" type="checkbox" role="switch" />
-          </label>
-          <div class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.playerQualityTitle">Qualité du lecteur</span>
-              <span class="settings-description" data-i18n="popup.settings.playerQualityDescription">Ouvrir chaque live dans cette qualité. Auto laisse Twitch décider.</span>
-            </span>
-            <select id="pref-player-quality" class="settings-select" data-i18n-attr-ariaLabel="popup.settings.playerQualityTitle">
-              <option value="auto" selected data-i18n="popup.settings.playerQualityAuto">Auto</option>
-              <option value="source" data-i18n="popup.settings.playerQualitySource">Source</option>
-              <option value="1440">1440p (2K)</option>
-              <option value="1080">1080p</option>
-              <option value="720">720p</option>
-              <option value="480">480p</option>
-              <option value="360">360p</option>
-            </select>
-          </div>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.hideTwitchExtensionsTitle">Masquer les extensions Twitch</span>
-              <span class="settings-description" data-i18n="popup.settings.hideTwitchExtensionsDescription">Masquer les incrustations d'extensions sur le lecteur vidéo.</span>
-            </span>
-            <input id="pref-hide-twitch-extensions" type="checkbox" role="switch" />
-          </label>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.clipDownloadTitle">Téléchargement des clips</span>
-              <span class="settings-description" data-i18n="popup.settings.clipDownloadDescription">Ajouter un bouton pour enregistrer les clips Twitch en MP4. StreamPulse+.</span>
-            </span>
-            <input id="pref-clip-download" type="checkbox" role="switch" />
+            <input id="pref-prevent-tab-discard" type="checkbox" role="switch" />
           </label>
         </section>
 
-        <!-- Aperçus -->
-        <section class="menu-panel" id="menu-previews" role="tabpanel" aria-labelledby="menu-tab-previews" hidden>
-          <h2 data-i18n="popup.osd.previewsTitle">Aperçus au survol</h2>
+        <!-- Activité : points, temps de visionnage et journal -->
+        <section class="menu-panel points-panel" id="menu-activity" role="tabpanel" aria-labelledby="menu-tab-activity" hidden>
+          <h2 data-i18n="popup.osd.menuActivity">Activité</h2>
 
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.osd.previewsTitle">Aperçus au survol</span>
-              <span class="settings-description" data-i18n="popup.settings.previewsEnableDescription">Affiche un aperçu du live en survolant une chaîne ou un clip.</span>
-            </span>
-            <input id="pref-previews-enabled" type="checkbox" role="switch" />
-          </label>
-
-          <div class="settings-row">
-            <span class="settings-title" id="previews-mode-label" data-i18n="popup.settings.previewsModeTitle">Mode d'aperçu</span>
-            <div class="segmented seg-group" id="previews-mode-group" role="group" aria-labelledby="previews-mode-label">
-              <button type="button" class="seg-btn" aria-pressed="false" data-previews-mode="image" data-i18n="popup.settings.previewsModeImage">Image</button>
-              <button type="button" class="seg-btn" aria-pressed="false" data-previews-mode="video" data-i18n="popup.settings.previewsModeVideo">Vidéo</button>
-            </div>
-          </div>
-
-          <div class="settings-row">
-            <span class="settings-title" id="previews-size-label" data-i18n="popup.settings.previewsSizeTitle">Taille</span>
-            <div class="segmented seg-group" id="previews-size-group" role="group" aria-labelledby="previews-size-label">
-              <button type="button" class="seg-btn" aria-pressed="false" data-previews-size="s" data-i18n="popup.osd.sizeS">Petit</button>
-              <button type="button" class="seg-btn" aria-pressed="false" data-previews-size="m" data-i18n="popup.osd.sizeM">Moyen</button>
-              <button type="button" class="seg-btn" aria-pressed="false" data-previews-size="l" data-i18n="popup.osd.sizeL">Grand</button>
-            </div>
-          </div>
-
-          <div class="field-stack">
-            <span class="settings-title" data-i18n="popup.settings.previewsSurfacesTitle">Afficher sur</span>
-            <div class="previews-surfaces">
-              <label class="chip-check"><input type="checkbox" id="pref-previews-directory" /><span data-i18n="popup.settings.previewsSurfaceDirectory">Répertoire</span></label>
-              <label class="chip-check"><input type="checkbox" id="pref-previews-sidebar" /><span data-i18n="popup.osd.previewsSidebar">Barre latérale</span></label>
-              <label class="chip-check"><input type="checkbox" id="pref-previews-clips" /><span data-i18n="popup.settings.previewsSurfaceClips">Clips</span></label>
-              <label class="chip-check"><input type="checkbox" id="pref-previews-search" /><span data-i18n="popup.settings.previewsSurfaceSearch">Recherche</span></label>
-            </div>
-          </div>
-
-          <div class="field-stack">
-            <div class="field-head">
-              <label class="settings-title" for="pref-previews-delay" data-i18n="popup.settings.previewsDelayTitle">Délai d'apparition</label>
-              <span class="field-value"><span id="previews-delay-value">200</span> ms</span>
-            </div>
-            <input id="pref-previews-delay" type="range" min="0" max="800" step="50" value="200" class="settings-range" />
-          </div>
-
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.previewsAudioTitle">Audio (mode vidéo)</span>
-              <span class="settings-description" data-i18n="popup.settings.previewsAudioDescription">Activer le son dans les aperçus vidéo.</span>
-            </span>
-            <input id="pref-previews-audio" type="checkbox" role="switch" />
-          </label>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.previewsAnimationsTitle">Animations</span>
-            </span>
-            <input id="pref-previews-animations" type="checkbox" role="switch" />
-          </label>
-        </section>
-
-        <!-- Chat -->
-        <section class="menu-panel" id="menu-chat" role="tabpanel" aria-labelledby="menu-tab-chat" hidden>
-          <h2 data-i18n="popup.osd.menuChat">Chat</h2>
-
-          <div class="field-stack">
-            <label class="settings-title" for="pref-chat-keywords" data-i18n="onboarding.chatFilterTitle">Filtre de chat (Anti-Spoiler)</label>
-            <span class="settings-description" data-i18n="popup.settings.chatFilterDescription">Mots-clés à masquer (séparés par des virgules).</span>
-            <textarea id="pref-chat-keywords" rows="3" class="settings-textarea" placeholder="Ex : spoiler, mot1, mot2" data-i18n-attr-placeholder="onboarding.chatFilterPlaceholder"></textarea>
-            <div class="field-actions">
-              <button id="save-chat-filter" class="button button-quiet" type="button" data-i18n="popup.actions.saveChatFilter">Enregistrer le filtre</button>
-            </div>
-          </div>
-
-          <div class="field-stack">
-            <label class="settings-title" for="pref-blocked-users" data-i18n="onboarding.blockedUsersTitle">Utilisateurs masqués</label>
-            <span class="settings-description" data-i18n="onboarding.blockedUsersDescription">Masquer les messages d'utilisateurs spécifiques (séparés par des virgules).</span>
-            <textarea id="pref-blocked-users" rows="3" class="settings-textarea" placeholder="bot, spammer" data-i18n-attr-placeholder="onboarding.blockedUsersPlaceholder"></textarea>
-            <div class="field-actions">
-            </div>
-          </div>
-        </section>
-
-        <!-- Temps et données -->
-        <section class="menu-panel" id="menu-data" role="tabpanel" aria-labelledby="menu-tab-data" hidden>
-          <h2 data-i18n="popup.osd.menuData">Temps et données</h2>
-
-          <div class="watch-time-section">
-            <div class="panel-head">
-              <h3 class="settings-group-header" data-i18n="popup.settings.groupWatchTime">Temps de visionnage</h3>
-              <select id="watch-time-month" class="settings-select" data-i18n-attr-ariaLabel="popup.osd.monthLabel"></select>
-            </div>
-            <div class="watch-time-totals" id="watch-time-totals">
-              <div class="wt-total-item">
-                <span class="wt-total-value" id="wt-total-time">--</span>
-                <span class="wt-total-label" data-i18n="popup.watchTime.totalTime">Temps total</span>
-              </div>
-              <div class="wt-total-item">
-                <span class="wt-total-value" id="wt-total-channels">--</span>
-                <span class="wt-total-label" data-i18n="popup.watchTime.totalChannels">Chaînes</span>
-              </div>
-            </div>
-            <h4 class="list-caption" data-i18n="popup.watchTime.topWatched">Les plus regardés</h4>
-            <ol id="wt-top-watched" class="wt-ranking"></ol>
-            <p class="wt-empty-state hidden" id="wt-empty" data-i18n="popup.watchTime.empty">Aucune donnée ce mois-ci.</p>
-            </div>
-
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.osd.watchTimeTitle">Suivi du temps de visionnage</span>
-              <span class="settings-description" data-i18n="popup.settings.watchTimeDescription">Suivi du temps passé sur chaque chaîne.</span>
-            </span>
-            <input id="pref-watch-time" type="checkbox" role="switch" />
-          </label>
-
-          <h3 class="settings-group-header" data-i18n="popup.osd.pointsTitle">Points de chaîne récupérés</h3>
-          <div class="settings-row stats-container">
-            <span class="stat-value" id="stat-points">--</span>
-            <button id="btn-reset-stats" class="button button-quiet" type="button" data-i18n="popup.osd.resetPoints">Remettre à zéro</button>
-          </div>
-
-          <h3 class="settings-group-header" data-i18n="popup.settings.groupEventLog">Journal d'événements</h3>
-          <div class="log-toolbar">
-            <div class="segmented log-filter-group" id="log-filter-group" role="group" data-i18n-attr-ariaLabel="popup.settings.groupEventLog">
-              <button type="button" class="pf-btn active" aria-pressed="true" data-log-filter="all" data-i18n="popup.settings.logFilterAll">Tous</button>
-              <button type="button" class="pf-btn" aria-pressed="false" data-log-filter="drop" data-i18n="popup.osd.logDrops">Drops</button>
-              <button type="button" class="pf-btn" aria-pressed="false" data-log-filter="moment" data-i18n="popup.osd.logMoments">Moments</button>
-              <button type="button" class="pf-btn" aria-pressed="false" data-log-filter="raid" data-i18n="popup.osd.logRaids">Raids</button>
-            </div>
-            <button id="btn-clear-logs" type="button" class="button button-link-danger" data-i18n="popup.settings.logClear">Effacer</button>
-          </div>
-          <div id="logs-container" class="log-list">
-            <p class="empty-state" data-i18n="popup.settings.logEmpty">Aucun événement enregistré.</p>
-          </div>
-
-          <h3 class="settings-group-header" data-i18n="backup.title">Sauvegarde</h3>
-          <div class="backup-block">
-            <p class="settings-description" data-i18n="backup.description">Téléchargez un fichier avec vos streamers, réglages, statistiques et temps de visionnage.</p>
-            <div class="data-actions">
-              <button id="btn-export" class="button button-quiet" type="button" data-i18n="backup.export">Sauvegarder mes données</button>
-              <button id="btn-import" class="button button-quiet" type="button" data-i18n="backup.import">Restaurer une sauvegarde</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="menu-panel points-panel" id="menu-points" role="tabpanel" aria-labelledby="menu-tab-points" hidden>
+          <h3 class="settings-group-header" data-i18n="popup.settings.pointsCounterTitle">Points de chaîne gagnés</h3>
           <div class="pts-head">
-            <h2 data-i18n="popup.points.title">Points</h2>
             <div class="segmented" id="points-period" role="group" data-i18n-attr-ariaLabel="popup.points.periodLabel">
               <button type="button" class="pf-btn" aria-pressed="false" data-period="today" data-i18n="popup.points.periodToday">Aujourd'hui</button>
               <button type="button" class="pf-btn active" aria-pressed="true" data-period="7d" data-i18n="popup.points.period7d">7 jours</button>
@@ -657,11 +778,11 @@
               <p class="pts-lcd-meta" id="points-meta"></p>
             </div>
             <div class="pts-tiles" id="points-reasons" hidden></div>
-            <h4 class="list-caption pts-caption"><span data-i18n="popup.points.byChannel">Par chaîne</span><span class="pts-hint" id="points-click-hint" data-i18n="popup.points.clickHint" hidden>Clique sur une chaîne pour le détail</span></h4>
+            <h3 class="list-caption pts-caption"><span data-i18n="popup.points.byChannel">Par chaîne</span><span class="pts-hint" id="points-click-hint" data-i18n="popup.points.clickHint" hidden>Clique sur une chaîne pour le détail</span></h3>
             <ol class="pts-list" id="points-channels"></ol>
-            <p class="wt-empty-state" id="points-empty" data-i18n="popup.points.empty" hidden>Aucun gain de points sur cette période.</p>
+            <p class="wt-empty-state" id="points-empty" data-i18n="popup.points.empty" hidden>Aucun gain de points sur cette période. Regarde un live Twitch avec StreamPulse actif : chaque gain sera compté ici.</p>
             <div class="smart-locked" id="points-locked">
-              <p class="settings-description" data-i18n="popup.points.lockedBody">D'où viennent tes points ? Réservé à StreamPulse+.</p>
+              <p class="settings-description" data-i18n="popup.points.lockedBody">D'où viennent tes points ? Visionnage, bonus, raids, séries, bonus d'abonné, fiche de chaque streamer et journal des gains. Réservé à StreamPulse+.</p>
               <button class="button button-primary" id="points-unlock" type="button" data-i18n="popup.smart.unlock">Débloquer</button>
             </div>
           </div>
@@ -672,16 +793,44 @@
           </div>
 
           <p class="pts-health" id="points-health" role="status"></p>
-          <label class="settings-toggle">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.points.trackingTitle">Suivre les points gagnés</span>
-              <span class="settings-description" data-i18n="popup.points.trackingBody">Actif tant qu'un onglet Twitch est ouvert, sur toutes tes chaînes.</span>
-            </span>
-            <input id="pref-points-tracking" type="checkbox" role="switch" />
-          </label>
           <div class="settings-row">
             <span class="settings-description" id="points-reset-status" role="status"></span>
             <button id="btn-reset-points" class="button button-quiet" type="button" data-i18n="popup.points.reset">Remettre à zéro</button>
+          </div>
+
+          <h3 class="settings-group-header" data-i18n="popup.settings.groupWatchTime">Temps de visionnage</h3>
+          <div class="watch-time-section">
+            <div class="panel-head">
+              <label class="visually-hidden" for="watch-time-month" data-i18n="popup.osd.monthLabel">Mois affiché</label>
+              <select id="watch-time-month" class="settings-select"></select>
+            </div>
+            <div class="watch-time-totals" id="watch-time-totals">
+              <div class="wt-total-item">
+                <span class="wt-total-value" id="wt-total-time">--</span>
+                <span class="wt-total-label" data-i18n="popup.watchTime.totalTime">Temps total</span>
+              </div>
+              <div class="wt-total-item">
+                <span class="wt-total-value" id="wt-total-channels">--</span>
+                <span class="wt-total-label" data-i18n="popup.watchTime.totalChannels">Chaînes</span>
+              </div>
+            </div>
+            <h3 class="list-caption" data-i18n="popup.watchTime.topWatched">Les plus regardés</h3>
+            <ol id="wt-top-watched" class="wt-ranking"></ol>
+            <p class="wt-empty-state hidden" id="wt-empty" data-i18n="popup.watchTime.empty">Aucune donnée ce mois-ci. Regarde un live pour commencer !</p>
+          </div>
+
+          <h3 class="settings-group-header" data-i18n="popup.settings.groupEventLog">Journal d'activité</h3>
+          <div class="log-toolbar">
+            <div class="segmented log-filter-group" id="log-filter-group" role="group" data-i18n-attr-ariaLabel="popup.settings.groupEventLog">
+              <button type="button" class="pf-btn active" aria-pressed="true" data-log-filter="all" data-i18n="popup.settings.logFilterAll">Tous</button>
+              <button type="button" class="pf-btn" aria-pressed="false" data-log-filter="drop" data-i18n="popup.osd.logDrops">Drops</button>
+              <button type="button" class="pf-btn" aria-pressed="false" data-log-filter="moment" data-i18n="popup.osd.logMoments">Moments</button>
+              <button type="button" class="pf-btn" aria-pressed="false" data-log-filter="raid" data-i18n="popup.osd.logRaids">Raids</button>
+            </div>
+            <button id="btn-clear-logs" type="button" class="button button-link-danger" data-i18n="popup.settings.logClear">Effacer</button>
+          </div>
+          <div id="logs-container" class="log-list">
+            <p class="empty-state" data-i18n="popup.settings.logEmpty">Aucun événement enregistré.</p>
           </div>
         </section>
 
@@ -721,8 +870,8 @@
 
           <label class="settings-toggle">
             <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.drops.trackingTitle">Suivre les Drops</span>
-              <span class="settings-description" data-i18n="popup.drops.trackingBody">Progression et récupération même sans onglet Twitch ouvert. La liste des campagnes se met à jour quand tu passes sur Twitch.</span>
+              <span class="settings-title" data-i18n="popup.drops.trackingTitle">Historique des Drops</span>
+              <span class="settings-description" data-i18n="popup.drops.trackingBody">Progression et récupération même sans onglet Twitch ouvert. La Récupération auto des Drops s'appuie sur cet historique ; la liste des campagnes se met à jour quand tu passes sur Twitch.</span>
             </span>
             <input id="pref-drops-tracking" type="checkbox" role="switch" />
           </label>
@@ -730,10 +879,10 @@
 
         <section class="menu-panel drops-panel" id="menu-badges" role="tabpanel" aria-labelledby="menu-tab-badges" hidden>
           <div class="pts-head">
-            <h2 data-i18n="popup.osd.menuBadges">Badges</h2>
+            <h2><span data-i18n="popup.osd.menuBadges">Badges</span><span class="pill-beta" data-i18n="popup.settings.betaLabel">bêta</span></h2>
           </div>
           <div class="pts-lcd badges-lcd" id="badges-teaser" hidden>
-            <p class="pts-lcd-total"><span id="badges-teaser-total">0</span><small data-i18n="popup.drops.badgesUnit">DISPONIBLES</small></p>
+            <p class="pts-lcd-total"><span id="badges-teaser-total">0</span><small data-i18n="popup.drops.badgesUnit">EN COURS</small></p>
             <p class="pts-lcd-meta" id="badges-teaser-meta"></p>
           </div>
           <div class="smart-locked" id="badges-locked">
@@ -742,21 +891,25 @@
           </div>
           <div id="badges-content">
             <div class="pts-lcd badges-lcd">
-              <p class="pts-lcd-total"><span id="badges-total">0</span><small data-i18n="popup.drops.badgesUnit">DISPONIBLES</small></p>
+              <p class="pts-lcd-total"><span id="badges-total">0</span><small data-i18n="popup.drops.badgesUnit">EN COURS</small></p>
               <p class="pts-lcd-meta" id="badges-lcd-meta"></p>
             </div>
             <div class="badges-auto-bar">
               <button class="button button-primary badges-auto-all" id="badges-auto-all" type="button" aria-pressed="false" data-i18n="popup.drops.badgeAutoAll">Récupérer tous les badges possibles</button>
               <p class="badges-auto-status" id="badges-auto-status" role="status" hidden></p>
-              <p class="badges-note" data-i18n="popup.drops.badgeAutoAllHint">Un onglet épinglé et muet regarde un live à la fois : Twitch ne compte qu'un live à la fois. Les paliers d'un même jeu avancent ensemble.</p>
+              <p class="badges-note" data-i18n="popup.drops.badgeAutoAllHint">Un onglet épinglé et muet regarde un live à la fois (Twitch ne compte qu'un live à la fois). Les paliers d'un même jeu (30 min, 1 h, 90 min…) avancent ensemble, puis l'onglet passe au jeu suivant.</p>
             </div>
             <div class="badges-toolbar">
-              <div class="segmented" id="badges-filters" role="group" data-i18n-attr-ariaLabel="popup.drops.allBadges">
-                <button type="button" class="pf-btn active" aria-pressed="true" data-filter="all"><span data-i18n="popup.drops.filterAll">Toutes</span><em data-count="all"></em></button>
-                <button type="button" class="pf-btn" aria-pressed="false" data-filter="free"><span data-i18n="popup.drops.badgeFilterFree">Gratuits</span><em data-count="free"></em></button>
-                <button type="button" class="pf-btn" aria-pressed="false" data-filter="paid"><span data-i18n="popup.drops.badgeFilterPaid">Payants</span><em data-count="paid"></em></button>
-                <button type="button" class="pf-btn" aria-pressed="false" data-filter="missing"><span data-i18n="popup.drops.badgeFilterMissing">À obtenir</span><em data-count="missing"></em></button>
+              <div class="segmented" id="badges-filters" role="group" data-i18n-attr-ariaLabel="popup.drops.badgeStatusLabel">
+                <button type="button" class="pf-btn active" aria-pressed="true" data-filter="live"><span data-i18n="popup.drops.badgeFilterLive">En cours</span><em data-count="live"></em></button>
+                <button type="button" class="pf-btn" aria-pressed="false" data-filter="soon"><span data-i18n="popup.drops.badgeFilterSoon">À venir</span><em data-count="soon"></em></button>
+                <button type="button" class="pf-btn" aria-pressed="false" data-filter="ended"><span data-i18n="popup.drops.badgeFilterEnded">Terminés</span><em data-count="ended"></em></button>
                 <button type="button" class="pf-btn" aria-pressed="false" data-filter="owned"><span data-i18n="popup.drops.badgeFilterOwned">Obtenus</span><em data-count="owned"></em></button>
+              </div>
+              <div class="segmented" id="badges-cost" role="group" data-i18n-attr-ariaLabel="popup.drops.badgeCostLabel">
+                <button type="button" class="pf-btn active" aria-pressed="true" data-cost="all"><span data-i18n="popup.drops.badgeCostAll">Tous</span></button>
+                <button type="button" class="pf-btn" aria-pressed="false" data-cost="free"><span data-i18n="popup.drops.badgeFilterFree">Gratuits</span></button>
+                <button type="button" class="pf-btn" aria-pressed="false" data-cost="paid"><span data-i18n="popup.drops.badgeFilterPaid">Payants</span></button>
               </div>
               <label class="badges-search">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -764,10 +917,12 @@
                 <input id="badges-search" type="search" autocomplete="off" spellcheck="false" data-i18n-attr-placeholder="popup.drops.searchBadges" placeholder="Chercher un badge" />
               </label>
             </div>
+            <p class="badges-sort" id="badges-sort"></p>
             <ul class="badge-grid" id="badges-catalog"></ul>
-            <p class="drops-empty" id="badges-catalog-empty" data-i18n="popup.drops.noBadgeMatch" hidden>Aucun badge ne correspond.</p>
+            <p class="drops-empty" id="badges-catalog-empty" hidden></p>
             <button id="badges-more" class="button button-quiet" type="button" data-i18n="popup.drops.showMore" hidden>Voir plus</button>
-            <p class="badges-note" data-i18n="popup.drops.catalogNote">Seuls les badges obtenables en ce moment sont listés. Clique sur un badge pour ouvrir un live où le gagner.</p>
+            <p class="badges-note" data-i18n="popup.drops.catalogNote">Les dates viennent des campagnes Twitch, relues dès qu'un onglet Twitch est ouvert. Clique sur un badge en cours pour ouvrir un live où le gagner.</p>
+            <p class="badges-note" id="badges-campaigns-note" role="status"></p>
             <p class="badges-note" id="drops-badges-sync" role="status"></p>
             <div hidden>
               <ul id="drops-rewards"></ul><small id="drops-rewards-meta"></small><p id="drops-rewards-empty"></p>
@@ -776,19 +931,27 @@
           </div>
         </section>
 
-        <section class="menu-panel" id="menu-identity" role="tabpanel" aria-labelledby="menu-tab-identity">
-          <h2 data-i18n="popup.osd.menuIdentity">Pseudo et badge</h2>
+        <section class="menu-panel" id="menu-identity" role="tabpanel" aria-labelledby="menu-tab-identity" hidden>
+          <h2 data-i18n="popup.osd.menuIdentity">Profil et badge</h2>
           <p class="settings-description" data-i18n="popup.identity.intro">L'apparence de ton badge StreamPulse et de ton pseudo dans le chat Twitch, visible par les autres utilisateurs de StreamPulse.</p>
           <p class="identity-rank" id="identity-rank" role="status" hidden></p>
+          <div class="field-stack pseudo-field">
+            <label class="settings-title" for="pref-pseudo-input" data-i18n="popup.settings.pseudoTitle">Ton pseudo</label>
+            <span class="settings-description" data-i18n="popup.settings.pseudoDescription">Utilisé dans le message d'accueil.</span>
+            <div class="pseudo-row">
+              <input id="pref-pseudo-input" class="text-input" type="text" maxlength="25" autocomplete="off" autocapitalize="none" spellcheck="false" data-i18n-attr-placeholder="popup.settings.pseudoPlaceholder" placeholder="Ton pseudo" />
+              <button id="pref-pseudo-save" class="button button-quiet" type="button" data-i18n="popup.settings.pseudoSave">Enregistrer</button>
+            </div>
+          </div>
           <label class="settings-toggle">
             <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.communityBadgeTitle">Badge communautaire</span>
-              <span class="settings-description" data-i18n="popup.settings.communityBadgeDescription">Affiche l'icône StreamPulse à côté des pseudos des utilisateurs dans le tchat Twitch.</span>
+              <span class="settings-title"><span data-i18n="popup.settings.communityBadgeTitle">Badge communautaire</span><span class="pill-beta" data-i18n="popup.settings.betaLabel">bêta</span></span>
+              <span class="settings-description" data-i18n="popup.settings.communityBadgeDescription">Affiche l'icône StreamPulse à côté de ton pseudo et de celui des autres utilisateurs de StreamPulse dans le chat Twitch. Une empreinte de ton pseudo, calculée dans ton navigateur, est envoyée à streampulse.fr ; le pseudo lui-même n'est jamais transmis.</span>
             </span>
             <input id="pref-community-badge" type="checkbox" role="switch" />
           </label>
           <div class="cosmetic-preview identity-preview">
-            <span class="cosmetic-preview-label" data-i18n="popup.cosmetics.preview">Aperçu dans le tchat</span>
+            <span class="cosmetic-preview-label" data-i18n="popup.cosmetics.preview">Aperçu dans le chat</span>
             <span class="cosmetic-line" aria-hidden="true"><span class="cosmetic-badge" id="cosmetic-badge"></span><span class="cosmetic-tile" id="cosmetic-tile"><span class="cosmetic-badge"></span></span><b class="cosmetic-name" id="cosmetic-name" data-i18n="popup.cosmetics.sampleName">TonPseudo</b><span class="cosmetic-msg">: gg !</span></span>
           </div>
           <div class="look-head">
@@ -809,7 +972,7 @@
           <div class="fx-picker is-list" id="cosmetic-name-fx" role="radiogroup" data-i18n-attr-ariaLabel="popup.cosmetics.tabName"></div>
         </section>
 
-        <!-- StreamPulse+ -->
+        <!-- StreamPulse+ : compte et licence -->
         <section class="menu-panel" id="menu-plus" role="tabpanel" aria-labelledby="menu-tab-plus" hidden>
           <h2 data-i18n="popup.osd.menuPlus">StreamPulse+</h2>
 
@@ -821,7 +984,7 @@
 
           <h3 class="settings-group-header" data-i18n="popup.referral.title">Parrainage</h3>
           <div class="referral" id="referral-block">
-            <p class="settings-description" data-i18n="popup.referral.body">Partage ton code : ton ami a 2,99 € offerts. Toi, tu touches 1 € par mois tant qu'il reste abonné, ou 5 € d'un coup s'il prend la formule à vie, versés sur PayPal.</p>
+            <p class="settings-description" data-i18n="popup.referral.body">Partage ton code : ton ami a 2,99 € offerts (1er mois gratuit, ou la formule à vie à 16 €). Toi, tu touches 1 € par mois tant qu'il reste abonné, ou 5 € d'un coup s'il prend la formule à vie, versés sur PayPal.</p>
             <div class="referral-row">
               <span class="referral-code" id="referral-code" hidden></span>
               <button class="button button-quiet" id="referral-copy" type="button" data-i18n="popup.referral.copy" hidden>Copier</button>
@@ -846,67 +1009,11 @@
             </div>
             <ol class="referral-tiers" id="referral-tiers"></ol>
           </div>
-
-          <h3 class="settings-group-header smart-head"><span data-i18n="popup.smart.title">Alertes intelligentes</span></h3>
-          <div class="smart-locked" id="smart-locked">
-            <p class="settings-description" data-i18n="popup.smart.lockedBody">Choisis quand être prévenu : un jeu précis, un mot dans le titre, un nombre de viewers. Réservé à StreamPulse+.</p>
-            <button class="button button-primary" id="smart-unlock" type="button" data-i18n="popup.smart.unlock">Débloquer</button>
-          </div>
-          <div class="smart-editor" id="smart-editor" hidden>
-            <p class="settings-description" data-i18n="popup.smart.replacesNote">Tant qu'un streamer a une règle active, elle remplace son alerte classique.</p>
-            <div class="smart-layout">
-              <ul class="smart-streamers" id="smart-streamers" data-i18n-attr-ariaLabel="popup.smart.streamersLabel" aria-label="Streamers"></ul>
-              <div class="smart-rules" id="smart-rules"></div>
-            </div>
-          </div>
-
-          <h3 class="settings-group-header smart-head"><span data-i18n="popup.pred.title">Prédictions assistées</span></h3>
-          <div class="smart-locked" id="pred-locked">
-            <p class="settings-description" data-i18n="popup.pred.lockedBody">Mise automatique selon ta règle, historique de tes paris et taux de réussite. Réservé à StreamPulse+.</p>
-            <button class="button button-primary" id="pred-unlock" type="button" data-i18n="popup.smart.unlock">Débloquer</button>
-          </div>
-          <div class="pred-editor" id="pred-editor" hidden>
-            <label class="settings-toggle">
-              <span class="settings-text">
-                <span class="settings-title" data-i18n="popup.pred.autoTitle">Miser automatiquement</span>
-                <span class="settings-description" data-i18n="popup.pred.autoBody">StreamPulse mise quelques secondes avant la fin de chaque prédiction, sur la chaîne ouverte dans un onglet Twitch.</span>
-              </span>
-              <input id="pred-enabled" type="checkbox" role="switch" />
-            </label>
-            <div class="settings-row">
-              <label class="settings-title" for="pred-strategy" data-i18n="popup.pred.strategy">Option choisie</label>
-              <select id="pred-strategy" class="settings-select">
-                <option value="majority" data-i18n="popup.pred.majority">La plus jouée</option>
-                <option value="underdog" data-i18n="popup.pred.underdog">La moins jouée (meilleure cote)</option>
-              </select>
-            </div>
-            <div class="pred-numbers">
-              <label class="pred-field"><span data-i18n="popup.pred.percent">Mise (% du solde)</span><input id="pred-percent" class="text-input" type="number" min="1" max="50" step="1" inputmode="numeric" /></label>
-              <label class="pred-field"><span data-i18n="popup.pred.max">Mise maximum</span><input id="pred-max" class="text-input" type="number" min="10" step="50" inputmode="numeric" /></label>
-              <label class="pred-field"><span data-i18n="popup.pred.reserve">Toujours garder</span><input id="pred-reserve" class="text-input" type="number" min="0" step="100" inputmode="numeric" /></label>
-            </div>
-            <dl class="pred-stats">
-              <div><dt data-i18n="popup.pred.bets">Paris</dt><dd id="pred-stat-bets">0</dd></div>
-              <div><dt data-i18n="popup.pred.rate">Réussite</dt><dd id="pred-stat-rate">–</dd></div>
-              <div><dt data-i18n="popup.pred.net">Gain net</dt><dd id="pred-stat-net">0</dd></div>
-            </dl>
-            <ol class="pred-history" id="pred-history"></ol>
-            <p class="settings-description" data-i18n="popup.pred.note">Résultats estimés d'après l'évolution de ton solde de points.</p>
-          </div>
-
-          <h3 class="settings-group-header" data-i18n="popup.plusMenu.groupRecap">Récap avancé</h3>
-          <div class="settings-row">
-            <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.plusMenu.recapTitle">Récap avancé et Wrapped annuel</span>
-              <span class="settings-description" data-i18n="popup.plusMenu.recapBody">Heures par catégorie, courbe d'activité et ton année entière.</span>
-            </span>
-            <button class="button button-quiet" id="plus-menu-recap" type="button" data-i18n="popup.plusMenu.openRecap">Ouvrir mon récap</button>
-          </div>
         </section>
 
-        <!-- Général et aide -->
+        <!-- Général -->
         <section class="menu-panel" id="menu-general" role="tabpanel" aria-labelledby="menu-tab-general" hidden>
-          <h2 data-i18n="popup.osd.menuGeneral">Général et aide</h2>
+          <h2 data-i18n="popup.osd.menuGeneral">Général</h2>
 
           <div class="settings-row">
             <span class="settings-title" id="theme-label" data-i18n="popup.osd.themeTitle">Thème</span>
@@ -915,7 +1022,6 @@
               <button class="seg-btn theme-toggle-btn" type="button" aria-pressed="false" data-theme-value="light" data-i18n="popup.osd.themeLight">Clair</button>
             </div>
           </div>
-
 
           <div class="field-stack">
             <span class="settings-title" data-i18n="popup.settings.languageTitle">Langue de l'extension</span>
@@ -942,6 +1048,47 @@
           </div>
           <button id="layout-reset" class="button button-quiet" type="button" data-i18n="popup.layout.reset">Rétablir l'ordre d'origine</button>
 
+          <h3 class="settings-group-header" data-i18n="popup.settings.dataGroup">Données</h3>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.osd.watchTimeTitle">Compter le temps de visionnage</span>
+              <span class="settings-description" data-i18n="popup.settings.watchTimeDescription">Compte le temps passé sur chaque chaîne Twitch et Kick, pour tes statistiques et ton Récap.</span>
+            </span>
+            <input id="pref-watch-time" type="checkbox" role="switch" />
+          </label>
+          <label class="settings-toggle">
+            <span class="settings-text">
+              <span class="settings-title" data-i18n="popup.settings.syncTitle">Synchroniser entre mes appareils</span>
+              <span class="settings-description" data-i18n="popup.settings.syncDescription">Tes streamers, tes réglages et ta langue suivent le profil de ton navigateur, sans compte ni serveur StreamPulse. Ton temps de visionnage, tes points et tes Drops restent sur cet appareil.</span>
+            </span>
+            <input id="pref-cross-device-sync" type="checkbox" role="switch" />
+          </label>
+          <p class="settings-note" id="sync-status" hidden></p>
+          <h4 class="list-caption backup-caption" data-i18n="backup.title">Sauvegarde</h4>
+          <div class="backup-block">
+            <p class="settings-description" data-i18n="backup.description">Télécharge un fichier avec tes streamers, réglages, statistiques et temps de visionnage, pour les restaurer plus tard ou sur un autre navigateur.</p>
+            <div class="data-actions">
+              <button id="btn-export" class="button button-quiet" type="button" data-i18n="backup.export">Sauvegarder mes données</button>
+              <button id="btn-import" class="button button-quiet" type="button" data-i18n="backup.import">Importer une sauvegarde</button>
+              <button id="btn-export-points-csv" class="button button-quiet" type="button" data-i18n="backup.exportPointsCsv">Exporter les points (CSV)</button>
+              <button id="btn-export-drops-csv" class="button button-quiet" type="button" data-i18n="backup.exportDropsCsv">Exporter les Drops (CSV)</button>
+              <button id="btn-import-csv" class="button button-quiet" type="button" data-i18n="backup.importCsv">Importer un historique (CSV)</button>
+              <input id="csv-file-input" type="file" accept=".csv,text/csv" class="visually-hidden" />
+            </div>
+          </div>
+
+          <h3 class="settings-group-header" data-i18n="popup.settings.resetPrefsTitle">Réinitialiser les réglages</h3>
+          <p class="settings-description" data-i18n="popup.settings.resetPrefsBody">Remet tous les réglages par défaut : notifications, récompenses, lecteur, aperçus. Ta langue et ton thème sont conservés.</p>
+          <div class="settings-row">
+            <span class="settings-description" id="reset-prefs-status" role="status"></span>
+            <button id="btn-reset-preferences" class="button button-quiet" type="button" data-i18n="popup.settings.resetPrefsArm">Réinitialiser</button>
+          </div>
+        </section>
+
+        <!-- Aide -->
+        <section class="menu-panel" id="menu-help" role="tabpanel" aria-labelledby="menu-tab-help" hidden>
+          <h2 data-i18n="popup.osd.menuHelp">Aide</h2>
+
           <h3 class="settings-group-header" data-i18n="popup.settings.groupFaq">Aide et FAQ</h3>
           <div class="faq">
             <details class="faq-item">
@@ -949,21 +1096,21 @@
                 <span data-i18n="popup.settings.faqPointsTitle">Points de chaîne et Drops</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
               </summary>
-              <p class="faq-body" data-i18n="popup.settings.faqPointsBody">StreamPulse clique automatiquement sur le coffre de points de chaîne et réclame vos Drops dès qu'ils apparaissent.</p>
+              <p class="faq-body" data-i18n="popup.settings.faqPointsBody">Sur Twitch, StreamPulse clique sur le coffre de Points de chaîne et récupère tes Drops dès qu'ils sont disponibles, si la Récupération auto correspondante est active.</p>
             </details>
             <details class="faq-item">
               <summary>
                 <span data-i18n="popup.settings.faqPlayerTitle">Lecteur et anti-pause</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
               </summary>
-              <p class="faq-body" data-i18n="popup.settings.faqPlayerBody">Le flux vidéo continue de tourner en arrière-plan sans coupure d'audio.</p>
+              <p class="faq-body" data-i18n="popup.settings.faqPlayerBody">Avec « Garder la qualité en arrière-plan », Twitch ne voit plus que l'onglet est caché : la vidéo et le son continuent sans baisse de qualité.</p>
             </details>
             <details class="faq-item">
               <summary>
                 <span data-i18n="popup.settings.faqPredictionsTitle">Prédictions et Raids</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
               </summary>
-              <p class="faq-body" data-i18n="popup.settings.faqPredictionsBody">Un widget déplaçable s'affiche sur la vidéo pour voter rapidement.</p>
+              <p class="faq-body" data-i18n="popup.settings.faqPredictionsBody">Un widget déplaçable s'affiche sur la vidéo pour voter rapidement. Les redirections de raid sont annulées si l'option est active.</p>
             </details>
           </div>
 
@@ -996,13 +1143,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z"/></svg>
             <span data-i18n="popup.settings.starGithub">Mettre une étoile sur GitHub</span>
           </a>
-
-          <div class="panel-actions">
-            <button id="open-patch-notes" class="button button-quiet" type="button">
-              <span data-i18n="popup.settings.patchNotes">Voir les nouveautés</span>
-              <span class="unread-dot unread-dot-inline" id="patch-notes-dot" hidden></span>
-            </button>
-          </div>
 
           <h3 class="settings-group-header" data-i18n="popup.supportDev">Offrir un Bubble Tea au développeur</h3>
           <div class="link-row">

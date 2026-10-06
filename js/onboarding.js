@@ -18,6 +18,7 @@ import {
   normalizePlatform,
   sanitizeHandle,
 } from "./platforms.js";
+import { DEFAULT_PREFERENCES } from "./preferences-data.js";
 
 /* ── DOM refs ── */
 const form = document.getElementById("onboarding-form");
@@ -48,6 +49,7 @@ const btnNext1 = document.getElementById("btn-next-1");
 const preferenceToggleDefinitions = [
   { element: document.getElementById("onboarding-live-notifications"), key: "liveNotifications" },
   { element: document.getElementById("onboarding-game-alerts"), key: "gameNotifications" },
+  { element: document.getElementById("onboarding-title-alerts"), key: "titleNotifications" },
   { element: document.getElementById("onboarding-sounds"), key: "soundsEnabled" },
   { element: document.getElementById("onboarding-fast-forward"), key: "enableFastForwardButton" },
   { element: document.getElementById("onboarding-hide-extensions"), key: "hideTwitchExtensions" },
@@ -59,6 +61,7 @@ const preferenceToggleDefinitions = [
   { element: document.getElementById("onboarding-streamer-favicon"), key: "enableStreamerFavicon" },
   { element: document.getElementById("onboarding-tab-live-icon"), key: "enableTabLiveIcon" },
   { element: document.getElementById("onboarding-community-badge"), key: "communityBadge" },
+  { element: document.getElementById("onboarding-cross-device-sync"), key: "crossDeviceSync" },
 ];
 
 /**
@@ -66,7 +69,12 @@ const preferenceToggleDefinitions = [
  * absente vaut « non ». Le badge communautaire envoie une empreinte du pseudo,
  * il demande donc un accord explicite ; suivre les raids rapporte des points.
  */
-const OFF_BY_DEFAULT = new Set(["communityBadge", "autoCancelRaids"]);
+// Défauts réels du produit (js/preferences-data.js) : une clé à false dans
+// DEFAULT_PREFERENCES est opt-in — sans réponse du service worker, les
+// interrupteurs reflètent quand même la vérité.
+const OFF_BY_DEFAULT = new Set(
+  Object.keys(DEFAULT_PREFERENCES).filter((key) => DEFAULT_PREFERENCES[key] === false)
+);
 const isEnabled = (preferences, key) => (OFF_BY_DEFAULT.has(key) ? preferences?.[key] === true : preferences?.[key] !== false);
 
 const LANGUAGE_FLAGS = { fr: "🇫🇷", en: "🇬🇧", es: "🇪🇸", "pt-BR": "🇧🇷", de: "🇩🇪", it: "🇮🇹", pl: "🇵🇱", tr: "🇹🇷", ru: "🇷🇺", ja: "🇯🇵", ko: "🇰🇷" };
@@ -712,7 +720,28 @@ function registerEventListeners() {
   });
 
   finishButton?.addEventListener("click", () => {
-    saveUserProfile().finally(() => window.close());
+    // L'étape d'après a déjà dit quoi faire (épingler l'extension) : ce
+    // bouton n'a plus qu'à sauver le profil et fermer l'onglet.
+    saveUserProfile().finally(closeOnboardingTab);
+  });
+}
+
+// window.close() peut être ignoré pour un onglet ouvert par chrome.tabs.create :
+// on ferme alors l'onglet par l'API tabs.
+function closeOnboardingTab() {
+  if (!chrome?.tabs?.getCurrent) {
+    window.close();
+    return;
+  }
+  chrome.tabs.getCurrent((tab) => {
+    if (chrome.runtime.lastError || !tab?.id) {
+      window.close();
+      return;
+    }
+    chrome.tabs.remove(tab.id).catch((error) => {
+      console.warn("[onboarding] fermeture de l'onglet", error);
+      window.close();
+    });
   });
 }
 

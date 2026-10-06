@@ -42,6 +42,12 @@ function el(tag, className = "", text = "") {
   return node;
 }
 
+// Texte tronqué par ellipse : le title rend la version complète au survol.
+function withTitle(node) {
+  node.title = node.textContent;
+  return node;
+}
+
 function button(className, { label = "", icon = "", text = "" } = {}) {
   const node = el("button", className);
   node.type = "button";
@@ -399,7 +405,7 @@ export function renderStage(stage, media, feature, streamer, status, options, ca
   text.append(
     pills,
     el("p", "feature-name", label),
-    el("p", "feature-sub", [active.title || t("popup.card.defaultLiveTitle"), active.game, platformLabel].filter(Boolean).join(" · ")),
+    withTitle(el("p", "feature-sub", [active.title || t("popup.card.defaultLiveTitle"), active.game, platformLabel].filter(Boolean).join(" · "))),
   );
 
   const alerts = el("div", "feature-alerts");
@@ -473,7 +479,13 @@ export function createMiniCard(streamer, status, { selected, pinned }, callbacks
   const who = el("span", "mini-who");
   const text = el("span", "mini-text");
   text.append(el("span", "mini-name", label), el("span", "mini-game", active.game || getPlatformLabel(platformId)));
-  who.append(avatarImage(`mini-avatar ring-${platformId}`, streamer, platformId), text);
+  // L'anneau coloré seul ne suffit pas à dire la plateforme : petit logo en plus.
+  const avatarWrap = el("span", "mini-avatar-wrap");
+  const logo = el("img", "mini-platform");
+  logo.src = platformIcon(platformId);
+  logo.alt = "";
+  avatarWrap.append(avatarImage(`mini-avatar ring-${platformId}`, streamer, platformId), logo);
+  who.append(avatarWrap, text);
   hit.append(who);
   hit.addEventListener("click", () => callbacks.onSelect(streamer.id));
 
@@ -596,7 +608,7 @@ export function createChannelRow(streamer, status, options, callbacks) {
   }
   const name = el("span", "row-name");
   highlight(name, label, query);
-  main.append(name, el("span", "row-meta", rowMeta(active, supported, isLive, viewers, platformLabel)));
+  main.append(name, withTitle(el("span", "row-meta", rowMeta(active, supported, isLive, viewers, platformLabel))));
 
   const state = el("span", `row-state${isLive ? " is-live" : ""}`);
   state.append(el("i"), document.createTextNode(t(isLive ? "popup.cplus.stateLive" : "popup.cplus.stateOffline")));

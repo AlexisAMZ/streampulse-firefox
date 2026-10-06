@@ -59,6 +59,38 @@ const missing = [...refs].filter((f) => !exists(f));
 if (missing.length) missing.forEach((f) => fail(`manifest references a missing file: ${f}`));
 else pass(`all ${refs.size} manifest-referenced files exist`);
 
+// Dépendances des content scripts classiques : un script qui lit un global
+// partagé doit être injecté APRÈS le fichier qui le définit, dans la même
+// entrée (chaque entrée du manifest est un ensemble ordonné indépendant).
+{
+  const SHARED_GLOBALS = [
+    ["StreamPulsePlusRule", "js/inject/plus-rule.js"],
+    ["__SP_DOM__", "js/inject/dom.js"],
+    ["__SP_I18N__", "js/inject/i18n-inline.js"],
+  ];
+  let depIssues = 0;
+  for (const cs of manifest.content_scripts ?? []) {
+    const list = cs.js ?? [];
+    const seen = new Set(list.filter((f, i) => list.indexOf(f) !== i));
+    seen.forEach((f) => { depIssues++; fail(`manifest injects ${f} twice in the same content_scripts entry`); });
+    list.forEach((file, index) => {
+      if (!exists(file)) return;
+      const src = fs.readFileSync(abs(file), "utf8");
+      for (const [globalName, provider] of SHARED_GLOBALS) {
+        // Un accès optionnel (window.X?.) tolère l'absence du global (ex. Kick).
+        const strict = src.split(`${globalName}?.`).join("");
+        if (file === provider || !strict.includes(globalName)) continue;
+        const at = list.indexOf(provider);
+        if (at === -1 || at > index) {
+          depIssues++;
+          fail(`${file} reads window.${globalName} but ${provider} is not injected before it in the same content_scripts entry`);
+        }
+      }
+    });
+  }
+  if (!depIssues) pass("content scripts load the shared globals they read (plus-rule, dom, i18n-inline) first");
+}
+
 // ── 2. i18n ─────────────────────────────────────────────────────────────────
 const locales = fs.readdirSync(abs("_locales")).filter((d) => fs.statSync(abs(`_locales/${d}`)).isDirectory());
 const localeMsgs = {};
@@ -243,45 +275,45 @@ for (const f of jsFiles) {
 }
 if (!syntaxFails) pass(`${jsFiles.length} JS files parse cleanly`);
 
-// ── 3bis. Preferences : DEFAULT_PREFERENCES vs sanitize() ───────────────────
+// ── 3bis. Preferences : DEFAULT_PREFERENCES vs sanitizePreferences() ────────
 // PreferenceStore.set() ecrit `{...DEFAULT_PREFERENCES, ...sanitize(prefs)}`.
-// Toute cle absente de sanitize() est donc silencieusement rabattue sur son
+// Toute cle absente de la coercion est donc silencieusement rabattue sur son
 // defaut a chaque ecriture : le reglage est accepte par le handler, puis perdu,
 // et l'utilisateur ne peut jamais le desactiver. C'est le bug qui a touche
 // dropAlerts / predictionAlerts / raidAlerts en 26.8.9. Ce controle est
-// statique parce que background.js est un service worker sans export.
+// statique : il porte sur js/preferences-data.js, ou DEFAULT_PREFERENCES et
+// sanitizePreferences() vivent ensemble (PreferenceStore.sanitize() n'est plus
+// qu'un delegue, et le module pur est teste par tests/preferences-data.test.mjs).
 {
-  const bgSrc = fs.existsSync(abs("js/background.js"))
-    ? fs.readFileSync(abs("js/background.js"), "utf8")
-    : "";
-  // DEFAULT_PREFERENCES vit desormais dans js/preferences-data.js (module
-  // partage avec la popup) : la parité se verifie entre ce fichier et sanitize().
+  // Le service worker est découpé : js/background.js assemble les modules de js/sw/.
+  const swFiles = ["js/background.js", ...(fs.existsSync(abs("js/sw")) ? fs.readdirSync(abs("js/sw")).filter((f) => f.endsWith(".js")).map((f) => `js/sw/${f}`) : [])];
+  const bgSrc = swFiles.filter((f) => fs.existsSync(abs(f))).map((f) => fs.readFileSync(abs(f), "utf8")).join("\n");
   const defSrc = fs.existsSync(abs("js/preferences-data.js"))
     ? fs.readFileSync(abs("js/preferences-data.js"), "utf8")
     : "";
   const defStart = defSrc.indexOf("export const DEFAULT_PREFERENCES = {");
-  const sanStart = bgSrc.indexOf("static sanitize(preferences");
-  const getStart = bgSrc.indexOf("static async get()", sanStart);
+  const sanStart = defSrc.indexOf("export function sanitizePreferences(preferences");
+  const sanEnd = sanStart === -1 ? -1 : defSrc.indexOf("\n}", sanStart);
 
-  if (defStart === -1 || sanStart === -1 || getStart === -1) {
-    warn("js/preferences-data.js: DEFAULT_PREFERENCES or PreferenceStore.sanitize() not found, preference parity not checked");
+  if (defStart === -1 || sanStart === -1 || sanEnd === -1) {
+    warn("js/preferences-data.js: DEFAULT_PREFERENCES or sanitizePreferences() not found, preference parity not checked");
   } else {
     const defBody = defSrc.slice(defStart, defSrc.indexOf("\n};", defStart));
-    const sanBody = bgSrc.slice(sanStart, getStart);
+    const sanBody = defSrc.slice(sanStart, sanEnd);
     const keysOf = (body, indent) =>
       [...body.matchAll(new RegExp(`^\\s{${indent}}([A-Za-z0-9_]+):`, "gm"))].map((m) => m[1]);
     const defKeys = keysOf(defBody, 2);
-    const sanKeys = new Set(keysOf(sanBody, 6));
+    const sanKeys = new Set(keysOf(sanBody, 4));
     const dropped = defKeys.filter((k) => !sanKeys.has(k));
 
     if (!defKeys.length) {
-      warn("js/background.js: DEFAULT_PREFERENCES parsed as empty, preference parity not checked");
+      warn("js/preferences-data.js: DEFAULT_PREFERENCES parsed as empty, preference parity not checked");
     } else if (dropped.length) {
       dropped.forEach((k) =>
-        fail(`preference "${k}" is in DEFAULT_PREFERENCES but not returned by sanitize(): it cannot be turned off, the write resets it to its default`)
+        fail(`preference "${k}" is in DEFAULT_PREFERENCES but not returned by sanitizePreferences(): it cannot be turned off, the write resets it to its default`)
       );
     } else {
-      pass(`${defKeys.length} preferences survive sanitize(): none silently reset on write`);
+      pass(`${defKeys.length} preferences survive sanitizePreferences(): none silently reset on write`);
     }
 
     // Survivre a sanitize() ne suffit pas : le handler "updatePreferences" ne

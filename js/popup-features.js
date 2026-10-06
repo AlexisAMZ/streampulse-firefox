@@ -23,6 +23,14 @@ import {
 
 const $ = (id) => document.getElementById(id);
 
+// Titre tronqué par ellipse : le title garde la version complète.
+function vodTitle(entry) {
+  const label = [entry.title, entry.game].filter(Boolean).join(" · ") || entry.game || "";
+  const span = node("span", "vod-title", label);
+  span.title = label;
+  return span;
+}
+
 function node(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -97,7 +105,7 @@ function createVodCard(entry) {
   const text = node("span", "vod-text");
   text.append(
     node("span", "vod-name", name),
-    node("span", "vod-title", [entry.title, entry.game].filter(Boolean).join(" · ") || entry.game || ""),
+    vodTitle(entry),
     node("span", "vod-ago", agoLabel(entry.endedAt)),
   );
   info.append(avatar, text);
@@ -138,7 +146,9 @@ export async function renderHistory() {
 
   $("history-count").textContent =
     stats.count === 1 ? t("popup.history.countSingular") : t("popup.history.countPlural", { count: stats.count });
-  $("history-sub").textContent = t("popup.history.summary", { duration: durationLabel(stats.totalSeconds) });
+  const sub = $("history-sub");
+  sub.textContent = t("popup.history.summary", { duration: durationLabel(stats.totalSeconds) });
+  sub.title = sub.textContent;
 
   grid.replaceChildren(...missed.map(createVodCard));
   grid.hidden = missed.length === 0;
@@ -172,8 +182,10 @@ export function plusActive() {
 
 function renderPlus() {
   const active = plusActive();
+  const deviceLimited = plusRecord?.status === "device_limited";
   $("open-plus")?.classList.toggle("is-active", active);
-  if ($("plus-offer")) $("plus-offer").hidden = active;
+  if ($("plus-offer")) $("plus-offer").hidden = active || deviceLimited;
+  if ($("plus-device-limited")) $("plus-device-limited").hidden = !deviceLimited;
   if ($("plus-active")) $("plus-active").hidden = !active;
   if (active && $("plus-active-plan")) {
     const key = plusRecord.licenseKey.replace(/^(SP-[A-Z0-9]{4}).*(.{4})$/, "$1-…-$2");
@@ -187,17 +199,64 @@ function renderPlus() {
   plusListeners.forEach((listener) => listener(active));
 }
 
+// Vue Plus = vraie modale : le reste du popup devient inerte, Tab boucle
+// dans la vue et le focus revient à l'élément qui l'a ouverte.
+const PLUS_FOCUSABLE = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
+let plusOpener = null;
+
+function setBackgroundInert(view, inert) {
+  Array.from(document.body.children).forEach((child) => {
+    if (
+      child === view ||
+      child.id === "toast-container" ||
+      child.tagName === "SCRIPT" ||
+      child.classList.contains("topbar") ||
+      child.tagName === "HEADER"
+    ) return;
+    child.inert = inert;
+  });
+}
+
+function trapPlusFocus(event) {
+  const view = $("plus-view");
+  if (event.key !== "Tab" || !view) return;
+  const focusable = [...view.querySelectorAll(PLUS_FOCUSABLE)].filter((el) => el.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const outside = !view.contains(document.activeElement) || document.activeElement === view;
+  if (event.shiftKey && (document.activeElement === first || outside)) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && (document.activeElement === last || outside)) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
 export function openPlus() {
   const view = $("plus-view");
   if (!view) return;
+  if (!view.classList.contains("hidden")) {
+    closePlus();
+    return;
+  }
+  const active = document.activeElement;
+  plusOpener = active && active !== document.body && !view.contains(active) ? active : null;
   view.classList.remove("hidden");
+  setBackgroundInert(view, true);
   view.tabIndex = -1;
   view.focus({ preventScroll: true });
 }
 
-function closePlus() {
-  $("plus-view")?.classList.add("hidden");
-  $("open-plus")?.focus();
+export function closePlus({ restoreFocus = true } = {}) {
+  const view = $("plus-view");
+  if (!view || view.classList.contains("hidden")) return;
+  view.classList.add("hidden");
+  setBackgroundInert(view, false);
+  const target = plusOpener?.isConnected && plusOpener.offsetParent !== null ? plusOpener : $("open-plus");
+  plusOpener = null;
+  if (restoreFocus) target?.focus();
 }
 
 function showKeyError(key) {
@@ -209,13 +268,14 @@ function showKeyError(key) {
 
 function initPlus() {
   $("open-plus")?.addEventListener("click", openPlus);
-  $("plus-close")?.addEventListener("click", closePlus);
+  $("plus-close")?.addEventListener("click", () => closePlus());
   $("plus-menu-open")?.addEventListener("click", openPlus);
   $("plus-menu-recap")?.addEventListener("click", () => {
     chrome.tabs.create({ url: chrome.runtime.getURL("html/recap.html") }, () => window.close());
   });
   $("plus-view")?.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closePlus();
+    else trapPlusFocus(event);
   });
 
   const plans = document.querySelectorAll(".plus-plan");
@@ -294,6 +354,30 @@ function initPlus() {
   $("plus-manage")?.addEventListener("click", async () => {
     const button = $("plus-manage");
     const error = $("plus-manage-error");
+    if (!plusRecord?.licenseKey || !button) return;
+    button.disabled = true;
+    if (error) error.hidden = true;
+    try {
+      const url = await portalUrl(plusRecord.licenseKey, fetch);
+      if (url) {
+        openTab(url);
+        return;
+      }
+      throw new Error("no_portal");
+    } catch {
+      if (error) {
+        error.textContent = t("popup.plus.manageError");
+        error.hidden = false;
+      }
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  // Limite d'appareils atteinte : même portail, depuis le bandeau dédié.
+  $("plus-manage-devices")?.addEventListener("click", async () => {
+    const button = $("plus-manage-devices");
+    const error = $("plus-manage-devices-error");
     if (!plusRecord?.licenseKey || !button) return;
     button.disabled = true;
     if (error) error.hidden = true;
@@ -643,7 +727,9 @@ function initSmartAlerts() {
 const OPEN_RECHECK_MS = 5 * 60 * 1000;
 
 async function recheckOnOpen() {
-  if (!plusRecord?.licenseKey || plusRecord.status !== "active") return;
+  // device_limited reste contrôlé à chaque ouverture : dès qu'une place est
+  // libérée dans le portail, ce navigateur se réactive tout seul.
+  if (!plusRecord?.licenseKey || !["active", "device_limited"].includes(plusRecord.status)) return;
   const now = Date.now();
   if (now - (Number(plusRecord.checkedAt || plusRecord.verifiedAt) || 0) < OPEN_RECHECK_MS) return;
   const result = await verifyLicense(plusRecord.licenseKey, fetch, now, await getDeviceId(chrome.storage.local));
@@ -651,10 +737,16 @@ async function recheckOnOpen() {
     // eslint-disable-next-line require-atomic-updates -- la dernière vérification fait foi.
     plusRecord = { ...result.record, checkedAt: now };
     await chrome.storage.local.set({ [PLUS_KEY]: plusRecord });
-  } else if (["invalid", "format", "device_limit"].includes(result.error)) {
+  } else if (["invalid", "format"].includes(result.error)) {
     // eslint-disable-next-line require-atomic-updates -- la dernière vérification fait foi.
     plusRecord = null;
     await chrome.storage.local.remove(PLUS_KEY);
+  } else if (result.error === "device_limit") {
+    // La clé reste, avec un statut dédié : l'utilisateur voit POURQUOI c'est
+    // verrouillé au lieu d'un « Débloquer » injustifié, et le portail peut
+    // libérer une place. L'effacer ferait perdre la clé de ce navigateur.
+    plusRecord = { ...plusRecord, status: "device_limited", checkedAt: now };
+    await chrome.storage.local.set({ [PLUS_KEY]: plusRecord });
   } else {
     return;
   }

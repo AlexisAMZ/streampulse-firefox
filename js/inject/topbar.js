@@ -44,7 +44,7 @@
     }
   }
 
-  // Les chaînes vivent dans i18n/translations.js (clés inject.topbar.*) et sont
+  // Les chaînes vivent dans i18n/lang/<code>.js (clés inject.topbar.*) et sont
   // exposées ici par js/inject/i18n-inline.js, chargé avant ce script. Les
   // content scripts étant injectés en scripts classiques, ils ne peuvent pas
   // importer le module ES directement.
@@ -88,7 +88,7 @@
   if (window.__SP_TOPBAR_INSTALLED__) return;
   window.__SP_TOPBAR_INSTALLED__ = true;
 
-  var LOGO_URL = chrome.runtime.getURL("images/photos/logosp.png");
+  var LOGO_URL = chrome.runtime.getURL("images/photos/logosp-128.png");
   // Memes destinations que la carte de soutien du popup.
   var TIP_LINKS = [
     { label: "Revolut", url: "https://revolut.me/alexisamz" },

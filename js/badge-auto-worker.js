@@ -3,8 +3,10 @@
 // suivant quand tous ses badges sont obtenus, et affiche une bannière sur la
 // page. Les Drops prêts sont récupérés par l'alarme habituelle des Drops.
 
-import { BADGE_AUTO_KEY, DROPS_BADGES_KEY, DROPS_CAMPAIGNS_KEY, DROPS_PROGRESS_KEY, badgesFrom, campaignsFrom, catalogBadges, progressFrom } from "./drops-data.js";
+import { BADGE_ADDED_KEY, BADGE_AUTO_KEY, BADGE_EVENTS_KEY, DROPS_BADGES_KEY, DROPS_PROGRESS_KEY, progressFrom } from "./drops-data.js";
+import { addedFrom, badgesFrom, catalogBadges, eventsFrom } from "./badges-data.js";
 import { addJobs, bannerModel, currentGroup, freeBadgeJobs, normalizeAuto, pruneJobs, removeJob } from "./badge-auto.js";
+import { PLUS_KEY, isPlusActive } from "./plus.js";
 
 const channelOf = (url) => (String(url || "").match(/^https:\/\/www\.twitch\.tv\/([a-z0-9_]{2,25})\/?(?:[?#]|$)/i) || [])[1] || "";
 
@@ -13,7 +15,7 @@ const channelOf = (url) => (String(url || "").match(/^https:\/\/www\.twitch\.tv\
  * haut de la page et remplacée à chaque mise à jour. Le bouton Arrêter passe
  * par le service worker.
  */
-export function showAutoBanner(view) {
+function showAutoBanner(view) {
   const ID = "sp-badge-auto-banner";
   document.getElementById(ID)?.remove();
   if (!view) return;
@@ -45,7 +47,7 @@ export function showAutoBanner(view) {
   stop.textContent = view.stop;
   stop.style.cssText = "flex:none;margin-left:auto;padding:7px 12px;border:0;border-radius:10px;background:#E6E3EC;color:#1A0B14;font:800 12px system-ui,sans-serif;cursor:pointer";
   stop.addEventListener("click", () => {
-    chrome.runtime.sendMessage({ type: "badgeAutoStop" }).catch(() => {});
+    chrome.runtime.sendMessage({ type: "badgeAutoStop" }).catch((error) => console.warn("[StreamPulse] arrêt du mode auto :", error?.message || error));
     bar.remove();
   });
   bar.append(dot, body, stop);
@@ -74,6 +76,10 @@ export function createBadgeAuto(deps) {
   const read = async () => normalizeAuto((await chrome.storage.local.get(BADGE_AUTO_KEY))[BADGE_AUTO_KEY]);
   const write = (state) => chrome.storage.local.set({ [BADGE_AUTO_KEY]: state });
 
+  /** Le mode auto des badges est une fonctionnalité Plus : la licence peut
+   * expirer (résiliation, remboursement, grâce dépassée) en cours de route. */
+  const plusActive = async () => isPlusActive((await chrome.storage.local.get(PLUS_KEY))[PLUS_KEY]);
+
   async function tabExists(tabId) {
     if (!tabId) return false;
     try {
@@ -95,7 +101,7 @@ export function createBadgeAuto(deps) {
   }
 
   async function closeTab(tabId) {
-    if (await tabExists(tabId)) await chrome.tabs.remove(tabId).catch(() => {});
+    if (await tabExists(tabId)) await chrome.tabs.remove(tabId).catch(() => {}); // Onglet fermé entre-temps : attendu.
   }
 
   /** Texte de la bannière, dans la langue de l'utilisateur. */
@@ -119,13 +125,13 @@ export function createBadgeAuto(deps) {
   async function paintBanner(state) {
     if (!(await tabExists(state?.tabId))) return;
     const view = await bannerView(state);
-    await chrome.scripting.executeScript({ target: { tabId: state.tabId }, func: showAutoBanner, args: [view] }).catch(() => {});
+    await chrome.scripting.executeScript({ target: { tabId: state.tabId }, func: showAutoBanner, args: [view] }).catch((error) => console.warn("[StreamPulse] bandeau du mode auto :", error?.message || error));
   }
 
-  /** Badges du catalogue avec leur campagne en cours (pour « tous les badges »). */
+  /** Badges en cours avec le Drop qui les donne (pour « tous les badges »). */
   async function catalog() {
-    const stored = await chrome.storage.local.get([DROPS_BADGES_KEY, DROPS_CAMPAIGNS_KEY]);
-    return catalogBadges(badgesFrom(stored), "all", "", { now: Date.now(), campaigns: campaignsFrom(stored).campaigns });
+    const stored = await chrome.storage.local.get([DROPS_BADGES_KEY, BADGE_EVENTS_KEY, BADGE_ADDED_KEY]);
+    return catalogBadges(badgesFrom(stored), { status: "live", now: Date.now(), events: eventsFrom(stored).events, added: addedFrom(stored).added });
   }
 
   /**
@@ -135,6 +141,14 @@ export function createBadgeAuto(deps) {
   const check = () => serial(async () => {
     let state = await read();
     if (!state) return;
+    // Plus inactif : on arrête tout au passage suivant, comme si l'utilisateur
+    // avait arrêté lui-même (état retiré, onglet fermé), et on le dit.
+    if (!(await plusActive())) {
+      await chrome.storage.local.remove(BADGE_AUTO_KEY);
+      await closeTab(state.tabId);
+      await deps.notify("background.notifications.badgeAutoTitle", "background.badgeAuto.stoppedPlus");
+      return;
+    }
     const owned = badgesFrom(await chrome.storage.local.get(DROPS_BADGES_KEY)).owned;
     if (state.mode === "all") state = addJobs(state, freeBadgeJobs(await catalog()));
     const { state: next, obtained } = pruneJobs(state, { owned, now: Date.now() });
@@ -167,6 +181,9 @@ export function createBadgeAuto(deps) {
 
   /** Ajoute un badge à la file (ou lance « tous les badges possibles »). */
   const start = ({ job = null, all = false } = {}) => serial(async () => {
+    // Même garde que l'interface (le volet badges n'apparaît qu'aux abonnés) :
+    // un démarrage direct par message ne doit pas contourner la licence.
+    if (!(await plusActive())) return { started: false, plusRequired: true };
     const previous = await read();
     let state = addJobs(previous, job ? [job] : [], all ? { mode: "all" } : {});
     if (all) state = addJobs(state, freeBadgeJobs(await catalog()));

@@ -1,17 +1,13 @@
 // Drops Twitch dans le popup : bande « Drops en cours » de l'accueil, puce
 // « Drops du jour », et panneau Drops des Réglages (en cours, campagnes et,
 // avec StreamPulse+, historique). Lit le storage que le service worker
-// alimente ; tous les calculs viennent de drops-data.js.
+// alimente ; tous les calculs viennent de drops-data.js et badges-data.js.
 
 import { t, getCurrentLanguage } from "./i18n.js";
 import { currentGroup, normalizeAuto } from "./badge-auto.js";
 import {
   DROPS_KEYS,
   BADGE_AUTO_KEY,
-  badgesFrom,
-  catalogBadges,
-  activeNames,
-  newBadges,
   activeRewards,
   isBadgeCampaign,
   bandModel,
@@ -32,7 +28,17 @@ import {
   remainingMinutes,
   rewardsFrom,
   summarizeHistory,
+  watchedMinutesFor,
 } from "./drops-data.js";
+import {
+  addedFrom,
+  badgesFrom,
+  catalogBadges,
+  countBadges,
+  eventsFrom,
+  newBadges,
+  gameFromDescription,
+} from "./badges-data.js";
 
 const $ = (id) => document.getElementById(id);
 /** Descriptions de badges traduites par le site (DeepL), gardées par langue. */
@@ -53,6 +59,10 @@ const CLAIMED_SHOWN_MS = 12 * 3_600_000;
 const CLAIMED_SHOWN_MAX = 3;
 const CLAIM_PENDING_MS = 20_000;
 const TICK_MS = 30_000;
+/** Au-delà, l'onglet Badges signale que les campagnes n'ont pas été relues. */
+const CAMPAIGNS_OLD_MS = 12 * 3_600_000;
+const BADGE_SORT_KEYS = Object.freeze({ live: "popup.drops.badgeSortLive", soon: "popup.drops.badgeSortSoon", ended: "popup.drops.badgeSortEnded", owned: "popup.drops.badgeSortOwned" });
+const BADGE_EMPTY_KEYS = Object.freeze({ live: "popup.drops.badgesEmptyLive", soon: "popup.drops.badgesEmptySoon", ended: "popup.drops.badgesEmptyEnded", owned: "popup.drops.badgesEmptyOwned" });
 const GIFT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
 
 let deps = { isPlus: () => false, openPlus: () => {} };
@@ -63,8 +73,14 @@ let badges = badgesFrom({});
 let history = [];
 let prefs = {};
 let myGames = new Set();
+// Temps de visionnage brut (par jour, chaîne et jeu) : alimente l'estimation
+// locale de progression des campagnes de badges à objectif de minutes.
+let watchDaily = {};
 let filter = "all";
-let badgeFilter = "all";
+let badgeEvents = eventsFrom({});
+let badgeAdded = addedFrom({});
+let badgeFilter = "live";
+let badgeCost = "all";
 let badgeQuery = "";
 let badgeLimit = 40;
 /** Récupérations demandées depuis ce popup : instanceId → heure de la demande. */
@@ -147,10 +163,22 @@ function thumb(url, className) {
   return box;
 }
 
+/** Jauge : width 100 % fixe, remplie par scaleX (bornée ; illisible → vide). Pur, testé. */
+export function fillTransform(percentValue) {
+  const value = Number(percentValue);
+  if (!Number.isFinite(value)) return "scaleX(0)";
+  const ratio = Math.min(1, Math.max(0, value / 100));
+  return `scaleX(${Math.round(ratio * 1000) / 1000})`;
+}
+
+function setFill(element, percentValue) {
+  if (element) element.style.transform = fillTransform(percentValue);
+}
+
 function bar(drop) {
   const track = el("span", "drops-bar");
   const fill = el("i");
-  fill.style.width = `${percent(drop)}%`;
+  setFill(fill, percent(drop));
   track.append(fill);
   return track;
 }
@@ -179,18 +207,18 @@ function renderChip(now) {
   let text;
   if (model?.kind === "progress") {
     const { drop } = model;
-    const left = isClaimable(drop) ? t("popup.drops.ready") : minutesLabel(remainingMinutes(drop));
+    const left = isClaimable(drop) ? t("popup.drops.ready") : t("popup.drops.timeLeft", { time: minutesLabel(remainingMinutes(drop)) });
     const more = model.others ? plural(model.others, "popup.drops.bandMoreOne", "popup.drops.bandMoreOther") : "";
     text = [drop.name, left, more].filter(Boolean).join(" · ");
-    fill.style.width = `${percent(drop)}%`;
+    setFill(fill, percent(drop));
     chip.title = [drop.game, channelLabel(drop), model.stale ? t("popup.drops.staleHint") : endsLabel(drop, now)].filter(Boolean).join(" · ");
   } else if (model?.kind === "claimed") {
     text = t("popup.drops.bandClaimed", { name: model.entry.name });
-    fill.style.width = "0";
+    setFill(fill, 0);
     chip.title = model.entry.game || "";
   } else {
     text = plural(today, "popup.cplus.dropsToday", "popup.cplus.dropsTodayPlural");
-    fill.style.width = "0";
+    setFill(fill, 0);
     chip.title = "";
   }
   if (label) label.textContent = text;
@@ -227,7 +255,7 @@ function progressRow(drop, now) {
     side = readySide(drop, now);
   } else {
     side = el("div", "drop-side");
-    side.append(el("b", null, minutesLabel(remainingMinutes(drop))), el("small", null, [t("popup.drops.progress", { minutes: drop.minutes, required: drop.required }), endsLabel(drop, now)].filter(Boolean).join(" · ")));
+    side.append(el("b", null, t("popup.drops.timeLeft", { time: minutesLabel(remainingMinutes(drop)) })), el("small", null, [t("popup.drops.progress", { minutes: drop.minutes, required: drop.required }), endsLabel(drop, now)].filter(Boolean).join(" · ")));
   }
   row.append(thumb(drop.image, "drop-img"), main, side);
   return row;
@@ -336,6 +364,21 @@ function rewardRequirement(reward) {
   return parts.join(` ${t("popup.drops.badgeOr")} `);
 }
 
+/** Libellé localisé du pill de type (« Code », « Badge »…) ; valeur inconnue affichée telle quelle. */
+const REWARD_TYPE_KEYS = {
+  code: "popup.drops.rewardTypeCode",
+  badge: "popup.drops.rewardTypeBadge",
+  emote: "popup.drops.rewardTypeEmote",
+  item: "popup.drops.rewardTypeItem",
+};
+
+function rewardTypeLabel(type) {
+  const value = String(type || "").trim();
+  if (!value) return "";
+  const key = REWARD_TYPE_KEYS[value.toLowerCase()];
+  return key ? t(key) : value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+}
+
 function rewardRow(reward, now) {
   const item = el("li");
   const row = el(reward.url ? "button" : "div", "camp-row");
@@ -344,11 +387,29 @@ function rewardRow(reward, now) {
     row.dataset.url = reward.url;
   }
   if (reward.summary && reward.summary !== reward.name) row.title = reward.summary;
+  const title = el("b", null, reward.rewards.map((item) => item.name).join(" + "));
+  const typeLabel = rewardTypeLabel(reward.rewards.find((item) => item.type)?.type);
+  if (typeLabel) title.append(" ", el("span", "camp-type", typeLabel));
   const main = el("span", "camp-main");
   main.append(
-    el("b", null, reward.rewards.map((item) => item.name).join(" + ")),
+    title,
     el("small", null, [reward.brand || reward.game || reward.name, rewardRequirement(reward)].filter(Boolean).join(" · ")),
   );
+  // Progression locale des campagnes à objectif de minutes : Twitch n'expose
+  // pas d'avancée, on estime avec le temps regardé sur le jeu depuis le
+  // lancement (voir watchedMinutesFor) et on affiche ce qu'il reste.
+  if (reward.minutesGoal) {
+    const watched = Math.min(watchedMinutesFor(watchDaily, reward, now), reward.minutesGoal);
+    const left = reward.minutesGoal - watched;
+    const parts = [t("popup.drops.badgeWatched", { watched: minutesLabel(watched), goal: minutesLabel(reward.minutesGoal) })];
+    if (left > 0) parts.push(t("popup.drops.badgeWatchLeft", { left: minutesLabel(left) }));
+    main.append(el("small", "camp-watch", parts.join(" · ")));
+    const bar = el("span", "camp-bar");
+    const fill = el("span", "camp-bar-fill");
+    fill.style.width = `${Math.round((watched / reward.minutesGoal) * 100)}%`;
+    bar.append(fill);
+    main.append(bar);
+  }
   const side = el("span", "camp-side");
   if (reward.endsAt > now) side.append(el("span", isEndingSoon({ ...reward, status: "" }, now) ? "camp-when is-soon" : "camp-when", t("popup.drops.endsIn", { time: spanLabel(reward.endsAt - now) })));
   row.append(thumb(reward.rewards[0]?.image, "drop-img is-small"), main, side);
@@ -384,19 +445,30 @@ function badgeCondition(description) {
 
 const categoryOf = (description) => /in the (.+?) category/i.exec(String(description || ""))?.[1] || "";
 
+/** Statut au pied d'une carte : « finit dans … », « À venir » ou « dès le … », « Terminé le … ». */
+function statusNodes(status, startsAt, endsAt, now) {
+  if (status === "soon") return [el("span", "badge-status-soon", startsAt > now ? t("popup.drops.badgeStartsOn", { date: shortDate(startsAt) }) : t("popup.drops.badgeSoon"))];
+  if (status === "ended") return endsAt ? [el("span", "badge-when", t("popup.drops.badgeEndedOn", { date: shortDate(endsAt) }))] : [];
+  if (endsAt > now) return [el("span", endsAt - now < 48 * 3_600_000 ? "badge-when is-soon" : "badge-when", t("popup.drops.endsIn", { time: spanLabel(endsAt - now) }))];
+  return [];
+}
+
 /**
  * Carte d'un badge ou d'une récompense : image, nom, condition courte, jeu,
- * coût et échéance. Un clic ouvre un live où la gagner.
+ * date d'ajout, coût et statut. Un clic ouvre un live où la gagner, seulement
+ * si le badge est en cours.
  */
-function badgeCard({ title, image, condition, fallback, game, paid, owned, endsAt, gameId, link, tooltip, autoId }) {
+function badgeCard({ title, image, condition, fallback, game, gameId, link, clickable = true, paid, owned, status = "live", startsAt = 0, endsAt = 0, addedAt = 0, tooltip, autoId }) {
   const now = Date.now();
   const item = el("li");
-  const card = el(game || link ? "button" : "div", owned ? "badge-card is-owned" : "badge-card");
-  if (game) {
+  const target = clickable && (game || link);
+  const classes = ["badge-card", owned ? "is-owned" : "", status === "soon" ? "is-soon" : "", status === "ended" ? "is-ended" : ""].filter(Boolean).join(" ");
+  const card = el(target ? "button" : "div", classes);
+  if (target && game) {
     card.type = "button";
     card.dataset.gameId = gameId || "";
     card.dataset.game = game;
-  } else if (link) {
+  } else if (target) {
     card.type = "button";
     card.dataset.url = link;
   }
@@ -415,9 +487,10 @@ function badgeCard({ title, image, condition, fallback, game, paid, owned, endsA
   body.append(el("b", null, title));
   const line = [condition, game].filter(Boolean).join(" · ");
   body.append(el("small", line ? "badge-card-cond" : "badge-card-cond is-long", line || fallback || ""));
+  if (addedAt) body.append(el("small", "badge-card-added", t("popup.drops.badgeAddedOn", { date: shortDate(addedAt) })));
   const foot = el("span", "badge-card-foot");
   foot.append(el("span", owned ? "badge-pill is-owned" : paid ? "badge-pill is-paid" : "badge-pill is-free", t(owned ? "popup.drops.badgeOwned" : paid ? "popup.drops.badgePaid" : "popup.drops.badgeFree")));
-  if (endsAt > now) foot.append(el("span", endsAt - now < 48 * 3_600_000 ? "badge-when is-soon" : "badge-when", t("popup.drops.endsIn", { time: spanLabel(endsAt - now) })));
+  foot.append(...statusNodes(status, startsAt, endsAt, now));
   card.append(art, body, foot);
   item.append(card);
   // Bouton frère de la carte (un bouton ne peut pas en contenir un autre).
@@ -445,36 +518,26 @@ function badgeCard({ title, image, condition, fallback, game, paid, owned, endsA
 
 function badgeRow(badge) {
   const text = badgeText[getCurrentLanguage()]?.[badge.id]?.text || badge.description;
+  const event = badge.event;
   return badgeCard({
     title: badge.title,
     image: sharpImage(badge.image),
-    condition: badgeCondition(badge.description),
+    condition: event?.minutes ? t("popup.drops.badgeWatch", { time: minutesLabel(event.minutes) }) : badgeCondition(badge.description),
     fallback: text,
-    game: badge.campaign?.game || categoryOf(badge.description),
-    gameId: badge.campaign?.gameId || "",
+    game: event?.game || categoryOf(badge.description) || gameFromDescription(badge.description),
+    gameId: event?.gameId || "",
     link: badge.campaign ? "" : badge.url,
+    // Seul un badge en cours ouvre un live : à venir ou terminé, il n'y a rien à gagner.
+    clickable: badge.status === "live",
     paid: badge.paid,
     owned: badge.owned,
-    endsAt: badge.campaign?.endsAt || 0,
+    status: badge.status,
+    startsAt: event?.startsAt || 0,
+    endsAt: event?.endsAt || 0,
+    addedAt: badge.addedAt,
     tooltip: text,
-    // Le mode auto a besoin d'une campagne en cours : c'est elle qui dit où regarder.
+    // Le mode auto a besoin d'un Drop en cours : c'est lui qui dit où regarder.
     autoId: badge.campaign && !badge.paid ? badge.id : "",
-  });
-}
-
-/** Une récompense de campagne (Poké Ball…) présentée comme un badge. */
-function rewardCard(reward) {
-  const paid = reward.subsGoal > 0 && !reward.minutesGoal;
-  return badgeCard({
-    title: reward.rewards.map((item) => item.name).join(" + "),
-    image: reward.rewards[0]?.image,
-    condition: rewardRequirement(reward),
-    game: reward.game || reward.brand,
-    link: reward.url,
-    paid,
-    owned: false,
-    endsAt: reward.endsAt,
-    tooltip: reward.summary && reward.summary !== reward.name ? reward.summary : "",
   });
 }
 
@@ -518,53 +581,59 @@ async function translateBadges(ids) {
   }
 }
 
+function setPressed(selector, isActive, extra) {
+  document.querySelectorAll(selector).forEach((button) => {
+    const active = isActive(button);
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+    extra?.(button);
+  });
+}
+
+/** Note sous la grille : campagnes jamais lues, ou pas relues depuis 12 h. */
+function renderBadgesNote(now) {
+  const note = $("badges-campaigns-note");
+  if (!note) return;
+  const at = campaigns.updatedAt;
+  note.textContent = !at ? t("popup.drops.badgesCampaignsNever") : now - at > CAMPAIGNS_OLD_MS ? t("popup.drops.badgesCampaignsOld", { date: dateTime(at) }) : "";
+}
+
 function renderCatalog() {
   if (!$("badges-catalog")) return;
   renderAutoBar();
-  const context = { now: Date.now(), campaigns: campaigns.campaigns, names: activeNames({ rewards: rewards.rewards, campaigns: campaigns.campaigns, drops: progress.drops }) };
-  const available = catalogBadges(badges, "all", "", context).filter((badge) => badge.available);
-  // Les récompenses de campagne comptent avec les badges : jamais obtenues (Twitch ne le dit pas).
-  const running = activeRewards(rewards.rewards, context.now);
-  const rewardPaid = running.filter((reward) => reward.subsGoal > 0 && !reward.minutesGoal).length;
-  const counts = {
-    all: available.length + running.length,
-    free: available.filter((badge) => !badge.paid).length + running.length - rewardPaid,
-    paid: available.filter((badge) => badge.paid).length + rewardPaid,
-    missing: available.filter((badge) => !badge.owned).length + running.length,
-    owned: available.filter((badge) => badge.owned).length,
-  };
+  const now = Date.now();
+  const context = { now, events: badgeEvents.events, added: badgeAdded.added };
+  const counts = countBadges(badges, context);
+  // Seuls les vrais badges : une récompense qui en donne un est déjà reliée au
+  // catalogue ; les autres (codes, objets en jeu) restent dans l'onglet Drops.
+  const { live, liveFree } = counts;
   const plus = deps.isPlus();
   $("badges-locked").hidden = plus;
   $("badges-content").hidden = !plus;
-  document.querySelectorAll("#badges-filters [data-filter]").forEach((button) => {
-    const active = button.dataset.filter === badgeFilter;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", active ? "true" : "false");
+  const filterCounts = { live, soon: counts.soon, ended: counts.ended, owned: counts.owned };
+  setPressed("#badges-filters [data-filter]", (button) => button.dataset.filter === badgeFilter, (button) => {
     const count = button.querySelector("[data-count]");
-    if (count) count.textContent = String(counts[button.dataset.filter] ?? 0);
+    if (count) count.textContent = String(filterCounts[button.dataset.filter] ?? 0);
   });
-  // Seuls les badges obtenables en ce moment : les événements finis n'intéressent personne.
-  const list = catalogBadges(badges, badgeFilter, badgeQuery, context).filter((badge) => badge.available);
-  // Les récompenses de campagne (Poké Ball…) passent dans la même grille.
-  const needle = badgeQuery.trim().toLowerCase();
-  const rewardCards = badgeFilter === "owned" ? [] : activeRewards(rewards.rewards, context.now)
-    .filter((reward) => badgeFilter !== "free" || reward.minutesGoal > 0)
-    .filter((reward) => badgeFilter !== "paid" || (reward.subsGoal > 0 && !reward.minutesGoal))
-    .filter((reward) => !needle || `${reward.name} ${reward.brand} ${reward.game} ${reward.rewards.map((item) => item.name).join(" ")}`.toLowerCase().includes(needle));
+  setPressed("#badges-cost [data-cost]", (button) => button.dataset.cost === badgeCost);
+  const list = catalogBadges(badges, { ...context, status: badgeFilter, cost: badgeCost, query: badgeQuery });
   const shown = list.slice(0, badgeLimit);
-  $("badges-catalog").replaceChildren(...rewardCards.map(rewardCard), ...shown.map(badgeRow));
+  $("badges-catalog").replaceChildren(...shown.map(badgeRow));
   translateBadges(shown.filter((badge) => !badgeCondition(badge.description)).map((badge) => badge.id));
-  $("badges-catalog-empty").hidden = list.length + rewardCards.length > 0;
+  const empty = list.length === 0;
+  $("badges-catalog-empty").hidden = !empty;
+  // Vide à cause d'une recherche ou du coût : « aucun ne correspond » ; sinon, rien dans ce statut.
+  $("badges-catalog-empty").textContent = badgeQuery.trim() || badgeCost !== "all" ? t("popup.drops.noBadgeMatch") : t(BADGE_EMPTY_KEYS[badgeFilter]);
+  $("badges-sort").textContent = empty ? "" : t(BADGE_SORT_KEYS[badgeFilter]);
   $("badges-more").hidden = list.length <= badgeLimit;
-  $("badges-total").textContent = String(counts.all);
-  // Aperçu gratuit : le nombre de badges à obtenir se voit, le détail reste réservé.
-  $("badges-teaser").hidden = plus || counts.all === 0;
-  $("badges-teaser-total").textContent = String(counts.all);
-  $("badges-teaser-meta").replaceChildren(el("span", null, t("popup.drops.badgesLcdFree", { count: counts.free })));
-  $("badges-lcd-meta").replaceChildren(...[
-    t("popup.drops.badgesLcdOwned", { count: counts.owned }),
-    t("popup.drops.badgesLcdFree", { count: counts.free }),
-  ].map((text) => el("span", null, text)));
+  $("badges-total").textContent = String(live);
+  $("badges-teaser").hidden = plus || live === 0;
+  $("badges-teaser-total").textContent = String(live);
+  const soonLine = t("popup.drops.badgesLcdSoon", { count: counts.soon });
+  const freeLine = t("popup.drops.badgesLcdFree", { count: liveFree });
+  $("badges-teaser-meta").replaceChildren(el("span", null, freeLine));
+  $("badges-lcd-meta").replaceChildren(el("span", null, soonLine), el("span", null, freeLine));
+  renderBadgesNote(now);
 }
 
 // ─── Panneau : historique (StreamPulse+) ──────────────────────────────────────
@@ -690,6 +759,13 @@ function bind() {
     badgeLimit = 40;
     renderCatalog();
   });
+  $("badges-cost")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-cost]");
+    if (!button) return;
+    badgeCost = button.dataset.cost;
+    badgeLimit = 40;
+    renderCatalog();
+  });
   $("badges-search")?.addEventListener("input", (event) => {
     badgeQuery = event.target.value;
     badgeLimit = 40;
@@ -747,8 +823,7 @@ function toggleAuto(badgeId) {
     return;
   }
   const badge = badges.badges.find((item) => item.id === badgeId);
-  const context = { now: Date.now(), campaigns: campaigns.campaigns };
-  const campaign = badge && catalogBadges({ ...badges, badges: [badge] }, "all", "", context)[0]?.campaign;
+  const campaign = badge && catalogBadges({ ...badges, badges: [badge] }, { status: "live", now: Date.now(), events: badgeEvents.events, added: badgeAdded.added })[0]?.campaign;
   if (!campaign) return;
   sendAuto({
     type: "badgeAutoStart",
@@ -763,6 +838,8 @@ async function reload() {
   campaigns = campaignsFrom(stored);
   rewards = rewardsFrom(stored);
   badges = badgesFrom(stored);
+  badgeEvents = eventsFrom(stored);
+  badgeAdded = addedFrom(stored);
   history = historyFrom(stored);
   prefs = stored[PREFERENCES_KEY] || {};
   const text = (await chrome.storage.local.get(BADGE_TEXT_KEY))[BADGE_TEXT_KEY];
@@ -781,8 +858,10 @@ export async function initDrops({ isPlus, onPlusChange, openPlus }) {
   await reload();
   // Les jeux regardés ne changent pas pendant que le popup est ouvert : lus une fois.
   chrome.storage.local.get([WATCH_DAILY_KEY]).then((stored) => {
+    watchDaily = stored[WATCH_DAILY_KEY] || {};
     myGames = myGamesFrom(stored[WATCH_DAILY_KEY], Date.now());
     renderCampaigns(Date.now());
+    renderRewards(Date.now());
   }).catch(() => {});
   setInterval(render, TICK_MS);
   // Popup ouvert : on demande une lecture fraîche à un onglet Twitch, s'il y en a un.

@@ -1,5 +1,11 @@
 import { BACKUP_KEYS, buildBackup, backupFileName } from "./backup.js";
 import { DEFAULT_PREFERENCES } from "./preferences-data.js";
+import { SYNC_STATUS_KEY } from "./sync-data.js";
+import { dropsHistoryCsv, importFromCsv, pointsJournalCsv } from "./history-csv.js";
+import { DROPS_HISTORY_KEY, historyFrom } from "./drops-data.js";
+import { POINTS_KEYS, stateFrom as pointsStateFrom } from "./points-data.js";
+import { bindInlineConfirm } from "./inline-confirm.js";
+import { DEFAULT_QUIET_END, DEFAULT_QUIET_START, normalizeQuietTime } from "./quiet-hours.js";
 import {
   initI18n,
   applyTranslations,
@@ -17,17 +23,18 @@ import {
   PLATFORM_DEFINITIONS,
   formatHandleForDisplay,
   getHandleComparisonKey,
+  getPlatformIcon,
   getPlatformLabelKey,
   getPlatformPlaceholderKey,
   normalizePlatform,
   sanitizeHandle,
 } from "./platforms.js";
 import { createAllChannelsTile, createChannelRow, createMiniCard, formatNumber, renderStage, renderStageEmpty } from "./ui.js";
-import { initFeatures, renderHistory } from "./popup-features.js";
+import { openChannel } from "./open-channel.js";
+import { UNDO_WINDOW_MS, addMessageFor, restoreGroups, restoreMessages, snapshotStreamer } from "./streamer-undo.js";
+import { closePlus, initFeatures, plusActive, renderHistory } from "./popup-features.js";
 import { initNews, markSeen } from "./popup-news.js";
 import { initSuggest } from "./popup-suggest.js";
-
-const PREFERENCES_STORAGE_KEY = "betaGeneralPreferences";
 
 const defaultPreferences = DEFAULT_PREFERENCES;
 
@@ -65,6 +72,22 @@ const sheetSearchEl = document.getElementById("sheet-search");
 const sheetGroupsEl = document.getElementById("sheet-groups");
 const sheetTotalEl = document.getElementById("sheet-total");
 const soundsToggle = document.getElementById("pref-sounds");
+const liveNotificationsToggle = document.getElementById("pref-live-notifications");
+const gameNotificationsToggle = document.getElementById("pref-game-notifications");
+const titleNotificationsToggle = document.getElementById("pref-title-notifications");
+const quietHoursToggle = document.getElementById("pref-quiet-hours");
+const quietHoursStartInput = document.getElementById("pref-quiet-hours-start");
+const quietHoursEndInput = document.getElementById("pref-quiet-hours-end");
+const quietHoursTimesRow = document.getElementById("quiet-hours-times");
+const dropAlertsToggle = document.getElementById("pref-drop-alerts");
+const badgeAlertsToggle = document.getElementById("pref-badge-alerts");
+const raidAlertsToggle = document.getElementById("pref-raid-alerts");
+const predictionsPopupToggle = document.getElementById("pref-predictions-popup");
+const volumeBoostInput = document.getElementById("pref-volume-boost");
+const volumeBoostValue = document.getElementById("volume-boost-value");
+const clipDownloadLock = document.getElementById("clip-download-lock");
+const previewsSub = document.getElementById("previews-sub");
+const raidDependencyStatus = document.getElementById("raid-dependency-status");
 const backgroundRaidAlertsToggle = document.getElementById("pref-background-raid-alerts");
 const autoClaimToggle = document.getElementById("pref-auto-claim");
 const autoClaimDropsToggle = document.getElementById("pref-auto-claim-drops");
@@ -97,7 +120,7 @@ const previewsDelayValue = document.getElementById("previews-delay-value");
 const previewsAnimationsToggle = document.getElementById("pref-previews-animations");
 const chatKeywordsInput = document.getElementById("pref-chat-keywords");
 const blockedUsersInput = document.getElementById("pref-blocked-users");
-const saveChatFilterButton = document.getElementById("save-chat-filter");
+const chatSaveStatus = document.getElementById("chat-save-status");
 const testNotificationButton = document.getElementById("test-notification");
 const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
 const languageOptions = document.getElementById("language-options-popup");
@@ -105,7 +128,8 @@ const languageOptions = document.getElementById("language-options-popup");
 const statPointsEl = document.getElementById("stat-points");
 const btnExport = document.getElementById("btn-export");
 const btnImport = document.getElementById("btn-import");
-const btnResetStats = document.getElementById("btn-reset-stats");
+const btnResetPreferences = document.getElementById("btn-reset-preferences");
+const resetPrefsStatus = document.getElementById("reset-prefs-status");
 
 const watchTimeMonthSelect = document.getElementById("watch-time-month");
 const wtTotalTime = document.getElementById("wt-total-time");
@@ -113,11 +137,11 @@ const wtTotalChannels = document.getElementById("wt-total-channels");
 const wtTopWatched = document.getElementById("wt-top-watched");
 const wtEmpty = document.getElementById("wt-empty");
 const watchTimeToggle = document.getElementById("pref-watch-time");
+const syncToggle = document.getElementById("pref-cross-device-sync");
+const syncStatusEl = document.getElementById("sync-status");
 const pointsTrackingToggle = document.getElementById("pref-points-tracking");
 const dropsTrackingToggle = document.getElementById("pref-drops-tracking");
 const communityBadgeToggle = document.getElementById("pref-community-badge");
-const patchNotesButton = document.getElementById("open-patch-notes");
-const patchNotesDot = document.getElementById("patch-notes-dot");
 
 const pseudoInput = document.getElementById("pref-pseudo-input");
 const pseudoSaveButton = document.getElementById("pref-pseudo-save");
@@ -130,6 +154,7 @@ let currentTab = "streamers";
 let lastAddedId = null;
 let previousLiveIds = new Set(); // track who was live last render
 let lastPointsValue = null; // for odometer bump
+let centeredId = null; // dernier streamer auto-centré dans le bandeau
 
 function markButtonSuccess(button) {
   if (!button) return;
@@ -143,7 +168,7 @@ function sanitizeInput(value = "", platform = state.selectedPlatform) {
   return sanitizeHandle(platform, value);
 }
 
-function showFeedback(message, type = "success") {
+function showFeedback(message, type = "success", action = null) {
   if (!message) return;
   if (!toastContainer) return;
 
@@ -159,9 +184,26 @@ function showFeedback(message, type = "success") {
   if (type === "error") toast.setAttribute("role", "alert");
   toast.textContent = message;
   toast.addEventListener("click", () => removeToast(toast));
+  if (action) toast.appendChild(createToastAction(toast, action));
   toastContainer.appendChild(toast);
 
-  setTimeout(() => removeToast(toast), TOAST_DURATION);
+  setTimeout(() => removeToast(toast), action?.duration || TOAST_DURATION);
+}
+
+function createToastAction(toast, { label, onClick }) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "toast-action";
+  button.textContent = label;
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    removeToast(toast);
+    Promise.resolve(onClick()).catch((error) => {
+      console.warn("[popup] action du toast en échec", error);
+      showFeedback(t("popup.feedback.undoFailed"), "error");
+    });
+  }, { once: true });
+  return button;
 }
 
 function removeToast(toast) {
@@ -186,18 +228,13 @@ function applyTheme(theme) {
 }
 
 function initTheme() {
-  const saved = state.preferences.theme || "dark";
-  applyTheme(saved);
+  applyTheme(state.preferences.theme || "dark");
   document.querySelectorAll(".theme-toggle-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const theme = btn.dataset.themeValue;
-      applyTheme(theme);
-      state.preferences.theme = theme;
-      chrome.storage.local.get(PREFERENCES_STORAGE_KEY).then((data) => {
-        const prefs = data[PREFERENCES_STORAGE_KEY] || {};
-        prefs.theme = theme;
-        chrome.storage.local.set({ [PREFERENCES_STORAGE_KEY]: prefs });
-      });
+      // Écriture via updatePreferences uniquement : la préférence theme vit
+      // dans betaGeneralPreferences comme les autres (et déclenche le
+      // re-render du panneau Général).
+      updatePreferences({ theme: btn.dataset.themeValue }, { silent: true }).then(() => applyTheme(state.preferences.theme || "dark"));
     });
   });
 }
@@ -344,14 +381,34 @@ function clearDropMarkers() {
   });
 }
 
+/** Applique un ordre de streamers : le service worker écrit depuis le stockage
+ * courant (un statut rafraîchi pendant le glisser ne peut pas être écrasé par
+ * notre copie d'ouverture). Repli local si le message échoue. */
+async function writeStreamerOrder(reordered) {
+  try {
+    const response = await chrome.runtime.sendMessage({
+      type: "reorderStreamers",
+      order: reordered.map((streamer) => streamer.id),
+    });
+    if (Array.isArray(response?.streamers)) {
+      state.streamers = response.streamers;
+      return;
+    }
+    throw new Error(response?.error || "réponse sans liste");
+  } catch (error) {
+    console.warn("[popup] réordonnancement côté service worker impossible :", error?.message || error);
+    state.streamers = reordered;
+    await chrome.storage.local.set({ betaGeneralStreamers: reordered });
+  }
+}
+
 async function reorderStreamers(from, to) {
   if (!Number.isInteger(from) || !Number.isInteger(to) || from === to) return false;
   if (from < 0 || to < 0 || from >= state.streamers.length || to >= state.streamers.length) return false;
   const reordered = [...state.streamers];
   const [moved] = reordered.splice(from, 1);
   reordered.splice(to, 0, moved);
-  state.streamers = reordered;
-  await chrome.storage.local.set({ betaGeneralStreamers: reordered });
+  await writeStreamerOrder(reordered);
   renderStreamers();
   return true;
 }
@@ -362,8 +419,7 @@ async function swapStreamers(indexA, indexB) {
   if (indexA < 0 || indexB < 0 || indexA >= state.streamers.length || indexB >= state.streamers.length) return false;
   const reordered = [...state.streamers];
   [reordered[indexA], reordered[indexB]] = [reordered[indexB], reordered[indexA]];
-  state.streamers = reordered;
-  await chrome.storage.local.set({ betaGeneralStreamers: reordered });
+  await writeStreamerOrder(reordered);
   renderStreamers();
   return true;
 }
@@ -515,6 +571,28 @@ async function toggleStreamerAlert(id, enabled, { type, key, onKey, offKey }) {
   return true;
 }
 
+async function undoRemove(snapshot, name) {
+  const added = await sendMessage(addMessageFor(snapshot));
+  if (!added?.success) {
+    showFeedback(added?.error || t("popup.feedback.undoFailed"), "error");
+    return;
+  }
+  const streamers = added.streamers || [];
+  const restored = streamers.find((s) => s.id === snapshot.streamer.id) || streamers[streamers.length - 1];
+  if (!restored) return;
+  const current = await chrome.storage.local.get([PINS_KEY, GROUPS_KEY]);
+  const pinnedIds = Array.isArray(current[PINS_KEY]) ? current[PINS_KEY] : [];
+  for (const message of restoreMessages(snapshot, restored.id, { streamers, pinnedIds })) {
+    const reply = await sendMessage(message);
+    if (reply?.error) console.warn("[popup] restauration partielle", message.type, reply.error);
+  }
+  const groups = Array.isArray(current[GROUPS_KEY]) ? current[GROUPS_KEY] : [];
+  const nextGroups = restoreGroups(groups, snapshot, restored.id);
+  if (nextGroups !== groups) await saveGroups(nextGroups);
+  showFeedback(t("popup.feedback.undoDone", { name }), "success");
+  await loadStreamers();
+}
+
 const streamerCallbacks = {
   onToggleNotify: (id, enabled) => toggleStreamerAlert(id, enabled, {
     type: "toggleNotifications",
@@ -534,13 +612,24 @@ const streamerCallbacks = {
     onKey: "popup.toast.titleNotifyEnabled",
     offKey: "popup.toast.titleNotifyDisabled",
   }),
-  onOpen: (url) => {
-    chrome.tabs.create({ url }, () => window.close());
+  onOpen: async (url) => {
+    try {
+      await openChannel(chrome, url);
+      window.close();
+    } catch (error) {
+      console.warn("[popup] ouverture de la chaîne impossible", error);
+      showFeedback(t("popup.feedback.openFailed"), "error");
+    }
   },
   onRemove: async (id, name) => {
+    const snapshot = snapshotStreamer(state, id);
     const result = await sendMessage({ type: "removeStreamer", id });
     if (result?.success) {
-      showFeedback(t("popup.feedback.removeSuccess", { name }), "success");
+      showFeedback(t("popup.feedback.removeSuccess", { name }), "success", snapshot && {
+        label: t("popup.feedback.undo"),
+        duration: UNDO_WINDOW_MS,
+        onClick: () => undoRemove(snapshot, name),
+      });
       await loadStreamers();
     } else if (result?.error) {
       showFeedback(result.error, "error");
@@ -551,8 +640,24 @@ const streamerCallbacks = {
 // --- Pins and groups: popup-only data, stored beside the streamer list ---
 async function togglePin(id) {
   const pinned = !isPinned(id);
-  state.pinnedIds = pinned ? [...state.pinnedIds, id] : state.pinnedIds.filter((x) => x !== id);
-  await chrome.storage.local.set({ [PINS_KEY]: state.pinnedIds });
+  const pinnedIds = pinned ? [...state.pinnedIds, id] : state.pinnedIds.filter((x) => x !== id);
+  // Écrit par le service worker depuis le stockage courant, comme l'ordre.
+  try {
+    const response = await chrome.runtime.sendMessage({ type: "setPinnedStreamers", pinnedIds });
+    if (Array.isArray(response?.pinnedIds)) {
+      // Faux positif : sendMessage n'écrit pas `state`, la réponse remplace
+      // simplement la liste locale par la version validée côté SW.
+      /* eslint-disable-next-line require-atomic-updates -- réponse du SW, pas d'écriture concurrente de state. */
+      state.pinnedIds = response.pinnedIds;
+    } else {
+      throw new Error(response?.error || "réponse sans liste");
+    }
+  } catch (error) {
+    console.warn("[popup] épinglage côté service worker impossible :", error?.message || error);
+    /* eslint-disable-next-line require-atomic-updates -- repli : même valeur calculée avant l'attente. */
+    state.pinnedIds = pinnedIds;
+    await chrome.storage.local.set({ [PINS_KEY]: pinnedIds });
+  }
   showFeedback(t(pinned ? "popup.cplus.pinned" : "popup.cplus.unpinned", { name: nameFor(id) }), "success");
   renderStreamers();
 }
@@ -633,6 +738,13 @@ function safeAvatarUrl(raw) {
   }
 }
 
+// Le sous-titre suit l'état réel : invitation à ajouter, personne en
+// direct, ou la liste des lives.
+function greetingSubKey(liveCount) {
+  if (!state.streamers.length) return "popup.greetingSubEmpty";
+  return liveCount ? "popup.greetingSub" : "popup.greetingSubNobody";
+}
+
 function renderGreeting(live = state.streamers.filter((s) => isLiveId(s.id))) {
   const titleEl = document.getElementById("greeting-title");
   if (titleEl) {
@@ -640,11 +752,13 @@ function renderGreeting(live = state.streamers.filter((s) => isLiveId(s.id))) {
     const hello = new Date().getHours() < 18 ? t("popup.greetingMorning") : t("popup.greetingEvening");
     const sub = document.createElement("span");
     sub.className = "greeting-sub";
-    sub.textContent = t("popup.greetingSub");
+    sub.textContent = t(greetingSubKey(live.length));
     titleEl.replaceChildren(document.createTextNode(name ? `${hello} ${name}.` : `${hello}.`), document.createElement("br"), sub);
   }
   const hintEl = document.getElementById("greeting-live-count");
-  if (hintEl) {
+  if (hintEl && !live.length) {
+    hintEl.textContent = "";
+  } else if (hintEl) {
     const countKey = live.length > 1 ? "popup.greetingLiveCountPlural" : "popup.greetingLiveCountSingular";
     const parts = [t(countKey, { count: live.length })];
     const newest = live.find((s) => justLiveIds.has(s.id));
@@ -685,8 +799,43 @@ function stepFeatured(delta) {
   renderStreamers();
 }
 
+// Kick : les streamers ajoutés avant le suivi par API n'ont pas de photo (le
+// logo de la plateforme prenait le relais). Une demande de résolution par
+// Kick : les streamers ajoutés avant le suivi par API n'ont pas de photo (le
+// logo de la plateforme prenait le relais). Une résolution par handle et par
+// ouverture du popup ; la popup a la permission hôte Kick, elle interroge
+// l'API elle-même et écrit direct — storage.onChanged re-rend la carte.
+const kickAvatarRequested = new Set();
+function sweepKickAvatars() {
+  for (const streamer of state.streamers) {
+    if ((streamer.platform || "twitch") !== "kick") continue;
+    const handle = String(streamer.handle || "").toLowerCase();
+    // Un avatar qui n'est pas une URL web est un reliquat : certains anciens
+    // ajouts stockaient le chemin du logo de la plateforme comme avatar.
+    if (!handle || /^https?:\/\//i.test(streamer.avatarUrl || "") || kickAvatarRequested.has(handle)) continue;
+    kickAvatarRequested.add(handle);
+    fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(handle)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then(async (channel) => {
+        const pic = channel?.user?.profile_pic;
+        if (!pic) return;
+        const stored = await chrome.storage.local.get("betaGeneralStreamers");
+        const list = Array.isArray(stored.betaGeneralStreamers) ? stored.betaGeneralStreamers : [];
+        const entry = list.find(
+          (item) => (item.platform || "twitch") === "kick"
+            && String(item.handle || "").toLowerCase() === handle,
+        );
+        if (!entry || entry.avatarUrl === pic) return;
+        entry.avatarUrl = pic;
+        await chrome.storage.local.set({ betaGeneralStreamers: list });
+      })
+      .catch(() => {});
+  }
+}
+
 function renderStreamers() {
   if (!streamerListEl) return;
+  sweepKickAvatars();
   const ordered = orderStreamers();
   const live = ordered.filter((s) => isLiveId(s.id));
   const offline = ordered.filter((s) => !isLiveId(s.id));
@@ -723,17 +872,24 @@ function renderStreamers() {
   }
   streamerListEl.replaceChildren(fragment);
 
-  // Garde la carte du streamer affiché sur la scène visible dans la bande,
-  // sinon la carte sélectionnée reste coupée au bord du scroll.
-  const selectedCard = streamerListEl.querySelector(".mini.is-selected");
-  if (selectedCard) {
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    selectedCard.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+  // Garde la carte du streamer affiché visible dans la bande, mais seulement
+  // quand la sélection change : les re-rendus du fond (statuts, points, temps
+  // de visionnage) ne doivent pas rappeler le bandeau à sa position pendant
+  // que l'utilisateur le fait défiler.
+  if (state.selectedId !== centeredId) {
+    const selectedCard = streamerListEl.querySelector(".mini.is-selected");
+    if (selectedCard) {
+      centeredId = state.selectedId;
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      selectedCard.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+    }
   }
 
   const liveCountEl = document.getElementById("live-count");
   if (liveCountEl) liveCountEl.textContent = t("popup.cplus.liveOf", { live: live.length, total: state.streamers.length });
 
+  const homeEl = document.getElementById("streamers-view");
+  if (homeEl) homeEl.dataset.roster = state.streamers.length ? "some" : "none";
   renderGreeting(live);
   renderFeatured();
   if (sheetEl && !sheetEl.hidden) renderSheet();
@@ -874,6 +1030,25 @@ function renderGroupChips() {
   sheetGroupsEl.replaceChildren(fragment);
 }
 
+// Recherche sans résultat : on propose d'ajouter ce qui a été tapé. On
+// préremplit la barre d'ajout plutôt que de lancer l'ajout, pour laisser
+// choisir la plateforme avant de valider.
+function createAddFromSearchButton(typed) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "button button-primary empty-add";
+  button.textContent = t("popup.cplus.addFromSearch", { name: typed });
+  button.title = button.textContent;
+  button.addEventListener("click", () => {
+    closeSheet({ restoreFocus: false });
+    if (!streamerInput) return;
+    streamerInput.value = typed;
+    streamerInput.focus();
+    streamerInput.select();
+  });
+  return button;
+}
+
 function renderSheet() {
   if (!sheetListEl) return;
   const query = state.sheetQuery.trim().toLowerCase();
@@ -896,6 +1071,8 @@ function renderSheet() {
     const empty = document.createElement("li");
     empty.className = "empty-state";
     empty.textContent = t(state.streamers.length ? "popup.cplus.noMatch" : "popup.emptyState");
+    const typed = state.sheetQuery.trim();
+    if (typed) empty.appendChild(createAddFromSearchButton(typed));
     fragment.appendChild(empty);
   }
   rows.forEach((streamer) => {
@@ -950,8 +1127,124 @@ async function handleSavePseudo() {
   }
 }
 
+/**
+ * Sous-réglages visuellement et fonctionnellement désactivés quand leur
+ * interrupteur principal est coupé (heures calmes, aperçus).
+ */
+function setSubEnabled(container, enabled) {
+  if (!container) return;
+  container.classList.toggle("is-off", !enabled);
+  container.querySelectorAll("input, select, textarea, button").forEach((control) => {
+    control.disabled = !enabled;
+  });
+}
+
+function syncQuietHoursTimes() {
+  setSubEnabled(quietHoursTimesRow, state.preferences?.quietHoursEnabled === true);
+}
+
+function syncPreviewsSub(enabled) {
+  setSubEnabled(previewsSub, enabled);
+}
+
+/** Cadenas Plus du téléchargement de clips : visible seulement sans licence. */
+function syncClipDownloadLock() {
+  if (!clipDownloadLock) return;
+  clipDownloadLock.hidden = plusActive();
+  if (clipDownloadToggle) {
+    // Sans licence, le réglage s'affiche éteint : initClipDownloadLock()
+    // remet le interrupteur à OFF si on tente de l'activer.
+    clipDownloadToggle.checked = plusActive() ? state.preferences?.enableClipDownload !== false : false;
+  }
+}
+
+/**
+ * Dépendance affichée : l'annulation auto des raids se coupe quand les raids
+ * entrants sont surveillés (les points se gagnent en suivant le raid). Le
+ * texte d'état est annoncé aux lecteurs d'écran (role="status").
+ */
+function syncRaidDependency() {
+  if (!raidDependencyStatus) return;
+  const watched = state.preferences?.backgroundRaidAlerts === true;
+  const cancelled = state.preferences?.autoCancelRaids === true;
+  const active = watched && !cancelled;
+  raidDependencyStatus.hidden = !active;
+  raidDependencyStatus.textContent = active ? t("popup.settings.raidDependencyActive") : "";
+}
+
+/** Retour d'enregistrement du filtre de chat : un seul mode, auto au changement,
+ * annoncé dans la zone de statut prévue à côté des champs (role="status"). */
+let chatSaveStatusTimer = 0;
+function announceChatSaved(ok) {
+  if (!chatSaveStatus) return;
+  clearTimeout(chatSaveStatusTimer);
+  if (!ok) {
+    chatSaveStatus.textContent = t("popup.feedback.saveFailed");
+    return;
+  }
+  chatSaveStatus.textContent = t("popup.feedback.chatFilterSaved");
+  chatSaveStatusTimer = setTimeout(() => {
+    chatSaveStatus.textContent = "";
+  }, 2500);
+}
+
+/** « il y a 5 minutes », « il y a 2 heures »… dans la langue de l'interface. */
+function sinceLabel(at) {
+  const minutes = Math.max(1, Math.round((Date.now() - at) / 60_000));
+  const relative = new Intl.RelativeTimeFormat(getCurrentLanguage(), { numeric: "auto" });
+  if (minutes < 60) return relative.format(-minutes, "minute");
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return relative.format(-hours, "hour");
+  return relative.format(-Math.round(hours / 24), "day");
+}
+
+/** État de la synchro sous le réglage : rien tant qu'elle n'a jamais tourné. */
+function renderSyncStatus() {
+  if (!syncStatusEl) return;
+  chrome.storage.local.get(SYNC_STATUS_KEY).then((stored) => {
+    const status = stored[SYNC_STATUS_KEY] || {};
+    const lastAt = Math.max(Number(status.lastPushAt) || 0, Number(status.lastPullAt) || 0);
+    const parts = [];
+    if (lastAt) parts.push(t("popup.settings.syncStatus", { time: sinceLabel(lastAt) }));
+    if (status.lastError) parts.push(t("popup.settings.syncError"));
+    syncStatusEl.textContent = parts.join(" · ");
+    syncStatusEl.hidden = parts.length === 0;
+  }).catch(() => {});
+}
+
 function renderPreferences() {
-  const prefs = state.preferences || defaultPreferences;
+  const prefs = state.preferences || defaultPreferences;  if (liveNotificationsToggle) {
+    liveNotificationsToggle.checked = prefs.liveNotifications !== false;
+  }
+  if (gameNotificationsToggle) {
+    gameNotificationsToggle.checked = prefs.gameNotifications === true;
+  }
+  if (titleNotificationsToggle) {
+    titleNotificationsToggle.checked = prefs.titleNotifications === true;
+  }
+  if (dropAlertsToggle) {
+    dropAlertsToggle.checked = prefs.dropAlerts !== false;
+  }
+  if (badgeAlertsToggle) {
+    badgeAlertsToggle.checked = prefs.badgeAlerts === true;
+  }
+  if (raidAlertsToggle) {
+    raidAlertsToggle.checked = prefs.raidAlerts !== false;
+  }
+  if (predictionsPopupToggle) {
+    predictionsPopupToggle.checked = prefs.enablePredictionsPopup !== false;
+  }
+  if (quietHoursToggle) {
+    quietHoursToggle.checked = prefs.quietHoursEnabled === true;
+  }
+  if (quietHoursStartInput) {
+    quietHoursStartInput.value = normalizeQuietTime(prefs.quietHoursStart, DEFAULT_QUIET_START);
+  }
+  if (quietHoursEndInput) {
+    quietHoursEndInput.value = normalizeQuietTime(prefs.quietHoursEnd, DEFAULT_QUIET_END);
+  }
+  syncQuietHoursTimes();
+  syncRaidDependency();
   if (soundsToggle) {
     soundsToggle.checked = prefs.soundsEnabled !== false;
   }
@@ -1006,6 +1299,12 @@ function renderPreferences() {
   if (playerQualitySelect) {
     playerQualitySelect.value = prefs.playerQuality || "auto";
   }
+  if (volumeBoostInput) {
+    const boost = Math.min(300, Math.max(100, Number(prefs.playerVolumeBoost) || 100));
+    volumeBoostInput.value = String(boost);
+    if (volumeBoostValue) volumeBoostValue.textContent = String(boost);
+  }
+  syncClipDownloadLock();
   if (latencyPlacementSelect) {
     latencyPlacementSelect.value = prefs.latencyPlacement === "chat" ? "chat" : "viewers";
   }
@@ -1015,6 +1314,10 @@ function renderPreferences() {
   if (watchTimeToggle) {
     watchTimeToggle.checked = prefs.watchTimeTracker !== false;
   }
+  if (syncToggle) {
+    syncToggle.checked = prefs.crossDeviceSync === true;
+  }
+  renderSyncStatus();
   if (dropsTrackingToggle) {
     dropsTrackingToggle.checked = prefs.dropsTracking !== false;
   }
@@ -1027,6 +1330,7 @@ function renderPreferences() {
   if (previewsEnabledToggle) {
     previewsEnabledToggle.checked = prefs.previewsEnabled !== false;
   }
+  syncPreviewsSub(Boolean(prefs.previewsEnabled !== false));
   if (previewsDirectoryToggle) {
     previewsDirectoryToggle.checked = prefs.previewsSurfaceDirectory !== false;
   }
@@ -1157,8 +1461,8 @@ function setActiveTab(tabName) {
     showMenuPanel(tabName);
   } else if (tabName === "settings") {
     // « Réglages » ne rouvre pas Drops ou Badges : ils ont leur propre onglet.
-    const current = document.querySelector('.menu-nav > .menu-tab[aria-selected="true"]')?.dataset.panel;
-    const first = [...document.querySelectorAll(".menu-nav > .menu-tab")].find((tab) => !tab.hidden && !PANEL_TABS.has(tab.dataset.panel));
+    const current = document.querySelector('.menu-nav .menu-tab[aria-selected="true"]')?.dataset.panel;
+    const first = [...document.querySelectorAll(".menu-nav .menu-tab")].find((tab) => !tab.hidden && !PANEL_TABS.has(tab.dataset.panel));
     const target = current && !PANEL_TABS.has(current) ? current : first?.dataset.panel;
     if (target) showMenuPanel(target);
   }
@@ -1171,7 +1475,7 @@ function setActiveTab(tabName) {
   const streamersView = document.getElementById("streamers-view");
   const settingsSection = document.getElementById("settings-section");
   const historyView = document.getElementById("history-view");
-  document.getElementById("plus-view")?.classList.add("hidden");
+  closePlus({ restoreFocus: false });
   historyView?.classList.toggle("hidden", tabName !== "history");
 
   if (tabName === "streamers") {
@@ -1286,9 +1590,10 @@ function resolveWatchTimeEntry(entry) {
   // Fallback: platform icon
   if (!avatarUrl) {
     try {
-      const iconPath = platform === "kick" ? "images/social/Kick.png" : "images/social/twitch.png";
-      avatarUrl = chrome.runtime.getURL(iconPath);
-    } catch { /* ignore */ }
+      avatarUrl = chrome.runtime.getURL(getPlatformIcon(platform));
+    } catch (error) {
+      console.warn("[popup] icône de plateforme introuvable", error);
+    }
   }
 
   return { displayName, avatarUrl, platform };
@@ -1305,15 +1610,14 @@ function buildWtRankingItem(entry, valueHtml) {
   avatarImg.loading = "lazy";
   avatarImg.onerror = function () {
     this.onerror = null;
-    const icon = platform === "kick" ? "images/social/Kick.png" : "images/social/twitch.png";
-    this.src = chrome.runtime.getURL(icon);
+    this.src = chrome.runtime.getURL(getPlatformIcon(platform));
   };
 
   const info = document.createElement("div");
   info.className = "wt-entry-info";
   info.innerHTML = `
     <span class="wt-channel">${escapeHtml(displayName)}</span>
-    <span class="wt-platform-badge">${escapeHtml(platform)}</span>
+    <span class="wt-platform-badge">${escapeHtml(t(getPlatformLabelKey(platform)))}</span>
   `;
 
   const value = document.createElement("span");
@@ -1442,22 +1746,67 @@ async function handleExport() {
   }
 }
 
-async function handleResetStats() {
-  if (!confirm(t("popup.stats.confirmReset") || "Réinitialiser les statistiques ?")) return;
-
-  if (btnResetStats) btnResetStats.disabled = true;
-  try {
-    await sendMessage({
-      type: "resetStat",
-      stat: "channelPointsClaimed",
-    });
-    await renderStats();
-    showFeedback(t("popup.stats.resetSuccess") || "Statistiques remises à zéro", "success");
-  } catch {
-    showFeedback(t("popup.stats.resetError") || "Reset failed", "error");
-  }
-  if (btnResetStats) btnResetStats.disabled = false;
+/** Télécharge un texte en fichier (même mécanique que la sauvegarde JSON). */
+function downloadTextFile(filename, text, mime) {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
+
+/** Export CSV du journal de points (60 jours de détail, une ligne par gain). */
+async function handleExportPointsCsv() {
+  try {
+    const stored = await chrome.storage.local.get(POINTS_KEYS);
+    const state = pointsStateFrom(stored);
+    downloadTextFile(`streampulse-points-${new Date().toISOString().slice(0, 10)}.csv`, pointsJournalCsv(state.journal, state.channels), "text/csv");
+  } catch (error) {
+    console.error("Points CSV export error:", error);
+    showFeedback(t("popup.osd.exportError"), "error");
+  }
+}
+
+/** Export CSV de l'historique des Drops obtenus. */
+async function handleExportDropsCsv() {
+  try {
+    const stored = await chrome.storage.local.get(DROPS_HISTORY_KEY);
+    downloadTextFile(`streampulse-drops-${new Date().toISOString().slice(0, 10)}.csv`, dropsHistoryCsv(historyFrom(stored)), "text/csv");
+  } catch (error) {
+    console.error("Drops CSV export error:", error);
+    showFeedback(t("popup.osd.exportError"), "error");
+  }
+}
+
+/** Import d'un CSV d'historique : fusion côté service worker, doublons ignorés. */
+async function handleImportCsv(file) {
+  try {
+    const text = await file.text();
+    const { drops, gains } = importFromCsv(text);
+    if (!drops.length && !gains.length) {
+      showFeedback(t("backup.importCsvError"), "error");
+      return;
+    }
+    const response = await chrome.runtime.sendMessage({ type: "importHistoryCsv", drops, gains });
+    if (response?.error) {
+      showFeedback(t("backup.importCsvError"), "error");
+      return;
+    }
+    showFeedback(t("backup.importCsvDone", { count: response.count || 0 }), "success");
+  } catch (error) {
+    console.error("CSV import error:", error);
+    showFeedback(t("backup.importCsvError"), "error");
+  }
+}
+
+// La remise à zéro des points vit uniquement dans Activité (btn-reset-points,
+// confirmation inline 2 clics dans popup-points.js) : un seul compteur, un seul
+// geste destructeur. À suivre hors périmètre : resetPoints devrait aussi
+// remettre betaGeneralStats.channelPointsClaimed (compteur de l'en-tête).
 
 function handleImportClick() {
   // A file picker opened from the popup makes Chrome close the popup, which
@@ -1567,7 +1916,7 @@ async function handleAddStreamer(event) {
   await loadStreamers();
 }
 
-async function updatePreferences(updates) {
+async function updatePreferences(updates, { silent = false } = {}) {
   // Une valeur undefined disparait a la serialisation de sendMessage : la
   // charge utile arrivait vide au service worker, qui repondait « Aucune
   // preference a mettre a jour ». On filtre ici et on nomme la cle, pour que
@@ -1616,7 +1965,8 @@ async function updatePreferences(updates) {
   const toastKey = specificKey
     ? SPECIFIC_TOASTS[specificKey][updates[specificKey] ? 0 : 1]
     : "popup.settings.saved";
-  showFeedback(t(toastKey));
+  // Les enregistrements continus (chat, thème) ont leur retour inline : pas de toast à chaque frappe.
+  if (!silent) showFeedback(t(toastKey));
 
   return true;
 }
@@ -1724,7 +2074,8 @@ function initHomeInteractions() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    // Show skeleton placeholders immediately
+    // Show skeleton placeholders immediately. The platform picker waits for
+    // initI18n below: its labels come from t(), empty until a language loads.
     showSkeletons(3);
 
     // Storage round-trip: only the keys needed for first paint.
@@ -1786,6 +2137,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (changes.betaGeneralStats) {
         renderStats();
       }
+      // État de la synchro multi-appareils (poussée/tirée par le service worker).
+      if (changes[SYNC_STATUS_KEY]) {
+        renderSyncStatus();
+      }
       // Statuses refreshed by the background while the popup is open.
       if (changes.betaGeneralStatuses) {
         state.statuses = changes.betaGeneralStatuses.newValue || {};
@@ -1835,6 +2190,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       next.focus();
     });
     initMenuNav();
+    // « Page complète » du tiroir Twitch : ?menu=<panneau> ouvre les réglages
+    // directement sur la rubrique demandée.
+    const requestedPanel = new URLSearchParams(location.search).get("menu");
+    if (requestedPanel && document.querySelector(`.menu-tab[data-panel="${CSS.escape(requestedPanel)}"]`)) {
+      showMenuPanel(requestedPanel);
+    }
     initNews().catch((error) => console.warn("[popup] news init failed:", error));
     initSuggest({ input: streamerInput, form: document.getElementById("add-streamer-form"), getPlatform: () => state.selectedPlatform, getStreamers: () => state.streamers });
     initHomeInteractions();
@@ -1896,10 +2257,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderEventLogs().catch(() => {});
     });
 
-    document.getElementById("btn-clear-logs")?.addEventListener("click", async () => {
-      await chrome.runtime.sendMessage({ type: "clearEventLogs" });
-      renderEventLogs().catch(() => {});
-    });
+    document.getElementById("btn-clear-logs") &&
+      bindInlineConfirm(document.getElementById("btn-clear-logs"), {
+        arm: t("popup.settings.logClear"),
+        confirm: t("common.confirm"),
+      }, () => {
+        chrome.runtime.sendMessage({ type: "clearEventLogs" }).catch((error) => console.warn("[popup] effacement du journal :", error));
+        renderEventLogs().catch(() => {});
+      });
 
     refreshButton?.addEventListener("click", async () => {
       refreshButton.disabled = true;
@@ -2042,6 +2407,43 @@ document.addEventListener("DOMContentLoaded", async () => {
         updatePreferences({ watchTimeTracker: e.target.checked });
       });
     }
+    if (syncToggle) {
+      syncToggle.addEventListener("change", (e) => {
+        updatePreferences({ crossDeviceSync: e.target.checked });
+      });
+    }
+    // Les cinq toggles d'alertes n'avaient jamais été câblés : basculer ne
+    // changeait rien, le réglage reprenait sa valeur au prochain rendu.
+    if (liveNotificationsToggle) {
+      liveNotificationsToggle.addEventListener("change", (e) => {
+        updatePreferences({ liveNotifications: e.target.checked });
+      });
+    }
+    if (gameNotificationsToggle) {
+      gameNotificationsToggle.addEventListener("change", (e) => {
+        updatePreferences({ gameNotifications: e.target.checked });
+      });
+    }
+    if (titleNotificationsToggle) {
+      titleNotificationsToggle.addEventListener("change", (e) => {
+        updatePreferences({ titleNotifications: e.target.checked });
+      });
+    }
+    if (dropAlertsToggle) {
+      dropAlertsToggle.addEventListener("change", (e) => {
+        updatePreferences({ dropAlerts: e.target.checked });
+      });
+    }
+    if (badgeAlertsToggle) {
+      badgeAlertsToggle.addEventListener("change", (e) => {
+        updatePreferences({ badgeAlerts: e.target.checked });
+      });
+    }
+    if (raidAlertsToggle) {
+      raidAlertsToggle.addEventListener("change", (e) => {
+        updatePreferences({ raidAlerts: e.target.checked });
+      });
+    }
 
     if (pointsTrackingToggle) {
       pointsTrackingToggle.addEventListener("change", (e) => {
@@ -2068,29 +2470,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (chatKeywordsInput) {
-      chatKeywordsInput.addEventListener("change", (e) => {
-        updatePreferences({ chatKeywords: e.target.value });
+      chatKeywordsInput.addEventListener("change", async (e) => {
+        const ok = await updatePreferences({ chatKeywords: e.target.value });
+        announceChatSaved(ok);
       });
     }
 
     if (blockedUsersInput) {
-      blockedUsersInput.addEventListener("change", (e) => {
-        updatePreferences({ chatBlockedUsers: e.target.value });
-      });
-    }
-
-    if (saveChatFilterButton) {
-      saveChatFilterButton.addEventListener("click", async () => {
-        const keywords = chatKeywordsInput?.value || "";
-        const blocked = blockedUsersInput?.value || "";
-        const ok = await updatePreferences({
-          chatKeywords: keywords,
-          chatBlockedUsers: blocked,
-        });
-        if (ok) {
-          showFeedback(t("popup.feedback.chatFilterSaved"), "success");
-          markButtonSuccess(saveChatFilterButton);
-        }
+      blockedUsersInput.addEventListener("change", async (e) => {
+        const ok = await updatePreferences({ chatBlockedUsers: e.target.value });
+        announceChatSaved(ok);
       });
     }
 
@@ -2105,8 +2494,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     btnExport?.addEventListener("click", handleExport);
+    document.getElementById("btn-export-points-csv")?.addEventListener("click", handleExportPointsCsv);
+    document.getElementById("btn-export-drops-csv")?.addEventListener("click", handleExportDropsCsv);
+    const csvInput = document.getElementById("csv-file-input");
+    document.getElementById("btn-import-csv")?.addEventListener("click", () => csvInput?.click());
+    csvInput?.addEventListener("change", () => {
+      const file = csvInput.files?.[0];
+      if (file) handleImportCsv(file);
+      csvInput.value = ""; // resélectionner le même fichier doit redéclencher.
+    });
     btnImport?.addEventListener("click", handleImportClick);
-    btnResetStats?.addEventListener("click", handleResetStats);
+
+    // Réinitialiser les réglages : confirmation inline en 2 clics, jamais
+    // confirm(). Le service worker remet les défauts en gardant la langue et
+    // le thème ; la popup se redessine avec les préférences renvoyées.
+    if (btnResetPreferences) {
+      bindInlineConfirm(
+        btnResetPreferences,
+        { arm: t("popup.settings.resetPrefsArm"), confirm: t("popup.settings.resetPrefsConfirm") },
+        async () => {
+          const result = await sendMessage({ type: "resetPreferences" });
+          if (result?.success) {
+            state.preferences = { ...state.preferences, ...result.preferences };
+            renderPreferences();
+            if (resetPrefsStatus) resetPrefsStatus.textContent = t("popup.settings.resetPrefsDone");
+          } else if (resetPrefsStatus) {
+            resetPrefsStatus.textContent = t("popup.feedback.saveFailed");
+          }
+        },
+      );
+    }
 
     pseudoSaveButton?.addEventListener("click", handleSavePseudo);
     pseudoInput?.addEventListener("keydown", (e) => {
@@ -2143,25 +2560,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// Notes de version : elles ne s'ouvrent plus d'elles-memes a chaque mise a
-// jour. Deux acces, l'un dans l'en-tete et l'autre dans les reglages, et une
-// pastille sur les deux tant que la version n'a pas ete consultee.
+// Notes de version : une seule entrée, l'icône Nouveautés de la barre du haut,
+// et un seul signal, son point, tant que la version n'a pas été consultée.
 {
   const headerButton = document.getElementById("header-patch-notes");
   const headerDot = document.getElementById("header-patch-dot");
-  const dots = [patchNotesDot, headerDot].filter(Boolean);
 
-  if (patchNotesButton || headerButton) {
-    chrome.storage.local.get("patchNotesUnread", ({ patchNotesUnread }) => {
-      dots.forEach((d) => (d.hidden = !patchNotesUnread));
-    });
+  if (headerButton) {
+    chrome.storage.local
+      .get("patchNotesUnread")
+      .then(({ patchNotesUnread }) => {
+        if (headerDot) headerDot.hidden = !patchNotesUnread;
+      })
+      .catch((error) => console.warn("[popup] nouveautés non lues :", error?.message || error));
 
-    const open = () => {
-      dots.forEach((d) => (d.hidden = true));
+    headerButton.addEventListener("click", () => {
+      if (headerDot) headerDot.hidden = true;
       sendMessage({ type: "openPatchNotes" });
-    };
-    patchNotesButton?.addEventListener("click", open);
-    headerButton?.addEventListener("click", open);
+    });
   }
 }
 

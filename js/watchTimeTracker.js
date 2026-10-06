@@ -21,19 +21,14 @@
     const host = window.location.hostname;
     if (host.includes("twitch.tv")) return "twitch";
     if (host.includes("kick.com")) return "kick";
+    if (host.endsWith("youtube.com")) return "youtube";
     return null;
   }
 
-  const IGNORED_ROUTES = {
-    twitch: new Set([
-      "directory", "settings", "subscriptions", "drops",
-      "wallet", "u", "search", "videos", "moderator",
-      "inventory", "friends",
-    ]),
-    kick: new Set([
-      "categories", "following", "search", "dashboard",
-    ]),
-  };
+  // Routes système de Kick. Sur Twitch, la liste partagée de js/inject/dom.js
+  // fait foi (popout compris) ; Kick garde sa propre liste, plus courte : un
+  // login légitime homonyme d'une route Twitch ne doit pas être filtré.
+  const KICK_IGNORED_ROUTES = new Set(["categories", "following", "search", "dashboard"]);
 
   function extractChannel() {
     const platform = detectPlatform();
@@ -42,12 +37,36 @@
     const path = window.location.pathname.split("/").filter(Boolean);
     if (path.length === 0) return null;
 
+    if (platform === "youtube") return youtubeChannel(path);
+
     const segment = path[0].toLowerCase();
     if (!segment || segment.length > 60) return null;
 
-    if (IGNORED_ROUTES[platform]?.has(segment)) return null;
+    if (platform === "kick" && KICK_IGNORED_ROUTES.has(segment)) return null;
+    // dom.js n'est injecté que sur Twitch (accès optionnel : ce script tourne aussi sur Kick).
+    if (platform === "twitch" && window.__SP_DOM__?.isChannelLogin(segment) === false) return null;
 
     return { platform, channel: segment };
+  }
+
+  /**
+   * Chaîne YouTube : @handle ou /channel/ID dans l'URL ; sinon (page watch d'un
+   * direct) le lien de la chaîne dans le DOM. Seuls les directs comptent, repérés
+   * par le chat en direct ou le badge du lecteur : une vidéo normale ou un VOD
+   * ne doit rien ajouter au temps de visionnage.
+   */
+  function youtubeChannel(path) {
+    const first = (path[0] || "").toLowerCase();
+    const fromUrl = first.startsWith("@")
+      ? first.slice(1)
+      : first === "channel"
+        ? (path[1] || "").toLowerCase()
+        : "";
+    if (!document.querySelector("ytd-live-chat-frame, .ytp-live-badge")) return null;
+    if (fromUrl) return { platform: "youtube", channel: fromUrl };
+    const href = document.querySelector("#channel-name a[href], ytd-channel-name a[href]")?.getAttribute("href") || "";
+    const handle = /\/@([\w.-]{1,60})/.exec(href)?.[1] || /\/channel\/(UC[\w-]{1,60})/.exec(href)?.[1] || "";
+    return handle ? { platform: "youtube", channel: handle.toLowerCase() } : null;
   }
 
   // ── Categorie du live (recap avance) ──
@@ -74,7 +93,7 @@
 
   function safeSend(msg) {
     try {
-      chrome.runtime.sendMessage(msg).catch(() => {});
+      chrome.runtime.sendMessage(msg).catch(() => {}); // SW endormi ou contexte invalidé : échec attendu.
     } catch (_) {
       // Extension context invalidated (reloaded): ignore
     }
@@ -82,8 +101,27 @@
 
   // ── Heartbeat ──
 
+  /**
+   * Vrai seulement si l'utilisateur regarde réellement : onglet visible et
+   * une vidéo en lecture. Sans cela, un onglet en arrière-plan ou un live en
+   * pause comptait 60 secondes par minute, même sans rien regarder.
+   */
+  function isActuallyWatching() {
+    if (document.visibilityState !== "visible") return false;
+    for (const video of document.querySelectorAll("video")) {
+      if (!video.paused && !video.ended && video.readyState >= 2) return true;
+    }
+    return false;
+  }
+
   function sendHeartbeat() {
     if (!currentChannel || !currentPlatform) return;
+    // Temps mort (onglet masqué, vidéo en pause) : la fenêtre partielle
+    // repart de maintenant, pour ne rien compter rétroactivement.
+    if (!isActuallyWatching()) {
+      lastHeartbeatTime = Date.now();
+      return;
+    }
     lastHeartbeatTime = Date.now();
     safeSend({
       type: "trackWatchTime",
