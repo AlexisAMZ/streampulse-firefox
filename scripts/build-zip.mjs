@@ -24,7 +24,9 @@ const DEV_ONLY = [/\.md$/i, /^\.gitignore$/, /^package(-lock)?\.json$/, /^eslint
   // AMO, pas au paquet telecharge par chaque utilisateur.
   /^images\/cws_screenshots\//, /^images\/promo\//,
   // Tests unitaires : outillage de developpement.
-  /^tests\//];
+  /^tests\//,
+  // Dossiers cachés (.superpowers, .impeccable…) : notes de travail locales.
+  /^\./];
 // Pas d'equivalent d'EXTRA ici : ce build parcourt le disque, config.js est
 // donc ramasse comme les autres fichiers.
 // Filet de securite : si l'une de ces entrees apparait, on refuse de packager.
