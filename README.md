@@ -10,7 +10,7 @@
   <a href="#-installation">Installation</a> •
   <a href="#-privacy">Privacy</a> •
   <a href="#-building-from-source">Build</a> •
-  <a href="https://streampulse.fr/">Website</a>
+  <a href="https://streampulse.tech/">Website</a>
 </p>
 
 <p align="center">
@@ -81,7 +81,7 @@ whether it is present. It is **pseudonymous data**, handled as personal data, wh
 the manifest declares `personallyIdentifyingInfo`. The badge can be turned off at any time in
 **Settings → Chat → Community badge**.
 
-Full policy: **[streampulse.fr/privacy](https://streampulse.fr/privacy)**
+Full policy: **[streampulse.tech/privacy](https://streampulse.tech/privacy)**
 
 ## 🛠 Building from source
 
@@ -121,7 +121,7 @@ worker, which is why the background section and audio handling differ from the C
 
 ## 🔗 Links
 
-- Website: [streampulse.fr](https://streampulse.fr/)
+- Website: [streampulse.tech](https://streampulse.tech/)
 - Chrome build: [Chrome Web Store](https://chromewebstore.google.com/detail/streampulse-multi-streame/ipfhbfabadbpkjimhdcjadopnahdpddh)
-- Support: [streampulse.fr/support](https://streampulse.fr/support)
+- Support: [streampulse.tech/support](https://streampulse.tech/support)
 - Developer: AlexisAMZ

@@ -49,6 +49,43 @@ export const FALLBACK_LANGUAGE = "en";
 export const RELEASES = [
 
   {
+    version: "26.10.10",
+    date: "2026-10-10",
+    title: {
+      "fr": "Une nouvelle adresse",
+      "en": "A new address",
+      "es": "Una nueva dirección",
+      "pt-BR": "Um novo endereço",
+      "de": "Eine neue Adresse",
+      "it": "Un nuovo indirizzo",
+      "pl": "Nowy adres",
+      "tr": "Yeni bir adres",
+      "ru": "Новый адрес",
+      "ja": "新しいアドレス",
+      "ko": "새로운 주소",
+    },
+    changes: [
+      {
+        type: "improved",
+        area: "interface",
+        text: {
+          "fr": "StreamPulse a une nouvelle adresse : streampulse.tech. La clé StreamPulse+, le badge communautaire et les jetons passent désormais par ce domaine.",
+          "en": "StreamPulse has a new home: streampulse.tech. Your StreamPulse+ key, the community badge and tokens now go through this domain.",
+          "es": "StreamPulse tiene nueva dirección: streampulse.tech. Tu clave StreamPulse+, la insignia de la comunidad y los tokens pasan ahora por este dominio.",
+          "pt-BR": "O StreamPulse tem um novo endereço: streampulse.tech. Sua chave StreamPulse+, o emblema da comunidade e os tokens agora passam por este domínio.",
+          "de": "StreamPulse hat eine neue Adresse: streampulse.tech. Dein StreamPulse+-Schlüssel, das Community-Abzeichen und die Tokens laufen jetzt über diese Domain.",
+          "it": "StreamPulse ha un nuovo indirizzo: streampulse.tech. La tua chiave StreamPulse+, il badge della community e i token passano ora da questo dominio.",
+          "pl": "StreamPulse ma nowy adres: streampulse.tech. Twój klucz StreamPulse+, odznaka społeczności i tokeny działają teraz przez tę domenę.",
+          "tr": "StreamPulse'un yeni adresi: streampulse.tech. StreamPulse+ anahtarın, topluluk rozeti ve jetonlar artık bu alan adı üzerinden geçiyor.",
+          "ru": "У StreamPulse новый адрес: streampulse.tech. Ключ StreamPulse+, значок сообщества и токены теперь работают через этот домен.",
+          "ja": "StreamPulse の新しいアドレスは streampulse.tech です。StreamPulse+ キー、コミュニティバッジ、トークンはこのドメイン経由になりました。",
+          "ko": "StreamPulse의 새 주소는 streampulse.tech입니다. StreamPulse+ 키, 커뮤니티 배지, 토큰이 이제 이 도메인을 통해 연결됩니다.",
+        },
+      },
+    ],
+  },
+
+  {
     version: "26.10.7",
     date: "2026-10-06",
     title: {
@@ -1736,17 +1773,17 @@ export const RELEASES = [
       {
         type: "improved",
         text: {
-          fr: "Le badge communautaire est désormais désactivé par défaut et ne s'active qu'avec votre accord, à l'installation ou dans les réglages, car il envoie une empreinte de votre pseudo à streampulse.fr.",
-          en: "The community badge is now off by default and only turns on with your consent, at install or in settings, since it sends a fingerprint of your username to streampulse.fr.",
-          es: "La insignia de la comunidad ahora está desactivada por defecto y solo se activa con tu consentimiento, al instalar o en los ajustes, porque envía una huella de tu nombre de usuario a streampulse.fr.",
-          "pt-BR": "O emblema da comunidade agora vem desativado por padrão e só é ativado com o seu consentimento, na instalação ou nas configurações, porque envia uma impressão do seu nome de usuário para streampulse.fr.",
-          de: "Das Community-Abzeichen ist jetzt standardmäßig aus und wird nur mit deiner Zustimmung aktiviert, bei der Installation oder in den Einstellungen, da es einen Fingerabdruck deines Benutzernamens an streampulse.fr sendet.",
-          it: "Il badge della community ora è disattivato di default e si attiva solo con il tuo consenso, all'installazione o nelle impostazioni, perché invia un'impronta del tuo nome utente a streampulse.fr.",
-          pl: "Odznaka społeczności jest teraz domyślnie wyłączona i włącza się tylko za Twoją zgodą, podczas instalacji lub w ustawieniach, ponieważ wysyła odcisk Twojej nazwy użytkownika do streampulse.fr.",
-          tr: "Topluluk rozeti artık varsayılan olarak kapalı ve yalnızca senin onayınla, kurulumda veya ayarlardan açılıyor, çünkü kullanıcı adının bir parmak izini streampulse.fr'ye gönderiyor.",
-          ru: "Значок сообщества теперь по умолчанию выключен и включается только с вашего согласия, при установке или в настройках, так как он отправляет отпечаток вашего имени пользователя на streampulse.fr.",
-          ja: "コミュニティバッジは初期設定でオフになり、インストール時または設定で同意した場合のみオンになります。ユーザー名のフィンガープリントを streampulse.fr に送信するためです。",
-          ko: "커뮤니티 배지는 이제 기본적으로 꺼져 있으며, 사용자 이름의 지문을 streampulse.fr로 보내기 때문에 설치 시 또는 설정에서 동의한 경우에만 켜집니다.",
+          fr: "Le badge communautaire est désormais désactivé par défaut et ne s'active qu'avec votre accord, à l'installation ou dans les réglages, car il envoie une empreinte de votre pseudo à streampulse.tech.",
+          en: "The community badge is now off by default and only turns on with your consent, at install or in settings, since it sends a fingerprint of your username to streampulse.tech.",
+          es: "La insignia de la comunidad ahora está desactivada por defecto y solo se activa con tu consentimiento, al instalar o en los ajustes, porque envía una huella de tu nombre de usuario a streampulse.tech.",
+          "pt-BR": "O emblema da comunidade agora vem desativado por padrão e só é ativado com o seu consentimento, na instalação ou nas configurações, porque envia uma impressão do seu nome de usuário para streampulse.tech.",
+          de: "Das Community-Abzeichen ist jetzt standardmäßig aus und wird nur mit deiner Zustimmung aktiviert, bei der Installation oder in den Einstellungen, da es einen Fingerabdruck deines Benutzernamens an streampulse.tech sendet.",
+          it: "Il badge della community ora è disattivato di default e si attiva solo con il tuo consenso, all'installazione o nelle impostazioni, perché invia un'impronta del tuo nome utente a streampulse.tech.",
+          pl: "Odznaka społeczności jest teraz domyślnie wyłączona i włącza się tylko za Twoją zgodą, podczas instalacji lub w ustawieniach, ponieważ wysyła odcisk Twojej nazwy użytkownika do streampulse.tech.",
+          tr: "Topluluk rozeti artık varsayılan olarak kapalı ve yalnızca senin onayınla, kurulumda veya ayarlardan açılıyor, çünkü kullanıcı adının bir parmak izini streampulse.tech'ye gönderiyor.",
+          ru: "Значок сообщества теперь по умолчанию выключен и включается только с вашего согласия, при установке или в настройках, так как он отправляет отпечаток вашего имени пользователя на streampulse.tech.",
+          ja: "コミュニティバッジは初期設定でオフになり、インストール時または設定で同意した場合のみオンになります。ユーザー名のフィンガープリントを streampulse.tech に送信するためです。",
+          ko: "커뮤니티 배지는 이제 기본적으로 꺼져 있으며, 사용자 이름의 지문을 streampulse.tech로 보내기 때문에 설치 시 또는 설정에서 동의한 경우에만 켜집니다.",
         }
       },
       {
@@ -1832,17 +1869,17 @@ export const RELEASES = [
       {
         type: "fix",
         text: {
-          fr: "L'extension contacte maintenant directement streampulse.fr : le badge, la vérification de ta clé StreamPulse+ et la connexion à Twitch ne dépendent plus d'une redirection qui pouvait les bloquer.",
-          en: "The extension now talks to streampulse.fr directly: the badge, your StreamPulse+ key check and the Twitch connection no longer rely on a redirect that could block them.",
-          es: "La extensión ahora contacta directamente con streampulse.fr: la insignia, la verificación de tu clave StreamPulse+ y la conexión con Twitch ya no dependen de una redirección que podía bloquearlas.",
-          "pt-BR": "A extensão agora se conecta diretamente a streampulse.fr: o emblema, a verificação da sua chave StreamPulse+ e a conexão com a Twitch não dependem mais de um redirecionamento que podia bloqueá-los.",
-          de: "Die Erweiterung verbindet sich jetzt direkt mit streampulse.fr: Abzeichen, Prüfung deines StreamPulse+-Schlüssels und Twitch-Verbindung hängen nicht mehr von einer Weiterleitung ab, die sie blockieren konnte.",
-          it: "L'estensione ora contatta direttamente streampulse.fr: il badge, la verifica della tua chiave StreamPulse+ e la connessione a Twitch non dipendono più da un reindirizzamento che poteva bloccarli.",
-          pl: "Rozszerzenie łączy się teraz bezpośrednio z streampulse.fr: odznaka, weryfikacja klucza StreamPulse+ i połączenie z Twitchem nie zależą już od przekierowania, które mogło je blokować.",
-          tr: "Eklenti artık doğrudan streampulse.fr ile iletişim kuruyor: rozet, StreamPulse+ anahtar doğrulaması ve Twitch bağlantısı artık onları engelleyebilecek bir yönlendirmeye bağlı değil.",
-          ru: "Расширение теперь обращается напрямую к streampulse.fr: значок, проверка ключа StreamPulse+ и подключение к Twitch больше не зависят от перенаправления, которое могло их блокировать.",
-          ja: "拡張機能が streampulse.fr に直接接続するようになりました。バッジ、StreamPulse+ キーの確認、Twitch との接続が、ブロックの原因になり得たリダイレクトに依存しなくなりました。",
-          ko: "확장 프로그램이 이제 streampulse.fr에 직접 연결합니다. 배지, StreamPulse+ 키 확인, 트위치 연결이 차단될 수 있던 리디렉션에 더 이상 의존하지 않습니다.",
+          fr: "L'extension contacte maintenant directement streampulse.tech : le badge, la vérification de ta clé StreamPulse+ et la connexion à Twitch ne dépendent plus d'une redirection qui pouvait les bloquer.",
+          en: "The extension now talks to streampulse.tech directly: the badge, your StreamPulse+ key check and the Twitch connection no longer rely on a redirect that could block them.",
+          es: "La extensión ahora contacta directamente con streampulse.tech: la insignia, la verificación de tu clave StreamPulse+ y la conexión con Twitch ya no dependen de una redirección que podía bloquearlas.",
+          "pt-BR": "A extensão agora se conecta diretamente a streampulse.tech: o emblema, a verificação da sua chave StreamPulse+ e a conexão com a Twitch não dependem mais de um redirecionamento que podia bloqueá-los.",
+          de: "Die Erweiterung verbindet sich jetzt direkt mit streampulse.tech: Abzeichen, Prüfung deines StreamPulse+-Schlüssels und Twitch-Verbindung hängen nicht mehr von einer Weiterleitung ab, die sie blockieren konnte.",
+          it: "L'estensione ora contatta direttamente streampulse.tech: il badge, la verifica della tua chiave StreamPulse+ e la connessione a Twitch non dipendono più da un reindirizzamento che poteva bloccarli.",
+          pl: "Rozszerzenie łączy się teraz bezpośrednio z streampulse.tech: odznaka, weryfikacja klucza StreamPulse+ i połączenie z Twitchem nie zależą już od przekierowania, które mogło je blokować.",
+          tr: "Eklenti artık doğrudan streampulse.tech ile iletişim kuruyor: rozet, StreamPulse+ anahtar doğrulaması ve Twitch bağlantısı artık onları engelleyebilecek bir yönlendirmeye bağlı değil.",
+          ru: "Расширение теперь обращается напрямую к streampulse.tech: значок, проверка ключа StreamPulse+ и подключение к Twitch больше не зависят от перенаправления, которое могло их блокировать.",
+          ja: "拡張機能が streampulse.tech に直接接続するようになりました。バッジ、StreamPulse+ キーの確認、Twitch との接続が、ブロックの原因になり得たリダイレクトに依存しなくなりました。",
+          ko: "확장 프로그램이 이제 streampulse.tech에 직접 연결합니다. 배지, StreamPulse+ 키 확인, 트위치 연결이 차단될 수 있던 리디렉션에 더 이상 의존하지 않습니다.",
         }
       },
       {
@@ -2248,17 +2285,17 @@ export const RELEASES = [
       {
         type: "improved",
         text: {
-          fr: "Nouveau look pour le récap, les notes de version, l'accueil et les éléments ajoutés sur Twitch, aux couleurs de streampulse.fr.",
-          en: "A new look for the recap, the release notes, the welcome screens and the elements added on Twitch, matching streampulse.fr.",
-          es: "Nuevo aspecto para el resumen, las notas de versión, la bienvenida y los elementos añadidos en Twitch, con los colores de streampulse.fr.",
-          "pt-BR": "Novo visual para o resumo, as notas de versão, as boas-vindas e os elementos adicionados na Twitch, com as cores do streampulse.fr.",
-          de: "Neuer Look für den Rückblick, die Versionshinweise, die Begrüßung und die auf Twitch eingefügten Elemente, passend zu streampulse.fr.",
-          it: "Nuovo aspetto per il riepilogo, le note di versione, il benvenuto e gli elementi aggiunti su Twitch, con i colori di streampulse.fr.",
-          pl: "Nowy wygląd podsumowania, informacji o wersji, ekranu powitalnego i elementów dodawanych na Twitchu, w barwach streampulse.fr.",
-          tr: "Özet, sürüm notları, karşılama ekranları ve Twitch'e eklenen öğeler için streampulse.fr renklerinde yeni görünüm.",
-          ru: "Новый вид итогов, заметок о версии, приветствия и элементов на Twitch в стиле streampulse.fr.",
-          ja: "まとめ、リリースノート、ようこそ画面、Twitchに追加される要素のデザインをstreampulse.frに合わせて一新。",
-          ko: "요약, 릴리스 노트, 시작 화면, 트위치에 추가되는 요소가 streampulse.fr 스타일로 새로워졌습니다.",
+          fr: "Nouveau look pour le récap, les notes de version, l'accueil et les éléments ajoutés sur Twitch, aux couleurs de streampulse.tech.",
+          en: "A new look for the recap, the release notes, the welcome screens and the elements added on Twitch, matching streampulse.tech.",
+          es: "Nuevo aspecto para el resumen, las notas de versión, la bienvenida y los elementos añadidos en Twitch, con los colores de streampulse.tech.",
+          "pt-BR": "Novo visual para o resumo, as notas de versão, as boas-vindas e os elementos adicionados na Twitch, com as cores do streampulse.tech.",
+          de: "Neuer Look für den Rückblick, die Versionshinweise, die Begrüßung und die auf Twitch eingefügten Elemente, passend zu streampulse.tech.",
+          it: "Nuovo aspetto per il riepilogo, le note di versione, il benvenuto e gli elementi aggiunti su Twitch, con i colori di streampulse.tech.",
+          pl: "Nowy wygląd podsumowania, informacji o wersji, ekranu powitalnego i elementów dodawanych na Twitchu, w barwach streampulse.tech.",
+          tr: "Özet, sürüm notları, karşılama ekranları ve Twitch'e eklenen öğeler için streampulse.tech renklerinde yeni görünüm.",
+          ru: "Новый вид итогов, заметок о версии, приветствия и элементов на Twitch в стиле streampulse.tech.",
+          ja: "まとめ、リリースノート、ようこそ画面、Twitchに追加される要素のデザインをstreampulse.techに合わせて一新。",
+          ko: "요약, 릴리스 노트, 시작 화면, 트위치에 추가되는 요소가 streampulse.tech 스타일로 새로워졌습니다.",
         }
       },
       {
