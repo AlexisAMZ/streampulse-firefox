@@ -147,6 +147,39 @@ else {
       warn(`translations.js defines blocks absent from ALL_LANGUAGES: ${orphanBlocks.join(", ")}`);
     }
 
+    // Clés littéralement utilisées : t("…"), translate(WithPrefs)(…),
+    // __SP_I18N__.get(…), data-i18n — mêmes motifs que le contrôle
+    // « used → exists » de Chrome.
+    const usedKeys = new Set();
+    const appDirs = ["js", "html"];
+    const skip = (f) =>
+      f.includes("vendor") || f.includes("i18n-inline") || f.endsWith("translations.js") ||
+      f.includes("changelog-data") || f.includes("history-data") || f.includes("predictions-data") ||
+      f.includes("predictions-data-inline") || f.includes("points-bonus-inline");
+    const keyPatterns = [
+      /\bt\("([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g,
+      /translate(?:WithPrefs)?\([^,\n]+,\s*"([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g,
+      /__SP_I18N__\.get\([^,\n]+,\s*"([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g,
+    ];
+    const scanDir = (dir) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (!skip(full)) scanDir(full);
+          continue;
+        }
+        if (!/\.(js|mjs|html)$/.test(entry.name) || skip(full)) continue;
+        const text = fs.readFileSync(full, "utf8");
+        for (const re of keyPatterns) {
+          for (const m of text.matchAll(re)) usedKeys.add(m[1]);
+        }
+        if (full.endsWith(".html")) {
+          for (const m of text.matchAll(/data-i18n="([^"]+)"/g)) usedKeys.add(m[1]);
+        }
+      }
+    };
+    for (const dir of appDirs) scanDir(path.join(REPO, dir));
+
     const referenceKeys = flatten(translations[DEFAULT_LANGUAGE]);
     let incomplete = 0;
 
@@ -169,6 +202,24 @@ else {
 
     if (!incomplete) {
       pass(`translations.js: ${declared.length} languages complete (${referenceKeys.length} keys each)`);
+    }
+
+    // Sens inverse (porté de Chrome) : les clés définies mais plus référencées
+    // s'accumulaient en silence (143 clés mortes × 11 langues purgeées le
+    // 2026-10-13). Le compte inclut volontairement les clés résolues
+    // dynamiquement — nuancier popup.cosmetics.*, paliers d'ancienneté,
+    // périodes du récap, resolveurs scopés inject.*, libellés du tiroir,
+    // changelog.areas.* — les 3 clés du tooling store
+    // (onboarding.welcomeTagline, popup.platformFilter.*) et tout le
+    // sous-arbre popup.cosmetics.* (copié vers shared.cosmetics.*). Si ce
+    // contrôle échoue : clé morte ajoutée (à supprimer) ou nouveau mécanisme
+    // dynamique (ajuster MAX_UNUSED_KEYS et le documenter ici).
+    const MAX_UNUSED_KEYS = 337;
+    const unusedKeys = referenceKeys.filter((k) => !usedKeys.has(k));
+    if (unusedKeys.length > MAX_UNUSED_KEYS) {
+      fail(`${unusedKeys.length} translation keys are never referenced by any literal call (max ${MAX_UNUSED_KEYS}) : une clé morte vient probablement d'être ajoutée, ou un nouveau mécanisme dynamique demande d'ajuster MAX_UNUSED_KEYS`);
+    } else {
+      pass(`${unusedKeys.length} translation keys unreferenced, within the dynamic-tooling-and-shared allowance (max ${MAX_UNUSED_KEYS})`);
     }
 
     // Une langue publiée (ready: true) ne doit pas être un simple copier-coller
