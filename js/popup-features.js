@@ -13,6 +13,9 @@ import { IDENTITY_STORAGE_KEYS, initIdentity, renderIdentity } from "./popup-ide
 import { HISTORY_KEY, formatClock, selectMissed, summarize } from "./history-data.js";
 import { PREDICTION_HISTORY_KEY, PREDICTION_RULE_KEY, normalizeRule as normalizePredictionRule, summarize as summarizePredictions } from "./predictions-data.js";
 import { PLUS_KEY, plusPageUrl, getDeviceId, isPlusActive, normalizeLicenseKey, portalUrl, releaseDevice, verifyLicense } from "./plus.js";
+import { mountLiquidMetalButton } from "./promo-liquid-button.js";
+import { mountClipsMorph } from "./promo-clips-morph.js";
+import { hasRecentSuccess, reviewAskDecision, REMOTE_CONFIG_CACHE_KEY } from "./popup-review.js";
 import { PLUS_VALUE_KEY, plusValueFrom } from "./plus-value.js";
 import {
   SMART_ALERTS_KEY,
@@ -175,6 +178,17 @@ function initHistory() {
 
 let plusRecord = null;
 let selectedPlan = "yearly";
+const PROMO_KEY = "streamPulsePromo";
+const PROMO_FREQ_MS = 20 * 60 * 60 * 1000; // une fois par jour au plus
+const PROMO_MIN_OPENS = 3; // pas avant la 3e ouverture éligible
+let promoState = { plusClosed: false, clipsClosed: false, opens: 0, lastShownAt: 0 };
+let promoDue = false;
+let promoSuccess = false;
+let promoPlusOk = false;
+let promoClipsOk = false;
+let promoRemoteOff = false;
+let promoHasDrops = false;
+let promoHasWatch = false;
 const PLAN_LABELS = { monthly: "popup.plus.planMonthly", yearly: "popup.plus.planYearly", lifetime: "popup.plus.planLifetime" };
 const plusListeners = new Set();
 
@@ -211,8 +225,69 @@ function renderPlus() {
   }
   if ($("plus-menu-text")) $("plus-menu-text").textContent = t(active ? "popup.plusMenu.statusActive" : "popup.plusMenu.statusInactive");
   if ($("plus-menu-open")) $("plus-menu-open").textContent = t(active ? "popup.plusMenu.manage" : "popup.plusMenu.discover");
+  renderPromo();
   renderPlusValue().catch(() => {});
   plusListeners.forEach((listener) => listener(active));
+}
+
+/**
+ * La carte au-dessus de la barre d'ajout : l'essai StreamPulse+ d'abord (hors
+ * abonnement), puis StreamPulse Clips — produit séparé, pour tous. Elle se
+ * mérite : jamais aux nouvelles installations, au plus une fois par jour, et
+ * chaque fermeture est gardée en storage.
+ */
+function renderPromo() {
+  const showPlus = promoDue && promoPlusOk && !plusActive() && !promoState.plusClosed;
+  const showClips = promoDue && promoClipsOk && !showPlus && !promoState.clipsClosed;
+  const plus = $("promo-plus");
+  const clips = $("promo-clips");
+  if (plus) plus.hidden = !showPlus;
+  if (clips) clips.hidden = !showClips;
+  const container = $("promo-float");
+  if (container) container.hidden = !showPlus && !showClips;
+  if (showClips) ensureClipsMetal();
+}
+
+/**
+ * Décide (une fois par ouverture) si la carte est due. Il faut avoir été
+ * servi : au moins un streamer suivi ET une activité récente (visionnage ou
+ * points des 2 derniers jours). Une installation toute fraîche n'est donc
+ * jamais exposée à la promo. Puis : trois ouvertures éligibles avant la
+ * première carte, une seule par jour, la demande d'avis passe devant elle,
+ * et l'interrupteur distant (config.promo.enabled) peut tout couper.
+ * Contextuel : Plus vise ceux qui ont de l'activité Drops, Clips ceux qui
+ * ont de l'historique de visionnage (les futurs clippeurs).
+ */
+function decidePromoDue() {
+  const activated = Array.isArray(smartStreamers) && smartStreamers.length > 0;
+  if (!activated || !promoSuccess) return false;
+  if (reviewAskDecision().due) return false; // la demande d'avis gagne la place
+  if (promoRemoteOff) return false; // coupe-circuit piloté depuis streampulse.tech
+  promoPlusOk = promoHasDrops;   // Plus vise ceux qui vivent des Drops
+  promoClipsOk = promoHasWatch;  // Clips vise ceux qui regardent (futurs clippeurs)
+  if (!promoPlusOk && !promoClipsOk) return false;
+  promoState.opens = (promoState.opens || 0) + 1;
+  const seenEnough = promoState.opens >= PROMO_MIN_OPENS;
+  const cooled = Date.now() - (promoState.lastShownAt || 0) >= PROMO_FREQ_MS;
+  const due = seenEnough && cooled;
+  if (due) promoState.lastShownAt = Date.now();
+  chrome.storage.local.set({ [PROMO_KEY]: promoState }).catch((error) => console.warn("[popup] promo :", error?.message || error));
+  return due;
+}
+
+/** Le bouton métal ne se monte que lorsque la carte est montrée : un canvas
+ *  WebGL monté dans un conteneur masqué naît avec une taille nulle. */
+let clipsMetalMounted = false;
+function ensureClipsMetal() {
+  const host = $("promo-clips-cta");
+  if (host && !clipsMetalMounted) {
+    clipsMetalMounted = true;
+    mountLiquidMetalButton(host, {
+      label: t("changelog.clipsCtaShort"),
+      onClick: () => window.open("https://spclips.com", "_blank", "noopener"),
+    });
+  }
+  mountClipsMorph($("clips-morph"));
 }
 
 /**
@@ -818,8 +893,24 @@ export async function initFeatures() {
   initClipDownloadLock();
   initPredictions();
 
-  const stored = await chrome.storage.local.get([PLUS_KEY, SMART_ALERTS_KEY, PREDICTION_RULE_KEY, PREDICTION_HISTORY_KEY, "betaGeneralStreamers", ...IDENTITY_STORAGE_KEYS]);
+  const stored = await chrome.storage.local.get([PLUS_KEY, PROMO_KEY, SMART_ALERTS_KEY, PREDICTION_RULE_KEY, PREDICTION_HISTORY_KEY, "betaGeneralStreamers", "streamPulseWatchTimeDaily", "streamPulsePointsDaily", "streamPulseDropsProgress", REMOTE_CONFIG_CACHE_KEY, ...IDENTITY_STORAGE_KEYS]);
   plusRecord = stored[PLUS_KEY] || null;
+  promoState = {
+    plusClosed: stored[PROMO_KEY]?.plusClosed === true,
+    clipsClosed: stored[PROMO_KEY]?.clipsClosed === true,
+    opens: stored[PROMO_KEY]?.opens || 0,
+    lastShownAt: stored[PROMO_KEY]?.lastShownAt || 0,
+  };
+  // Même règle que la demande d'avis : la promo ne se montre qu'à quelqu'un à
+  // qui l'extension a déjà rendu service — du visionnage ou des points dans
+  // les 2 derniers jours (tables quotidiennes locales, jamais renvoyées).
+  promoSuccess = hasRecentSuccess([stored.streamPulseWatchTimeDaily, stored.streamPulsePointsDaily]);
+  // Ciblage contextuel : Drops vécus → la carte Plus parle à la bonne personne ;
+  // de l'historique de visionnage → la carte Clips (les futurs clippeurs).
+  promoHasDrops = Object.keys(stored.streamPulseDropsProgress || {}).length > 0;
+  promoHasWatch = Object.keys(stored.streamPulseWatchTimeDaily || {}).length > 0;
+  // Coupe-circuit distant : config.promo.enabled = false coupe tout, sans republier.
+  promoRemoteOff = stored[REMOTE_CONFIG_CACHE_KEY]?.data?.promo?.enabled === false;
   plusListeners.add(() => renderIdentity());
   initIdentity({ getRecord: () => plusRecord, isPlus: plusActive, openPlus, stored });
   predictionRule = normalizePredictionRule(stored[PREDICTION_RULE_KEY]);
@@ -827,7 +918,19 @@ export async function initFeatures() {
   recheckOnOpen().catch(() => {});
   smartRules = normalizeRules(stored[SMART_ALERTS_KEY]);
   smartStreamers = Array.isArray(stored.betaGeneralStreamers) ? stored.betaGeneralStreamers : [];
+  promoDue = decidePromoDue();
   renderPlus();
+  $("promo-plus-close")?.addEventListener("click", () => {
+    promoState.plusClosed = true;
+    renderPromo();
+    chrome.storage.local.set({ [PROMO_KEY]: promoState }).catch((error) => console.warn("[popup] carte plus :", error?.message || error));
+  });
+  $("promo-plus-cta")?.addEventListener("click", openPlus);
+  $("promo-clips-close")?.addEventListener("click", () => {
+    promoState.clipsClosed = true;
+    renderPromo();
+    chrome.storage.local.set({ [PROMO_KEY]: promoState }).catch((error) => console.warn("[popup] carte clips :", error?.message || error));
+  });
   initPoints({ isPlus: plusActive, onPlusChange: (listener) => plusListeners.add(listener), openPlus })
     .catch((error) => console.warn("[popup] points init failed:", error));
   initReviewAsk().catch((error) => console.warn("[popup] review ask init failed:", error));
