@@ -11,14 +11,15 @@ export default {
   "platforms": {
     "twitch": "Twitch",
     "kick": "Kick",
-    "youtube": "YouTube"
+    "youtube": "YouTube",
+    "chzzk": "CHZZK"
   },
   "onboarding": {
     "newBadge": "Novo",
     "badgePreviewMessage": "Olha, este é o meu emblema do StreamPulse!",
     "welcomeTitle": "Nunca mais perca uma live.",
     "skipStep": "Pular esta etapa",
-    "badgePrivacyNote": "Desativado por padrão. Se você ativar: um hash do seu nome de usuário é enviado para streampulse.tech no máximo uma vez por dia. Nada mais sai do seu navegador.",
+    "badgePrivacyNote": "Desativado por padrão. Se você ativar: um hash do seu nome de usuário é enviado para streampulse.tech no máximo uma vez por dia.",
     "advancedSettings": "Configurações avançadas",
     "removeStreamerName": "Remover {{name}}",
     "stepProfile": "Usuário",
@@ -30,7 +31,7 @@ export default {
     "profileHintFound": "✓ Encontrado: {{handle}}",
     "profileHintKept": "Perfil da Twitch não encontrado: sem problemas, vamos manter este nome de usuário como está. Você também pode pular esta etapa.",
     "documentTitle": "Configuração inicial",
-    "welcomeTagline": "EXTENSÃO CHROME · TWITCH · KICK · YOUTUBE",
+    "welcomeTagline": "EXTENSÃO FIREFOX · TWITCH · KICK · YOUTUBE",
     "welcomeDescription": "Boas-vindas ao StreamPulse: notificações de live, resgate automático de pontos e de Drops. Comece escolhendo o idioma da interface.",
     "preferencesTitle": "Configurações recomendadas",
     "preferencesDescription": "Ative as opções que preferir. Você pode mudá-las depois nas configurações.",
@@ -66,7 +67,8 @@ export default {
     "placeholders": {
       "twitch": "ex.: AlexisAMZ",
       "kick": "ex.: Teuf",
-      "youtube": "@usuário ou link de canal do YouTube"
+      "youtube": "@usuário ou link de canal do YouTube",
+      "chzzk": "Nome ou link do canal"
     },
     "submit": "Adicionar",
     "currentHeader": "Seus streamers",
@@ -83,7 +85,7 @@ export default {
     "finishTitle": "Pronto!",
     "finishDescription": "O StreamPulse está configurado. Fixe a extensão para acessá-la fácil.",
     "finish": "Concluir",
-    "footerText": "Criado por <a href=\"https://www.instagram.com/alexisamz\" target=\"_blank\" rel=\"noopener noreferrer\">@AlexisAMZ</a> • <a href=\"mailto:contact@alexisamz.fr\">contact@alexisamz.fr</a>",
+    "footerText": "Criado por <a href=\"https://www.instagram.com/alexisamz\" target=\"_blank\" rel=\"noopener noreferrer\">@AlexisAMZ</a> • <a href=\"mailto:contact@streampulse.tech\">contact@streampulse.tech</a>",
     "feedback": {
       "invalidHandle": "Este nome da {{platform}} não é válido. Confira a grafia ou cole o link do canal.",
       "adding": "Adicionando…",
@@ -94,9 +96,50 @@ export default {
       "extensionUnavailable": "O StreamPulse não está respondendo. Recarregue esta página; se continuar, reinicie o Chrome.",
       "removeFailed": "Não foi possível remover este streamer. Recarregue a página e tente de novo."
     },
-    "htmlLang": "pt-BR"
+    "htmlLang": "pt-BR",
+    "plusDocumentTitle": "Boas-vindas ao StreamPulse+",
+    "plusStepWelcome": "Boas-vindas",
+    "plusStepBadges": "Emblemas",
+    "plusStepDrops": "Drops",
+    "plusStepAlerts": "Alertas",
+    "plusStepStyle": "Emblema",
+    "plusTitle": "Boas-vindas ao <span class=\"accent\">StreamPulse+</span>",
+    "plusMapBadges": "O farm de emblemas da Twitch, incluindo os novos assim que saem.",
+    "plusMapDrops": "A coleta de Drops e do inventário, sem clique.",
+    "plusMapAlerts": "Os alertas avançados: categoria, título, campanhas de Drops.",
+    "plusMapStyle": "Seu emblema de chat com efeitos, e os clipes em MP4.",
+    "plusBadgesTitle": "<span class=\"accent\">Emblemas</span> que caem sozinhos.",
+    "plusBadgesDesc": "Uma aba fixada e sem som assiste às lives certas, jogo por jogo, e fecha quando termina. A Twitch só conta uma live por vez: deixe a aba trabalhar enquanto você faz outra coisa.",
+    "plusAutoFarmTitle": "Novos emblemas no automático",
+    "plusAutoFarmDesc": "Assim que um novo emblema gratuito aparece na Twitch, uma aba fixada e sem som vai buscá-lo e depois fecha. Sem esta opção, os novos emblemas só chegam se você iniciar o modo automático.",
+    "plusLowQualityTitle": "Farm em 160p",
+    "plusLowQualityDesc": "A aba do modo automático assiste em 160p em vez de 360p: menos banda, os Drops caem do mesmo jeito.",
+    "plusDropsTitle": "Seus <span class=\"accent\">Drops</span>, sem pensar nisso.",
+    "plusDropsDesc": "As recompensas prontas são resgatadas por você, e o inventário abre em segundo plano para coletar o que terminou. Requer uma sessão da Twitch conectada.",
+    "plusAlertsTitle": "Avisado do que <span class=\"accent\">importa</span>.",
+    "plusAlertsDesc": "Além da live, acompanhe as mudanças de categoria e de título dos seus streamers. Os alertas de campanhas de Drops são ajustados jogo por jogo no popup.",
+    "plusStyleTitle": "Seu <span class=\"accent\">estilo</span>, seus efeitos.",
+    "plusStyleDesc": "Seu nome e seu emblema de chat levam os efeitos da sua assinatura — gradientes, texturas, animações. Tudo é escolhido no popup, seção Emblema. E os clipes da Twitch são baixados em MP4 pela própria página.",
+    "plusStyleNameTitle": "Seu nome",
+    "plusStyleBadgeTitle": "Seu emblema",
+    "plusFinish": "Aproveitar o StreamPulse+"
   },
   "popup": {
+    "settingsFilter": {
+      "search": "Buscar uma configuração",
+      "all": "Todas",
+      "platforms": "Plataforma",
+      "empty": "Nenhuma configuração corresponde. Tente outra palavra ou plataforma."
+    },
+    "sounds": {
+      "general": "Som geral",
+      "inherit": "Igual ao som geral",
+      "listen": "Ouvir",
+      "perKind": "Um som diferente por tipo de alerta",
+      "plusNote": "Um som diferente por tipo de alerta é um recurso do StreamPulse+.",
+      "preset": { "classic": "Clássico", "chime": "Sino", "pulse": "Pulso", "bubble": "Bolha", "arpeggio": "Arpejo", "drop": "Gota" },
+      "kind": { "live": "Live iniciada", "game": "Mudança de categoria", "title": "Mudança de título", "raid": "Raid recebido" }
+    },
     "greetingSubNobody": "Ninguém ao vivo.",
     "greetingSubEmpty": "Boas-vindas ao StreamPulse.",
     "news": {
@@ -172,6 +215,14 @@ export default {
       "yearlyPrice": "19 €",
       "perYear": "/ano",
       "checkout": "Desbloquear o StreamPulse+",
+      "checkoutTrial": "Testar 7 dias grátis",
+      "checkoutYearly": "Assinar por um ano (19 €)",
+      "savePercent": "-47 %",
+      "trustTrial": "7 dias grátis sem cobrança imediata",
+      "trustYearly": "Economize 16,88 € por ano em relação ao mensal",
+      "trustCancel": "Cancelamento em 1 clique na extensão",
+      "trustDevices": "Chave ativa em 2 navegadores",
+      "creatorPlaceholder": "Código de criador ou cupom (opcional)",
       "secure": "Pagamento seguro em streampulse.tech",
       "keyPlaceholder": "Já tenho uma chave de licença",
       "activate": "Ativar",
@@ -221,13 +272,13 @@ export default {
       "toggleBody": "A lista de campanhas é atualizada quando você entra na Twitch: o aviso chega nesse momento, uma vez por campanha.",
       "gamesLabel": "Jogos seguidos",
       "gamePlaceholder": "Adicionar um jogo (Enter)",
-      "removeGame": "Remover {{game}}",
+      "removeGame": "Remover {{game}}"
     },
     "plusMenu": {
       "statusActive": "Sua licença está ativa neste navegador: tudo desbloqueado.",
       "statusInactive": "Desbloqueie estas ferramentas com o StreamPulse+.",
       "manage": "Gerenciar minha licença",
-      "discover": "Conhecer o StreamPulse+",
+      "discover": "Conhecer o StreamPulse+"
     },
     "cosmetics": {
       "tabBadge": "Selo",
@@ -250,6 +301,8 @@ export default {
       "glitter": "Glitter",
       "candy": "Bengala doce",
       "toxic": "Tóxico",
+      "matrix": "Matrix",
+      "bughunterOnly": "Para quem encontrou um bug",
       "ocean": "Oceano",
       "tenure": "Fidelidade · Medidor",
       "pager": "Fidelidade · Pager",
@@ -287,7 +340,7 @@ export default {
       "bounce": "Pulo",
       "spin": "Giro",
       "flicker": "Neon piscante",
-      "neon": "Neon",
+      "neon": "Neon"
     },
     "smart": {
       "title": "Alertas inteligentes",
@@ -358,7 +411,8 @@ export default {
       "feature": "Destacar {{name}}",
       "open": "Abrir {{name}}",
       "remove": "Remover {{name}}",
-      "drag": "Arraste para mover {{name}}"
+      "drag": "Arraste para mover {{name}}",
+      "noLiveInFilter": "Ninguém está ao vivo em {{platform}} agora."
     },
     "points": {
       "periodLabel": "Período",
@@ -414,7 +468,7 @@ export default {
       "title": "Drops",
       "autoOn": "Resgate automático",
       "autoOff": "Resgate manual",
-      "autoHint": "Ajustar em Automação",
+      "autoHint": "Ajustar em Recompensas",
       "inProgress": "Em andamento",
       "updatedAgo": "atualizado {{ago}}",
       "neverRead": "ainda não lido na Twitch",
@@ -442,6 +496,11 @@ export default {
       "campaignsMeta": "{{count}} ativas · lidas na Twitch {{ago}}",
       "campaignsNone": "Abra a página de campanhas de Drops na Twitch para carregar a lista.",
       "openCampaigns": "Abrir as campanhas",
+      "liveTitle": "Canal 24/7: emblemas e Drops",
+      "liveBody": "Uma live da StreamPulse fica no ar dia e noite em um jogo com emblema ou Drop ativo. Assista para ganhar ou escolha o jogo com !game.",
+      "liveOpen": "Abrir o canal 24/7",
+      "badgesLiveTitle": "Canal 24/7 para emblemas, aberto a todos",
+      "badgesLiveBody": "Uma live da StreamPulse roda dia e noite em um jogo com um emblema ativo, com ou sem StreamPulse+. Assista para conquistá-lo, ou escolha o jogo com !game.",
       "upcomingEmpty": "A Twitch ainda não anunciou nenhuma campanha futura.",
       "filterEmpty": "Nenhuma campanha neste filtro.",
       "filterLabel": "Filtrar as campanhas",
@@ -474,6 +533,14 @@ export default {
       "badgeAuto": "Obter no automático",
       "badgeAutoOn": "Em andamento · Parar",
       "badgeAutoHint": "Modo auto: abre uma live numa aba fixada e sem som, e fecha quando o emblema for obtido",
+      "badgeBell": "Me avisar",
+      "badgeBellOn": "Alerta ativo",
+      "badgeBellHint": "Receba uma notificação no início e pouco antes do fim",
+      "badgeBellRemove": "Parar os alertas deste emblema",
+      "badgeBellEnd": "Aviso do fim",
+      "badgeBellEndHint": "Receba uma notificação 15 minutos antes do fim",
+      "badgeLimited": "Alertas de emblemas temporários",
+      "badgeLimitedHint": "StreamPulse+ · Receba uma notificação do Chrome assim que um emblema disponível por um dia ou menos for liberado.",
       "badgeAutoQueued": "Na fila · Remover",
       "badgeAutoRemove": "Remover este emblema do modo auto",
       "badgeAutoAll": "Pegar todos os emblemas possíveis",
@@ -527,7 +594,8 @@ export default {
       "historyEmpty": "Nenhum Drop obtido desde o início do acompanhamento. Eles vão aparecer aqui, mês a mês.",
       "lockedBody": "O histórico de todos os Drops obtidos, mês a mês, com o jogo e o canal. Exclusivo do StreamPulse+.",
       "trackingTitle": "Histórico de Drops",
-      "trackingBody": "Progresso e resgate mesmo sem aba da Twitch aberta. O resgate automático de Drops usa este histórico; a lista de campanhas é atualizada quando você passa pela Twitch."
+      "trackingBody": "Progresso e resgate mesmo sem aba da Twitch aberta. O resgate automático de Drops usa este histórico; a lista de campanhas é atualizada quando você passa pela Twitch.",
+      "badgesCampaign": "Campanha de emblemas"
     },
     "review": {
       "title": "Curtindo o StreamPulse?",
@@ -546,6 +614,7 @@ export default {
     },
     "identity": {
       "rankFounder": "Fundador do StreamPulse",
+      "rankBughunter": "Caçador de bugs",
       "rankAmbassador": "Embaixador · amigos indicados: {{count}}",
       "intro": "A aparência do seu emblema StreamPulse e do seu nome no chat da Twitch, visível para outros usuários do StreamPulse."
     },
@@ -578,7 +647,12 @@ export default {
       "paypalSave": "Salvar",
       "paypalSaved": "Endereço do PayPal salvo.",
       "paypalInvalid": "Este endereço de e-mail não é válido.",
-      "paypalMissing": "Adicione seu endereço do PayPal para receber seus ganhos."
+      "paypalMissing": "Adicione seu endereço do PayPal para receber seus ganhos.",
+      "freeBody": "Compartilhe seu código: seu amigo ganha 2,99 € de desconto (1º mês grátis). Você ganha um mês de StreamPulse+ para cada amigo que assinar, com a chave enviada por e-mail.",
+      "freeLabel": "Seu e-mail, para receber seus meses grátis",
+      "freeSubmit": "Criar meu código",
+      "freeTaken": "Este endereço já está em uso em outro navegador.",
+      "freeReady": "Seu código está pronto. Assim que um amigo assinar, sua chave chega por e-mail."
     },
     "layout": {
       "title": "Disposição",
@@ -607,15 +681,18 @@ export default {
       "alertTitle": "Título",
       "remove": "Remover",
       "confirmRemove": "Remover {{name}}?",
+      "removeAccount": "Remover {{platform}}",
+      "removeBoth": "Remover os dois",
+      "confirmRemoveLinked": "Qual conta de {{name}} remover?",
       "cancel": "Cancelar",
       "rowLive": "{{name}}, ao vivo na {{platform}}. {{game}}",
       "menuLabel": "Seções das configurações",
       "menuPlayer": "Player",
-      "menuPreviews": "Prévias",
+      "menuPreviewsChat": "Prévias e chat",
       "menuChat": "Chat",
       "menuDrops": "Drops",
       "menuBadges": "Emblemas",
-      "menuIdentity": "Perfil e emblema",
+      "menuIdentityLinked": "Perfil e contas",
       "menuPlus": "StreamPulse+",
       "menuGeneral": "Geral",
       "menuActivity": "Atividade",
@@ -623,7 +700,7 @@ export default {
       "groupRewards": "Recompensas",
       "groupPlayer": "Player",
       "groupProfile": "Perfil",
-      "groupTabs": "Abas",
+      "groupTabs": "Abas do navegador",
       "themeTitle": "Tema",
       "themeDark": "Escuro",
       "themeLight": "Claro",
@@ -643,14 +720,14 @@ export default {
     "tabs": {
       "streamers": "Streamers",
       "history": "Histórico",
-      "settings": "Configurações",
+      "settings": "Configurações"
     },
     "refresh": "Atualizar",
     "greetingLiveCountSingular": "{{count}} streamer ao vivo",
     "greetingLiveCountPlural": "{{count}} streamers ao vivo",
     "platformFilter": {
       "twitch": "twitch",
-      "kick": "kick",
+      "kick": "kick"
     },
     "addStreamerTitleBase": "Adicionar um streamer",
     "addStreamerTitlePlatform": "Adicionar um streamer de {{platform}}",
@@ -661,7 +738,8 @@ export default {
     "placeholders": {
       "twitch": "ex.: AlexisAMZ",
       "kick": "ex.: Teuf",
-      "youtube": "@usuário ou link de canal do YouTube"
+      "youtube": "@usuário ou link de canal do YouTube",
+      "chzzk": "Nome ou link do canal"
     },
     "emptyState": "Nenhum streamer por enquanto. Adicione um para começar.",
     "sort": {
@@ -676,7 +754,7 @@ export default {
     "settings": {
       "raidDependencyActive": "As raids recebidas estão sendo monitoradas: o cancelamento automático fica desligado, já que os pontos são ganhos seguindo a raid.",
       "liveAlertsTitle": "Alertas de live",
-      "liveAlertsBody": "Uma notificação quando um streamer entra ao vivo. Vale para todos os seus streamers, ajustável em cada card.",
+      "liveAlertsBody": "Uma notificação quando um streamer inicia uma live.",
       "quietHoursTitle": "Horário silencioso",
       "quietHoursBody": "Nenhuma notificação neste intervalo; ele pode passar da meia-noite.",
       "quietHoursStartLabel": "Início",
@@ -689,7 +767,6 @@ export default {
       "raidCancelledTitle": "Raid cancelada",
       "raidCancelledBody": "Uma notificação quando uma raid é cancelada automaticamente. Twitch. Notificação silenciosa.",
       "pointsGroupTitle": "Pontos do canal",
-      "advancedGroup": "Avançado",
       "predictionsWidgetTitle": "Widget de palpites",
       "predictionsWidgetBody": "Mostra o widget de palpites nas páginas de canal da Twitch.",
       "playerButtonsGroup": "Botões",
@@ -706,11 +783,16 @@ export default {
       "resetPrefsConfirm": "Confirmar",
       "resetPrefsDone": "Configurações redefinidas.",
       "gameAlertsTitle": "Alertas de mudança de categoria",
-      "gameAlertsDescription": "Vale para todos os seus streamers: depois você pode ajustar por streamer.",
+      "gameAlertsDescription": "Uma notificação quando um streamer muda de categoria.",
       "titleAlertsTitle": "Alertas de mudança de título",
-      "titleAlertsDescription": "Vale para todos os seus streamers: depois você pode ajustar por streamer.",
+      "titleAlertsDescription": "Uma notificação quando um streamer muda o título da live.",
+      "alertsGroup": "Alertas",
+      "soundSilenceGroup": "Som e silêncio",
       "soundsTitle": "Som das notificações",
-      "alertsPerStreamerNote": "Esses alertas são definidos em cada streamer, no card dele: notificações, mudanças de categoria e de título.",
+      "alertsPerStreamerNote": "Um clique aplica o ajuste a todos os seus streamers, inclusive aos que você adicionar depois. Para um só, use os ícones do cartão dele.",
+      "alertsMixed": "Ajustado de forma diferente por streamer: ativo em {{on}} de {{total}}. Um clique aplica o mesmo ajuste a todos.",
+      "dropsWhereNote": "Os alertas de Drops ficam em Notificações (Drop obtido) e na seção Drops (novas campanhas).",
+      "raidsWhereNote": "O cancelamento automático de Raids fica em Recompensas; ele é desligado quando os alertas de raids recebidos estão ativos.",
       "soundsDescription": "Toca um som com as notificações de live, de categoria e de título. As outras notificações ficam silenciosas.",
       "updateNotificationsTitle": "Notificação de atualização",
       "updateNotificationsDescription": "Avisar quando o StreamPulse for atualizado (uma vez por versão), com um clique para as novidades.",
@@ -724,12 +806,12 @@ export default {
       "fastForwardTitle": "Botão de avanço rápido",
       "fastForwardDescription": "Adiciona um botão ao player da Twitch e da Kick para alcançar a live quando o vídeo atrasa.",
       "communityBadgeTitle": "Emblema da comunidade",
-    "betaLabel": "beta",
+      "betaLabel": "beta",
       "saved": "Configuração salva",
       "communityBadgeDescription": "Mostra o ícone do StreamPulse ao lado do seu nome e do nome dos outros usuários do StreamPulse no chat da Twitch. Uma impressão do seu nome, calculada no seu navegador, é enviada para streampulse.tech; o nome em si nunca é transmitido.",
       "chatFilterDescription": "Esconde no chat da Twitch e da Kick as mensagens que contêm estas palavras (separadas por vírgulas).",
       "languageTitle": "Idioma da extensão",
-      "pseudoTitle": "Seu nome",
+      "pseudoTitle": "Nome na saudação",
       "pseudoDescription": "Usado na mensagem de boas-vindas.",
       "pseudoPlaceholder": "Seu nome",
       "pseudoSave": "Salvar",
@@ -810,7 +892,7 @@ export default {
       "clipDownloadTitle": "Download de clipes",
       "clipDownloadDescription": "Adiciona um botão nas páginas de clipes da Twitch para salvá-los em MP4. Exclusivo do StreamPulse+.",
       "preventTabDiscardTitle": "Impedir a suspensão da aba",
-      "preventTabDiscardDescription": "Impede o Chrome de suspender as páginas de canal da Twitch e da Kick, para os pontos e os Drops continuarem caindo. Desativado, as abas já protegidas voltam ao comportamento normal."
+      "preventTabDiscardDescription": "Impede o Firefox de suspender as páginas de canal da Twitch e da Kick, para os pontos e os Drops continuarem caindo. Desativado, as abas já protegidas voltam ao comportamento normal."
     },
     "watchTime": {
       "totalTime": "Tempo total",
@@ -842,8 +924,8 @@ export default {
       "titleNotifyDisabled": "Alertas de título desativados para {{name}}"
     },
     "preferences": {
-      "liveEnabled": "Notificações do Chrome ativadas.",
-      "liveDisabled": "Notificações do Chrome desativadas.",
+      "liveEnabled": "Notificações do Firefox ativadas.",
+      "liveDisabled": "Notificações do Firefox desativadas.",
       "gameEnabled": "Alertas de mudança de categoria ativados.",
       "gameDisabled": "Alertas de mudança de categoria desativados.",
       "soundsEnabled": "Som das notificações ativado.",
@@ -867,6 +949,11 @@ export default {
     "errors": {
       "generic": "Algo deu errado. Tente de novo em instantes; se continuar, feche e abra o StreamPulse outra vez.",
       "invalidHandle": "Este nome da {{platform}} não é válido. Confira a grafia ou cole o link do canal.",
+      "chzzkPermission": "O CHZZK precisa da sua permissão para verificar as lives. Aceite para adicionar este canal.",
+      "chzzkPagesTitle": "Ative o StreamPulse no CHZZK",
+      "chzzkPagesBody": "Adiciona o botão «Adicionar ao StreamPulse» e o indicador de latência nas páginas de canal do CHZZK.",
+      "chzzkPagesAction": "Ativar",
+      "chzzkHint": "O Chrome vai pedir acesso a chzzk.naver.com. É só para ver se este canal está ao vivo."
     },
     "feedback": {
       "undoDone": "{{name}} voltou para a sua lista.",
@@ -878,18 +965,157 @@ export default {
       "addSuccessPlatform": "{{handle}} adicionado ao StreamPulse para {{platform}}!",
       "removeSuccess": "{{name}} removido da lista.",
       "testSent": "Notificação de teste enviada!",
-      "chatFilterSaved": "Filtro de chat salvo.",
+      "chatFilterSaved": "Filtro de chat salvo."
     },
     "labels": {
       "viewers": "{{count}} espectadores",
-      "previewAltLive": "Prévia da live de {{name}}",
+      "previewAltLive": "Prévia da live de {{name}}"
     },
-    "htmlLang": "pt-BR"
+    "htmlLang": "pt-BR",
+    "watchLater": {
+      "tab": "Assistir mais tarde",
+      "save": "Salvar para assistir depois",
+      "title": "Assistir mais tarde",
+      "hint": "Mantém os links do Twitch, Kick e YouTube com uma nota pessoal. Essa lista fica só nesse navegador.",
+      "addTitle": "Salvar um link",
+      "editTitle": "Edita o título ou a nota",
+      "urlLabel": "Link HTTPS",
+      "titleLabel": "Título (opcional)",
+      "noteLabel": "Observação (opcional)",
+      "saveForm": "Salvar para assistir depois",
+      "saveChanges": "Salvar alterações",
+      "cancel": "Cancelar edição",
+      "refresh": "Atualizar",
+      "empty": "Ainda não há links salvos. Cole um link acima ou salve uma transmissão ao vivo ou um replay.",
+      "loading": "Carregando sua lista...",
+      "count": "{{count}} / {{max}} links",
+      "edit": "Editar",
+      "editLabel": "Edite {{title}}",
+      "remove": "Remova",
+      "confirmRemove": "Confirme a remoção",
+      "openLabel": "Abrir {{title}} em uma nova aba",
+      "addedAt": "Salvo em {{date}}",
+      "saved": "Link salvo.",
+      "removed": "Link removido.",
+      "invalidUrl": "Use um link HTTPS do Twitch, Kick ou YouTube sem nome de usuário nem senha.",
+      "invalidTitle": "Mantenha o título com {{max}} caracteres ou menos e tente de novo.",
+      "invalidNote": "Mantenha a nota com {{max}} caracteres ou menos e tente de novo.",
+      "full": "Sua lista já tem {{max}} links. Tira um antes de adicionar outro.",
+      "missing": "Esse link foi removido em outro lugar. Cancela a edição e, se precisar, adiciona de novo.",
+      "readError": "Não foi possível carregar sua lista. Atualize a página para tentar novamente.",
+      "writeError": "Não foi possível salvar sua alteração. Seu rascunho ainda está aqui; tente de novo."
+    },
+    "bulkAdd": {
+      "open": "Adicione vários streamers de uma vez só"
+    },
+    "notificationTools": {
+      "pauseTitle": "Pausa seus alertas",
+      "pauseHour": "Silenciar alertas por 1 hora",
+      "pauseTomorrow": "Silencia os alertas até amanhã às 8h",
+      "resume": "Retomar agora",
+      "pauseActive": "Notificações silenciadas até {{time}}.",
+      "pauseInactive": "As notificações não são pausadas.",
+      "exceptPinned": "Mantenha os alertas para os streamers fixados",
+      "exceptPinnedHint": "Só os streamers fixados podem quebrar o silêncio.",
+      "readError": "Não foi possível ler a configuração de pausa.",
+      "writeError": "Não foi possível alterar a configuração de pausa. Tente de novo.",
+      "loading": "Lendo as configurações de notificação…",
+      "refresh": "Atualizar",
+      "diagnosticTitle": "Por que não tem alerta?",
+      "diagnosticHint": "Lê o último status salvo neste aparelho. Não envia um teste.",
+      "streamerLabel": "Streamer",
+      "empty": "Siga um streamer para fazer um diagnóstico.",
+      "observedAt": "Última atualização: {{date}}.",
+      "noObservationTime": "Sem data e hora de status.",
+      "permissionGranted": "Notificações do sistema são permitidas.",
+      "permissionDenied": "As notificações do sistema ficam bloqueadas no navegador.",
+      "permissionUnknown": "Não foi possível ler a permissão de notificações do sistema.",
+      "pinnedAllowed": "A pausa não bloqueia esse streamer fixado.",
+      "quietActive": "O horário de silêncio está ativo ({{start}}–{{end}}).",
+      "quietInactive": "O horário de silêncio não está impedindo essa verificação.",
+      "settings": "Alertas — ao vivo: {{live}}, categoria: {{game}}, título: {{title}}.",
+      "enabled": "on",
+      "disabled": "desativado",
+      "plusActive": "O StreamPulse+ está ativo.",
+      "plusInactive": "O StreamPulse+ não está ativo; as regras inteligentes são ignoradas.",
+      "error": "Diagnóstico indisponível. Reabra o pop-up.",
+      "state": {
+        "live": "ao vivo agora",
+        "offline": "offline"
+      },
+      "reason": {
+        "noStatus": "Ainda não tem status local. Espera a próxima verificação.",
+        "noBaseline": "Ainda não há estado de comparação; não dá pra confirmar uma transição.",
+        "apiError": "A API da plataforma retornou um erro, então o estado anterior foi mantido.",
+        "unsupported": "Essa plataforma não mostra o status de transmissão ao vivo.",
+        "streamerDisabled": "Os alertas estão desativados no cartão desse streamer.",
+        "offline": "Esse streamer está offline.",
+        "smartMatch": "Uma regra inteligente já está em vigor.",
+        "smartUnchanged": "Uma regra inteligente já foi acionada; ela só avisa uma vez.",
+        "smartNoMatch": "Nenhuma regra inteligente corresponde à categoria ou ao título atual.",
+        "live": "Um alerta ao vivo seria enviado.",
+        "catchUp": "Essa transmissão ao vivo está incluída na notificação de catch-up.",
+        "changes": "Qualquer mudança na categoria ou no título seria avisada.",
+        "noChange": "Nada mudou desde a última verificação."
+      },
+      "pauseOneHour": "Silenciar alertas por 1 hora",
+      "pauseUntilTomorrow": "Silencia os alertas até amanhã às 8h"
+    },
+    "rewardPlan": {
+      "title": "Planeje uma sessão de Drops",
+      "hint": "Selecione os Drops e calcule o tempo necessário. Os tempos são estimativas: quem decide o que conta é o Twitch.",
+      "select": "Selecione {{name}}",
+      "budget": "Tempo disponível para esta sessão (minutos)",
+      "total": "Tempo estimado: {{time}}.",
+      "unknown": "Um ou mais Drops selecionados não mostram a duração.",
+      "overBudget": "Este plano de visualização excede o seu tempo disponível em {{time}}.",
+      "withinBudget": "Esse plano de visualização se encaixa no seu tempo livre.",
+      "deadline": "Nesse ritmo, pelo menos um Drops selecionado não vai conseguir terminar antes do prazo.",
+      "empty": "Escolha um Drop para estimar seu plano de visualização.",
+      "loading": "Carregando campanhas…",
+      "readError": "Não foi possível carregar os Drops selecionados.",
+      "writeError": "Não foi possível salvar seu plano de visualização.",
+      "description": "Escolhe os Drops, define o tempo que você realmente tem disponível e vê o que dá pra concluir. Isso é só uma estimativa: o Twitch decide o que conta.",
+      "minutes": "{{count}} min",
+      "unknownDuration": "Duração desconhecida",
+      "remaining": "faltam {{time}}",
+      "selectedCount": "{{count}} escolhido(s)",
+      "impossible": "Impossível antes do prazo neste ritmo"
+    },
+    "linkPicker": {
+      "button": "Vincular a outra conta",
+      "buttonLinked": "Conta vinculada: gerenciar vínculo",
+      "title": "Vincular {{name}} a…",
+      "hint": "Um só cartão e uma só notificação quando as duas contas estiverem ao vivo.",
+      "none": "Nada para vincular ainda. Adicione primeiro este streamer em uma plataforma diferente de {{platform}}.",
+      "linkedWith": "Vinculado a {{names}}. Um só cartão e uma só notificação ao vivo.",
+      "unlink": "Desvincular",
+      "done": "{{first}} e {{second}} estão vinculados.",
+      "unlinked": "Vínculo removido.",
+      "error": "Não foi possível alterar o vínculo. Tente novamente em instantes.",
+      "search": "Buscar uma conta",
+      "close": "Fechar"
+    },
+    "linkedAccounts": {
+      "title": "Contas vinculadas",
+      "description": "Streamers que você vinculou entre plataformas: um só cartão e uma só notificação quando as duas contas estão ao vivo. Para vincular, use o botão de vínculo no cartão de um streamer ou em Todos os canais.",
+      "accountLabel": "{{platform}}: {{name}} ({{account}})",
+      "preferredSummary": "Preferida: {{account}}",
+      "empty": "Nenhuma conta vinculada ainda.",
+      "loading": "Carregando contas vinculadas...",
+      "conflict": "As contas vinculadas mudaram em outro lugar. Confira a lista antes de tentar de novo.",
+      "readError": "Não foi possível carregar as contas vinculadas. Tente carregar de novo.",
+      "writeError": "Não foi possível remover o vínculo. Tente novamente em instantes.",
+      "retry": "Carregar de novo",
+      "unlink": "Desvincular",
+      "unlinkConfirm": "Confirmar desvínculo",
+      "unlinked": "Contas desvinculadas. Estatísticas e configurações não mudaram."
+    }
   },
   "background": {
     "dropAlerts": {
       "title": "Campanha de Drops: {{game}}",
-      "message": "Uma campanha de Drops começou num jogo que você segue.",
+      "message": "Uma campanha de Drops começou num jogo que você segue."
     },
     "badgeAuto": {
       "bannerTitle": "Modo auto do StreamPulse",
@@ -904,7 +1130,9 @@ export default {
       "doneMessage": "Nenhum emblema para pegar por enquanto: a aba foi fechada.",
       "stoppedPlus": "O StreamPulse+ está inativo: a coleta automática de emblemas parou.",
       "freeDoneTitle": "Emblema conquistado ✓",
-      "freeDoneMessage": "Mais {{count}} emblemas disponíveis hoje. Pegue todos com o StreamPulse+."
+      "freeDoneMessage": "Mais {{count}} emblemas disponíveis hoje. Pegue todos com o StreamPulse+.",
+      "autoFarmTitle": "Novos emblemas a caminho",
+      "autoFarmMessage": "{{count}} novo(s) emblema(s) da Twitch sendo coletado(s) em uma aba sem som."
     },
     "errors": {
       "invalidHandle": "Este nome da {{platform}} não é válido. Confira a grafia ou cole o link do canal.",
@@ -927,6 +1155,12 @@ export default {
       "dropMessage": "Um Drop da Twitch foi resgatado automaticamente.",
       "dropClaimedMessage": "No seu inventário: {{reward}}",
       "badgeTitle": "Novo emblema: {{name}}",
+      "badgeShortTitle": "Emblema temporário: {{name}}",
+      "badgeShortMessage": "Restam só {{time}} para pegar. Corre!",
+      "badgeLiveTitle": "Emblema disponível: {{name}}",
+      "badgeLiveMessage": "O emblema que você segue já pode ser conquistado.",
+      "badgeLastTitle": "Última chance: {{name}}",
+      "badgeLastMessage": "O emblema termina em {{time}}.",
       "badgeAutoTitle": "Emblema obtido",
       "raidTitle": "StreamPulse · Raid cancelado",
       "raidMessage": "A transferência para o canal da raid foi cancelada.",
@@ -951,6 +1185,8 @@ export default {
     }
   },
   "recap": {
+    "platformsLabel": "Plataformas contadas",
+    "platformsHint": "O YouTube está desmarcado por enquanto, enquanto sua medição é verificada. Você pode adicioná-lo se quiser.",
     "referral": {
       "body": "Indique o StreamPulse: um mês grátis para cada amigo que assinar com o seu código.",
       "copy": "Copiar meu código"
@@ -970,8 +1206,8 @@ export default {
       "pointsPeakMonth": "Melhor mês: {{label}} · {{points}} pontos",
       "pointsBest": "Melhor canal: {{name}} · {{points}} pontos",
       "pointsSubBonus": "Bônus de inscrito: +{{points}} pontos",
-      "lockedTitle": "Resumo avançado e resumo do ano",
-      "lockedBody": "Suas horas por categoria, a curva da sua atividade e o seu ano inteiro em um resumo.",
+      "lockedTitle": "Resumo avançado",
+      "lockedBody": "Suas horas por categoria e a curva da sua atividade, dia após dia.",
       "unlock": "Desbloquear"
     },
     "documentTitle": "Meu resumo · StreamPulse",
@@ -1165,5 +1401,43 @@ export default {
     "chatFilter": {
       "replacement": "Mensagem removida pelo StreamPulse"
     }
+  },
+  "bulk": {
+    "documentTitle": "Adicionar streamers em lote | StreamPulse",
+    "title": "Adicione streamers em lote",
+    "intro": "Cole até 50 nomes de usuário ou links de canais e, depois, escolha quais adicionar ao StreamPulse.",
+    "listLabel": "Sua lista",
+    "listHint": "Um nome de usuário ou link por linha. Vírgulas, ponto-e-vírgulas e tabulações também funcionam.",
+    "platformLabel": "Plataforma para nomes de usuário sem link",
+    "groupLabel": "Grupo (opcional)",
+    "noGroup": "Sem grupo",
+    "groupHint": "Adicione os novos streamers a um grupo já existente sem alterar seus outros grupos.",
+    "preview": "Dá uma olhada na lista",
+    "previewTitle": "Dá uma olhada antes de adicionar",
+    "previewHint": "Isso verifica o formato e as repetições. Cada conta é verificada quando você a adiciona.",
+    "selectAll": "Selecione todas as opções",
+    "emptyPreview": "Cole sua lista e, em seguida, revise-a para ver os candidatos, as duplicatas e as entradas inválidas.",
+    "keepOpen": "O que você digitar fica aqui mesmo quando a janela pop-up do StreamPulse fechar. Deixa essa aba aberta enquanto estiver adicionando.",
+    "ready": "Pronto para adicionar",
+    "duplicate": "Duplicado nesta lista",
+    "existing": "Já segue",
+    "invalid": "Nome de usuário ou link inválido",
+    "adding": "Adicionando…",
+    "success": "Adicionado",
+    "error": "Não foi possível adicionar",
+    "stale": "A lista mudou: dá uma olhada nela de novo antes de adicionar.",
+    "summary": "{{candidates}} para adicionar · {{duplicates}} duplicatas · {{invalid}} inválido",
+    "tooMany": "Encontradas {{count}} entradas; só é possível adicionar {{max}} de uma vez.",
+    "retrySelected": "Tentar novamente {{count}}",
+    "addSelected": "Adicione {{count}}",
+    "progress": "Adicionando {{done}} de {{total}}…",
+    "finished": "{{added}} adicionado · {{failed}} falhou",
+    "partial": "Algumas contas não foram adicionadas. Elas ficam salvas e você pode tentar de novo.",
+    "addFailed": "Não foi possível adicionar a conta.",
+    "readFailed": "Não foi possível ler seus dados do StreamPulse.",
+    "verifyFailed": "Não foi possível verificar a conta.",
+    "groupFailed": "A conta foi adicionada, mas não foi possível atualizar o grupo dela.",
+    "groupMissing": "A conta foi adicionada, mas não está mais no grupo selecionado.",
+    "missingGroupOption": "Grupo não está mais disponível"
   }
 };

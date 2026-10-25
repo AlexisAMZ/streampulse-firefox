@@ -9,6 +9,8 @@
  * sanitizePreferences exposent exactement les mêmes clés.
  */
 import { DEFAULT_LANGUAGE, matchLanguage } from "../i18n/meta.js";
+import { DEFAULT_RECAP_PLATFORMS, normalizeRecapPlatforms } from "./recap-platforms.js";
+import { DEFAULT_SOUND, SOUND_INHERIT, normalizeGeneralSound, normalizeKindSound } from "./notification-sounds.js";
 
 /** Qualités proposées pour le lecteur Twitch. "auto" laisse Twitch décider. */
 export const PLAYER_QUALITIES = ["auto", "source", "1440", "1080", "720", "480", "360"];
@@ -25,17 +27,29 @@ export const DEFAULT_PREFERENCES = {
   // Bêta : détection des raids entrants en arrière-plan via IRC anonyme.
   // Opt-in explicite car elle maintient une connexion WebSocket permanente.
   backgroundRaidAlerts: false,
-  // Notification « StreamPulse a été mis à jour » : opt-in pour ne pas
-  // surprendre les nouvelles installations.
-  updateNotifications: false,
+  // Notification « StreamPulse a été mis à jour » : prévenu par défaut à
+  // chaque mise à jour installée (décision du propriétaire, 2026-10-17),
+  // désactivable dans les réglages. Un choix stocké n'est jamais écrasé.
+  updateNotifications: true,
   soundsEnabled: true,
+  // Son des notifications : un son général, et un son par type d'alerte qui
+  // peut s'en écarter ("inherit" = le son général).
+  notificationSound: DEFAULT_SOUND,
+  soundLive: SOUND_INHERIT,
+  soundGame: SOUND_INHERIT,
+  soundTitle: SOUND_INHERIT,
+  soundRaid: SOUND_INHERIT,
   theme: "dark",
   quietHoursEnabled: false,
   quietHoursStart: "23:00",
   quietHoursEnd: "08:00",
   autoClaimChannelPoints: true,
   autoClaimDrops: true,
-  autoClaimMoments: true,
+  // StreamPulse+ : dès qu'un nouveau badge gratuit apparaît au catalogue, le
+  // mode auto le récupère tout seul (l'effet réel reste réservé à Plus).
+  autoFarmNewBadges: true,
+  // StreamPulse+ : 160p au lieu de 360p dans l'onglet du mode auto des badges.
+  badgeFarmLowQuality: false,
   autoOpenInventory: false,
   autoOpenInventoryIntervalHours: 24,
   hideTwitchExtensions: false,
@@ -50,6 +64,8 @@ export const DEFAULT_PREFERENCES = {
   // côté du nombre de spectateurs ; "chat" = dans l'en-tête du chat, à la
   // place du titre « Chat du stream ».
   latencyPlacement: "viewers",
+  // Plateformes comptées dans le récap (gratuit) : YouTube décoché pour l'instant, voir recap-platforms.js.
+  recapPlatforms: DEFAULT_RECAP_PLATFORMS,
   autoCancelRaids: false,
   preventTabDiscard: true,
   enablePredictionsPopup: true,
@@ -138,6 +154,17 @@ export function notificationFieldsFromUpdates(updates = {}) {
 }
 
 /**
+ * Copie de la liste de streamers avec les alertes globales appliquées, comme le
+ * fait le service worker : la popup s'en sert pour que l'interrupteur reflète
+ * tout de suite le réglage, sans attendre de relire le stockage.
+ */
+export function withNotificationFields(streamers, updates = {}) {
+  const fields = notificationFieldsFromUpdates(updates);
+  if (fields.length === 0 || !Array.isArray(streamers)) return streamers;
+  return streamers.map((streamer) => ({ ...streamer, ...Object.fromEntries(fields) }));
+}
+
+/**
  * Préférences d'après remise à zéro : tout revient au défaut, sauf la langue
  * et le thème choisis.
  */
@@ -167,15 +194,21 @@ export function sanitizePreferences(preferences = {}) {
     badgeAlerts: preferences.badgeAlerts === undefined ? preferences.dropAlerts === true : preferences.badgeAlerts === true,
     raidAlerts: optIn(preferences, "raidAlerts"),
     backgroundRaidAlerts: preferences.backgroundRaidAlerts === true,
-    updateNotifications: optIn(preferences, "updateNotifications"),
+    updateNotifications: preferences.updateNotifications !== false,
     soundsEnabled: preferences.soundsEnabled !== false,
+    notificationSound: normalizeGeneralSound(preferences.notificationSound),
+    soundLive: normalizeKindSound(preferences.soundLive),
+    soundGame: normalizeKindSound(preferences.soundGame),
+    soundTitle: normalizeKindSound(preferences.soundTitle),
+    soundRaid: normalizeKindSound(preferences.soundRaid),
     theme: preferences.theme === "light" ? "light" : "dark",
     quietHoursEnabled: preferences.quietHoursEnabled === true,
     quietHoursStart: normalizeQuietHour(preferences.quietHoursStart, DEFAULT_PREFERENCES.quietHoursStart),
     quietHoursEnd: normalizeQuietHour(preferences.quietHoursEnd, DEFAULT_PREFERENCES.quietHoursEnd),
     autoClaimChannelPoints: preferences.autoClaimChannelPoints !== false,
     autoClaimDrops: preferences.autoClaimDrops !== false,
-    autoClaimMoments: preferences.autoClaimMoments !== false,
+    autoFarmNewBadges: preferences.autoFarmNewBadges !== false,
+    badgeFarmLowQuality: preferences.badgeFarmLowQuality === true,
     autoOpenInventory: Boolean(preferences.autoOpenInventory),
     autoOpenInventoryIntervalHours: clampInventoryIntervalHours(preferences.autoOpenInventoryIntervalHours),
     hideTwitchExtensions: Boolean(preferences.hideTwitchExtensions),
@@ -188,6 +221,7 @@ export function sanitizePreferences(preferences = {}) {
     latencyPlacement: LATENCY_PLACEMENTS.includes(preferences.latencyPlacement)
       ? preferences.latencyPlacement
       : "viewers",
+    recapPlatforms: normalizeRecapPlatforms(preferences.recapPlatforms),
     // Les alertes de raid rapportent des points en suivant le raid : garder
     // l'annulation automatique active rendrait les deux fonctionnalités
     // contradictoires (le raid est annulé avant qu'on puisse le suivre).

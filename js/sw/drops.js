@@ -1,9 +1,10 @@
 // Points de chaîne, Drops, badges et mode auto des badges.
 
-import { createBadgeAuto } from "../badge-auto-worker.js";
+import { createBadgeAuto, watchProbe } from "../badge-auto-worker.js";
 import { PLUS_KEY, isPlusActive } from "../plus.js";
-import { BADGE_ADDED_KEY, BADGE_AUTO_KEY, CLAIM_OK_STATUSES, DROPS_CAMPAIGNS_KEY, campaignsFrom } from "../drops-data.js";
-import { addedFrom, isPaidBadge } from "../badges-data.js";
+import { BADGE_ADDED_KEY, BADGE_AUTO_KEY, BADGE_EVENTS_KEY, CLAIM_OK_STATUSES, DROPS_BADGES_KEY, DROPS_CAMPAIGNS_KEY, campaignsFrom } from "../drops-data.js";
+import { addedFrom, badgesFrom, catalogBadges, eventsFrom, isPaidBadge } from "../badges-data.js";
+import { BADGE_ALERT_SEEN_KEY, BADGE_LIMITED_KEY, BADGE_WATCH_KEY, LIMITED_EVENT_MS, SHORT_EVENT_MS, formatTimeLeft, isShortEvent, limitedFrom, planBadgeAlerts, seenFrom as alertsSeenFrom, watchFrom } from "../badge-watch.js";
 import { DROP_ALERTS_KEY, DROP_ALERTS_SEEN_KEY, campaignAlerts, normalizeDropAlerts, seenFrom } from "../drop-alerts.js";
 import { createDropsClient } from "../drops-gql.js";
 import { createDropsStore } from "../drops-store.js";
@@ -59,6 +60,30 @@ export async function announceDrops(entries) {
   }
 }
 
+/**
+ * StreamPulse+ : un badge frais apparaît au catalogue → il part au farm tout
+ * seul, sans ouvrir l'extension (et sans rater une campagne à durée limitée).
+ * Sans file, « tous les badges possibles » démarre et rattrape tout ; avec une
+ * file, les nouveaux s'y ajoutent. Coupé par le réglage, et sans effet hors Plus.
+ */
+export async function farmNewBadgesForPlus(added = []) {
+  const prefs = await PreferenceStore.get();
+  if (prefs.dropsTracking === false || prefs.autoFarmNewBadges === false) return false;
+  if (!isPlusActive((await chrome.storage.local.get(PLUS_KEY))[PLUS_KEY])) return false;
+  const ids = (added || []).map((item) => item?.id).filter(Boolean);
+  if (!ids.length) return false;
+  const result = await badgeAuto.autoFarm(ids).catch((error) => {
+    console.warn("[StreamPulse] farm des nouveaux badges :", error?.message || error);
+    return null;
+  });
+  if (!result?.started) return false;
+  await NotificationCenter.show({
+    title: translateWithPrefs(prefs, "background.badgeAuto.autoFarmTitle"),
+    message: translateWithPrefs(prefs, "background.badgeAuto.autoFarmMessage", { count: result.count }),
+  });
+  return true;
+}
+
 // ─── Alertes de campagnes Drops (StreamPulse+) ────────────────────────────────
 
 /** Au plus trois alertes d'un coup : une liste relue après une longue pause ne doit pas inonder. */
@@ -98,13 +123,15 @@ async function twitchTabs(preferredId) {
 
 const dropsClient = createDropsClient({ fetch: (...args) => fetch(...args), cookies: chrome.cookies });
 
-const DROPS_ALARM_MINUTES = 10;
+/** 5 min : un événement de badge de 30 minutes ne doit pas passer entre deux lectures. */
+const DROPS_ALARM_MINUTES = 5;
 /** Un onglet Twitch qui vient de relire l'inventaire dispense le service worker de le faire. */
 const DROPS_WORKER_MIN_GAP_MS = 4 * 60_000;
 
 export function scheduleDropsAlarm() {
   chrome.alarms.get(DROPS_ALARM, (existing) => {
-    if (!existing) chrome.alarms.create(DROPS_ALARM, { periodInMinutes: DROPS_ALARM_MINUTES, delayInMinutes: 1 });
+    // Une alarme créée avec l'ancienne période (10 min) est recréée.
+    if (!existing || existing.periodInMinutes !== DROPS_ALARM_MINUTES) chrome.alarms.create(DROPS_ALARM, { periodInMinutes: DROPS_ALARM_MINUTES, delayInMinutes: 1 });
   });
 }
 
@@ -141,6 +168,8 @@ export async function refreshDropsFromWorker({ minGapMs = DROPS_WORKER_MIN_GAP_M
 }
 
 const REWARDS_EVERY_MS = 30 * 60_000;
+/** Le catalogue des badges est relu plus souvent que les campagnes : un nouveau badge est le premier signe d'un événement court. */
+const BADGES_EVERY_MS = 5 * 60_000;
 
 /** Dates d'ajout des badges notées par streampulse.tech (le CDN garde la réponse 10 min). */
 const BADGE_ADDED_URL = "https://streampulse.tech/api/twitch-badges?added=1";
@@ -186,18 +215,63 @@ async function refreshRewardsFromWorker({ maxAgeMs = REWARDS_EVERY_MS } = {}) {
   }
   // En mode auto, les badges obtenus se relisent à chaque passage pour fermer l'onglet au plus vite.
   let freshBadge = false;
-  if (stored[BADGE_AUTO_KEY] || now - (Number(stored.streamPulseDropsBadges?.updatedAt) || 0) >= maxAgeMs) {
+  if (stored[BADGE_AUTO_KEY] || now - (Number(stored.streamPulseDropsBadges?.updatedAt) || 0) >= Math.min(maxAgeMs, BADGES_EVERY_MS)) {
     const result = await dropsClient.readBadges().then((raw) => dropsStore.recordBadges(raw)).catch(warn("badges globaux"));
     if (result) {
       freshBadge = result.added.length > 0;
       announceBadges(result.added).catch(warnWith("annonce des badges"));
+      // StreamPulse+ : les nouveaux badges partent directement au farm.
+      farmNewBadgesForPlus(result.added).catch(warnWith("farm des nouveaux badges"));
     }
   }
   await checkBadgeAuto();
+  await checkBadgeWatch().catch(warnWith("alertes des badges limités"));
   // Après le mode auto, qui doit fermer son onglet au plus vite : le site peut être lent.
   await refreshBadgeAdded({ force: freshBadge }).catch(warnWith("dates d'ajout des badges"));
 }
 
+
+/** Textes des alertes : événement court, badge suivi qui démarre, dernière chance. */
+const BADGE_ALERT_KEYS = Object.freeze({
+  short: ["background.notifications.badgeShortTitle", "background.notifications.badgeShortMessage"],
+  live: ["background.notifications.badgeLiveTitle", "background.notifications.badgeLiveMessage"],
+  last: ["background.notifications.badgeLastTitle", "background.notifications.badgeLastMessage"],
+});
+
+/**
+ * Alertes des badges à durée limitée : événements courts (si les alertes de
+ * badges sont actives) et badges suivis avec la cloche. Appelé après chaque
+ * lecture du catalogue ; chaque alerte part une seule fois.
+ */
+export async function checkBadgeWatch() {
+  const stored = await chrome.storage.local.get([DROPS_BADGES_KEY, BADGE_EVENTS_KEY, BADGE_ADDED_KEY, BADGE_WATCH_KEY, BADGE_ALERT_SEEN_KEY, BADGE_LIMITED_KEY, PLUS_KEY]);
+  const prefs = await PreferenceStore.get();
+  const now = Date.now();
+  const watch = watchFrom(stored);
+  const badges = catalogBadges(badgesFrom(stored), { status: "live", now, events: eventsFrom(stored).events, added: addedFrom(stored).added });
+  // StreamPulse+ avec l'option : tout badge d'une journée ou moins prévient ; sinon, les événements de 2 h ou moins si les alertes de badges sont actives.
+  const shortMs = isPlusActive(stored[PLUS_KEY]) && limitedFrom(stored) ? LIMITED_EVENT_MS : prefs.badgeAlerts === true ? SHORT_EVENT_MS : 0;
+  const { alerts, seen } = planBadgeAlerts({ badges, watch, seen: alertsSeenFrom(stored), shortMs, now, baseline: stored[BADGE_ALERT_SEEN_KEY] === undefined });
+  // Un badge suivi dont plus rien ne se joue (obtenu, terminé) quitte la liste.
+  const live = new Set(badges.map((badge) => badge.id));
+  const all = catalogBadges(badgesFrom(stored), { now, events: eventsFrom(stored).events, added: addedFrom(stored).added });
+  const finished = new Set(all.filter((badge) => badge.owned || badge.status === "ended").map((badge) => badge.id));
+  const kept = Object.fromEntries(Object.entries(watch).filter(([id]) => live.has(id) || !finished.has(id)));
+  const changedWatch = Object.keys(kept).length !== Object.keys(watch).length;
+  const changedSeen = stored[BADGE_ALERT_SEEN_KEY] === undefined || alerts.length > 0 || Object.keys(seen).length !== Object.keys(alertsSeenFrom(stored)).length;
+  if (changedSeen || changedWatch) await chrome.storage.local.set({ [BADGE_ALERT_SEEN_KEY]: seen, ...(changedWatch ? { [BADGE_WATCH_KEY]: kept } : {}) });
+  for (const { badge, kind, endsAt } of alerts) {
+    const time = endsAt > 0 ? formatTimeLeft(endsAt - now) : "";
+    const short = isShortEvent(badge.event, LIMITED_EVENT_MS);
+    const [titleKey, messageKey] = BADGE_ALERT_KEYS[kind === "ending" ? "last" : short ? "short" : "live"];
+    const game = badge.event?.game;
+    await NotificationCenter.show({
+      title: translateWithPrefs(prefs, titleKey, { name: badge.title }),
+      message: translateWithPrefs(prefs, messageKey, { name: badge.title, time }),
+      url: game ? `https://www.twitch.tv/directory/game/${encodeURIComponent(game)}?filter=drops` : undefined,
+    });
+  }
+}
 
 /** Jeu du live d'une chaîne : "" hors ligne, null si Helix ne répond pas. */
 export async function streamGameOf(login) {
@@ -215,6 +289,22 @@ export const badgeAuto = createBadgeAuto({
   streamUrl: dropsStreamUrl,
   streamGameOf,
   lowPowerPlayer,
+  // 160p en économie de bande passante (réglage Plus), 360p sinon.
+  videoHeight: async () => ((await PreferenceStore.get()).badgeFarmLowQuality ? 160 : 360),
+  // Sonde de lecture de l'onglet (vigie) et signal « l'utilisateur regarde
+  // ailleurs », tous deux tolérants aux échecs.
+  probeTab: async (tabId) => {
+    const [frame] = await chrome.scripting.executeScript({ target: { tabId }, func: watchProbe }).catch(() => []);
+    return frame?.result ?? null;
+  },
+  audibleElsewhere: async (tabId) => {
+    try {
+      const tabs = await chrome.tabs.query({ url: "https://www.twitch.tv/*", audible: true });
+      return tabs.some((tab) => tab.id !== tabId);
+    } catch (_) {
+      return false;
+    }
+  },
   translate: async (key, params) => translateWithPrefs(await PreferenceStore.get(), key, params),
   notify: async (titleKey, messageKey, params = {}) => {
     const prefs = await PreferenceStore.get();
@@ -277,9 +367,9 @@ export async function claimDropFromWorker(instanceId, auto) {
  */
 export async function dropsStreamUrl({ gameId, game }) {
   const directory = `https://www.twitch.tv/directory/game/${encodeURIComponent(game || "")}?filter=drops`;
-  if (!/^\d{1,20}$/.test(String(gameId || ""))) return directory;
   try {
     await ensureConfig();
+    if (!/^\d{1,20}$/.test(String(gameId || ""))) return directory;
     const data = await fetchTwitchJson(`https://api.twitch.tv/helix/streams?game_id=${gameId}&type=live&first=20`, { headers: twitchHeaders() });
     // Un live avec le tag Drops fait progresser la campagne ; à défaut, le premier live du jeu.
     const live = (data?.data || []).filter((item) => item.user_login);

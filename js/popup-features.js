@@ -9,8 +9,12 @@ import { initDrops } from "./popup-drops.js";
 import { initLayout } from "./popup-layout.js";
 import { initReviewAsk } from "./popup-review.js";
 import { initBadgeAsk } from "./popup-badge-ask.js";
+import { createWatchLaterButton } from "./popup-watch-later.js";
 import { IDENTITY_STORAGE_KEYS, initIdentity, renderIdentity } from "./popup-identity.js";
-import { HISTORY_KEY, formatClock, selectMissed, summarize } from "./history-data.js";
+import { HISTORY_KEY, formatClock, missedView, summarize } from "./history-data.js";
+import { groupMissedEntries } from "./history-grouping.js";
+import { LINKED_ACCOUNTS_KEY, normalizeLinkedAccounts } from "./linked-accounts.js";
+import { getPlatformIcon, getPlatformLabelKey } from "./platforms.js";
 import { PREDICTION_HISTORY_KEY, PREDICTION_RULE_KEY, normalizeRule as normalizePredictionRule, summarize as summarizePredictions } from "./predictions-data.js";
 import { PLUS_KEY, plusPageUrl, getDeviceId, isPlusActive, normalizeLicenseKey, portalUrl, releaseDevice, verifyLicense } from "./plus.js";
 import { mountLiquidMetalButton } from "./promo-liquid-button.js";
@@ -115,11 +119,36 @@ function createVodCard(entry) {
   info.append(avatar, text);
 
   card.append(thumb, info);
+  if (entry.vodUrl) item.append(createWatchLaterButton(entry));
+  const markSeen = (variants) => variants
+    .filter((variant) => !variant.seen)
+    .forEach((variant) => chrome.runtime.sendMessage({ type: "markHistorySeen", id: variant.id }).catch?.(() => {}));
   card.addEventListener("click", () => {
     openTab(entry.vodUrl);
-    if (!entry.seen) chrome.runtime.sendMessage({ type: "markHistorySeen", id: entry.id }).catch?.(() => {});
+    markSeen(entry.variants);
   });
   item.append(card);
+
+  // Compte relié sur deux plateformes : une seule carte, un lien par rediffusion.
+  if (entry.variants.length > 1) {
+    const platforms = node("span", "vod-platforms");
+    entry.variants.forEach((variant) => {
+      const chip = node("button", `vod-platform plat-${variant.platform}`);
+      chip.type = "button";
+      const logo = node("img");
+      logo.alt = "";
+      logo.src = chrome.runtime.getURL(getPlatformIcon(variant.platform));
+      chip.append(logo);
+      chip.title = t(getPlatformLabelKey(variant.platform));
+      chip.setAttribute("aria-label", t("popup.history.watchVod", { name: `${name} · ${chip.title}` }));
+      chip.addEventListener("click", () => {
+        openTab(variant.vodUrl);
+        markSeen([variant]);
+      });
+      platforms.append(chip);
+    });
+    item.append(platforms);
+  }
 
   // Suppression directe : un « X » discret sur la carte, sans ouvrir le VOD.
   const dismiss = node("button", "vod-dismiss");
@@ -133,6 +162,7 @@ function createVodCard(entry) {
     chrome.runtime
       .sendMessage({ type: "removeHistoryEntry", id: entry.id })
       .catch?.(() => {});
+    entry.ids.slice(1).forEach((id) => chrome.runtime.sendMessage({ type: "removeHistoryEntry", id }).catch?.(() => {}));
     item.remove();
     // Le compteur et l'état vide doivent se recalculer sans la carte retirée.
     renderHistory().catch(() => {});
@@ -144,8 +174,11 @@ function createVodCard(entry) {
 export async function renderHistory() {
   const grid = $("history-grid");
   if (!grid) return;
-  const stored = await chrome.storage.local.get(HISTORY_KEY);
-  const missed = selectMissed(stored[HISTORY_KEY], { platform: historyPlatform });
+  const stored = await chrome.storage.local.get([HISTORY_KEY, LINKED_ACCOUNTS_KEY, "betaGeneralStreamers"]);
+  const view = missedView(stored[HISTORY_KEY], { platform: historyPlatform });
+  const roster = Array.isArray(stored.betaGeneralStreamers) ? stored.betaGeneralStreamers : [];
+  const linked = normalizeLinkedAccounts(stored[LINKED_ACCOUNTS_KEY], roster);
+  const missed = groupMissedEntries(view.entries, linked, roster);
   const stats = summarize(missed);
 
   $("history-count").textContent =
@@ -157,6 +190,12 @@ export async function renderHistory() {
   grid.replaceChildren(...missed.map(createVodCard));
   grid.hidden = missed.length === 0;
   $("history-empty").hidden = missed.length !== 0;
+  const emptyTitle = $("history-empty")?.querySelector(".history-empty-title");
+  const emptyBody = $("history-empty")?.querySelector(".history-empty-body");
+  if (emptyTitle && emptyBody && view.emptyReason) {
+    emptyTitle.textContent = t(view.emptyReason === "filter" ? "popup.history.emptyFilterTitle" : "popup.history.emptyTitle");
+    emptyBody.textContent = t(view.emptyReason === "filter" ? "popup.history.emptyFilterBody" : "popup.history.emptyBody");
+  }
 }
 
 function initHistory() {
@@ -191,6 +230,17 @@ let promoRemoteOff = false;
 let promoHasDrops = false;
 let promoHasWatch = false;
 const PLAN_LABELS = { monthly: "popup.plus.planMonthly", yearly: "popup.plus.planYearly", lifetime: "popup.plus.planLifetime" };
+const PLUS_ATTENTION_KEY = "plusBadgeSeenVersion";
+let plusAttentionSeen = false;
+
+function markPlusAttentionSeen() {
+  if (plusAttentionSeen) return;
+  plusAttentionSeen = true;
+  $("open-plus")?.classList.remove("has-attention");
+  const version = chrome.runtime?.getManifest?.()?.version || "1";
+  chrome.storage?.local?.set({ [PLUS_ATTENTION_KEY]: version }).catch(() => {});
+}
+
 const plusListeners = new Set();
 
 /** Rappelé à chaque changement d'état de la licence. */
@@ -205,10 +255,11 @@ export function plusActive() {
 function renderPlus() {
   const active = plusActive();
   const deviceLimited = plusRecord?.status === "device_limited";
-  $("open-plus")?.classList.toggle("is-active", active);
+  const openButton = $("open-plus");
+  openButton?.classList.toggle("is-active", active);
+  openButton?.classList.toggle("has-attention", !active && !plusAttentionSeen);
   // Le pill de la barre change d'infobulle avec l'état : l'abonnement se
   // découvre ou se gère, et le lecteur d'écran entend la bonne action.
-  const openButton = $("open-plus");
   if (openButton) {
     const hint = t(active ? "popup.plus.openActive" : "popup.plus.open");
     openButton.title = hint;
@@ -351,6 +402,7 @@ function trapPlusFocus(event) {
 }
 
 export function openPlus() {
+  markPlusAttentionSeen();
   const view = $("plus-view");
   if (!view) return;
   if (!view.classList.contains("hidden")) {
@@ -395,6 +447,17 @@ function initPlus() {
   });
 
   const plans = document.querySelectorAll(".plus-plan");
+  const updateOfferUi = () => {
+    const checkout = $("plus-checkout");
+    const trustMain = $("plus-trust-main-text");
+    if (selectedPlan === "monthly") {
+      if (checkout) checkout.textContent = t("popup.plus.checkoutTrial");
+      if (trustMain) trustMain.textContent = t("popup.plus.trustTrial");
+    } else {
+      if (checkout) checkout.textContent = t("popup.plus.checkoutYearly");
+      if (trustMain) trustMain.textContent = t("popup.plus.trustYearly");
+    }
+  };
   const selectPlan = (plan) => {
     selectedPlan = plan.dataset.plan;
     plans.forEach((other) => {
@@ -402,8 +465,10 @@ function initPlus() {
       other.classList.toggle("active", on);
       other.setAttribute("aria-checked", String(on));
     });
+    updateOfferUi();
   };
   plans.forEach((plan) => plan.addEventListener("click", () => selectPlan(plan)));
+  updateOfferUi();
   // Motif radiogroup ARIA : les flèches déplacent la sélection (et le focus),
   // les deux boutons ne restent pas tous deux dans l'ordre de tabulation.
   document.querySelector(".plus-plans")?.addEventListener("keydown", (event) => {
@@ -426,7 +491,10 @@ function initPlus() {
     plan.tabIndex = plan.classList.contains("active") ? 0 : -1;
   });
 
-  $("plus-checkout")?.addEventListener("click", () => openTab(plusPageUrl(getCurrentLanguage(), selectedPlan)));
+  $("plus-checkout")?.addEventListener("click", () => {
+    const creator = $("plus-creator-input")?.value?.trim() || "";
+    openTab(plusPageUrl(getCurrentLanguage(), selectedPlan, creator));
+  });
 
   $("plus-key-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -451,6 +519,9 @@ function initPlus() {
         renderPlus();
         thankPlusSubscriber(result.record.licenseKey, t).catch(() => {});
         chrome.runtime.sendMessage({ type: "refreshStatuses" }).catch?.(() => {});
+        // Première activation : onboarding StreamPulse+ (fonctions et réglages
+        // dédiés). Le service worker ne l'ouvre qu'une seule fois.
+        chrome.runtime.sendMessage({ type: "openPlusOnboarding" }).catch?.(() => {});
       } else {
         const errors = {
           format: "popup.plus.errorFormat",
@@ -845,7 +916,7 @@ const OPEN_RECHECK_MS = 5 * 60 * 1000;
 async function recheckOnOpen() {
   // device_limited reste contrôlé à chaque ouverture : dès qu'une place est
   // libérée dans le portail, ce navigateur se réactive tout seul.
-  if (!plusRecord?.licenseKey || !["active", "device_limited"].includes(plusRecord.status)) return;
+  if (!plusRecord?.licenseKey || !["active", "device_limited", "unverified"].includes(plusRecord.status)) return;
   const now = Date.now();
   if (now - (Number(plusRecord.checkedAt || plusRecord.verifiedAt) || 0) < OPEN_RECHECK_MS) return;
   const result = await verifyLicense(plusRecord.licenseKey, fetch, now, await getDeviceId(chrome.storage.local));
@@ -894,8 +965,10 @@ export async function initFeatures() {
   initClipDownloadLock();
   initPredictions();
 
-  const stored = await chrome.storage.local.get([PLUS_KEY, PROMO_KEY, SMART_ALERTS_KEY, PREDICTION_RULE_KEY, PREDICTION_HISTORY_KEY, "betaGeneralStreamers", "streamPulseWatchTimeDaily", "streamPulsePointsDaily", "streamPulseDropsProgress", REMOTE_CONFIG_CACHE_KEY, ...IDENTITY_STORAGE_KEYS]);
+  const stored = await chrome.storage.local.get([PLUS_KEY, PROMO_KEY, PLUS_ATTENTION_KEY, SMART_ALERTS_KEY, PREDICTION_RULE_KEY, PREDICTION_HISTORY_KEY, "betaGeneralStreamers", "streamPulseWatchTimeDaily", "streamPulsePointsDaily", "streamPulseDropsProgress", REMOTE_CONFIG_CACHE_KEY, ...IDENTITY_STORAGE_KEYS]);
   plusRecord = stored[PLUS_KEY] || null;
+  const currentVersion = chrome.runtime?.getManifest?.()?.version || "1";
+  plusAttentionSeen = stored[PLUS_ATTENTION_KEY] === currentVersion;
   promoState = {
     plusClosed: stored[PROMO_KEY]?.plusClosed === true,
     clipsClosed: stored[PROMO_KEY]?.clipsClosed === true,
@@ -912,6 +985,8 @@ export async function initFeatures() {
   promoHasWatch = Object.keys(stored.streamPulseWatchTimeDaily || {}).length > 0;
   // Coupe-circuit distant : config.promo.enabled = false coupe tout, sans republier.
   promoRemoteOff = stored[REMOTE_CONFIG_CACHE_KEY]?.data?.promo?.enabled === false;
+  // Fréquence distante en heures (config.promo.freqHours) : l'ajustement est
+  // effectif au prochain réveil du service worker, sans republier.
   const freqHours = Number(stored[REMOTE_CONFIG_CACHE_KEY]?.data?.promo?.freqHours);
   promoFreqMs = freqHours > 0 ? freqHours * 60 * 60 * 1000 : PROMO_FREQ_MS;
   plusListeners.add(() => renderIdentity());

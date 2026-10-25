@@ -45,11 +45,15 @@ const SITE_DIRS = { fr: "", "pt-BR": "pt-br" };
 const SITE_LANGS = ["fr", "en", "es", "pt-BR", "de", "it", "pl", "tr", "ru", "ja", "ko", "id", "nl", "sv", "cs"];
 
 /** Page StreamPulse+ dans la langue de l'extension (anglais par défaut). */
-export function plusPageUrl(lang, plan) {
+export function plusPageUrl(lang, plan, creator) {
   const code = SITE_LANGS.includes(lang) ? lang : "en";
   const dir = code in SITE_DIRS ? SITE_DIRS[code] : code;
   const base = dir ? `https://streampulse.tech/${dir}/plus` : PLUS_CHECKOUT_URL;
-  return plan ? `${base}?plan=${encodeURIComponent(plan)}` : base;
+  const params = new URLSearchParams();
+  if (plan) params.set("plan", plan);
+  if (creator) params.set("creator", creator);
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
 }
 
 /** Sans nouvelle vérification réussie, la licence reste active ce délai (hors ligne). */
@@ -86,7 +90,9 @@ export function normalizeLicenseKey(input) {
 export const PLUS_RECHECK_MS = 24 * 60 * 60 * 1000;
 
 export function needsRecheck(record, now = Date.now()) {
-  if (!record || record.status !== "active" || !record.licenseKey) return false;
+  if (!record || !["active", "unverified"].includes(record.status) || !record.licenseKey) return false;
+  // Une date dans le futur ne doit jamais repousser la revérification (licence forgée).
+  if (PLUS_RULE.isFuture(record.checkedAt, now) || PLUS_RULE.isFuture(record.verifiedAt, now)) return true;
   return now - (Number(record.checkedAt || record.verifiedAt) || 0) >= PLUS_RECHECK_MS;
 }
 
@@ -105,7 +111,8 @@ export async function verifyLicense(input, fetchImpl, now = Date.now(), device =
     const response = await fetchImpl(LICENSE_VERIFY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key: licenseKey, device }),
+      // `version` : le serveur refuse les versions périmées (STREAMPULSE_MIN_VERSION).
+      body: JSON.stringify({ key: licenseKey, device, version: globalThis.chrome?.runtime?.getManifest?.().version }),
     });
     if (!response.ok && ![403, 404, 422].includes(response.status)) {
       return { ok: false, error: "network" };
@@ -118,9 +125,12 @@ export async function verifyLicense(input, fetchImpl, now = Date.now(), device =
   if (!payload?.valid) return { ok: false, error: "invalid" };
   const plan = PLUS_PLANS.includes(payload.plan) ? payload.plan : "monthly";
   const referrals = Math.max(0, Math.floor(Number(payload.referrals) || 0));
-  // Rôle posé à la main sur la licence (métadonnée Stripe sp_role) : « admin » pour le fondateur.
-  const role = payload.role === "admin" ? "admin" : "";
+  // Rôle posé à la main sur la licence (métadonnée Stripe sp_role) : « admin » pour le fondateur,
+  // « bughunter » pour qui a trouvé un bug.
+  const role = ["admin", "bughunter"].includes(payload.role) ? payload.role : "";
   // Début de l'abonnement : tuile d'ancienneté de son propre badge.
   const since = Math.max(0, Number(payload.since) || 0);
-  return { ok: true, record: { licenseKey, plan, status: "active", verifiedAt: now, referrals, role, since } };
+  // Signature du serveur : `iat` (date serveur) et `sig`, vérifiées par js/sw/license-guard.js.
+  const signature = payload.sig && payload.iat ? { iat: Math.floor(Number(payload.iat)), sig: String(payload.sig) } : {};
+  return { ok: true, record: { licenseKey, plan, status: "active", verifiedAt: now, referrals, role, since, ...signature } };
 }

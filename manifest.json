@@ -3,7 +3,7 @@
   "default_locale": "en",
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "26.10.15",
+  "version": "26.10.25",
   "browser_specific_settings": {
     "gecko": {
       "id": "streampulse@alexisamz.fr",
@@ -20,7 +20,11 @@
     "alarms",
     "cookies",
     "notifications",
-    "scripting"
+    "scripting",
+    "declarativeNetRequestWithHostAccess"
+  ],
+  "optional_host_permissions": [
+    "https://*.chzzk.naver.com/*"
   ],
   "host_permissions": [
     "https://api.twitch.tv/*",
@@ -146,6 +150,7 @@
       "js": [
         "js/inject/i18n-inline.js",
         "js/watchTimeTracker.js",
+        "js/inject/quickFollowCore.js",
         "js/inject/quickFollowYoutube.js"
       ],
       "run_at": "document_idle"
@@ -158,6 +163,7 @@
       "all_frames": false,
       "js": [
         "js/inject/i18n-inline.js",
+        "js/inject/quickFollowCore.js",
         "js/inject/quickFollowKick.js",
         "js/vendor/hls.light.min.js",
         "js/previews/sources.js",
@@ -166,6 +172,8 @@
         "js/previews/observer.js",
         "js/kickPreviews.js",
         "js/kickPlayerEnhancer.js",
+        "js/inject/plus-rule.js",
+        "js/inject/kick-claim-rules.js",
         "js/kickChannelPoints.js",
         "js/chatFilter.js",
         "js/inject/kick-badge.js",
@@ -205,7 +213,8 @@
       "matches": [
         "https://www.twitch.tv/*",
         "https://www.youtube.com/*",
-        "https://kick.com/*"
+        "https://kick.com/*",
+        "https://chzzk.naver.com/*"
       ]
     },
     {

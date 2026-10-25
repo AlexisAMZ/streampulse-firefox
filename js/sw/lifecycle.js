@@ -3,6 +3,7 @@
 import { DEFAULT_PREFERENCES } from "../preferences-data.js";
 import { syncUpdateBadge } from "./action-badge.js";
 import { scheduleKeepAliveAlarm, scheduleWatcherAlarm, setupAutoOpenInventoryAlarm } from "./alarms.js";
+import { syncChzzkAccess } from "./chzzk-access.js";
 import { fetchRemoteConfig } from "./config.js";
 import { dropsStore, scheduleDropsAlarm } from "./drops.js";
 import { translateWithPrefs } from "./i18n.js";
@@ -10,8 +11,18 @@ import { NotificationCenter } from "./notifications.js";
 import { pollStreamers } from "./polling.js";
 import { refreshRaidWatcher } from "./raids.js";
 import { DataStore, PreferenceStore } from "./stores.js";
+import { uninstallSurveyUrl } from "./uninstall-survey.js";
+
+export { uninstallSurveyUrl };
 
 let initDone = false;
+
+/** Page de sondage ouverte à la désinstallation : version, langue et ancienneté seulement, aucun identifiant. */
+async function registerUninstallSurvey() {
+  const { installedAt } = await chrome.storage.local.get("installedAt");
+  const url = uninstallSurveyUrl(chrome.runtime.getManifest().version, chrome.i18n?.getUILanguage?.(), installedAt);
+  chrome.runtime.setUninstallURL(url).catch((error) => console.warn("Uninstall URL failed:", error?.message || error));
+}
 
 async function openOnboarding(mode = "") {
   const query = mode ? `?mode=${encodeURIComponent(mode)}` : "";
@@ -104,6 +115,9 @@ async function notifyUpdateOnce(version) {
 /** Listener chrome.runtime.onInstalled. */
 export async function handleInstalled(details) {
   initDone = true;
+  if ((details?.reason || "install") === "install") await chrome.storage.local.set({ installedAt: Date.now() });
+  await registerUninstallSurvey();
+  await syncChzzkAccess();
   await fetchRemoteConfig(); // load credentials before first poll
   const streamers = await DataStore.ensureDefaults();
   await PreferenceStore.ensureDefaults();
@@ -159,6 +173,8 @@ export async function handleInstalled(details) {
 /** Listener chrome.runtime.onStartup. */
 export async function handleStartup() {
   initDone = true;
+  await registerUninstallSurvey();
+  await syncChzzkAccess();
   await fetchRemoteConfig(); // refresh credentials on browser startup
   scheduleWatcherAlarm();
   scheduleKeepAliveAlarm();

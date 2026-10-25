@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "StreamPulse: Уведомления, баллы и drops Twitch, Kick и YouTube"
+    "message": "StreamPulse: Уведомления, баллы, drops и значки Twitch, Kick и YouTube"
   },
   "appDesc": {
-    "message": "Автосбор Баллов канала и Drops, уведомления о live, история пропущенных эфиров, превью и фильтры чата. Twitch, Kick и YouTube."
+    "message": "Уведомления о live для Twitch, Kick, YouTube и CHZZK. Автосбор Баллов канала, Drops и значки, превью, фильтры чата."
   },
   "openPopupDesc": {
     "message": "Открыть StreamPulse"

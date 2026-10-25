@@ -150,6 +150,8 @@ else {
     // Clés littéralement utilisées : t("…"), translate(WithPrefs)(…),
     // __SP_I18N__.get(…), data-i18n — mêmes motifs que le contrôle
     // « used → exists » de Chrome.
+    const referenceKeys = flatten(translations[DEFAULT_LANGUAGE]);
+    const referenceKeySet = new Set(referenceKeys);
     const usedKeys = new Set();
     const appDirs = ["js", "html"];
     const skip = (f) =>
@@ -173,6 +175,12 @@ else {
         for (const re of keyPatterns) {
           for (const m of text.matchAll(re)) usedKeys.add(m[1]);
         }
+        // Clé écrite en entier comme littéral (table de clés, code d'erreur
+        // traduit plus loin) : référencée même hors d'un appel t(). Seules les
+        // clés existantes comptent (porté de Chrome).
+        for (const m of text.matchAll(/"([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g)) {
+          if (referenceKeySet.has(m[1])) usedKeys.add(m[1]);
+        }
         if (full.endsWith(".html")) {
           for (const m of text.matchAll(/data-i18n="([^"]+)"/g)) usedKeys.add(m[1]);
         }
@@ -180,7 +188,6 @@ else {
     };
     for (const dir of appDirs) scanDir(path.join(REPO, dir));
 
-    const referenceKeys = flatten(translations[DEFAULT_LANGUAGE]);
     let incomplete = 0;
 
     for (const code of declared) {
@@ -214,7 +221,9 @@ else {
     // sous-arbre popup.cosmetics.* (copié vers shared.cosmetics.*). Si ce
     // contrôle échoue : clé morte ajoutée (à supprimer) ou nouveau mécanisme
     // dynamique (ajuster MAX_UNUSED_KEYS et le documenter ici).
-    const MAX_UNUSED_KEYS = 337;
+    // 168 (2026-10-20) : comme Chrome, depuis que les clés écrites en entier
+    // comptent ; le reste est dynamique ou attend une interface (165 mesurées).
+    const MAX_UNUSED_KEYS = 168;
     const unusedKeys = referenceKeys.filter((k) => !usedKeys.has(k));
     if (unusedKeys.length > MAX_UNUSED_KEYS) {
       fail(`${unusedKeys.length} translation keys are never referenced by any literal call (max ${MAX_UNUSED_KEYS}) : une clé morte vient probablement d'être ajoutée, ou un nouveau mécanisme dynamique demande d'ajuster MAX_UNUSED_KEYS`);

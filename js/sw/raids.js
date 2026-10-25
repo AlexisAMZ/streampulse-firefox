@@ -7,7 +7,7 @@ import { stopRaidWatcher, syncRaidWatcher } from "../raidWatcher.js";
 import { CONFIG, ensureConfig, twitchHeaders } from "./config.js";
 import { STORAGE_KEYS } from "./constants.js";
 import { formatNumberForLanguage, translate } from "./i18n.js";
-import { NotificationCenter } from "./notifications.js";
+import { NotificationCenter, soundFor } from "./notifications.js";
 import { PreferenceStore } from "./stores.js";
 import { resolveChannelAvatar } from "./watchtime.js";
 
@@ -73,7 +73,7 @@ export async function notifyIncomingRaid({ channel, raider, viewers }) {
     iconUrl,
     requireInteraction: false,
     priority: 1,
-    playSound: preferences?.soundsEnabled !== false,
+    sound: await soundFor(preferences, "raid"),
   });
 }
 

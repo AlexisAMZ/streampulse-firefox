@@ -12,12 +12,10 @@
 /**
  * Jamais recopiés.
  * - manifest.json : le manifeste Firefox n'a rien à voir avec celui de Chrome.
- * - js/changelog-data.js : même historique (12 versions, vérifié), mais l'entrée
- *   26.9.21 diverge volontairement. Elle n'annonce pas les 354 Ko économisés par
- *   le chargement à la demande de hls.js, qui n'existe pas ici, et elle ajoute
- *   trois correctifs propres au port. Maintenu à la main, pas par copie.
+ * js/changelog-data.js était ici tant que l'entrée 26.9.21 divergeait ; cette
+ * entrée n'existe plus (historique réduit), le fichier est donc recopié tel quel.
  */
-export const NEVER_COPY = ["manifest.json", "js/changelog-data.js"];
+export const NEVER_COPY = ["manifest.json"];
 
 /**
  * Propres au port, absents de la référence. Listés pour mémoire : la
@@ -87,8 +85,13 @@ export const PATCHES = [
   },
   {
     file: "js/sw/notifications.js",
-    why: "chrome.offscreen n'existe pas sur Firefox. Inutile ici : la page d'arriere-plan Firefox est une vraie page, elle a un DOM et joue le son elle-meme.",
+    why: "chrome.offscreen n'existe pas sur Firefox. Inutile ici : la page d'arriere-plan Firefox est une vraie page, elle a un DOM et joue le son elle-meme (meme lecteur que le document hors ecran de Chrome).",
     edits: [
+      {
+        find: `import { DEFAULT_SOUND, resolveSound } from "../notification-sounds.js";`,
+        replace: `import { DEFAULT_SOUND, resolveSound } from "../notification-sounds.js";
+import { playNotificationSound } from "../notification-sound-player.js";`,
+      },
       {
         find: `    try {
       await chrome.offscreen.createDocument({
@@ -109,7 +112,7 @@ export const PATCHES = [
       await chrome.runtime.sendMessage({
         audioCommand: {
           action: "play",
-          file: filePath,
+          preset,
           volume: 1.0,
         },
       });
@@ -117,14 +120,10 @@ export const PATCHES = [
       console.warn("Audio playback error:", error.message);
     }`,
         replace: `    // Chrome n'a pas de DOM dans son service worker et passe par un document
-    // offscreen. La page d'arriere-plan Firefox, elle, est une vraie page :
-    // Audio() y est disponible, on joue donc le son sur place. L'appel a
-    // chrome.offscreen levait un TypeError avale par le try/catch, puis le
-    // sendMessage ne trouvait personne : le son ne sortait jamais.
+    // offscreen. La page d'arriere-plan Firefox est une vraie page : on joue
+    // le son sur place, avec le meme lecteur (fichier ou synthese Web Audio).
     try {
-      const audio = new Audio(chrome.runtime.getURL(filePath));
-      audio.volume = 1;
-      await audio.play();
+      await playNotificationSound(preset, { volume: 1, getUrl: (path) => chrome.runtime.getURL(path) });
     } catch (error) {
       console.warn("Audio playback error:", error?.message);
     }`,
@@ -166,7 +165,7 @@ export const PATCHES = [
       bonusRules = module;
     })
     .catch((error) => {
-      // Sans ces règles, les points ne sont plus récupérés ; Drops et Moments continuent.
+      // Sans ces règles, les points ne sont plus récupérés ; les Drops continuent.
       console.warn("[StreamPulse] règles de la caisse de bonus indisponibles", error);
     });`,
         replace: `  // js/inject/points-bonus-inline.js est declare juste avant ce fichier dans
@@ -175,6 +174,98 @@ export const PATCHES = [
   // demarrerait jamais. Sans ces regles, Drops et Moments continuent.
   bonusRules = window.__SP_POINTS_BONUS__ || null;
   if (!bonusRules) console.warn("[StreamPulse] points-bonus-inline.js absent, recuperation des points desactivee.");`,
+      },
+    ],
+  },
+  {
+    file: "js/chzzk.js",
+    why: "CHZZK : la regle d'en-tete cible l'initiateur par l'identifiant de l'extension (32 lettres a-p) sur Chrome. Sur Firefox, runtime.id est l'identifiant gecko (streampulse@alexisamz.fr) et l'origine d'une page d'extension est un moz-extension://<uuid> aleatoire : initiatorDomains ne peut pas viser l'extension. On cible les requetes sans onglet (tabIds -1, celles de la page d'arriere-plan), donc jamais celles de chzzk.naver.com ouvert dans un onglet.",
+    edits: [
+      {
+        find: `  if (typeof extensionId !== "string" || !/^[a-p]{32}$/.test(extensionId)) return null;`,
+        replace: `  if (typeof extensionId !== "string" || extensionId === "") return null;`,
+      },
+      {
+        find: `condition: { urlFilter: "||api.chzzk.naver.com/", resourceTypes: ["xmlhttprequest"], initiatorDomains: [extensionId] },`,
+        replace: `condition: { urlFilter: "||api.chzzk.naver.com/", resourceTypes: ["xmlhttprequest"], tabIds: [-1] },`,
+      },
+      {
+        // Firefox refuse declarativeNetRequestWithHostAccess en optional_permissions (web-ext lint :
+        // « Invalid optional_permissions »). Elle reste donc obligatoire dans le manifeste du port, sans
+        // aucun avertissement pour l'utilisateur (MDN : seule declarativeNetRequest en affiche un) ; la
+        // demande ne porte plus que sur l'hôte CHZZK.
+        find: `export const CHZZK_API_PERMISSIONS = ["declarativeNetRequestWithHostAccess"];`,
+        replace: `export const CHZZK_API_PERMISSIONS = [];`,
+      },
+    ],
+  },
+  {
+    file: "tests/chzzk.test.mjs",
+    why: "Test de la divergence ci-dessus : l'identifiant Firefox est de la forme nom@domaine et la condition est tabIds -1.",
+    edits: [
+      {
+        find: `  const rule = chzzkOriginRule("abcdefghijklmnopabcdefghijklmnop");`,
+        replace: `  const rule = chzzkOriginRule("streampulse@alexisamz.fr");`,
+      },
+      {
+        find: `  assert.deepEqual(rule.condition.initiatorDomains, ["abcdefghijklmnopabcdefghijklmnop"]);`,
+        replace: `  assert.deepEqual(rule.condition.tabIds, [-1]);`,
+      },
+      {
+        find: `  for (const bad of ["", null, undefined, "pas un id", 42]) assert.equal(chzzkOriginRule(bad), null);`,
+        replace: `  for (const bad of ["", null, undefined, 42]) assert.equal(chzzkOriginRule(bad), null);`,
+      },
+      {
+        find: `permissions: ["declarativeNetRequestWithHostAccess"] });`,
+        replace: `permissions: [] });`,
+      },
+      {
+        find: `  assert.ok(!manifest.permissions.includes("declarativeNetRequestWithHostAccess"));
+  assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess"]);`,
+        replace: `  // Firefox : obligatoire (sans avertissement), car le navigateur la refuse en facultative.
+  assert.ok(manifest.permissions.includes("declarativeNetRequestWithHostAccess"));
+  assert.equal(manifest.optional_permissions, undefined);`,
+      },
+      {
+        find: `test("manifeste : la règle d'en-tête est une permission facultative, jamais obligatoire"`,
+        replace: `test("manifeste Firefox : la règle d'en-tête est obligatoire, sans demande"`,
+      },
+    ],
+  },
+  {
+    file: "tests/notification-sounds.test.mjs",
+    why: "Le son se joue sur place dans la page d'arriere-plan Firefox (voir js/sw/notifications.js) : le test observe la premiere note synthetisee au lieu du message envoye au document hors ecran de Chrome.",
+    edits: [
+      {
+        find: `  async function played(local) {
+    const fake = createFakeChrome({ local });
+    globalThis.chrome = fake;`,
+        replace: `  const firstFrequencies = [];
+  globalThis.AudioContext = class {
+    currentTime = 0;
+    state = "running";
+    destination = {};
+    createGain() {
+      return { gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect: () => ({ connect() {} }) };
+    }
+    createOscillator() {
+      return {
+        frequency: {},
+        connect: () => ({ connect() {} }),
+        start(when) { if (when === 0.02) firstFrequencies.push(this.frequency.value); },
+        stop() {},
+      };
+    }
+  };
+  const presetOf = (frequency) => Object.keys(SOUND_SYNTH).find((id) => SOUND_SYNTH[id][0].freq === frequency);
+  async function played(local) {
+    const fake = createFakeChrome({ local });
+    globalThis.chrome = fake;
+    firstFrequencies.length = 0;`,
+      },
+      {
+        find: `    return fake.calls.filter(([name]) => name === "runtime.sendMessage").map(([, message]) => message?.audioCommand?.preset);`,
+        replace: `    return firstFrequencies.map(presetOf);`,
       },
     ],
   },
@@ -206,6 +297,7 @@ export const TAGLINES = {
   ru: "РАСШИРЕНИЕ ДЛЯ FIREFOX · TWITCH · KICK · YOUTUBE",
   ja: "Firefox拡張機能 · Twitch · Kick · YouTube",
   ko: "파이어폭스 확장 프로그램 · 트위치 · 킥 · 유튜브",
+  ar: "إضافة FIREFOX · TWITCH · KICK · YOUTUBE",
 };
 
-export const LANGUAGES = ["fr", "en", "es", "pt-BR", "de", "it", "pl", "tr", "ru", "ja", "ko"];
+export const LANGUAGES = ["fr", "en", "es", "pt-BR", "de", "it", "pl", "tr", "ru", "ja", "ko", "ar"];

@@ -4,13 +4,17 @@
 // listeners chrome.* sont posés ici, au top-level et de façon synchrone :
 // MV3 peut livrer un événement dès l'évaluation du module, un listener posé
 // après un await le raterait.
+import { syncChzzkAccess } from "./sw/chzzk-access.js";
 import { installDebugTools } from "./sw/debug.js";
 import { badgeAuto, scheduleDropsAlarm } from "./sw/drops.js";
 import { NotificationCenter } from "./sw/notifications.js";
 import { handleAlarm, scheduleKeepAliveAlarm, scheduleWatchTimeFlushAlarm, scheduleWatcherAlarm } from "./sw/alarms.js";
 import { handleInstalled, handleStartup, initOnWake } from "./sw/lifecycle.js";
+import { onPlusRecordChanged, runPlusGuard } from "./sw/license-guard.js";
 import { createMessageDispatcher } from "./sw/message-dispatch.js";
 import { MESSAGE_HANDLERS } from "./sw/messages.js";
+import { handleOpenPlusOnboarding } from "./sw/messages-app.js";
+import { createPlusExternalListener } from "./sw/plus-external.js";
 import { keepChannelTabLoaded, onPreferencesChangedForTabDiscard } from "./sw/tab-discard.js";
 import { WatchTimeStore } from "./sw/watchtime.js";
 import { initSync } from "./sw/sync.js";
@@ -46,6 +50,9 @@ chrome.notifications.onClosed.addListener((notificationId) => {
 chrome.runtime.onInstalled.addListener(handleInstalled);
 chrome.runtime.onStartup.addListener(handleStartup);
 chrome.alarms.onAlarm.addListener(handleAlarm);
+// La permission CHZZK s'accorde ou se retire depuis les réglages du navigateur comme depuis la popup.
+chrome.permissions?.onAdded?.addListener(syncChzzkAccess);
+chrome.permissions?.onRemoved?.addListener(syncChzzkAccess);
 
 // Un handler par type de message (js/sw/messages.js), après contrôle de
 // l'expéditeur (js/sw/message-dispatch.js).
@@ -54,6 +61,17 @@ chrome.runtime.onMessage.addListener(
     runtimeId: chrome.runtime.id,
     extensionPrefix: chrome.runtime.getURL(""),
   }))
+);
+
+// Page /plus/merci du site : activation de la clé sans copier-coller.
+chrome.runtime.onMessageExternal?.addListener(
+  createPlusExternalListener({
+    storage: chrome.storage.local,
+    fetch: (...args) => fetch(...args),
+    onActivated: () => {
+      handleOpenPlusOnboarding({}, null, () => {});
+    },
+  })
 );
 
 scheduleWatcherAlarm();
@@ -75,6 +93,12 @@ if (chrome.runtime.onSuspend?.addListener) {
 }
 
 initOnWake().catch((error) => console.warn("[SP] initialisation au réveil :", error?.message || error));
+
+// Licence StreamPulse+ : toute écriture du storage est vérifiée (signature du
+// serveur, js/sw/license-guard.js) ; un enregistrement forgé est supprimé.
+const plusGuardDeps = { storage: chrome.storage.local, fetch: (...args) => fetch(...args) };
+chrome.storage.onChanged.addListener((changes, area) => onPlusRecordChanged(changes, area, plusGuardDeps));
+runPlusGuard(plusGuardDeps);
 
 // preventTabDiscard : pages de chaîne Twitch et Kick gardées chargées.
 chrome.storage.onChanged.addListener(onPreferencesChangedForTabDiscard);

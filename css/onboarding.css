@@ -3,9 +3,9 @@
 
 /* Head and stepper */
 .ob-head { gap: 22px; }
-.stepper { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-left: auto; min-width: 0; }
+.stepper { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-inline-start: auto; min-width: 0; }
 /* Les pills sont de vrais <button> : reset bouton avant l'habillage pill. */
-.step-pill { appearance: none; border: 0; margin: 0; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 14px 0 8px; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); color: var(--text-3); font-size: 13px; font-weight: 600; transition: background-color var(--dur-base) ease, color var(--dur-base) ease; }
+.step-pill { appearance: none; border: 0; margin: 0; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding-block: 0; padding-inline: 8px 14px; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); color: var(--text-3); font-size: 13px; font-weight: 600; transition: background-color var(--dur-base) ease, color var(--dur-base) ease; }
 .step-pill:disabled { cursor: default; }
 .step-num { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--surface-2); font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .step-pill.active { background: var(--violet-soft); box-shadow: inset 0 0 0 1px var(--violet-line); color: var(--text); }
@@ -27,15 +27,15 @@
      porte sur la ligne entière, pas sur des mots positionnés par nth-child. */
   .welcome-display .welcome-line { display: inline-block; animation: word-in 700ms var(--ease-out) both; }
 }
-/* onboarding.js switches steps on animationend of these two classes: they must
-   always animate, even with reduced motion (1ms there, see below). */
-.wizard-step.slide-out-left { animation: slide-out-left 220ms ease-in both; }
-.wizard-step.slide-out-right { animation: slide-out-right 220ms ease-in both; }
+@media (prefers-reduced-motion: no-preference) {
+  .wizard-step.slide-out-left { animation: slide-out-left 220ms var(--ease-out) both; }
+  .wizard-step.slide-out-right { animation: slide-out-right 220ms var(--ease-out) both; }
+}
 @keyframes slide-out-left { to { opacity: 0; transform: translateX(-28px); } }
 @keyframes slide-out-right { to { opacity: 0; transform: translateX(28px); } }
 @media (prefers-reduced-motion: reduce) {
   .wizard-step.slide-out-left,
-  .wizard-step.slide-out-right { animation-duration: 1ms; }
+  .wizard-step.slide-out-right { animation: none; }
 }
 .step-frame { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 64px; align-items: start; }
 .step-frame-single { grid-template-columns: 1fr; justify-items: center; text-align: center; }
@@ -48,13 +48,13 @@
 .step-nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 12px; }
 .step-nav-center { justify-content: center; }
 /* Étape facultative : le lien « Passer » reste discret entre Retour et Continuer. */
-.btn-skip { margin-left: auto; color: var(--text-3); text-decoration: none; }
+.btn-skip { margin-inline-start: auto; color: var(--text-3); text-decoration: none; }
 .btn-skip:hover { color: var(--text); }
-.btn-skip + .btn-primary { margin-left: 0; }
+.btn-skip + .btn-primary { margin-inline-start: 0; }
 
 /* Languages */
-.language-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; width: 100%; margin-top: 8px; text-align: left; }
-.language-button { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 2px 12px; padding: 12px 36px 12px 14px; border: 0; border-radius: 16px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); color: var(--text); text-align: left; cursor: pointer; transition: box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease; }
+.language-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; width: 100%; margin-top: 8px; text-align: start; }
+.language-button { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 2px 12px; padding-block: 12px; padding-inline: 14px 36px; border: 0; border-radius: 16px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); color: var(--text); text-align: start; cursor: pointer; transition: box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease; }
 .language-button:hover { box-shadow: inset 0 0 0 1px var(--line-2); }
 .language-button.is-active { background: var(--violet-soft); box-shadow: inset 0 0 0 1.5px var(--violet); }
 .language-button-flag { grid-row: span 2; font-size: 22px; line-height: 1; }
@@ -63,9 +63,9 @@
 /* Colonne de droite du bouton : nom au-dessus, code en-dessous (le drapeau fait span 2 lignes). */
 .language-button-meta { display: grid; gap: 1px; min-width: 0; color: var(--text-3); font-size: 12px; }
 .language-button-code { color: var(--text-3); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
-.language-button-check { position: absolute; top: 50%; right: 12px; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--violet); color: #ffffff; font-size: 11px; opacity: 0; transform: translateY(-50%); }
+.language-button-check { position: absolute; top: 50%; inset-inline-end: 12px; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--violet); color: #ffffff; font-size: 11px; opacity: 0; transform: translateY(-50%); }
 .language-button.is-active .language-button-check { opacity: 1; }
-.badge-new { display: inline-flex; align-items: center; height: 18px; margin-left: 6px; padding: 0 7px; border-radius: 999px; background: var(--lcd); color: var(--lcd-ink); font-size: 10px; font-weight: 800; vertical-align: 1px; }
+.badge-new { display: inline-flex; align-items: center; height: 18px; margin-inline-start: 6px; padding: 0 7px; border-radius: 999px; background: var(--lcd); color: var(--lcd-ink); font-size: 10px; font-weight: 800; vertical-align: 1px; }
 
 /* Profile */
 .profile-avatar-row { display: flex; align-items: center; gap: 20px; }
@@ -74,7 +74,7 @@
 .profile-avatar.has-image .profile-avatar-initials { display: none; }
 .profile-avatar-img { width: 100%; height: 100%; object-fit: cover; }
 .profile-avatar-spinner { position: absolute; inset: 0; border: 3px solid transparent; border-top-color: var(--violet); border-radius: 50%; animation: spin 800ms linear infinite; }
-.profile-avatar-status { position: absolute; right: 3px; bottom: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--text-3); box-shadow: 0 0 0 4px var(--surface); }
+.profile-avatar-status { position: absolute; inset-inline-end: 3px; bottom: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--text-3); box-shadow: 0 0 0 4px var(--surface); }
 .profile-avatar-status[data-state="loading"],
 .profile-avatar-status[data-state="searching"] { background: var(--violet); }
 .profile-avatar-status[data-state="found"],
@@ -94,13 +94,13 @@
 .field-label { color: var(--text-2); font-size: 13px; font-weight: 600; }
 
 /* Inputs */
-.input-row { display: flex; align-items: center; gap: 8px; height: 54px; padding: 0 6px 0 16px; border-radius: 15px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line-2); transition: box-shadow var(--dur-fast) ease; }
+.input-row { display: flex; align-items: center; gap: 8px; height: 54px; padding-block: 0; padding-inline: 16px 6px; border-radius: 15px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line-2); transition: box-shadow var(--dur-fast) ease; }
 .input-row:focus-within { box-shadow: inset 0 0 0 1.5px var(--violet), 0 0 0 4px var(--violet-soft); }
 .input-row input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; font-size: 16px; }
 .input-row input::placeholder { color: var(--text-3); }
 .input-prefix { color: var(--text-3); font-weight: 600; }
 .input-prefix.is-hidden { display: none; }
-.input-counter { padding-right: 10px; color: var(--text-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.input-counter { padding-inline-end: 10px; color: var(--text-3); font-size: 12px; font-variant-numeric: tabular-nums; }
 #submit-button { height: 42px; padding: 0 20px; border: 0; border-radius: 11px; background: var(--violet); color: #ffffff; font-family: var(--display); font-size: 13px; font-weight: 700; cursor: pointer; }
 #submit-button:hover { background: var(--violet-strong); }
 #submit-button:disabled { cursor: progress; opacity: 0.55; }
@@ -113,7 +113,7 @@
 .platform-button img { width: 18px; height: 18px; }
 .platform-button:hover { color: var(--text); }
 .platform-button.is-active { background: var(--violet-soft); box-shadow: inset 0 0 0 1.5px var(--violet); color: var(--text); }
-.feedback { color: var(--text-2); font-size: 14px; }
+.feedback { color: var(--text-2); font-size: 14px; overflow-wrap: anywhere; }
 .feedback.success { color: var(--lcd-accent); }
 .feedback.error { color: var(--danger); }
 .current-streamers { display: grid; gap: 10px; }
@@ -122,7 +122,7 @@
 .section-line { flex: 1; height: 1px; background: var(--line); }
 .section-count { color: var(--text-3); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .streamer-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.streamer-item { display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 12px; border-radius: 14px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
+.streamer-item { display: flex; align-items: center; gap: 12px; padding-block: 10px; padding-inline: 12px 10px; border-radius: 14px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
 @media (prefers-reduced-motion: no-preference) {
   .streamer-item { animation: rise 360ms var(--ease-out) both; }
 }
@@ -160,6 +160,10 @@
 .settings-text { display: grid; gap: 2px; min-width: 0; }
 .settings-title { font-weight: 600; }
 .settings-description { color: var(--text-2); font-size: 13px; line-height: 1.45; }
+.plus-tag { display: inline-block; padding: 1px 6px; border-radius: 999px; background: var(--violet-soft); color: var(--violet-text); font-size: 11px; font-weight: 800; vertical-align: 1px; }
+.settings-toggle.is-locked,
+.settings-toggle input:disabled { cursor: not-allowed; }
+.settings-toggle input:disabled { opacity: 0.55; }
 
 /* Finish */
 .finish-title { font-size: clamp(36px, 4.6vw, 58px); }
@@ -171,7 +175,7 @@
 .finish-watched-row { display: flex; align-items: center; }
 .finish-watched-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--surface-2); object-fit: cover; box-shadow: 0 0 0 3px var(--bg); }
 .finish-watched-avatar + .finish-watched-avatar,
-.finish-watched-avatar + .finish-watched-more { margin-left: -10px; }
+.finish-watched-avatar + .finish-watched-more { margin-inline-start: -10px; }
 .finish-watched-more { display: grid; place-items: center; height: 44px; min-width: 44px; padding: 0 10px; border-radius: 999px; background: var(--surface-2); box-shadow: 0 0 0 3px var(--bg); color: var(--text-2); font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .btn-finish { height: 58px; margin-top: 8px; padding: 0 32px; font-size: 15px; justify-self: start; }
 .finish-hint { color: var(--text-3); font-size: 14px; }
@@ -204,12 +208,12 @@
   .step-frame { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .step-header { position: static; }
   .step-label { display: none; }
-  .step-pill { padding-right: 6px; }
+  .step-pill { padding-inline-end: 6px; }
 }
 /* Petit écran / zoom : resserre la colonne unique pour éviter le défilement
    horizontal avec les chaînes longues (allemand, russe). */
 @media (max-width: 1100px) {
-  .wizard { padding-left: 20px; padding-right: 20px; }
+  .wizard { padding-inline-start: 20px; padding-inline-end: 20px; }
 }
 @media (max-width: 720px) {
   .step-frame { gap: 24px; }
@@ -219,6 +223,83 @@
 @media (prefers-reduced-motion: reduce) {
   .step-pill,
   .language-button,
-  .input-row { transition: none; }
+  .input-row,
   .profile-avatar-spinner { animation-duration: 2400ms; }
 }
+
+/* ── StreamPulse+ : parcours d'accueil (?mode=plus) ───────────────────────
+   Le wizard normal et le parcours Plus ont chacun leur stepper : seul celui
+   du mode actif est visible. Les libellés de réglages réutilisent ceux du
+   popup — une même clé partout pour un même réglage. */
+body.plus-mode #stepper,
+body.plus-mode .step-counter { display: none; }
+body:not(.plus-mode) #plus-stepper { display: none; }
+
+.plus-panel { display: grid; gap: 22px; padding: 26px; }
+.plus-features { display: grid; gap: 13px; margin: 0; padding: 0; list-style: none; }
+.plus-features li { display: flex; align-items: baseline; gap: 12px; color: var(--text-2); }
+.plus-features svg { flex: none; width: 19px; height: 19px; translate: 0 3px; color: var(--violet-text); }
+.plus-features span { color: var(--text); }
+
+.plus-settings { box-shadow: none; border: 1px solid var(--line); border-radius: 16px; padding: 4px 18px; display: grid; }
+.plus-settings .settings-toggle:first-child { box-shadow: none; }
+
+/* ── StreamPulse+ : aperçu du style (étape Badge) ─────────────────────────
+   Les vraies classes d'effets, partagées avec le tchat via css/fx-effects.css.
+   La base du badge et les nuances du pseudo sont copiées de css/popup.css :
+   duplication assumée par DESIGN.md (« garder les deux en synchro »). */
+.plus-style-preview {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #0e0e10;
+}
+.plus-chat-line { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600; }
+.plus-chat-line .cosmetic-badge { --sp-badge-color: var(--violet); width: 18px; height: 18px; flex: none; background-color: var(--violet); -webkit-mask: url("../images/photos/badge-mark.svg") center / contain no-repeat; mask: url("../images/photos/badge-mark.svg") center / contain no-repeat; }
+
+.plus-picker { display: grid; gap: 10px; }
+.plus-picker .group-title { margin-top: 6px; }
+.fx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 8px; }
+
+/* Puces du nuancier : mêmes classes et gabarit que le volet Badge du popup
+   (css/popup.css) — l'aperçu est le vrai rendu, partagé via fx-effects.css. */
+.fx-option { position: relative; display: grid; justify-items: center; gap: 6px; padding: 12px 6px 8px; border: 0; border-radius: 12px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); color: var(--text); cursor: pointer; transition: box-shadow 160ms ease, transform 160ms ease; }
+.fx-option:hover { transform: translateY(-1px); box-shadow: inset 0 0 0 1px var(--violet-line); }
+.fx-option[aria-checked="true"] { box-shadow: inset 0 0 0 2px var(--violet), 0 8px 18px -12px var(--violet); }
+.fx-option[aria-disabled="true"] { cursor: not-allowed; opacity: 0.55; }
+.fx-option[aria-disabled="true"]:hover { transform: none; box-shadow: inset 0 0 0 1px var(--line); }
+.fx-radio { position: absolute; top: 6px; inset-inline-start: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--line-2); }
+.fx-option[aria-checked="true"] .fx-radio { background: var(--violet); }
+.fx-sample-name { max-width: 100%; overflow: hidden; color: #bf94ff; font-size: 13px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.fx-option .cosmetic-badge { --sp-badge-color: var(--violet); width: 26px; height: 26px; background-color: var(--violet); -webkit-mask: url("../images/photos/badge-mark.svg") center / contain no-repeat; mask: url("../images/photos/badge-mark.svg") center / contain no-repeat; }
+.fx-label { color: var(--text-2); font-size: 10.5px; font-weight: 600; text-align: center; }
+.fx-lock { position: absolute; top: 5px; inset-inline-end: 6px; color: #ffd23f; font-size: 11px; font-weight: 800; }
+
+/* Bases du rendu des effets, copiées de css/popup.css (duplication assumée par
+   DESIGN.md pour les cosmétiques Plus) : les variantes sp-paint/sp-fx viennent
+   de fx-effects.css, déjà lié — sauf ambassador et halo, qui n'existent que
+   dans popup.css et twitch-badge.css : elles sont copiées ici, à garder en
+   synchro avec elles. */
+.cosmetic-name { color: #bf94ff; font-weight: 700; }
+.sp-paint { -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; background-size: 200% 100%; }
+.sp-paint--ambassador { background-image: linear-gradient(90deg, #ffd23f, #b58bff, #9146ff, #ffd23f); background-size: 260% 100%; animation: sp-paint-slide 4.5s linear infinite; }
+.cosmetic-badge.sp-fx-halo { background-color: #ffd23f; filter: drop-shadow(0 0 2px #ffd23f) drop-shadow(0 0 6px #ffd23f); animation: sp-badge-pulse 2.8s ease-in-out infinite; }
+@keyframes sp-paint-slide { to { background-position: -200% 0; } }
+@keyframes sp-badge-pulse { 0%, 100% { filter: drop-shadow(0 0 0 transparent); transform: scale(1); } 50% { filter: drop-shadow(0 0 5px var(--violet)); transform: scale(1.12); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .plus-style-preview .cosmetic-badge,
+  .plus-style-preview .cosmetic-name,
+  .fx-option .cosmetic-badge,
+  .fx-option .fx-sample-name { animation: none; }
+  .fx-option { transition: none; }
+  .fx-option:hover { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plus-style-preview .cosmetic-badge,
+  .plus-style-preview .sp-paint { animation: none; }
+}
+
+.platform-hint { margin: 8px 0 0; color: var(--text-2); font-size: 13px; line-height: 1.45; }
