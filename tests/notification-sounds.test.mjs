@@ -89,7 +89,7 @@ test("le service worker applique le son par type seulement avec StreamPulse+", a
     await NotificationSystem.notifyLive(streamer, { platform: "twitch" }, { ...preferences, soundsEnabled: false });
     return firstFrequencies.map(presetOf);
   }
-  const plus = { streamPulsePlus: { status: "active", plan: "lifetime", licenseKey: "SP-TEST" } };
+  const plus = { streamPulsePlus: { status: "active", plan: "lifetime", licenseKey: "SP-TEST", iat: Date.now(), sig: "sig" } };
   assert.deepEqual(await played(plus), ["chime", "drop"]);
   assert.deepEqual(await played({}), ["chime", "chime"]);
 });
