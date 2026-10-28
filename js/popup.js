@@ -1185,7 +1185,7 @@ async function handleSavePseudo() {
   // L'avatar doit suivre le pseudo. Sans ce lookup, le spread de l'ancien
   // profil conservait la photo posee a l'onboarding : apres un changement de
   // pseudo, le filigrane des statistiques montrait encore l'ancien compte.
-  const lookup = await sendMessage({ type: "lookupTwitchUser", handle: raw });
+  const lookup = await sendMessage({ type: "lookupTwitchUser", handle: raw, platform: previous.platform });
   const user = lookup?.user || null;
   const next = {
     ...previous,
@@ -1251,6 +1251,7 @@ function syncDropsPlusLock() {
   const prefs = state.preferences || {};
   if (autoClaimDropsToggle) autoClaimDropsToggle.checked = plus && prefs.autoClaimDrops !== false;
   if (autoOpenInventoryToggle) autoOpenInventoryToggle.checked = plus && Boolean(prefs.autoOpenInventory);
+  if (badgeAlertsToggle) badgeAlertsToggle.checked = plus && prefs.badgeAlerts === true;
 }
 
 /** Sans licence, activer un réglage Drops ouvre l'offre au lieu d'enregistrer. */
@@ -1344,7 +1345,7 @@ function renderPreferences() {
     dropAlertsToggle.checked = prefs.dropAlerts !== false;
   }
   if (badgeAlertsToggle) {
-    badgeAlertsToggle.checked = prefs.badgeAlerts === true;
+    badgeAlertsToggle.checked = plusActive() && prefs.badgeAlerts === true;
   }
   if (raidAlertsToggle) {
     raidAlertsToggle.checked = prefs.raidAlerts !== false;
@@ -2670,6 +2671,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     if (badgeAlertsToggle) {
       badgeAlertsToggle.addEventListener("change", (e) => {
+        if (guardDropsPlus(e)) return;
         updatePreferences({ badgeAlerts: e.target.checked });
       });
     }

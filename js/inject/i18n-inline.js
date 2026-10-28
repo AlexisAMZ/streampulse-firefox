@@ -49,7 +49,11 @@
       "months": "Abonné depuis {{count}} mois",
       "monthOne": "Abonné depuis 1 mois",
       "newMember": "Nouvel abonné",
-      "freeLine": "Utilisateur de l'extension"
+      "freeLine": "Utilisateur de l'extension",
+      "worn": "Porté",
+      "tenure": "Ancienneté",
+      "nameStyle": "Style du pseudo",
+      "bughunter": "Chasseur de bugs"
     },
     "topbar": {
       "previews": "Aperçus au survol",
@@ -90,6 +94,7 @@
       "clipDownload": "Télécharger le clip (MP4)",
       "clipDownloading": "Téléchargement du clip…",
       "clipDownloadFailed": "Téléchargement impossible. Recharge la page du clip et réessaie.",
+      "clipOpenEditor": "Monter avec StreamPulse Clips",
       "latencyEmpty": "Latence : --",
       "latencyValue": "Latence : {{value}}s",
       "offline": "HORS LIGNE"
@@ -219,7 +224,11 @@
       "months": "Subscribed for {{count}} months",
       "monthOne": "Subscribed for 1 month",
       "newMember": "New subscriber",
-      "freeLine": "Extension user"
+      "freeLine": "Extension user",
+      "worn": "Worn",
+      "tenure": "Tenure",
+      "nameStyle": "Name style",
+      "bughunter": "Bug hunter"
     },
     "topbar": {
       "previews": "Hover previews",
@@ -260,6 +269,7 @@
       "clipDownload": "Download clip (MP4)",
       "clipDownloading": "Downloading clip…",
       "clipDownloadFailed": "Download failed. Reload the clip page and try again.",
+      "clipOpenEditor": "Edit with StreamPulse Clips",
       "latencyEmpty": "Latency: --",
       "latencyValue": "Latency: {{value}}s",
       "offline": "OFFLINE"
@@ -389,7 +399,11 @@
       "months": "Suscrito desde hace {{count}} meses",
       "monthOne": "Suscrito desde hace 1 mes",
       "newMember": "Nuevo suscriptor",
-      "freeLine": "Usuario de la extensión"
+      "freeLine": "Usuario de la extensión",
+      "worn": "Equipado",
+      "tenure": "Antigüedad",
+      "nameStyle": "Estilo del nombre",
+      "bughunter": "Cazador de errores"
     },
     "topbar": {
       "previews": "Vistas previas al pasar",
@@ -430,6 +444,7 @@
       "clipDownload": "Descargar clip (MP4)",
       "clipDownloading": "Descargando clip…",
       "clipDownloadFailed": "No se ha podido descargar. Recarga la página del clip y vuelve a intentarlo.",
+      "clipOpenEditor": "Editar con StreamPulse Clips",
       "latencyEmpty": "Latencia: --",
       "latencyValue": "Latencia: {{value}}s",
       "offline": "DESCONECTADO"
@@ -559,7 +574,11 @@
       "months": "Assinante há {{count}} meses",
       "monthOne": "Assinante há 1 mês",
       "newMember": "Novo assinante",
-      "freeLine": "Usuário da extensão"
+      "freeLine": "Usuário da extensão",
+      "worn": "Equipado",
+      "tenure": "Antiguidade",
+      "nameStyle": "Estilo do nome",
+      "bughunter": "Caçador de bugs"
     },
     "topbar": {
       "previews": "Prévias ao passar o mouse",
@@ -600,6 +619,7 @@
       "clipDownload": "Baixar clipe (MP4)",
       "clipDownloading": "Baixando clipe…",
       "clipDownloadFailed": "Não foi possível baixar. Recarregue a página do clipe e tente de novo.",
+      "clipOpenEditor": "Editar com o StreamPulse Clips",
       "latencyEmpty": "Latência: --",
       "latencyValue": "Latência: {{value}}s",
       "offline": "OFFLINE"
@@ -729,7 +749,11 @@
       "months": "Seit {{count}} Monaten dabei",
       "monthOne": "Seit 1 Monat dabei",
       "newMember": "Neues Mitglied",
-      "freeLine": "Nutzt die Erweiterung"
+      "freeLine": "Nutzt die Erweiterung",
+      "worn": "Getragen",
+      "tenure": "Mitgliedsdauer",
+      "nameStyle": "Namensstil",
+      "bughunter": "Fehlerjäger"
     },
     "topbar": {
       "previews": "Hover-Vorschau",
@@ -770,6 +794,7 @@
       "clipDownload": "Clip herunterladen (MP4)",
       "clipDownloading": "Clip wird heruntergeladen…",
       "clipDownloadFailed": "Download nicht möglich. Lade die Clipseite neu und versuch es noch mal.",
+      "clipOpenEditor": "Mit StreamPulse Clips bearbeiten",
       "latencyEmpty": "vorzuspulen Latenz: --",
       "latencyValue": "Latenz: {{value}}s",
       "offline": "OFFLINE"
@@ -899,7 +924,11 @@
       "months": "Abbonato da {{count}} mesi",
       "monthOne": "Abbonato da 1 mese",
       "newMember": "Nuovo abbonato",
-      "freeLine": "Utente dell'estensione"
+      "freeLine": "Utente dell'estensione",
+      "worn": "Indossato",
+      "tenure": "Anzianità",
+      "nameStyle": "Stile del nome",
+      "bughunter": "Cacciatore di bug"
     },
     "topbar": {
       "previews": "Anteprime al passaggio",
@@ -940,6 +969,7 @@
       "clipDownload": "Scarica clip (MP4)",
       "clipDownloading": "Download della clip…",
       "clipDownloadFailed": "Download non riuscito. Ricarica la pagina della clip e riprova.",
+      "clipOpenEditor": "Modifica con StreamPulse Clips",
       "latencyEmpty": "Latenza: --",
       "latencyValue": "Latenza: {{value}}s",
       "offline": "OFFLINE"
@@ -1069,7 +1099,11 @@
       "months": "Subskrybuje od {{count}} mies.",
       "monthOne": "Subskrybuje od 1 miesiąca",
       "newMember": "Nowy subskrybent",
-      "freeLine": "Użytkownik rozszerzenia"
+      "freeLine": "Użytkownik rozszerzenia",
+      "worn": "Noszony",
+      "tenure": "Staż",
+      "nameStyle": "Styl pseudonimu",
+      "bughunter": "Łowca błędów"
     },
     "topbar": {
       "previews": "Podgląd po najechaniu",
@@ -1110,6 +1144,7 @@
       "clipDownload": "Pobierz klip (MP4)",
       "clipDownloading": "Pobieranie klipu…",
       "clipDownloadFailed": "Nie udało się pobrać. Odśwież stronę klipu i spróbuj ponownie.",
+      "clipOpenEditor": "Edytuj w StreamPulse Clips",
       "latencyEmpty": "Opóźnienie: --",
       "latencyValue": "Opóźnienie: {{value}} s",
       "offline": "OFFLINE"
@@ -1239,7 +1274,11 @@
       "months": "{{count}} aydır abone",
       "monthOne": "1 aydır abone",
       "newMember": "Yeni abone",
-      "freeLine": "Eklenti kullanıcısı"
+      "freeLine": "Eklenti kullanıcısı",
+      "worn": "Takılı",
+      "tenure": "Kıdem",
+      "nameStyle": "İsim stili",
+      "bughunter": "Hata avcısı"
     },
     "topbar": {
       "previews": "Üzerine gelince önizleme",
@@ -1280,6 +1319,7 @@
       "clipDownload": "Klibi indir (MP4)",
       "clipDownloading": "Klip indiriliyor…",
       "clipDownloadFailed": "İndirilemedi. Klip sayfasını yenileyip tekrar dene.",
+      "clipOpenEditor": "StreamPulse Clips ile düzenle",
       "latencyEmpty": "Gecikme: --",
       "latencyValue": "Gecikme süresi: {{value}} saniye",
       "offline": "ÇEVRİMDIŞI"
@@ -1409,7 +1449,11 @@
       "months": "Подписчик {{count}} мес.",
       "monthOne": "Подписчик 1 месяц",
       "newMember": "Новый подписчик",
-      "freeLine": "Пользователь расширения"
+      "freeLine": "Пользователь расширения",
+      "worn": "Надет",
+      "tenure": "Стаж",
+      "nameStyle": "Стиль ника",
+      "bughunter": "Охотник за багами"
     },
     "topbar": {
       "previews": "Превью при наведении",
@@ -1450,6 +1494,7 @@
       "clipDownload": "Скачать клип (MP4)",
       "clipDownloading": "Скачивание клипа…",
       "clipDownloadFailed": "Не удалось скачать. Перезагрузи страницу клипа и попробуй снова.",
+      "clipOpenEditor": "Монтировать в StreamPulse Clips",
       "latencyEmpty": "Задержка: --",
       "latencyValue": "Задержка: {{value}} с",
       "offline": "ОФЛАЙН"
@@ -1579,7 +1624,11 @@
       "months": "{{count}}か月利用中",
       "monthOne": "1か月利用中",
       "newMember": "新規メンバー",
-      "freeLine": "拡張機能ユーザー"
+      "freeLine": "拡張機能ユーザー",
+      "worn": "装着中",
+      "tenure": "加入歴",
+      "nameStyle": "名前のスタイル",
+      "bughunter": "バグハンター"
     },
     "topbar": {
       "previews": "ホバープレビュー",
@@ -1620,6 +1669,7 @@
       "clipDownload": "クリップをダウンロード (MP4)",
       "clipDownloading": "クリップをダウンロード中…",
       "clipDownloadFailed": "ダウンロードできませんでした。クリップのページを再読み込みして、もう一度お試しください。",
+      "clipOpenEditor": "StreamPulse Clips で編集",
       "latencyEmpty": "遅延：--",
       "latencyValue": "遅延：{{value}}秒",
       "offline": "オフライン"
@@ -1749,7 +1799,11 @@
       "months": "{{count}}개월째 구독 중",
       "monthOne": "1개월째 구독 중",
       "newMember": "새 구독자",
-      "freeLine": "확장 프로그램 사용자"
+      "freeLine": "확장 프로그램 사용자",
+      "worn": "장착 중",
+      "tenure": "구독 기간",
+      "nameStyle": "닉네임 스타일",
+      "bughunter": "버그 헌터"
     },
     "topbar": {
       "previews": "마우스 오버 미리보기",
@@ -1790,6 +1844,7 @@
       "clipDownload": "클립 다운로드 (MP4)",
       "clipDownloading": "클립 다운로드 중…",
       "clipDownloadFailed": "다운로드할 수 없습니다. 클립 페이지를 새로고침한 뒤 다시 시도하세요.",
+      "clipOpenEditor": "StreamPulse Clips로 편집",
       "latencyEmpty": "지연 시간: --",
       "latencyValue": "지연 시간: {{value}}초",
       "offline": "오프라인"
@@ -1919,7 +1974,11 @@
       "months": "مشترك منذ {{count}} أشهر",
       "monthOne": "مشترك منذ شهر واحد",
       "newMember": "مشترك جديد",
-      "freeLine": "مستخدم الإضافة"
+      "freeLine": "مستخدم الإضافة",
+      "worn": "مُجهَّز",
+      "tenure": "الأقدمية",
+      "nameStyle": "ستايل الاسم",
+      "bughunter": "صائد الأخطاء"
     },
     "topbar": {
       "previews": "معاينات التمرير",
@@ -1960,6 +2019,7 @@
       "clipDownload": "تنزيل المقطع (MP4)",
       "clipDownloading": "جارٍ تنزيل المقطع…",
       "clipDownloadFailed": "فشل التنزيل. أعد تحميل صفحة المقطع وحاول مجددًا.",
+      "clipOpenEditor": "تعديل باستخدام StreamPulse Clips",
       "latencyEmpty": "زمن الاستجابة: --",
       "latencyValue": "زمن الاستجابة: {{value}} ث",
       "offline": "غير متصل"

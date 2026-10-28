@@ -6,8 +6,11 @@
 import { t, getCurrentLanguage } from "./i18n.js";
 import { currentGroup, normalizeAuto } from "./badge-auto.js";
 import { BADGE_FREE_KEY, freeAvailable, freeUsedToday } from "./badge-free.js";
-import { BADGE_LIMITED_KEY, BADGE_WATCH_KEY, ENDING_SOON_MS, limitedFrom, toggleWatch, watchFrom } from "./badge-watch.js";
-import { DROP_ALERTS_KEY, MAX_GAMES, normalizeDropAlerts } from "./drop-alerts.js";
+import { BADGE_LIMITED_KEY, BADGE_SCOPE_KEY, BADGE_WATCH_KEY, ENDING_SOON_MS, limitedFrom, toggleWatch, watchFrom } from "./badge-watch.js";
+import { DROP_ALERTS_KEY } from "./drop-alerts.js";
+import { createScopeEditor } from "./popup-alert-scope.js";
+import { REFRESH_CHOICES, effectiveRefreshMinutes } from "./refresh-interval.js";
+import { MISSED_KEY, markSeen, missedFrom, weekSummary } from "./missed-alerts.js";
 import {
   DROPS_KEYS,
   BADGE_AUTO_KEY,
@@ -76,10 +79,8 @@ const CAMPAIGNS_OLD_MS = 12 * 3_600_000;
 const BADGE_SORT_KEYS = Object.freeze({ live: "popup.drops.badgeSortLive", soon: "popup.drops.badgeSortSoon", ended: "popup.drops.badgeSortEnded", owned: "popup.drops.badgeSortOwned" });
 const BADGE_EMPTY_KEYS = Object.freeze({ live: "popup.drops.badgesEmptyLive", soon: "popup.drops.badgesEmptySoon", ended: "popup.drops.badgesEmptyEnded", owned: "popup.drops.badgesEmptyOwned" });
 const GIFT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
-const CLOSE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
 
 /** Alertes de campagnes Drops (Plus) : { enabled, games }, lu comme le reste. */
-let dropAlerts = normalizeDropAlerts(null);
 
 let deps = { isPlus: () => false, openPlus: () => {} };
 let progress = progressFrom({});
@@ -88,6 +89,7 @@ let rewards = rewardsFrom({});
 let badges = badgesFrom({});
 let history = [];
 let prefs = {};
+let missed = missedFrom(null);
 let myGames = new Set();
 // Temps de visionnage brut (par jour, chaîne et jeu) : alimente l'estimation
 // locale de progression des campagnes de badges à objectif de minutes.
@@ -555,57 +557,109 @@ function formatPlanDuration(minutes) {
 
 // ─── Panneau : alertes de campagnes (StreamPulse+) ────────────────────────────
 
-function saveDropAlerts() {
-  dropAlerts = normalizeDropAlerts(dropAlerts);
-  chrome.storage.local.set({ [DROP_ALERTS_KEY]: dropAlerts });
+const dropScope = createScopeEditor({
+  key: DROP_ALERTS_KEY,
+  toggleId: "pref-drop-campaign-alerts",
+  modesId: "drop-alerts-modes",
+  gamesId: "drop-alerts-games",
+  lineId: "drop-alerts-line",
+  isPlus: () => deps.isPlus(),
+  openPlus: () => deps.openPlus(),
+});
+
+const badgeScope = createScopeEditor({
+  key: BADGE_SCOPE_KEY,
+  toggleId: "badges-scope-toggle",
+  modesId: "badges-scope-modes",
+  gamesId: "badges-scope-games",
+  lineId: "badges-scope-line",
+  isPlus: () => deps.isPlus(),
+  openPlus: () => deps.openPlus(),
+});
+
+// ─── Délai d'actualisation des badges et Drops (StreamPulse+) ─────────────────
+
+/** Les deux listes (onglets Badges et Drops) montrent le délai en vigueur. */
+function renderRefresh() {
+  const plus = deps.isPlus();
+  const current = String(effectiveRefreshMinutes(prefs, plus));
+  for (const select of document.querySelectorAll(".drops-refresh-select")) {
+    if (!select.options.length) {
+      select.append(...REFRESH_CHOICES.map((minutes) => new Option(t("popup.rewardPlan.minutes", { count: minutes }), String(minutes))));
+    }
+    if (document.activeElement !== select) select.value = current;
+  }
+  for (const lock of document.querySelectorAll(".drops-refresh-lock")) lock.hidden = plus;
 }
 
-/** Chips des jeux suivis : un clic sur la croix retire, Entrée ajoute. */
-function renderDropAlertsGames() {
-  const host = $("drop-alerts-games");
-  if (!host) return;
-  const chips = dropAlerts.games.map((game) => {
-    const chip = el("span", "smart-term", game);
-    const remove = el("button");
-    remove.type = "button";
-    remove.innerHTML = CLOSE_ICON;
-    remove.setAttribute("aria-label", t("popup.dropAlerts.removeGame", { game }));
-    remove.addEventListener("click", () => {
-      dropAlerts = { ...dropAlerts, games: dropAlerts.games.filter((item) => item !== game) };
-      saveDropAlerts();
-      renderDropAlertsGames();
-    });
-    chip.append(remove);
-    return chip;
-  });
-  if (dropAlerts.games.length < MAX_GAMES) {
-    const add = el("input", "smart-add");
-    add.type = "text";
-    add.placeholder = t("popup.dropAlerts.gamePlaceholder");
-    add.setAttribute("aria-label", t("popup.dropAlerts.gamesLabel"));
-    add.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter") return;
-      event.preventDefault();
-      const game = add.value.trim();
-      if (!game) return;
-      dropAlerts = { ...dropAlerts, games: [...dropAlerts.games, game] };
-      saveDropAlerts();
-      renderDropAlertsGames();
-      host.querySelector(".smart-add")?.focus();
-    });
-    chips.push(add);
+async function changeRefresh(event) {
+  if (!deps.isPlus()) {
+    renderRefresh();
+    deps.openPlus();
+    return;
   }
-  host.replaceChildren(...chips);
+  const minutes = Number(event.target.value);
+  try {
+    const result = await chrome.runtime.sendMessage({ type: "updatePreferences", updates: { dropsRefreshMinutes: minutes } });
+    if (result?.success !== true) throw new Error(result?.error || "refus");
+    prefs = { ...prefs, dropsRefreshMinutes: minutes };
+  } catch (error) {
+    console.warn("[popup] délai d'actualisation non enregistré :", error?.message || error);
+  }
+  renderRefresh();
+}
+
+// ─── Alertes manquées (sans StreamPulse+) ─────────────────────────────────────
+
+/** Détail d'une ligne : « 30 min · fini il y a 2 h », « en cours · encore 20 min », « nouvelle campagne ». */
+function missedDetail(item, now) {
+  if (item.kind === "drop") return t("popup.missed.newCampaign");
+  const parts = item.durationMs ? [spanLabel(item.durationMs)] : [];
+  if (item.endsAt && item.endsAt <= now) parts.push(t("popup.missed.ended", { ago: agoLabel(item.endsAt, now) }));
+  else if (item.endsAt) parts.push(t("popup.missed.left", { time: spanLabel(item.endsAt - now) }));
+  else parts.push(t("popup.missed.newBadge"));
+  return parts.join(" · ");
+}
+
+function renderMissed() {
+  const now = Date.now();
+  const summary = weekSummary(missed, now);
+  const show = !deps.isPlus() && summary.total > 0;
+  for (const id of ["badges-missed", "drops-missed"]) {
+    const host = $(id);
+    if (!host) continue;
+    host.hidden = !show;
+    if (!show) continue;
+    host.querySelector(".missed-count").textContent = String(summary.total);
+    const rows = missed.items.slice(0, 3).map((item) => {
+      const row = el("li");
+      row.append(el("span", "", [item.title, item.game].filter(Boolean).join(" · ")), el("span", "", missedDetail(item, now)));
+      return row;
+    });
+    host.querySelector(".missed-lcd-list").replaceChildren(...rows);
+  }
+}
+
+/** Onglet Badges ou Drops ouvert : les alertes manquées sont vues, le point de l'icône s'éteint. */
+async function seeMissed() {
+  if (deps.isPlus() || !missed.items.some((item) => item.at > missed.seenAt)) return;
+  missed = markSeen(missed, Date.now());
+  try {
+    await chrome.storage.local.set({ [MISSED_KEY]: missed });
+  } catch (error) {
+    console.warn("[popup] alertes manquées non marquées comme vues :", error?.message || error);
+  }
 }
 
 function renderDropAlerts() {
   const plus = deps.isPlus();
   if ($("drop-alerts-locked")) $("drop-alerts-locked").hidden = plus;
   if ($("drop-alerts-editor")) $("drop-alerts-editor").hidden = !plus;
-  if (!plus) return;
-  const toggle = $("pref-drop-campaign-alerts");
-  if (toggle && document.activeElement !== toggle) toggle.checked = dropAlerts.enabled;
-  renderDropAlertsGames();
+  if ($("badges-scope-lock")) $("badges-scope-lock").hidden = plus;
+  dropScope.render();
+  badgeScope.render();
+  renderRefresh();
+  renderMissed();
 }
 
 // ─── Panneau : badges et récompenses ──────────────────────────────────────────
@@ -1043,10 +1097,11 @@ function bind() {
     openPanel();
   });
   $("drop-alerts-unlock")?.addEventListener("click", () => deps.openPlus());
-  $("pref-drop-campaign-alerts")?.addEventListener("change", (event) => {
-    dropAlerts = { ...dropAlerts, enabled: event.target.checked };
-    saveDropAlerts();
-  });
+  dropScope.bind();
+  badgeScope.bind();
+  for (const cta of document.querySelectorAll(".missed-lcd-buy")) cta.addEventListener("click", () => deps.openPlus());
+  for (const id of ["tab-badges", "tab-drops"]) $(id)?.addEventListener("click", () => seeMissed());
+  for (const select of document.querySelectorAll(".drops-refresh-select")) select.addEventListener("change", changeRefresh);
   $("drops-filters")?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-filter]");
     if (!button) return;
@@ -1127,6 +1182,11 @@ function bind() {
 
 /** Suit ou ne suit plus un badge : l'arrière-plan prévient au départ et avant la fin. */
 async function toggleBell(badgeId) {
+  // Alertes de badges : réservées à StreamPulse+.
+  if (!deps.isPlus()) {
+    deps.openPlus();
+    return;
+  }
   const now = Date.now();
   const badge = badges.badges.find((item) => item.id === badgeId);
   const live = Boolean(badge) && catalogBadges({ ...badges, badges: [badge] }, { status: "live", now, events: badgeEvents.events, added: badgeAdded.added }).length > 0;
@@ -1219,12 +1279,14 @@ function toggleAuto(badgeId) {
 }
 
 async function reload() {
-  const stored = await chrome.storage.local.get([...DROPS_KEYS, PREFERENCES_KEY, BADGE_AUTO_KEY, BADGE_FREE_KEY, BADGE_WATCH_KEY, BADGE_LIMITED_KEY, DROP_ALERTS_KEY, REWARD_PLAN_KEY]);
+  const stored = await chrome.storage.local.get([...DROPS_KEYS, PREFERENCES_KEY, BADGE_AUTO_KEY, BADGE_FREE_KEY, BADGE_WATCH_KEY, BADGE_LIMITED_KEY, BADGE_SCOPE_KEY, DROP_ALERTS_KEY, REWARD_PLAN_KEY, MISSED_KEY]);
   badgeAuto = normalizeAuto(stored[BADGE_AUTO_KEY]);
   badgeFree = stored[BADGE_FREE_KEY] || null;
   badgeWatch = watchFrom(stored);
   badgeLimited = limitedFrom(stored);
-  dropAlerts = normalizeDropAlerts(stored[DROP_ALERTS_KEY]);
+  dropScope.load(stored);
+  badgeScope.load(stored);
+  missed = missedFrom(stored[MISSED_KEY]);
   progress = progressFrom(stored);
   campaigns = campaignsFrom(stored);
   rewards = rewardsFrom(stored);
@@ -1245,6 +1307,10 @@ export async function initDrops({ isPlus, onPlusChange, openPlus }) {
   bind();
   onPlusChange(() => render());
   chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && MISSED_KEY in changes) {
+      missed = missedFrom(changes[MISSED_KEY].newValue);
+      renderMissed();
+    }
     if (area === "local" && REWARD_PLAN_KEY in changes) {
       rewardPlan = normalizePlanSelection(changes[REWARD_PLAN_KEY].newValue);
       // Un choix fait ici écrit puis revient par cet événement : tant que tu es dans le plan, on ne le recrée pas.

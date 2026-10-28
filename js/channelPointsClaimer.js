@@ -235,6 +235,7 @@
       start();
       return;
     }
+    // Essai sur un autre compte Twitch : isPlusActive répond non (js/inject/plus-rule.js).
     plusOn = PLUS_RULE.isPlusActive(result?.[PLUS_RULE.PLUS_KEY]);
     applyPref(result?.[PREFERENCES_KEY]);
   });

@@ -9,6 +9,8 @@ import { initDrops } from "./popup-drops.js";
 import { initLayout } from "./popup-layout.js";
 import { initReviewAsk } from "./popup-review.js";
 import { initBadgeAsk } from "./popup-badge-ask.js";
+import { initReferralAsk } from "./popup-referral-ask.js";
+import { initLocalPrices } from "./plus-local-price.js";
 import { createWatchLaterButton } from "./popup-watch-later.js";
 import { IDENTITY_STORAGE_KEYS, initIdentity, renderIdentity } from "./popup-identity.js";
 import { HISTORY_KEY, formatClock, missedView, summarize } from "./history-data.js";
@@ -16,7 +18,10 @@ import { groupMissedEntries } from "./history-grouping.js";
 import { LINKED_ACCOUNTS_KEY, normalizeLinkedAccounts } from "./linked-accounts.js";
 import { getPlatformIcon, getPlatformLabelKey } from "./platforms.js";
 import { PREDICTION_HISTORY_KEY, PREDICTION_RULE_KEY, normalizeRule as normalizePredictionRule, summarize as summarizePredictions } from "./predictions-data.js";
-import { PLUS_KEY, plusPageUrl, getDeviceId, isPlusActive, normalizeLicenseKey, portalUrl, releaseDevice, verifyLicense } from "./plus.js";
+import { TRIAL_STATE_KEY, trialStateFrom, trialTakenOnAccount } from "./sw/trial.js";
+import { celebrateTrial } from "./confetti.js";
+import { POPUP_SEEN_KEY } from "./trial-reminder.js";
+import { PLUS_KEY, plusPageUrl, getDeviceId, isPlusActive, normalizeLicenseKey, portalUrl, releaseDevice, trialEndsAt, trialPaused, verifyLicense } from "./plus.js";
 import { mountLiquidMetalButton } from "./promo-liquid-button.js";
 import { mountClipsMorph } from "./promo-clips-morph.js";
 import { hasRecentSuccess, reviewAskDecision, REMOTE_CONFIG_CACHE_KEY } from "./popup-review.js";
@@ -229,18 +234,7 @@ let promoClipsOk = false;
 let promoRemoteOff = false;
 let promoHasDrops = false;
 let promoHasWatch = false;
-const PLAN_LABELS = { monthly: "popup.plus.planMonthly", yearly: "popup.plus.planYearly", lifetime: "popup.plus.planLifetime" };
-const PLUS_ATTENTION_KEY = "plusBadgeSeenVersion";
-let plusAttentionSeen = false;
-
-function markPlusAttentionSeen() {
-  if (plusAttentionSeen) return;
-  plusAttentionSeen = true;
-  $("open-plus")?.classList.remove("has-attention");
-  const version = chrome.runtime?.getManifest?.()?.version || "1";
-  chrome.storage?.local?.set({ [PLUS_ATTENTION_KEY]: version }).catch(() => {});
-}
-
+const PLAN_LABELS = { monthly: "popup.plus.planMonthly", yearly: "popup.plus.planYearly", lifetime: "popup.plus.planLifetime", trial: "popup.plus.planTrial" };
 const plusListeners = new Set();
 
 /** Rappelé à chaque changement d'état de la licence. */
@@ -252,12 +246,69 @@ export function plusActive() {
   return isPlusActive(plusRecord);
 }
 
+const DAY_MS = 86_400_000;
+// En attente tant que le stockage n'est pas lu : le bandeau d'offre ne clignote pas.
+let trialState = { ...trialStateFrom(null), pending: true };
+
+/** Boutons « Essayer 7 jours gratuitement » : sans licence, tant que l'essai n'a jamais servi ici. */
+function renderTrialOffer() {
+  const eligible = !plusActive() && !trialState.used && !trialState.pending;
+  for (const button of document.querySelectorAll(".trial-start, .trial-note")) button.hidden = !eligible;
+  // Bandeau du haut : l'essai se propose, il ne démarre jamais sans ce clic.
+  const strip = $("trial-offer-strip");
+  if (strip) strip.hidden = !eligible;
+  document.body.classList.toggle("has-trial", eligible || (plusRecord?.plan === "trial" && (plusActive() || trialPaused(plusRecord))));
+  // Avec l'essai proposé, l'écran des alertes manquées garde un seul bouton.
+  for (const buy of document.querySelectorAll(".missed-lcd-buy")) buy.hidden = eligible;
+}
+
+async function startTrialFromButton(event) {
+  const button = event.currentTarget;
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  try {
+    const response = await chrome.runtime.sendMessage({ type: "startTrial" });
+    // « started » : la licence d'essai arrive par le stockage et rafraîchit tout le popup.
+    if (response?.result === "started") {
+      celebrateTrial({ line: t("popup.trial.unlockedLine"), big: t("popup.trial.offerBadge"), caption: t("popup.trial.unlockedCaption") })
+        .then(() => $("trial-strip")?.classList.add("is-fresh"));
+    }
+    if (response?.result === "refused") openPlus();
+  } catch (error) {
+    console.warn("[plus] essai indisponible :", error?.message || error);
+  } finally {
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+  }
+}
+
+/** Bandeau LCD de l'essai StreamPulse+ : jours restants et bouton S'abonner. */
+function renderTrialStrip(trial) {
+  const strip = $("trial-strip");
+  if (!strip) return;
+  strip.hidden = !trial;
+  if (!trial) return;
+  const days = Math.max(1, Math.ceil((trialEndsAt(plusRecord) - Date.now()) / DAY_MS));
+  $("trial-days").textContent = t("popup.trial.days", { days });
+  // Essai lié à un autre compte Twitch : les récupérations sont en pause, on le dit.
+  const otherAccount = trialPaused(plusRecord);
+  const body = strip.querySelector(".trial-body");
+  // La clé data-i18n suit le texte : un changement de langue garde le bon message.
+  if (body) {
+    body.dataset.i18n = otherAccount ? "popup.trial.otherAccount" : "popup.trial.body";
+    body.textContent = t(body.dataset.i18n);
+  }
+  // Les deux derniers jours, l'écran passe en alerte.
+  strip.classList.toggle("is-ending", days <= 2);
+}
+
 function renderPlus() {
   const active = plusActive();
   const deviceLimited = plusRecord?.status === "device_limited";
   const openButton = $("open-plus");
   openButton?.classList.toggle("is-active", active);
-  openButton?.classList.toggle("has-attention", !active && !plusAttentionSeen);
+  // Sans abonnement, le bouton + brille tant que le popup est ouvert.
+  openButton?.classList.toggle("has-attention", !active);
   // Le pill de la barre change d'infobulle avec l'état : l'abonnement se
   // découvre ou se gère, et le lecteur d'écran entend la bonne action.
   if (openButton) {
@@ -265,18 +316,24 @@ function renderPlus() {
     openButton.title = hint;
     openButton.setAttribute("aria-label", hint);
   }
-  if ($("plus-offer")) $("plus-offer").hidden = active || deviceLimited;
+  // Pendant l'essai, l'offre reste visible : c'est le moment de s'abonner.
+  // Essai en cours, même en pause sur un autre compte Twitch : le bandeau reste.
+  const trial = plusRecord?.plan === "trial" && (active || trialPaused(plusRecord));
+  if ($("plus-offer")) $("plus-offer").hidden = (active && !trial) || deviceLimited;
   if ($("plus-device-limited")) $("plus-device-limited").hidden = !deviceLimited;
   if ($("plus-active")) $("plus-active").hidden = !active;
   if (active && $("plus-active-plan")) {
     const key = plusRecord.licenseKey.replace(/^(SP-[A-Z0-9]{4}).*(.{4})$/, "$1-…-$2");
+    const date = new Date(trialEndsAt(plusRecord)).toLocaleDateString(getCurrentLanguage(), { day: "numeric", month: "long" });
     $("plus-active-plan").textContent = t(
       PLAN_LABELS[plusRecord.plan] || PLAN_LABELS.monthly,
-      { key },
+      { key, date },
     );
   }
   if ($("plus-menu-text")) $("plus-menu-text").textContent = t(active ? "popup.plusMenu.statusActive" : "popup.plusMenu.statusInactive");
   if ($("plus-menu-open")) $("plus-menu-open").textContent = t(active ? "popup.plusMenu.manage" : "popup.plusMenu.discover");
+  renderTrialStrip(trial);
+  renderTrialOffer();
   renderPromo();
   renderPlusValue().catch(() => {});
   plusListeners.forEach((listener) => listener(active));
@@ -336,7 +393,7 @@ function ensureClipsMetal() {
     clipsMetalMounted = true;
     mountLiquidMetalButton(host, {
       label: t("changelog.clipsCtaShort"),
-      onClick: () => window.open("https://spclips.com", "_blank", "noopener"),
+      onClick: () => window.open("https://spclips.com/app?utm_source=streampulse&utm_medium=extension&utm_campaign=popup", "_blank", "noopener"),
     });
   }
   mountClipsMorph($("clips-morph"));
@@ -402,7 +459,6 @@ function trapPlusFocus(event) {
 }
 
 export function openPlus() {
-  markPlusAttentionSeen();
   const view = $("plus-view");
   if (!view) return;
   if (!view.classList.contains("hidden")) {
@@ -435,7 +491,34 @@ function showKeyError(key) {
 }
 
 function initPlus() {
+  initLocalPrices().catch((error) => console.warn("[plus] prix locaux indisponibles :", error));
   $("open-plus")?.addEventListener("click", openPlus);
+  $("trial-subscribe")?.addEventListener("click", openPlus);
+  // Mode développeur (extension non empaquetée) : remettre l'essai à zéro pour le retester.
+  const devReset = $("trial-dev-reset");
+  if (devReset && !chrome.runtime.getManifest().update_url) {
+    devReset.hidden = false;
+    devReset.addEventListener("click", async () => {
+      devReset.disabled = true;
+      try {
+        const response = await chrome.runtime.sendMessage({ type: "devResetTrial" });
+        if (response?.reset) location.reload();
+      } catch (error) {
+        console.warn("[plus] réinitialisation de l'essai :", error?.message || error);
+      } finally {
+        devReset.disabled = false;
+      }
+    });
+  }
+  for (const button of document.querySelectorAll(".trial-start")) button.addEventListener("click", startTrialFromButton);
+  // Popup ouvert : le rappel de l'essai par notification n'a pas lieu d'être.
+  chrome.storage.local.set({ [POPUP_SEEN_KEY]: Date.now() }).catch(() => {});
+  Promise.all([chrome.storage.local.get(TRIAL_STATE_KEY), trialTakenOnAccount(chrome.storage.sync)]).then(([stored, takenOnAccount]) => {
+    // Essai déjà pris sur ce compte Google (autre ordinateur, réinstallation) : pas de bouton.
+    const state = trialStateFrom(stored[TRIAL_STATE_KEY]);
+    trialState = takenOnAccount ? { ...state, used: true } : state;
+    renderPlus();
+  }).catch(() => {});
   $("plus-close")?.addEventListener("click", () => closePlus());
   $("plus-menu-open")?.addEventListener("click", openPlus);
   $("plus-menu-recap")?.addEventListener("click", () => {
@@ -545,9 +628,16 @@ function initPlus() {
     button.disabled = true;
     if (error) error.hidden = true;
     try {
-      const url = await portalUrl(plusRecord.licenseKey, fetch);
-      if (url) {
-        openTab(url);
+      const portal = await portalUrl(plusRecord.licenseKey, fetch, await getDeviceId(chrome.storage.local));
+      if (portal?.url) {
+        openTab(portal.url);
+        return;
+      }
+      if (portal?.emailed) {
+        if (error) {
+          error.textContent = t("popup.plus.manageEmailed");
+          error.hidden = false;
+        }
         return;
       }
       throw new Error("no_portal");
@@ -569,9 +659,16 @@ function initPlus() {
     button.disabled = true;
     if (error) error.hidden = true;
     try {
-      const url = await portalUrl(plusRecord.licenseKey, fetch);
-      if (url) {
-        openTab(url);
+      const portal = await portalUrl(plusRecord.licenseKey, fetch, await getDeviceId(chrome.storage.local));
+      if (portal?.url) {
+        openTab(portal.url);
+        return;
+      }
+      if (portal?.emailed) {
+        if (error) {
+          error.textContent = t("popup.plus.manageEmailed");
+          error.hidden = false;
+        }
         return;
       }
       throw new Error("no_portal");
@@ -965,10 +1062,8 @@ export async function initFeatures() {
   initClipDownloadLock();
   initPredictions();
 
-  const stored = await chrome.storage.local.get([PLUS_KEY, PROMO_KEY, PLUS_ATTENTION_KEY, SMART_ALERTS_KEY, PREDICTION_RULE_KEY, PREDICTION_HISTORY_KEY, "betaGeneralStreamers", "streamPulseWatchTimeDaily", "streamPulsePointsDaily", "streamPulseDropsProgress", REMOTE_CONFIG_CACHE_KEY, ...IDENTITY_STORAGE_KEYS]);
+  const stored = await chrome.storage.local.get([PLUS_KEY, PROMO_KEY, SMART_ALERTS_KEY, PREDICTION_RULE_KEY, PREDICTION_HISTORY_KEY, "betaGeneralStreamers", "streamPulseWatchTimeDaily", "streamPulsePointsDaily", "streamPulseDropsProgress", REMOTE_CONFIG_CACHE_KEY, ...IDENTITY_STORAGE_KEYS]);
   plusRecord = stored[PLUS_KEY] || null;
-  const currentVersion = chrome.runtime?.getManifest?.()?.version || "1";
-  plusAttentionSeen = stored[PLUS_ATTENTION_KEY] === currentVersion;
   promoState = {
     plusClosed: stored[PROMO_KEY]?.plusClosed === true,
     clipsClosed: stored[PROMO_KEY]?.clipsClosed === true,
@@ -1011,8 +1106,11 @@ export async function initFeatures() {
   });
   initPoints({ isPlus: plusActive, onPlusChange: (listener) => plusListeners.add(listener), openPlus })
     .catch((error) => console.warn("[popup] points init failed:", error));
-  initReviewAsk().catch((error) => console.warn("[popup] review ask init failed:", error));
-  initBadgeAsk().catch((error) => console.warn("[popup] badge ask init failed:", error));
+  // La carte parrainage passe après l'avis et le badge : une seule carte à la fois.
+  Promise.all([initReviewAsk(), initBadgeAsk()])
+    .catch((error) => console.warn("[popup] review/badge ask init failed:", error))
+    .then(() => initReferralAsk())
+    .catch((error) => console.warn("[popup] referral ask init failed:", error));
   initLayout().catch((error) => console.warn("[popup] layout init failed:", error));
   initDrops({ isPlus: plusActive, onPlusChange: (listener) => plusListeners.add(listener), openPlus })
     .catch((error) => console.warn("[popup] drops init failed:", error));
@@ -1025,6 +1123,10 @@ export async function initFeatures() {
     if (changes[PLUS_KEY]) {
       plusRecord = changes[PLUS_KEY].newValue || null;
       renderPlus();
+    }
+    if (changes[TRIAL_STATE_KEY]) {
+      trialState = trialStateFrom(changes[TRIAL_STATE_KEY].newValue);
+      renderTrialOffer();
     }
     if (changes[PLUS_VALUE_KEY]) renderPlusValue().catch(() => {});
     if (changes[PREDICTION_HISTORY_KEY]) {

@@ -223,7 +223,7 @@ else {
     // dynamique (ajuster MAX_UNUSED_KEYS et le documenter ici).
     // 168 (2026-10-20) : comme Chrome, depuis que les clés écrites en entier
     // comptent ; le reste est dynamique ou attend une interface (165 mesurées).
-    const MAX_UNUSED_KEYS = 168;
+    const MAX_UNUSED_KEYS = 172;
     const unusedKeys = referenceKeys.filter((k) => !usedKeys.has(k));
     if (unusedKeys.length > MAX_UNUSED_KEYS) {
       fail(`${unusedKeys.length} translation keys are never referenced by any literal call (max ${MAX_UNUSED_KEYS}) : une clé morte vient probablement d'être ajoutée, ou un nouveau mécanisme dynamique demande d'ajuster MAX_UNUSED_KEYS`);

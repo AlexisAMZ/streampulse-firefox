@@ -25,12 +25,12 @@ export default {
     "htmlLang": "tr",
     "stepProfile": "Kullanıcı adı",
     "profileTitle": "Twitch kullanıcı adın.",
-    "profileDescription": "İsteğe bağlı: Twitch kullanıcı adını gir, seni karşılamak için profil fotoğrafını alalım. Twitch hesabın yok ya da paylaşmak istemiyor musun? Bu adımı atla, her şey yine çalışır.",
-    "profileInputLabel": "Twitch kullanıcı adın",
-    "profileHintIdle": "Kullanıcı adını yaz: Twitch profilini otomatik olarak arayalım.",
+    "profileDescription": "İsteğe bağlı: platformunu seç, kullanıcı adını gir, seni karşılamak için profil fotoğrafını alalım. Paylaşmak istemiyor musun? Bu adımı atla, her şey yine çalışır.",
+    "profileInputLabel": "Kullanıcı adın",
+    "profileHintIdle": "Kullanıcı adını yaz: profilini otomatik olarak arayalım.",
     "profileHintSearching": "Aranıyor…",
     "profileHintFound": "✓ Bulundu: {{handle}}",
-    "profileHintKept": "Twitch profili bulunamadı: sorun değil, bu kullanıcı adını olduğu gibi tutuyoruz. Bu adımı atlayabilirsin.",
+    "profileHintKept": "Profil bulunamadı: sorun değil, bu kullanıcı adını olduğu gibi tutuyoruz. Bu adımı atlayabilirsin.",
     "documentTitle": "İlk kurulum",
     "welcomeTagline": "FIREFOX UZANTISI · TWITCH · KICK · YOUTUBE",
     "welcomeDescription": "StreamPulse'a hoş geldin: canlı yayın bildirimleri, puanların ve Drops'ların otomatik alınması. Önce arayüz dilini seç.",
@@ -207,7 +207,7 @@ export default {
       "intro": "Bildirimler, kanal puanları ve önizlemeler ücretsiz kalıyor. StreamPulse+ en sadık izleyiciler için araçlar ekler.",
       "plansLabel": "Plan",
       "monthly": "Aylık",
-      "monthlyNote": "7 gün ücretsiz, taahhütsüz",
+      "monthlyNote": "Taahhüt yok, istediğin zaman iptal",
       "monthlyPrice": "2,99 €",
       "perMonth": "/ay",
       "yearly": "Yıllık",
@@ -215,10 +215,10 @@ export default {
       "yearlyPrice": "19 €",
       "perYear": "/yıl",
       "checkout": "StreamPulse+'ın kilidini aç",
-      "checkoutTrial": "7 gün ücretsiz dene",
+      "checkoutTrial": "Aylık abone ol (2,99 €)",
       "checkoutYearly": "Bir yıllık abone ol (19 €)",
       "savePercent": "%47 indirim",
-      "trustTrial": "7 gün ücretsiz, hemen çekim yapılmaz",
+      "trustTrial": "Taahhüt yok, tek tıkla iptal",
       "trustYearly": "Aylık plana göre yılda 16,88 € tasarruf et",
       "trustCancel": "Eklenti içinden 1 tıkla iptal",
       "trustDevices": "Anahtar 2 tarayıcıda geçerli",
@@ -237,9 +237,11 @@ export default {
       "activeTitle": "StreamPulse+ etkin",
       "planMonthly": "Aylık plan · {{key}}",
       "planLifetime": "Ömür boyu plan · {{key}}",
+      "planTrial": "Ücretsiz deneme · {{date}} tarihine kadar",
       "planYearly": "Yıllık plan · {{key}}",
       "manage": "Aboneliğimi yönet",
       "manageError": "Hesabın şu an açılamıyor. Birkaç dakika sonra tekrar dene.",
+      "manageEmailed": "Hesabını korumak için bağlantı ödeme e-posta adresine gönderildi.",
       "deactivate": "Lisansı bu tarayıcıdan kaldır",
       "close": "Kapat"
     },
@@ -265,11 +267,46 @@ export default {
       "failed": "Reddedildi",
       "note": "Sonuçlar puan bakiyendeki değişime göre tahmin edilir."
     },
+    "alertScope": {
+      "label": "Uyarı kapsamı",
+      "allGames": "Tüm oyunlar",
+      "someGames": "Seçilen oyunlar",
+      "allBadges": "Tüm rozetler"
+    },
+    "dropsRefresh": {
+      "title": "Rozet ve Drops yenileme",
+      "body": "StreamPulse'ın rozetleri ve Drops'ları ne sıklıkla kontrol ettiği. Bazıları yalnızca birkaç dakika sürer: hiçbirini kaçırmamak için 1 veya 2 dk seç. Yalnızca StreamPulse+ ile."
+    },
+    "trial": {
+      "days": "{{days}} gün",
+      "body": "StreamPulse+ denemesi · her şey açık",
+      "subscribe": "Abone ol",
+      "devReset": "Reset (dev)",
+      "unlockedLine": "> StreamPulse+ etkin",
+      "unlockedCaption": "7 gün boyunca her şey açık. Kart gerekmez.",
+      "start": "7 günün kilidini aç",
+      "offerBadge": "7 G",
+      "offerBody": "StreamPulse+ ücretsiz · kart gerekmez · Twitch hesabına bağlı",
+      "consent": "Kart gerekmez, ödeme yok. Deneme bu tarayıcıda açık olan Twitch hesabına bağlanır: Drops ve rozetler bu hesapta toplanır.",
+      "otherAccount": "Deneme başka bir Twitch hesabına bağlı: StreamPulse+ duraklatıldı"
+    },
+    "missed": {
+      "unit": "KAÇIRILDI",
+      "cta": "Hiçbirini kaçırma",
+      "newCampaign": "Yeni kampanya",
+      "ended": "bitti {{ago}}",
+      "left": "{{time}} kaldı",
+      "newBadge": "Yeni rozet"
+    },
+    "badgeScope": {
+      "title": "Yeni rozet uyarıları",
+      "body": "StreamPulse+ · Her yeni rozet için ya da yalnızca seçtiğin oyunlarınkiler için, kullanılabilir olduğu anda bir Chrome bildirimi."
+    },
     "dropAlerts": {
       "title": "Drops uyarıları",
-      "lockedBody": "Takip ettiğin bir oyunda Drops kampanyası başladığında bildirim: Valorant, CS2… Yalnızca StreamPulse+.",
+      "lockedBody": "Bir Drops kampanyası başladığında bildirim, tüm oyunlarda ya da yalnızca seçtiklerinde. Yalnızca StreamPulse+ ile.",
       "toggle": "Yeni kampanyalarda bildir",
-      "toggleBody": "Kampanya listesi Twitch'i ziyaret ettiğinde yenilenir: bildirim o anda, kampanya başına bir kez gelir.",
+      "toggleBody": "Her yeni kampanya için bir Chrome bildirimi, tüm oyunlarda ya da yalnızca seçtiklerinde. Liste bir Twitch sekmesi açıkken yenilenir.",
       "gamesLabel": "Takip edilen oyunlar",
       "gamePlaceholder": "Oyun ekle (Enter)",
       "removeGame": "{{game}} çıkar"
@@ -618,16 +655,25 @@ export default {
       "rankAmbassador": "Elçi · davet edilen arkadaş: {{count}}",
       "intro": "StreamPulse rozetinin ve adının Twitch sohbetindeki görünümü, diğer StreamPulse kullanıcılarına görünür."
     },
+    "referralAsk": {
+      "title": "Bir arkadaşını davet et",
+      "body": "Bağlantını paylaş: abone olan her arkadaşın için para ya da ücretsiz aylar kazanırsın.",
+      "open": "Bağlantımı al"
+    },
     "referral": {
-      "generalBody": "Kodunla StreamPulse+ alan her arkadaş için bir ay ücretsiz.",
-      "generalOpen": "Kodumu gör",
+      "generalBody": "Bağlantını paylaş: abone olan her arkadaşın için para ya da ücretsiz aylar kazanırsın.",
+      "generalOpen": "Bağlantımı al",
       "plusTitle": "Arkadaşlarını davet et",
-      "plusBody": "Arkadaşın 2,99 € indirim alır (ilk ay ücretsiz). Sen de para ve şu ödülleri kazanırsın:",
+      "plusBody": "Arkadaşın yalnızca bağlantını kullanır, hiçbir şey yazmaz. Sen de para ve şu ödülleri kazanırsın:",
       "title": "Davet",
-      "body": "Kodunu paylaş: arkadaşın 2,99 € indirim alır (ilk ay ücretsiz). Abone kaldığı sürece ayda 1 € kazanırsın; PayPal'a ödenir.",
-      "get": "Kodumu al",
-      "copy": "Kopyala",
+      "body": "Bağlantını paylaş: arkadaşının hiçbir şey yazmasına gerek yok, bağlantı yeterli. Aylık abone arkadaşının ödediği her ay için 1 €, yıllık abone arkadaşının ödediği her yıl için 5 € alırsın, PayPal'a yatırılır.",
+      "get": "Bağlantımı al",
+      "copy": "Kodu kopyala",
       "copied": "Kod kopyalandı!",
+      "copyLink": "Bağlantımı kopyala",
+      "linkCopied": "Bağlantı kısa bir mesajla kopyalandı. Arkadaşına gönder: hiçbir şey yazmasına gerek yok, bağlantı yeterli.",
+      "linkCopiedShort": "Bağlantı kopyalandı!",
+      "shareMessage": "StreamPulse'ı öneririm: Twitch, Kick veya YouTube yayıncısı canlıya girince haber veren uzantı. StreamPulse+ alacaksan benim bağlantımı kullan, bana destek olur: {{link}}",
       "loading": "Yükleniyor…",
       "soon": "Davet sistemi çok yakında açılıyor.",
       "error": "Kod şu anda kullanılamıyor. Daha sonra tekrar dene.",
@@ -638,7 +684,7 @@ export default {
       "tierBadge": "Rozet efekti",
       "tierDevice": "Bir cihaz daha",
       "each": "Her arkadaş",
-      "tierMoney": "Abone kaldığı sürece ayda 1 €",
+      "tierMoney": "Ödenen her ay için 1 €, her yıl için 5 €",
       "balance": "Ödenecek",
       "earned": "Kazanılan: {{earned}} · ödenen: {{paid}}",
       "payoutRule": "{{min}} tutarından itibaren PayPal'ına ödenir. Yalnızca reşit olanlar için.",
@@ -646,13 +692,15 @@ export default {
       "paypalPlaceholder": "sen@ornek.com",
       "paypalSave": "Kaydet",
       "paypalSaved": "PayPal adresi kaydedildi.",
+      "paypalPending": "Bu adresi ödeme e-postana gönderilen bağlantıyla onayla.",
       "paypalInvalid": "Bu e-posta adresi geçerli değil.",
       "paypalMissing": "Kazançlarını almak için PayPal adresini ekle.",
-      "freeBody": "Kodunu paylaş: arkadaşın 2,99 € indirim alır (ilk ay ücretsiz). Abone olan her arkadaş için sen bir ay StreamPulse+ kazanırsın, anahtarın e-postayla gelir.",
+      "freeBody": "Bağlantını paylaş: arkadaşının hiçbir şey yazmasına gerek yok, bağlantı yeterli. Abone olan her arkadaşın için bir ay StreamPulse+ kazanırsın, anahtarın e-postayla gelir.",
       "freeLabel": "Ücretsiz aylarını almak için e-postan",
       "freeSubmit": "Kodumu oluştur",
       "freeTaken": "Bu adres başka bir tarayıcıda zaten kullanılıyor.",
-      "freeReady": "Kodun hazır. Bir arkadaşın abone olur olmaz anahtarın e-postayla gelir."
+      "freeReady": "Bağlantın hazır. Bir arkadaşın abone olur olmaz anahtarın e-postayla gelir.",
+      "freeCheckEmail": "Adresini onaylamak için e-postadaki bağlantıyı aç, sonra kodunu oluşturmak için geri dön."
     },
     "layout": {
       "title": "Düzen",
@@ -1113,6 +1161,16 @@ export default {
     }
   },
   "background": {
+    "trialEnd": {
+      "soonTitle": "StreamPulse+ denemen yarın bitiyor",
+      "soonMessage": "Otomatik Drops, rozetler ve özel uyarılar 24 saatten kısa sürede duruyor. Hiçbir şey kaybetmemek için abone ol.",
+      "endedTitle": "StreamPulse+ denemen bitti",
+      "endedMessage": "Drops ve rozetler artık otomatik toplanmıyor. Geri almak için StreamPulse+'a dön."
+    },
+    "trialReminder": {
+      "title": "7 gün ücretsiz StreamPulse+",
+      "message": "Kart gerekmez. StreamPulse'ı aç ve \"7 günün kilidini aç\"a tıkla: Drops ve rozetler kendiliğinden, uyarılar sana göre."
+    },
     "dropAlerts": {
       "title": "Drops kampanyası: {{game}}",
       "message": "Takip ettiğin bir oyunda Drops kampanyası başladı."
@@ -1125,6 +1183,10 @@ export default {
       "bannerNext": "Sonra: {{games}} başka oyunda {{badges}} rozet",
       "bannerHint": "Bu sekmeyi açık bırak: yayını kendisi değiştirir.",
       "bannerStop": "Durdur",
+      "bannerElsewhere": "Başka bir sekmede Twitch yayını oynuyor: Twitch aynı anda yalnızca bir yayını sayar, bu Drop duraklamış olabilir.",
+      "bannerRemaining": "{{minutes}} dk kaldı",
+      "bannerCollapse": "Daralt",
+      "bannerExpand": "Genişlet",
       "obtained": "{{name}} artık senin.",
       "doneTitle": "Otomatik mod bitti",
       "doneMessage": "Şimdilik alınacak rozet kalmadı: sekme kapatıldı.",
@@ -1188,8 +1250,8 @@ export default {
     "platformsLabel": "Sayılan platformlar",
     "platformsHint": "YouTube şimdilik işaretsiz, ölçümü doğrulanıyor. İstersen ekleyebilirsin.",
     "referral": {
-      "body": "StreamPulse'ı öner: kodunla alan her arkadaş için bir ay ücretsiz.",
-      "copy": "Kodumu kopyala"
+      "body": "Davet: bağlantınla abone olan her arkadaşın için para ya da ücretsiz aylar kazanırsın.",
+      "copy": "Bağlantımı kopyala"
     },
     "periodYear": "{{year}} Özeti",
     "plus": {
@@ -1303,7 +1365,7 @@ export default {
     "continueBtn": "Devam et",
     "plusTitle": "StreamPulse+",
     "plusLine": "Drops ve rozetler, sen başka bir şey izlerken kendiliğinden alınır.",
-    "plusCta": "7 gün ücretsiz dene",
+    "plusCta": "StreamPulse+'ı keşfet",
     "clipsTitle": "StreamPulse Clips",
     "clipsLine": "Bir Twitch veya Kick klibinin bağlantısını yapıştır: TikTok için hazır dikey video — kamera algılanır, animasyonlu altyazı, kurgusuz.",
     "clipsCta": "StreamPulse Clips'i keşfet",
@@ -1353,7 +1415,11 @@ export default {
       "months": "{{count}} aydır abone",
       "monthOne": "1 aydır abone",
       "newMember": "Yeni abone",
-      "freeLine": "Eklenti kullanıcısı"
+      "freeLine": "Eklenti kullanıcısı",
+      "worn": "Takılı",
+      "tenure": "Kıdem",
+      "nameStyle": "İsim stili",
+      "bughunter": "Hata avcısı"
     },
     "topbar": {
       "previews": "Üzerine gelince önizleme",
@@ -1394,6 +1460,7 @@ export default {
       "clipDownload": "Klibi indir (MP4)",
       "clipDownloading": "Klip indiriliyor…",
       "clipDownloadFailed": "İndirilemedi. Klip sayfasını yenileyip tekrar dene.",
+      "clipOpenEditor": "StreamPulse Clips ile düzenle",
       "latencyEmpty": "Gecikme: --",
       "latencyValue": "Gecikme süresi: {{value}} saniye",
       "offline": "ÇEVRİMDIŞI"

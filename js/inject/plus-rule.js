@@ -15,6 +15,8 @@
   // (ou annuelle) après sa dernière vérification réussie ; la licence à vie
   // (vendue jusqu'en octobre 2026, gardée par ses acheteurs) n'expire pas.
   var PLUS_GRACE_MS = 30 * 24 * 60 * 60 * 1000;
+  // Essai de 7 jours : compté depuis `since`, signé par le serveur (début de l'essai).
+  var TRIAL_MS = 7 * 24 * 60 * 60 * 1000;
 
   // Tolérance d'horloge : au-delà, une date « vérifiée » dans le futur est une licence forgée.
   var CLOCK_SKEW_MS = 5 * 60 * 1000;
@@ -33,6 +35,12 @@
     var at = typeof now === "number" ? now : Date.now();
     if (isFuture(record.verifiedAt, at) || isFuture(record.checkedAt, at) || isFuture(record.iat, at)) return false;
     if (record.plan === "lifetime") return true;
+    if (record.plan === "trial") {
+      // Un autre compte Twitch que celui de l'essai : tout StreamPulse+ se met en pause.
+      if (record.otherAccount === true) return false;
+      var start = Number(record.since);
+      return start > 0 && !isFuture(start, at) && at - start <= TRIAL_MS && at - Number(record.iat) <= PLUS_GRACE_MS;
+    }
     // `iat` est la date signée par le serveur : elle seule compte.
     return at - Number(record.iat) <= PLUS_GRACE_MS;
   }
@@ -63,9 +71,29 @@
     return "m1";
   }
 
+  /**
+   * Essai actif mais mis en pause : un autre compte Twitch que celui de l'essai
+   * est connecté (js/sw/trial-account.js pose `otherAccount` sur la licence).
+   */
+  function trialPaused(record, now) {
+    if (!record || record.plan !== "trial" || record.otherAccount !== true) return false;
+    var copy = {};
+    for (var key in record) if (key !== "otherAccount") copy[key] = record[key];
+    return isPlusActive(copy, now);
+  }
+
+  /** Fin de l'essai (ms), 0 si la licence n'est pas un essai. */
+  function trialEndsAt(record) {
+    if (!record || record.plan !== "trial" || !(Number(record.since) > 0)) return 0;
+    return Number(record.since) + TRIAL_MS;
+  }
+
   root.StreamPulsePlusRule = Object.freeze({
     PLUS_KEY: PLUS_KEY,
     PLUS_GRACE_MS: PLUS_GRACE_MS,
+    TRIAL_MS: TRIAL_MS,
+    trialPaused: trialPaused,
+    trialEndsAt: trialEndsAt,
     MONTH_MS: MONTH_MS,
     TENURE_TIERS: TENURE_TIERS,
     TENURE_STYLES: TENURE_STYLES,

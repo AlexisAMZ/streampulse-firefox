@@ -63,12 +63,12 @@ export default {
     "htmlLang": "ar",
     "stepProfile": "اسم المستخدم",
     "profileTitle": "اسم مستخدمك في Twitch.",
-    "profileDescription": "اختياري: أدخل اسم مستخدمك في Twitch وسنجلب صورة ملفك الشخصي لنرحّب بك كما ينبغي. ليس لديك حساب Twitch أو تفضّل ألّا تشاركه؟ تخطَّ هذه الخطوة وكل شيء يعمل رغم ذلك.",
-    "profileInputLabel": "اسم المستخدم في TWITCH",
-    "profileHintIdle": "اكتب اسمك: سنبحث عن ملفك في Twitch.",
+    "profileDescription": "اختياري: اختر منصتك وأدخل اسم المستخدم وسنجلب صورة ملفك الشخصي لنرحّب بك كما ينبغي. تفضّل ألّا تشاركه؟ تخطَّ هذه الخطوة وكل شيء يعمل رغم ذلك.",
+    "profileInputLabel": "اسم المستخدم",
+    "profileHintIdle": "اكتب اسمك: سنبحث عن ملفك تلقائيًا.",
     "profileHintSearching": "جارٍ البحث…",
     "profileHintFound": "✓ تم العثور عليه: {{handle}}",
-    "profileHintKept": "لم يُعثر على ملف Twitch: لا بأس، سنُبقي اسم المستخدم كما هو. يمكنك أيضًا تخطّي هذه الخطوة.",
+    "profileHintKept": "لم يُعثر على الملف: لا بأس، سنُبقي اسم المستخدم كما هو. يمكنك أيضًا تخطّي هذه الخطوة.",
     "documentTitle": "الإعداد لأول مرة",
     "welcomeTagline": "إضافة FIREFOX · TWITCH · KICK · YOUTUBE",
     "welcomeDescription": "مرحبًا بك في StreamPulse: إشعارات البث المباشر، وجمع النقاط وDrops تلقائيًا. ابدأ باختيار لغة الواجهة.",
@@ -257,7 +257,7 @@ export default {
       "intro": "تبقى الإشعارات ونقاط القناة والمعاينات مجانية. يضيف StreamPulse+ أدوات لأكثر المشاهدين حماسًا.",
       "plansLabel": "الخطة",
       "monthly": "شهرية",
-      "monthlyNote": "7 أيام مجانًا، ويمكن الإلغاء في أي وقت",
+      "monthlyNote": "دون التزام، ألغِ متى شئت",
       "monthlyPrice": "2.99 €",
       "perMonth": "/شهريًا",
       "yearly": "سنوية",
@@ -265,10 +265,10 @@ export default {
       "yearlyPrice": "19 €",
       "perYear": "/سنويًا",
       "checkout": "افتح StreamPulse+",
-      "checkoutTrial": "تجربة مجانية لمدة 7 أيام",
+      "checkoutTrial": "اشترك شهريًا (2.99 €)",
       "checkoutYearly": "اشتراك سنوي (19 يورو)",
       "savePercent": "خصم 47%",
-      "trustTrial": "7 أيام مجانية بدون خصم فوري",
+      "trustTrial": "دون التزام، ألغِ بنقرة",
       "trustYearly": "وفّر 16.88 يورو سنوياً مقارنة بالشهري",
       "trustCancel": "إلغاء بنقرة واحدة داخل الإضافة",
       "trustDevices": "المفتاح صالح على متصفحين",
@@ -287,9 +287,11 @@ export default {
       "activeTitle": "StreamPulse+ مفعَّل",
       "planMonthly": "الخطة الشهرية · {{key}}",
       "planLifetime": "الخطة الدائمة · {{key}}",
+      "planTrial": "تجربة مجانية · حتى {{date}}",
       "planYearly": "الخطة السنوية · {{key}}",
       "manage": "إدارة اشتراكي",
       "manageError": "تعذّر فتح حسابك الآن. حاول مجددًا بعد بضع دقائق.",
+      "manageEmailed": "لحماية حسابك، أُرسل الرابط إلى بريد الدفع الخاص بك.",
       "deactivate": "إزالة الترخيص من هذا المتصفح",
       "close": "إغلاق"
     },
@@ -315,11 +317,46 @@ export default {
       "failed": "مرفوض",
       "note": "النتائج تقديرية، تُستنتج من تغيّر رصيد نقاطك."
     },
+    "alertScope": {
+      "label": "نطاق التنبيه",
+      "allGames": "كل الألعاب",
+      "someGames": "ألعاب مختارة",
+      "allBadges": "كل الشارات"
+    },
+    "dropsRefresh": {
+      "title": "تحديث الشارات وDrops",
+      "body": "كم مرة يتحقق StreamPulse من الشارات وDrops. بعضها لا يدوم إلا بضع دقائق: اختر 1 أو 2 دقيقة حتى لا يفوتك شيء. حصريًا مع StreamPulse+."
+    },
+    "trial": {
+      "days": "{{days}} يوم",
+      "body": "تجربة StreamPulse+ · كل شيء مفتوح",
+      "subscribe": "اشترك",
+      "devReset": "Reset (dev)",
+      "unlockedLine": "> تم تفعيل StreamPulse+",
+      "unlockedCaption": "كل شيء مفتوح لمدة 7 أيام. دون بطاقة.",
+      "start": "افتح 7 أيام",
+      "offerBadge": "7 أيام",
+      "offerBody": "StreamPulse+ مجانًا · دون بطاقة · مرتبط بحسابك على Twitch",
+      "consent": "دون بطاقة، لا شيء تدفعه. ترتبط التجربة بحساب Twitch المسجّل في هذا المتصفح: تُستلم Drops والشارات على هذا الحساب.",
+      "otherAccount": "التجربة مرتبطة بحساب Twitch آخر: StreamPulse+ متوقف مؤقتًا"
+    },
+    "missed": {
+      "unit": "فائتة",
+      "cta": "لا تفوّت شيئًا",
+      "newCampaign": "حملة جديدة",
+      "ended": "انتهت {{ago}}",
+      "left": "يتبقى {{time}}",
+      "newBadge": "شارة جديدة"
+    },
+    "badgeScope": {
+      "title": "تنبيهات الشارات الجديدة",
+      "body": "StreamPulse+ · إشعار Chrome لكل شارة جديدة، أو فقط لشارات الألعاب التي تختارها، فور توفرها."
+    },
     "dropAlerts": {
       "title": "تنبيهات Drops",
-      "lockedBody": "احصل على إشعار عند بدء حملة Drops على لعبة تتابعها: Valorant وCS2… حصريًا في StreamPulse+.",
+      "lockedBody": "إشعار عند بدء حملة Drops، على كل الألعاب أو فقط التي تختارها. حصريًا مع StreamPulse+.",
       "toggle": "إشعار عند الحملات الجديدة",
-      "toggleBody": "تُحدَّث قائمة الحملات عند زيارتك Twitch: يصدر التنبيه حينها، مرة واحدة لكل حملة.",
+      "toggleBody": "إشعار Chrome لكل حملة جديدة، على كل الألعاب أو فقط التي تختارها. تُحدَّث القائمة عند فتح علامة تبويب Twitch.",
       "gamesLabel": "الألعاب المتابَعة",
       "gamePlaceholder": "أضف لعبة (Enter)",
       "removeGame": "إزالة {{game}}"
@@ -668,16 +705,25 @@ export default {
       "rankAmbassador": "سفير · الأصدقاء المُحالون: {{count}}",
       "intro": "كيف تبدو شارة StreamPulse واسمك في دردشة Twitch، ظاهرة لمستخدمي StreamPulse الآخرين."
     },
+    "referralAsk": {
+      "title": "ادعُ صديقًا",
+      "body": "شارك رابطك: عن كل صديق يشترك، تكسب مالًا أو أشهرًا مجانية.",
+      "open": "احصل على رابطي"
+    },
     "referral": {
-      "generalBody": "شهر مجاني لكل صديق يشترك في StreamPulse+ بكودك.",
-      "generalOpen": "عرض كودي",
+      "generalBody": "شارك رابطك: تكسب مالًا أو أشهرًا مجانية عن كل صديق يشترك.",
+      "generalOpen": "احصل على رابطي",
       "plusTitle": "ادعُ أصدقاءك",
-      "plusBody": "يحصل صديقك على خصم 2.99 € (الشهر الأول مجاني). وتكسب مالًا وهذه المكافآت:",
+      "plusBody": "صديقك يستخدم رابطك فقط دون كتابة أي شيء. وتكسب مالًا وهذه المكافآت:",
       "title": "الإحالة",
-      "body": "شارك كودك: يحصل صديقك على خصم 2.99 € (الشهر الأول مجاني). وتحصل أنت على 1 € شهريًا ما دام مشتركًا، تُدفع عبر PayPal.",
-      "get": "احصل على كودي",
-      "copy": "نسخ",
+      "body": "شارك رابطك: صديقك لا يحتاج إلى كتابة شيء، الرابط يكفي. تحصل على 1 € عن كل شهر يدفعه صديق بالاشتراك الشهري، أو 5 € عن كل سنة يدفعها صديق بالاشتراك السنوي، عبر PayPal.",
+      "get": "احصل على رابطي",
+      "copy": "انسخ الكود",
       "copied": "تم نسخ الكود!",
+      "copyLink": "انسخ رابطي",
+      "linkCopied": "تم نسخ الرابط مع رسالة قصيرة. أرسله لصديقك: لا يحتاج إلى كتابة شيء، الرابط يكفي.",
+      "linkCopiedShort": "تم نسخ الرابط!",
+      "shareMessage": "أنصحك بـ StreamPulse، الإضافة التي تنبّهك عندما يبدأ ستريمر على Twitch أو Kick أو YouTube بثًّا مباشرًا. إذا اشتركت في StreamPulse+ فاستخدم رابطي، فهذا يدعمني: {{link}}",
       "loading": "جارٍ التحميل…",
       "soon": "ستُفتح الإحالات قريبًا جدًا.",
       "error": "الكود غير متاح الآن. حاول لاحقًا.",
@@ -688,7 +734,7 @@ export default {
       "tierBadge": "تأثير الشارة",
       "tierDevice": "جهاز إضافي",
       "each": "كل صديق",
-      "tierMoney": "1 €/شهر ما دام مشتركًا",
+      "tierMoney": "1 € عن كل شهر مدفوع، 5 € عن كل سنة مدفوعة",
       "balance": "المبلغ المستحق",
       "earned": "المكسب: {{earned}} · المدفوع: {{paid}}",
       "payoutRule": "يُدفع إلى PayPal الخاص بك ابتداءً من {{min}}. للبالغين فقط.",
@@ -696,13 +742,15 @@ export default {
       "paypalPlaceholder": "you@example.com",
       "paypalSave": "حفظ",
       "paypalSaved": "تم حفظ عنوان PayPal.",
+      "paypalPending": "أكّد هذا العنوان عبر الرابط المرسل إلى بريد الدفع.",
       "paypalInvalid": "عنوان البريد الإلكتروني هذا غير صالح.",
       "paypalMissing": "أضف عنوان PayPal لاستلام أرباحك.",
-      "freeBody": "شارك رمزك: يحصل صديقك على خصم 2.99 € (الشهر الأول مجانًا). وتحصل أنت على شهر من StreamPulse+ عن كل صديق يشترك، ويصلك مفتاحك بالبريد.",
+      "freeBody": "شارك رابطك: صديقك لا يحتاج إلى كتابة شيء، الرابط يكفي. تكسب شهرًا من StreamPulse+ عن كل صديق يشترك، ويصلك مفتاحك بالبريد.",
       "freeLabel": "بريدك الإلكتروني لاستلام أشهرك المجانية",
       "freeSubmit": "إنشاء رمزي",
       "freeTaken": "هذا العنوان مستخدم بالفعل في متصفح آخر.",
-      "freeReady": "رمزك جاهز. بمجرد أن يشترك صديق، يصلك مفتاحك بالبريد."
+      "freeReady": "رابطك جاهز. بمجرد أن يشترك صديق، يصلك مفتاحك بالبريد.",
+      "freeCheckEmail": "افتح الرابط المرسل إلى بريدك لتأكيد عنوانك، ثم عد لإنشاء رمزك."
     },
     "layout": {
       "title": "التخطيط",
@@ -1163,6 +1211,16 @@ export default {
     }
   },
   "background": {
+    "trialEnd": {
+      "soonTitle": "تنتهي تجربة StreamPulse+ غدًا",
+      "soonMessage": "يتوقف الاستلام التلقائي لـ Drops والشارات والتنبيهات المخصصة خلال أقل من 24 ساعة. اشترك كي لا تفقدها.",
+      "endedTitle": "انتهت تجربة StreamPulse+",
+      "endedMessage": "لم تعد Drops والشارات تُستلم تلقائيًا. عُد إلى StreamPulse+ لاستعادتها."
+    },
+    "trialReminder": {
+      "title": "7 أيام من StreamPulse+ مجانًا",
+      "message": "دون بطاقة. افتح StreamPulse وانقر «افتح 7 أيام»: تُستلم Drops والشارات تلقائيًا، وتنبيهات كما تريد."
+    },
     "dropAlerts": {
       "title": "حملة Drops: {{game}}",
       "message": "بدأت حملة Drops للتو على لعبة تتابعها."
@@ -1175,6 +1233,10 @@ export default {
       "bannerNext": "التالي: {{badges}} شارة على {{games}} لعبة أخرى",
       "bannerHint": "أبقِ هذا التبويب مفتوحًا: ينتقل بين البثوث وحده.",
       "bannerStop": "إيقاف",
+      "bannerElsewhere": "بثّ آخر على Twitch يعمل في تبويب آخر: لا يحتسب Twitch إلا بثًّا واحدًا في كل مرة، لذا قد يكون هذا الـDrop متوقفًا.",
+      "bannerRemaining": "متبقٍّ {{minutes}} دقيقة",
+      "bannerCollapse": "طيّ",
+      "bannerExpand": "توسيع",
       "obtained": "{{name}} لك الآن.",
       "doneTitle": "انتهى الوضع التلقائي",
       "doneMessage": "لا مزيد من الشارات حاليًا: أُغلق التبويب.",
@@ -1238,8 +1300,8 @@ export default {
     "platformsLabel": "المنصات المحتسبة",
     "platformsHint": "YouTube غير محدّد حاليًا إلى أن يُتحقق من قياسه. يمكنك إضافته إن شئت.",
     "referral": {
-      "body": "الإحالات: شهر مجاني لكل صديق يشترك في StreamPulse+ بكودك.",
-      "copy": "نسخ كودي"
+      "body": "الإحالة: عن كل صديق يشترك عبر رابطك، تكسب مالًا أو أشهرًا مجانية.",
+      "copy": "انسخ رابطي"
     },
     "periodYear": "حصاد {{year}}",
     "plus": {
@@ -1353,7 +1415,7 @@ export default {
     "continueBtn": "متابعة",
     "plusTitle": "StreamPulse+",
     "plusLine": "تُستلَم Drops والشارات وحدها بينما تشاهد شيئًا آخر.",
-    "plusCta": "جرّب 7 أيام مجانًا",
+    "plusCta": "اكتشف StreamPulse+",
     "clipsTitle": "StreamPulse Clips",
     "clipsLine": "الصق رابط مقطع من Twitch أو Kick: فيديو عمودي جاهز لـTikTok، مع اكتشاف كاميرا الويب وترجمات متحركة — بلا مونتاج.",
     "clipsCta": "اكتشف StreamPulse Clips",
@@ -1403,7 +1465,11 @@ export default {
       "months": "مشترك منذ {{count}} أشهر",
       "monthOne": "مشترك منذ شهر واحد",
       "newMember": "مشترك جديد",
-      "freeLine": "مستخدم الإضافة"
+      "freeLine": "مستخدم الإضافة",
+      "worn": "مُجهَّز",
+      "tenure": "الأقدمية",
+      "nameStyle": "ستايل الاسم",
+      "bughunter": "صائد الأخطاء"
     },
     "topbar": {
       "previews": "معاينات التمرير",
@@ -1444,6 +1510,7 @@ export default {
       "clipDownload": "تنزيل المقطع (MP4)",
       "clipDownloading": "جارٍ تنزيل المقطع…",
       "clipDownloadFailed": "فشل التنزيل. أعد تحميل صفحة المقطع وحاول مجددًا.",
+      "clipOpenEditor": "تعديل باستخدام StreamPulse Clips",
       "latencyEmpty": "زمن الاستجابة: --",
       "latencyValue": "زمن الاستجابة: {{value}} ث",
       "offline": "غير متصل"

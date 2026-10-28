@@ -25,8 +25,9 @@ const ES_MODULES = [
   "js/chzzk-sync.js",
   "js/plus.js",
   "js/license-sign.js",
-  "js/badge-watch.js",
   "js/plus-thanks.js",
+  "js/currency.js",
+  "js/plus-local-price.js",
   "js/eventsubRaid.js",
   "js/raidWatcher.js",
   "js/popup.js",
@@ -51,6 +52,14 @@ const ES_MODULES = [
   "js/badge-auto.js",
   "js/badge-auto-worker.js",
   "js/badge-free.js",
+  "js/alert-scope.js",
+  "js/badge-watch.js",
+  "js/popup-alert-scope.js",
+  "js/refresh-interval.js",
+  "js/missed-alerts.js",
+  "js/confetti.js",
+  "js/trial-reminder.js",
+  "js/trial-end.js",
   "js/predictions-data.js",
   "js/points-bonus.js",
   "js/points-data.js",
@@ -67,6 +76,7 @@ const ES_MODULES = [
   "js/open-channel.js",
   "js/streamer-undo.js",
   "js/popup-badge-ask.js",
+  "js/popup-referral-ask.js",
   "js/popup-chzzk-ask.js",
   "js/popup-identity.js",
   "js/popup-news.js",
@@ -104,7 +114,7 @@ const ES_MODULES = [
 
 export default [
   {
-    ignores: ["js/vendor/**", "node_modules/**", "coverage/**", "stream-247/**", "DevKit/**"],
+    ignores: ["js/vendor/**", "node_modules/**", "coverage/**", "stream-247/**", "DevKit/**", "promo/**"],
   },
   js.configs.recommended,
   {

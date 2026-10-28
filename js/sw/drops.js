@@ -1,11 +1,15 @@
 // Points de chaîne, Drops, badges et mode auto des badges.
 
 import { createBadgeAuto, watchProbe } from "../badge-auto-worker.js";
-import { PLUS_KEY, isPlusActive } from "../plus.js";
+import { PLUS_KEY, isPlusActive, plusActiveFrom } from "../plus.js";
+import { refreshTrialAccount } from "./trial-account.js";
 import { BADGE_ADDED_KEY, BADGE_AUTO_KEY, BADGE_EVENTS_KEY, CLAIM_OK_STATUSES, DROPS_BADGES_KEY, DROPS_CAMPAIGNS_KEY, campaignsFrom } from "../drops-data.js";
 import { addedFrom, badgesFrom, catalogBadges, eventsFrom, isPaidBadge } from "../badges-data.js";
-import { BADGE_ALERT_SEEN_KEY, BADGE_LIMITED_KEY, BADGE_WATCH_KEY, LIMITED_EVENT_MS, SHORT_EVENT_MS, formatTimeLeft, isShortEvent, limitedFrom, planBadgeAlerts, seenFrom as alertsSeenFrom, watchFrom } from "../badge-watch.js";
+import { BADGE_ALERT_SEEN_KEY, BADGE_LIMITED_KEY, BADGE_SCOPE_KEY, BADGE_WATCH_KEY, LIMITED_EVENT_MS, SHORT_EVENT_MS, formatTimeLeft, isShortEvent, limitedFrom, newBadgeAlerts, planBadgeAlerts, seenFrom as alertsSeenFrom, watchFrom } from "../badge-watch.js";
 import { DROP_ALERTS_KEY, DROP_ALERTS_SEEN_KEY, campaignAlerts, normalizeDropAlerts, seenFrom } from "../drop-alerts.js";
+import { scopeActive } from "../alert-scope.js";
+import { DEFAULT_REFRESH_MINUTES, effectiveRefreshMinutes, refreshGapMs } from "../refresh-interval.js";
+import { recordMissedBadges, recordMissedCampaigns } from "./missed.js";
 import { createDropsClient } from "../drops-gql.js";
 import { createDropsStore } from "../drops-store.js";
 import { createPointsStore } from "../points-store.js";
@@ -69,7 +73,7 @@ export async function announceDrops(entries) {
 export async function farmNewBadgesForPlus(added = []) {
   const prefs = await PreferenceStore.get();
   if (prefs.dropsTracking === false || prefs.autoFarmNewBadges === false) return false;
-  if (!isPlusActive((await chrome.storage.local.get(PLUS_KEY))[PLUS_KEY])) return false;
+  if (!(await plusActiveFrom(chrome.storage.local))) return false;
   const ids = (added || []).map((item) => item?.id).filter(Boolean);
   if (!ids.length) return false;
   const result = await badgeAuto.autoFarm(ids).catch((error) => {
@@ -97,9 +101,13 @@ const CAMPAIGN_ALERTS_PER_READ = 3;
  */
 export async function checkDropCampaignAlerts() {
   const stored = await chrome.storage.local.get([PLUS_KEY, DROP_ALERTS_KEY, DROP_ALERTS_SEEN_KEY, DROPS_CAMPAIGNS_KEY]);
+  // Sans StreamPulse+ : aucune notification, la campagne part dans les alertes manquées.
+  if (!isPlusActive(stored[PLUS_KEY])) {
+    await recordMissedCampaigns(campaignsFrom(stored).campaigns);
+    return;
+  }
   const settings = normalizeDropAlerts(stored[DROP_ALERTS_KEY]);
-  if (!settings.enabled || !settings.games.length) return;
-  if (!isPlusActive(stored[PLUS_KEY])) return;
+  if (!scopeActive(settings)) return;
   const { alerts, seen } = campaignAlerts(campaignsFrom(stored).campaigns, settings, seenFrom(stored[DROP_ALERTS_SEEN_KEY]), Date.now());
   await chrome.storage.local.set({ [DROP_ALERTS_SEEN_KEY]: seen });
   if (!alerts.length) return;
@@ -123,16 +131,21 @@ async function twitchTabs(preferredId) {
 
 const dropsClient = createDropsClient({ fetch: (...args) => fetch(...args), cookies: chrome.cookies });
 
-/** 5 min : un événement de badge de 30 minutes ne doit pas passer entre deux lectures. */
-const DROPS_ALARM_MINUTES = 5;
-/** Un onglet Twitch qui vient de relire l'inventaire dispense le service worker de le faire. */
-const DROPS_WORKER_MIN_GAP_MS = 4 * 60_000;
+/** Délai d'actualisation en vigueur : choisi par l'abonné, 5 min sinon (js/refresh-interval.js). */
+async function refreshMinutes() {
+  const [prefs, stored] = await Promise.all([PreferenceStore.get(), chrome.storage.local.get(PLUS_KEY)]);
+  return effectiveRefreshMinutes(prefs, isPlusActive(stored[PLUS_KEY]));
+}
 
-export function scheduleDropsAlarm() {
-  chrome.alarms.get(DROPS_ALARM, (existing) => {
-    // Une alarme créée avec l'ancienne période (10 min) est recréée.
-    if (!existing || existing.periodInMinutes !== DROPS_ALARM_MINUTES) chrome.alarms.create(DROPS_ALARM, { periodInMinutes: DROPS_ALARM_MINUTES, delayInMinutes: 1 });
-  });
+/** Alarme des Drops et des badges, recréée quand le délai change. */
+/** Compte Twitch connecté ("" si déconnecté) : sert à lier l'essai StreamPulse+. */
+export const currentTwitchId = () => dropsClient.viewerId();
+
+export async function scheduleDropsAlarm() {
+  const minutes = await refreshMinutes().catch(() => DEFAULT_REFRESH_MINUTES);
+  const existing = await chrome.alarms.get(DROPS_ALARM);
+  if (existing?.periodInMinutes === minutes) return;
+  await chrome.alarms.create(DROPS_ALARM, { periodInMinutes: minutes, delayInMinutes: Math.min(1, minutes) });
 }
 
 /**
@@ -142,14 +155,19 @@ export function scheduleDropsAlarm() {
  * `rewardsMaxAgeMs` resserre la fenêtre de relecture des badges et récompenses
  * (le popup la raccourcit, sinon sa liste ne suit qu'à l'alarme des 30 min).
  */
-export async function refreshDropsFromWorker({ minGapMs = DROPS_WORKER_MIN_GAP_MS, rewardsMaxAgeMs = REWARDS_EVERY_MS } = {}) {
+export async function refreshDropsFromWorker({ minGapMs, rewardsMaxAgeMs = REWARDS_EVERY_MS } = {}) {
   const prefs = await PreferenceStore.get();
+  // Un onglet Twitch qui vient de relire l'inventaire dispense le service worker de le faire.
+  const gapMs = minGapMs ?? refreshGapMs(await refreshMinutes());
   if (prefs.dropsTracking === false) return { read: false, reason: "disabled" };
-  refreshRewardsFromWorker({ maxAgeMs: rewardsMaxAgeMs }).catch((error) => {
+  // Essai StreamPulse+ : compte Twitch connecté = compte de l'essai ? (et liaison au premier compte)
+  await refreshTrialAccount({ storage: chrome.storage.local, fetch: (...args) => fetch(...args), viewerId: () => dropsClient.viewerId() })
+    .catch(warnWith("compte de l'essai"));
+  refreshRewardsFromWorker({ maxAgeMs: rewardsMaxAgeMs, badgesGapMs: gapMs }).catch((error) => {
     if (error.code !== "signed-out") console.warn("[StreamPulse] badges :", error.code || error.message);
   });
   const stored = await chrome.storage.local.get("streamPulseDropsProgress");
-  if (Date.now() - (Number(stored.streamPulseDropsProgress?.updatedAt) || 0) < minGapMs) return { read: false, reason: "fresh" };
+  if (Date.now() - (Number(stored.streamPulseDropsProgress?.updatedAt) || 0) < gapMs) return { read: false, reason: "fresh" };
   let inventory;
   try {
     inventory = await dropsClient.readInventory();
@@ -158,9 +176,8 @@ export async function refreshDropsFromWorker({ minGapMs = DROPS_WORKER_MIN_GAP_M
     if (error.code !== "signed-out") console.warn("[StreamPulse] lecture des Drops impossible :", error.code || error.message, error.detail || "");
     return { read: false, reason: error.code || "error" };
   }
-  // Récupération auto des Drops : réservée à StreamPulse+.
-  const plus = isPlusActive((await chrome.storage.local.get(PLUS_KEY))[PLUS_KEY]);
-  const autoClaim = plus && prefs.autoClaimDrops !== false;
+  // Récupération auto des Drops : réservée à StreamPulse+ (essai : sur son compte Twitch seulement).
+  const autoClaim = (await plusActiveFrom(chrome.storage.local)) && prefs.autoClaimDrops !== false;
   const result = await dropsStore.recordInventory(inventory, { autoClaim });
   announceDrops(result.added).catch(warnWith("annonce des Drops"));
   for (const instanceId of result.claim) await claimDropFromWorker(instanceId, true);
@@ -168,8 +185,6 @@ export async function refreshDropsFromWorker({ minGapMs = DROPS_WORKER_MIN_GAP_M
 }
 
 const REWARDS_EVERY_MS = 30 * 60_000;
-/** Le catalogue des badges est relu plus souvent que les campagnes : un nouveau badge est le premier signe d'un événement court. */
-const BADGES_EVERY_MS = 5 * 60_000;
 
 /** Dates d'ajout des badges notées par streampulse.tech (le CDN garde la réponse 10 min). */
 const BADGE_ADDED_URL = "https://streampulse.tech/api/twitch-badges?added=1";
@@ -203,7 +218,7 @@ function refreshBadgeAdded({ force = false } = {}) {
  * `maxAgeMs` raccourcit la fenêtre (popup ouvert) : c'est le seul moyen pour
  * l'utilisateur de voir la liste à jour sans attendre la prochaine alarme.
  */
-async function refreshRewardsFromWorker({ maxAgeMs = REWARDS_EVERY_MS } = {}) {
+async function refreshRewardsFromWorker({ maxAgeMs = REWARDS_EVERY_MS, badgesGapMs = refreshGapMs(DEFAULT_REFRESH_MINUTES) } = {}) {
   const stored = await chrome.storage.local.get(["streamPulseDropsRewards", "streamPulseDropsBadges", BADGE_AUTO_KEY]);
   const now = Date.now();
   // Deux délais séparés : une lecture réussie de l'un ne doit jamais bloquer l'autre.
@@ -215,7 +230,7 @@ async function refreshRewardsFromWorker({ maxAgeMs = REWARDS_EVERY_MS } = {}) {
   }
   // En mode auto, les badges obtenus se relisent à chaque passage pour fermer l'onglet au plus vite.
   let freshBadge = false;
-  if (stored[BADGE_AUTO_KEY] || now - (Number(stored.streamPulseDropsBadges?.updatedAt) || 0) >= Math.min(maxAgeMs, BADGES_EVERY_MS)) {
+  if (stored[BADGE_AUTO_KEY] || now - (Number(stored.streamPulseDropsBadges?.updatedAt) || 0) >= Math.min(maxAgeMs, badgesGapMs)) {
     const result = await dropsClient.readBadges().then((raw) => dropsStore.recordBadges(raw)).catch(warn("badges globaux"));
     if (result) {
       freshBadge = result.added.length > 0;
@@ -244,14 +259,20 @@ const BADGE_ALERT_KEYS = Object.freeze({
  * lecture du catalogue ; chaque alerte part une seule fois.
  */
 export async function checkBadgeWatch() {
-  const stored = await chrome.storage.local.get([DROPS_BADGES_KEY, BADGE_EVENTS_KEY, BADGE_ADDED_KEY, BADGE_WATCH_KEY, BADGE_ALERT_SEEN_KEY, BADGE_LIMITED_KEY, PLUS_KEY]);
+  const stored = await chrome.storage.local.get([DROPS_BADGES_KEY, BADGE_EVENTS_KEY, BADGE_ADDED_KEY, BADGE_WATCH_KEY, BADGE_ALERT_SEEN_KEY, BADGE_LIMITED_KEY, BADGE_SCOPE_KEY, PLUS_KEY]);
   const prefs = await PreferenceStore.get();
   const now = Date.now();
   const watch = watchFrom(stored);
   const badges = catalogBadges(badgesFrom(stored), { status: "live", now, events: eventsFrom(stored).events, added: addedFrom(stored).added });
   // StreamPulse+ avec l'option : tout badge d'une journée ou moins prévient ; sinon, les événements de 2 h ou moins si les alertes de badges sont actives.
-  const shortMs = isPlusActive(stored[PLUS_KEY]) && limitedFrom(stored) ? LIMITED_EVENT_MS : prefs.badgeAlerts === true ? SHORT_EVENT_MS : 0;
-  const { alerts, seen } = planBadgeAlerts({ badges, watch, seen: alertsSeenFrom(stored), shortMs, now, baseline: stored[BADGE_ALERT_SEEN_KEY] === undefined });
+  const plus = isPlusActive(stored[PLUS_KEY]);
+  // Sans licence, les badges courts partent dans les alertes manquées (popup), sans notification.
+  if (!plus) recordMissedBadges({ liveBadges: badges }, now).catch(warnWith("alertes manquées (badges)"));
+  // Toutes les alertes de badges sont réservées à StreamPulse+ : sans licence, rien ne part.
+  const shortMs = !plus ? 0 : limitedFrom(stored) ? LIMITED_EVENT_MS : prefs.badgeAlerts === true ? SHORT_EVENT_MS : 0;
+  // Portée « tous les badges / jeux choisis » : jamais sans licence active.
+  const scope = plus ? stored[BADGE_SCOPE_KEY] : null;
+  const { alerts, seen } = planBadgeAlerts({ badges, watch: plus ? watch : {}, seen: alertsSeenFrom(stored), shortMs, now, scope, baseline: stored[BADGE_ALERT_SEEN_KEY] === undefined });
   // Un badge suivi dont plus rien ne se joue (obtenu, terminé) quitte la liste.
   const live = new Set(badges.map((badge) => badge.id));
   const all = catalogBadges(badgesFrom(stored), { now, events: eventsFrom(stored).events, added: addedFrom(stored).added });
@@ -273,8 +294,17 @@ export async function checkBadgeWatch() {
   }
 }
 
-/** Jeu du live d'une chaîne : "" hors ligne, null si Helix ne répond pas. */
+/**
+ * Jeu du live d'une chaîne : "" hors ligne, null si inconnu. Lu en direct par
+ * la session Twitch (une chaîne qui change de jeu se voit tout de suite), Helix
+ * à défaut (déconnecté de Twitch).
+ */
 export async function streamGameOf(login) {
+  try {
+    return await dropsClient.liveGameOf(login);
+  } catch (_) {
+    // Pas de session Twitch ou GQL indisponible : Helix, parfois en retard.
+  }
   try {
     await ensureConfig();
     const data = await fetchTwitchJson(`https://api.twitch.tv/helix/streams?user_login=${encodeURIComponent(login)}&type=live`, { headers: twitchHeaders() });
@@ -311,7 +341,7 @@ export const badgeAuto = createBadgeAuto({
     await NotificationCenter.show({ title: translateWithPrefs(prefs, titleKey), message: translateWithPrefs(prefs, messageKey, params) });
   },
   // Les Drops du live doivent être suivis pour que la récupération auto passe.
-  onStart: () => scheduleDropsAlarm(),
+  onStart: () => scheduleDropsAlarm().catch(warnWith("alarme des Drops")),
 });
 
 function checkBadgeAuto() {
@@ -326,13 +356,14 @@ export function checkBadgeAfterClaim() {
 
 
 
-/** Alerte pour les nouveaux badges gratuits (3 au plus d'un coup). */
-async function announceBadges(badges) {
-  const free = badges.filter((badge) => !isPaidBadge(badge)).slice(0, 3);
-  if (!free.length) return;
+/** Alerte pour les nouveaux badges (StreamPulse+) : gratuits (réglage « Nouveau badge ») ou tous (portée). */
+async function announceBadges(added) {
+  if (!added?.length) return;
   const prefs = await PreferenceStore.get();
-  if (!prefs.badgeAlerts) return;
-  for (const badge of free) {
+  const stored = await chrome.storage.local.get([PLUS_KEY, BADGE_SCOPE_KEY]);
+  const scope = isPlusActive(stored[PLUS_KEY]) ? stored[BADGE_SCOPE_KEY] : null;
+  if (!scope) await recordMissedBadges({ added: added.filter((badge) => !isPaidBadge(badge)) });
+  for (const badge of newBadgeAlerts(added, { scope, freeAlerts: scope !== null && prefs.badgeAlerts === true, isPaid: isPaidBadge })) {
     await NotificationCenter.show({
       title: translateWithPrefs(prefs, "background.notifications.badgeTitle", { name: badge.title }),
       message: badge.description || badge.title,
@@ -365,6 +396,19 @@ export async function claimDropFromWorker(instanceId, auto) {
  * la catégorie filtrée sur les Drops. Les badges de « Twitch Gaming » se gagnent
  * sur n'importe quelle chaîne du jeu qui a les Drops activés.
  */
+/** Chaîne StreamPulse 24/7 (badges et Drops), voir js/popup-drops.js. */
+const OFFICIAL_LOGIN = "streampulse247";
+const isOfficialLive = (item) => String(item.user_login).toLowerCase() === OFFICIAL_LOGIN;
+
+/** Vrai si la chaîne 24/7 diffuse ce jeu en ce moment ; faux si on ne peut pas le vérifier. */
+async function officialOnGame(gameId) {
+  try {
+    return (await dropsClient.liveGameOf(OFFICIAL_LOGIN)) === String(gameId);
+  } catch (_) {
+    return false;
+  }
+}
+
 export async function dropsStreamUrl({ gameId, game }) {
   const directory = `https://www.twitch.tv/directory/game/${encodeURIComponent(game || "")}?filter=drops`;
   try {
@@ -372,7 +416,10 @@ export async function dropsStreamUrl({ gameId, game }) {
     if (!/^\d{1,20}$/.test(String(gameId || ""))) return directory;
     const data = await fetchTwitchJson(`https://api.twitch.tv/helix/streams?game_id=${gameId}&type=live&first=20`, { headers: twitchHeaders() });
     // Un live avec le tag Drops fait progresser la campagne ; à défaut, le premier live du jeu.
-    const live = (data?.data || []).filter((item) => item.user_login);
+    let live = (data?.data || []).filter((item) => item.user_login);
+    // La chaîne 24/7 change souvent de jeu et Helix la garde dans l'ancien
+    // plusieurs minutes : elle n'est choisie que si elle est vraiment sur ce jeu.
+    if (live.some(isOfficialLive) && !(await officialOnGame(gameId))) live = live.filter((item) => !isOfficialLive(item));
     const stream = live.find((item) => (item.tags || []).some((tag) => /drops/i.test(String(tag)))) || live[0];
     return stream ? `https://www.twitch.tv/${encodeURIComponent(stream.user_login)}` : directory;
   } catch (error) {

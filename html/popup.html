@@ -44,6 +44,17 @@
         </button>
       </div>
     </header>
+    <div class="trial-strip" id="trial-offer-strip" hidden>
+      <b data-i18n="popup.trial.offerBadge">7 J</b>
+      <span data-i18n="popup.trial.offerBody">StreamPulse+ offert · sans carte bancaire · lié à ton compte Twitch</span>
+      <button class="button trial-subscribe trial-start" type="button" data-i18n="popup.trial.start">Débloquer les 7 jours</button>
+    </div>
+    <div class="trial-strip" id="trial-strip" role="status" hidden>
+      <b id="trial-days">J-7</b>
+      <span class="trial-body" data-i18n="popup.trial.body">Essai StreamPulse+ · tout est débloqué</span>
+      <button class="button trial-subscribe trial-dev-reset" id="trial-dev-reset" type="button" data-i18n="popup.trial.devReset" hidden>Réinitialiser (dev)</button>
+      <button class="button trial-subscribe" id="trial-subscribe" type="button" data-i18n="popup.trial.subscribe">S'abonner</button>
+    </div>
 
     <div class="notif-blocked" id="notif-blocked" role="status" hidden>
       <span data-i18n="popup.notifBlockedBody">Chrome bloque les notifications de StreamPulse : aucune alerte de live ne peut s'afficher.</span>
@@ -133,6 +144,21 @@
         </div>
       </aside>
 
+      <aside class="ask referral-ask" id="referral-ask" role="region" aria-labelledby="referral-ask-title" hidden>
+        <svg class="ask-mark referral-ask-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
+        <p class="ask-text referral-ask-text">
+          <b id="referral-ask-title" data-i18n="popup.referralAsk.title">Parraine un ami</b>
+          <span data-i18n="popup.referralAsk.body">Partage ton lien : pour chaque ami qui s'abonne, tu gagnes de l'argent ou des mois offerts.</span>
+        </p>
+        <div class="ask-actions referral-ask-actions">
+          <button id="referral-ask-open" type="button" class="button button-primary" data-i18n="popup.referralAsk.open">Obtenir mon lien</button>
+          <div class="ask-secondary">
+            <button id="referral-ask-later" type="button" class="ask-link" data-i18n="popup.review.later">Plus tard</button>
+            <button id="referral-ask-never" type="button" class="ask-link" data-i18n="popup.review.never">Non merci</button>
+          </div>
+        </div>
+      </aside>
+
       <section class="live-strip">
         <div class="strip-head">
           <h2 class="strip-title"><span data-i18n="popup.osd.sectionLive">En direct</span><span class="strip-count" id="live-count" role="status"></span></h2>
@@ -153,7 +179,7 @@
           <svg class="promo-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.3 7.7L22 12l-7.7 2.3L12 22l-2.3-7.7L2 12l7.7-2.3z"/></svg>
           <p class="promo-line" data-i18n="changelog.plusLine">Les Drops et les badges se réclament tout seuls, pendant que tu regardes autre chose.</p>
           <button class="promo-cta" id="promo-plus-cta" type="button" data-i18n="changelog.plusCta">
-            Essayer 7 jours gratuits
+            Découvrir StreamPulse+
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
           </button>
           <button class="promo-close" id="promo-plus-close" type="button" data-i18n-attr-ariaLabel="popup.plus.close" data-i18n-attr-title="popup.plus.close" aria-label="Fermer" title="Fermer">
@@ -289,7 +315,7 @@
       <aside class="plus-offer" id="plus-offer">
         <div class="plus-plans" role="radiogroup" data-i18n-attr-ariaLabel="popup.plus.plansLabel" aria-label="Formule">
           <button class="plus-plan" type="button" role="radio" aria-checked="false" data-plan="monthly">
-            <span class="plan-text"><b data-i18n="popup.plus.monthly">Mensuel</b><small data-i18n="popup.plus.monthlyNote">7 jours gratuits, sans engagement</small></span>
+            <span class="plan-text"><b data-i18n="popup.plus.monthly">Mensuel</b><small data-i18n="popup.plus.monthlyNote">Sans engagement, résiliable à tout moment</small></span>
             <span class="plan-price"><span data-i18n="popup.plus.monthlyPrice">2,99 €</span><small data-i18n="popup.plus.perMonth">/mois</small></span>
           </button>
           <button class="plus-plan active" type="button" role="radio" aria-checked="true" data-plan="yearly">
@@ -297,6 +323,8 @@
             <span class="plan-price"><span class="plus-badge-save" data-i18n="popup.plus.savePercent">-47 %</span><span data-i18n="popup.plus.yearlyPrice">19 €</span><small data-i18n="popup.plus.perYear">/an</small></span>
           </button>
         </div>
+        <button class="plus-checkout trial-start" type="button" data-i18n="popup.trial.start" hidden>Débloquer les 7 jours</button>
+        <p class="settings-description trial-note" data-i18n="popup.trial.consent" hidden>Sans carte bancaire, rien à payer. L'essai est lié au compte Twitch connecté sur ce navigateur : les Drops et badges se récupèrent sur ce compte.</p>
         <button class="plus-checkout" id="plus-checkout" type="button" data-i18n="popup.plus.checkoutYearly">S'abonner un an (19 €)</button>
         <ul class="plus-trust-list" id="plus-trust-list">
           <li id="plus-trust-main"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span id="plus-trust-main-text" data-i18n="popup.plus.trustYearly">Économise 16,88 € par an face au mensuel</span></li>
@@ -334,7 +362,7 @@
 
       <section class="plus-referral" aria-labelledby="plus-referral-title">
         <h3 class="plus-referral-title" id="plus-referral-title" data-i18n="popup.referral.plusTitle">Parraine tes amis</h3>
-        <p class="plus-referral-body" data-i18n="popup.referral.plusBody">Ton ami a 2,99 € offerts (1er mois gratuit). Toi, tu gagnes de l'argent et ces récompenses :</p>
+        <p class="plus-referral-body" data-i18n="popup.referral.plusBody">Ton ami passe par ton lien, sans rien saisir. Toi, tu gagnes de l'argent et ces récompenses :</p>
         <ol class="referral-tiers" id="plus-referral-tiers"></ol>
       </section>
       </div>
@@ -478,7 +506,7 @@
           </label>
           <label class="settings-toggle">
             <span class="settings-text">
-              <span class="settings-title" data-i18n="popup.settings.badgeAlertsTitle">Nouveau badge</span>
+              <span class="settings-title"><span data-i18n="popup.settings.badgeAlertsTitle">Nouveau badge</span><span class="plus-tag drops-plus-lock" data-i18n="popup.plus.badge" hidden>PLUS</span></span>
               <span class="settings-description" data-i18n="popup.settings.badgeAlertsBody">Une notification quand un badge de chat devient disponible. Twitch. Notification silencieuse.</span>
             </span>
             <input id="pref-badge-alerts" type="checkbox" role="switch" />
@@ -899,6 +927,14 @@
               <span id="drops-auto-label" data-i18n="popup.drops.autoOn">Récupération auto</span>
             </button>
           </div>
+          <div class="missed-lcd" id="drops-missed" role="status" hidden>
+            <div class="missed-lcd-head">
+              <p class="missed-lcd-total"><span class="missed-count">0</span><small data-i18n="popup.missed.unit">RATÉS</small></p>
+              <button class="button missed-lcd-cta trial-start" type="button" data-i18n="popup.trial.start" data-i18n-attr-title="popup.trial.consent" title="Sans carte bancaire, rien à payer. L'essai est lié au compte Twitch connecté sur ce navigateur : les Drops et badges se récupèrent sur ce compte." hidden>Débloquer les 7 jours</button>
+              <button class="button missed-lcd-cta missed-lcd-buy" type="button" data-i18n="popup.missed.cta">Ne plus rien rater</button>
+            </div>
+            <ul class="missed-lcd-list"></ul>
+          </div>
 
           <!-- Chaîne 24/7 bannie : masquée temporairement (réactiver LIVE_247_PAGE dans js/popup-drops.js à son retour) -->
           <button type="button" class="drops-live" id="drops-live" hidden style="display:none" data-i18n-attr-ariaLabel="popup.drops.liveOpen" aria-label="Ouvrir la chaîne 24/7">
@@ -927,21 +963,32 @@
 
           <h3 class="drops-section"><span data-i18n="popup.dropAlerts.title">Alertes Drops</span><span class="plus-tag" data-i18n="popup.plus.badge">PLUS</span></h3>
           <div class="smart-locked" id="drop-alerts-locked">
-            <p class="settings-description" data-i18n="popup.dropAlerts.lockedBody">Une notification quand une campagne de Drops démarre sur un jeu que tu suis : Valorant, CS2… Réservé à StreamPulse+.</p>
+            <p class="settings-description" data-i18n="popup.dropAlerts.lockedBody">Une notification quand une campagne de Drops démarre, sur tous les jeux ou seulement ceux que tu choisis. Réservé à StreamPulse+.</p>
             <button class="button button-primary" id="drop-alerts-unlock" type="button" data-i18n="popup.smart.unlock">Débloquer</button>
           </div>
           <div class="drop-alerts" id="drop-alerts-editor" hidden>
             <label class="settings-toggle">
               <span class="settings-text">
                 <span class="settings-title" data-i18n="popup.dropAlerts.toggle">Prévenir aux nouvelles campagnes</span>
-                <span class="settings-description" data-i18n="popup.dropAlerts.toggleBody">La liste des campagnes est relue quand tu passes sur Twitch : l'alerte part à ce moment-là, une seule fois par campagne.</span>
+                <span class="settings-description" data-i18n="popup.dropAlerts.toggleBody">Une notification Chrome par nouvelle campagne, sur tous les jeux ou ceux que tu choisis. La liste est relue dès qu'un onglet Twitch est ouvert.</span>
               </span>
               <input id="pref-drop-campaign-alerts" type="checkbox" role="switch" />
             </label>
-            <div class="smart-line drop-alerts-line">
+            <div class="segmented alert-scope-modes" id="drop-alerts-modes" role="group" data-i18n-attr-ariaLabel="popup.alertScope.label">
+              <button type="button" class="pf-btn" aria-pressed="false" data-mode="all" data-i18n="popup.alertScope.allGames">Tous les jeux</button>
+              <button type="button" class="pf-btn active" aria-pressed="true" data-mode="games" data-i18n="popup.alertScope.someGames">Jeux choisis</button>
+            </div>
+            <div class="smart-line drop-alerts-line" id="drop-alerts-line">
               <span data-i18n="popup.dropAlerts.gamesLabel">Jeux suivis</span>
               <div class="smart-terms" id="drop-alerts-games"></div>
             </div>
+            <label class="settings-toggle drops-refresh">
+              <span class="settings-text">
+                <span class="settings-title"><span data-i18n="popup.dropsRefresh.title">Actualisation des badges et Drops</span><span class="plus-tag drops-refresh-lock" data-i18n="popup.plus.badge">PLUS</span></span>
+                <span class="settings-description" data-i18n="popup.dropsRefresh.body">Toutes les combien StreamPulse relit les badges et les Drops. Certains ne durent que quelques minutes : choisis 1 ou 2 min pour ne rien rater. Réservé à StreamPulse+.</span>
+              </span>
+              <select id="drops-refresh" class="settings-select drops-refresh-select" data-i18n-attr-ariaLabel="popup.dropsRefresh.title"></select>
+            </label>
           </div>
 
           <section class="reward-plan" id="reward-plan" aria-live="polite"></section>
@@ -957,6 +1004,14 @@
         <section class="menu-panel drops-panel" id="menu-badges" role="tabpanel" aria-labelledby="menu-tab-badges" hidden>
           <div class="pts-head">
             <h2><span data-i18n="popup.osd.menuBadges">Badges</span><span class="pill-beta" data-i18n="popup.settings.betaLabel">bêta</span></h2>
+          </div>
+          <div class="missed-lcd" id="badges-missed" role="status" hidden>
+            <div class="missed-lcd-head">
+              <p class="missed-lcd-total"><span class="missed-count">0</span><small data-i18n="popup.missed.unit">RATÉS</small></p>
+              <button class="button missed-lcd-cta trial-start" type="button" data-i18n="popup.trial.start" data-i18n-attr-title="popup.trial.consent" title="Sans carte bancaire, rien à payer. L'essai est lié au compte Twitch connecté sur ce navigateur : les Drops et badges se récupèrent sur ce compte." hidden>Débloquer les 7 jours</button>
+              <button class="button missed-lcd-cta missed-lcd-buy" type="button" data-i18n="popup.missed.cta">Ne plus rien rater</button>
+            </div>
+            <ul class="missed-lcd-list"></ul>
           </div>
           <button type="button" class="drops-live" id="badges-live" hidden style="display:none" data-i18n-attr-ariaLabel="popup.drops.liveOpen" aria-label="Ouvrir la chaîne 24/7">
             <i class="drops-live-dot" aria-hidden="true"></i>
@@ -985,6 +1040,30 @@
                   <span class="settings-description" data-i18n="popup.drops.badgeLimitedHint">StreamPulse+ · Reçois une notification Chrome dès qu'un badge disponible une journée ou moins devient accessible.</span>
                 </span>
                 <input id="badges-limited" type="checkbox" role="switch" />
+              </label>
+              <div class="drop-alerts badges-scope">
+                <label class="settings-toggle">
+                  <span class="settings-text">
+                    <span class="settings-title"><span data-i18n="popup.badgeScope.title">Alertes nouveaux badges</span><span class="plus-tag" id="badges-scope-lock" data-i18n="popup.plus.badge">PLUS</span></span>
+                    <span class="settings-description" data-i18n="popup.badgeScope.body">StreamPulse+ · Une notification Chrome pour chaque nouveau badge, ou seulement ceux des jeux que tu choisis, dès qu'il devient disponible.</span>
+                  </span>
+                  <input id="badges-scope-toggle" type="checkbox" role="switch" />
+                </label>
+                <div class="segmented alert-scope-modes" id="badges-scope-modes" role="group" data-i18n-attr-ariaLabel="popup.alertScope.label">
+                  <button type="button" class="pf-btn active" aria-pressed="true" data-mode="all" data-i18n="popup.alertScope.allBadges">Tous les badges</button>
+                  <button type="button" class="pf-btn" aria-pressed="false" data-mode="games" data-i18n="popup.alertScope.someGames">Jeux choisis</button>
+                </div>
+                <div class="smart-line drop-alerts-line" id="badges-scope-line" hidden>
+                  <span data-i18n="popup.dropAlerts.gamesLabel">Jeux suivis</span>
+                  <div class="smart-terms" id="badges-scope-games"></div>
+                </div>
+              </div>
+              <label class="settings-toggle drops-refresh">
+                <span class="settings-text">
+                  <span class="settings-title"><span data-i18n="popup.dropsRefresh.title">Actualisation des badges et Drops</span><span class="plus-tag drops-refresh-lock" data-i18n="popup.plus.badge">PLUS</span></span>
+                  <span class="settings-description" data-i18n="popup.dropsRefresh.body">Toutes les combien StreamPulse relit les badges et les Drops. Certains ne durent que quelques minutes : choisis 1 ou 2 min pour ne rien rater. Réservé à StreamPulse+.</span>
+                </span>
+                <select id="badges-refresh" class="settings-select drops-refresh-select" data-i18n-attr-ariaLabel="popup.dropsRefresh.title"></select>
               </label>
               <p class="badges-auto-status" id="badges-auto-status" role="status" hidden></p>
               <p class="badges-note" data-i18n="popup.drops.badgeAutoAllHint">Un onglet épinglé et muet regarde un live à la fois (Twitch ne compte qu'un live à la fois). Les paliers d'un même jeu (30 min, 1 h, 90 min…) avancent ensemble, puis l'onglet passe au jeu suivant.</p>
@@ -1076,10 +1155,11 @@
 
           <h3 class="settings-group-header" data-i18n="popup.referral.title">Parrainage</h3>
           <div class="referral" id="referral-block">
-            <p class="settings-description" id="referral-body" data-i18n="popup.referral.body">Partage ton code : ton ami a 2,99 € offerts (1er mois gratuit). Toi, tu touches 1 € par mois tant qu'il reste abonné, versés sur PayPal.</p>
+            <p class="settings-description" id="referral-body" data-i18n="popup.referral.body">Partage ton lien : ton ami n'a rien à saisir, le lien suffit. Toi, tu touches 1 € par mois payé par un ami mensuel, ou 5 € par année payée par un ami annuel, versés sur PayPal.</p>
             <div class="referral-row">
               <span class="referral-code" id="referral-code" hidden></span>
-              <button class="button button-quiet" id="referral-copy" type="button" data-i18n="popup.referral.copy" hidden>Copier</button>
+              <button class="button button-primary" id="referral-copy-link" type="button" data-i18n="popup.referral.copyLink" hidden>Copier mon lien</button>
+              <button class="button button-quiet" id="referral-copy" type="button" data-i18n="popup.referral.copy" hidden>Copier le code</button>
               <button class="button button-primary" id="referral-get" type="button" data-i18n="popup.referral.get">Obtenir mon code</button>
             </div>
             <form class="referral-paypal" id="referral-free-form" hidden>

@@ -25,12 +25,12 @@ export default {
     "htmlLang": "ja",
     "stepProfile": "ユーザー名",
     "profileTitle": "Twitchのユーザー名。",
-    "profileDescription": "任意：Twitch のユーザー名を入力すると、プロフィール写真を取得してお出迎えします。Twitch アカウントがない、または入力したくない場合はスキップしてください。すべての機能はそのまま使えます。",
-    "profileInputLabel": "あなたのTwitchユーザー名",
-    "profileHintIdle": "ユーザー名を入力すると、Twitch のプロフィールを自動で検索します。",
+    "profileDescription": "任意：プラットフォームを選んでユーザー名を入力すると、プロフィール写真を取得してお出迎えします。入力したくない場合はスキップしてください。すべての機能はそのまま使えます。",
+    "profileInputLabel": "あなたのユーザー名",
+    "profileHintIdle": "ユーザー名を入力すると、プロフィールを自動で検索します。",
     "profileHintSearching": "検索中…",
     "profileHintFound": "✓ 見つかりました：{{handle}}",
-    "profileHintKept": "Twitchのプロフィールが見つかりません：大丈夫、このユーザー名をそのまま使います。このステップをスキップしても構いません。",
+    "profileHintKept": "プロフィールが見つかりません：大丈夫、このユーザー名をそのまま使います。このステップをスキップしても構いません。",
     "documentTitle": "初回設定",
     "welcomeTagline": "Firefox拡張機能 · Twitch · Kick · YouTube",
     "welcomeDescription": "StreamPulse へようこそ：配信開始の通知、チャンネルポイントとドロップの自動受け取り。まずは表示言語を選んでください。",
@@ -207,7 +207,7 @@ export default {
       "intro": "通知、チャンネルポイント、プレビューは無料のままです。StreamPulse+ は熱心な視聴者向けのツールを追加します。",
       "plansLabel": "プラン",
       "monthly": "月額",
-      "monthlyNote": "7日間無料・いつでも解約",
+      "monthlyNote": "縛りなし、いつでも解約可能",
       "monthlyPrice": "2.99 €",
       "perMonth": "/月",
       "yearly": "年間",
@@ -215,10 +215,10 @@ export default {
       "yearlyPrice": "19 €",
       "perYear": "/年",
       "checkout": "StreamPulse+ を有効にする",
-      "checkoutTrial": "7日間無料で試す",
+      "checkoutTrial": "月額で購読（2.99 €）",
       "checkoutYearly": "1年間登録する (€19)",
       "savePercent": "47%OFF",
-      "trustTrial": "7日間無料・即時請求なし",
+      "trustTrial": "縛りなし、ワンクリックで解約",
       "trustYearly": "月額プランと比べて年間16.88 €お得",
       "trustCancel": "拡張機能から1クリックで解約可能",
       "trustDevices": "2つのブラウザで利用可能",
@@ -237,9 +237,11 @@ export default {
       "activeTitle": "StreamPulse+ は有効です",
       "planMonthly": "月額プラン · {{key}}",
       "planLifetime": "買い切りプラン · {{key}}",
+      "planTrial": "無料お試し · {{date}}まで",
       "planYearly": "年間プラン · {{key}}",
       "manage": "サブスクリプションを管理",
       "manageError": "現在アカウントページを開けません。数分後にもう一度お試しください。",
+      "manageEmailed": "アカウント保護のため、リンクを支払い用メールアドレスに送信しました。",
       "deactivate": "このブラウザからライセンスを解除",
       "close": "閉じる"
     },
@@ -265,11 +267,46 @@ export default {
       "failed": "拒否",
       "note": "結果はポイント残高の変化から推定しています。"
     },
+    "alertScope": {
+      "label": "通知の対象",
+      "allGames": "すべてのゲーム",
+      "someGames": "選んだゲーム",
+      "allBadges": "すべてのバッジ"
+    },
+    "dropsRefresh": {
+      "title": "バッジとドロップの更新間隔",
+      "body": "StreamPulse がバッジとドロップを確認する間隔。数分しかないものもあるので、見逃さないよう 1〜2 分を選んでください。StreamPulse+ 限定。"
+    },
+    "trial": {
+      "days": "残り{{days}}日",
+      "body": "StreamPulse+ お試し中 · すべて解放",
+      "subscribe": "購読する",
+      "devReset": "Reset (dev)",
+      "unlockedLine": "> StreamPulse+ 有効",
+      "unlockedCaption": "7 日間すべて解放。カード不要。",
+      "start": "7 日間を解放",
+      "offerBadge": "7日",
+      "offerBody": "StreamPulse+ 無料 · カード不要 · Twitch アカウントに紐付け",
+      "consent": "カード不要、支払いはありません。お試しはこのブラウザでログイン中の Twitch アカウントに紐付き、ドロップとバッジはそのアカウントで受け取ります。",
+      "otherAccount": "お試しは別の Twitch アカウントに紐付いています：StreamPulse+ は一時停止中"
+    },
+    "missed": {
+      "unit": "見逃し",
+      "cta": "もう見逃さない",
+      "newCampaign": "新しいキャンペーン",
+      "ended": "{{ago}}に終了",
+      "left": "残り{{time}}",
+      "newBadge": "新しいバッジ"
+    },
+    "badgeScope": {
+      "title": "新しいバッジの通知",
+      "body": "StreamPulse+ · 新しいバッジが入手可能になった瞬間に Chrome 通知。すべて、または選んだゲームのものだけ。"
+    },
     "dropAlerts": {
       "title": "Drops通知",
-      "lockedBody": "フォロー中のゲームでDropsキャンペーンが始まったら通知：Valorant、CS2など。StreamPulse+限定。",
+      "lockedBody": "ドロップのキャンペーンが始まったら通知。すべてのゲーム、または選んだゲームだけ。StreamPulse+ 限定。",
       "toggle": "新しいキャンペーンを通知",
-      "toggleBody": "キャンペーン一覧はTwitchを開いたときに更新されます：その時点で、キャンペーンごとに1回通知します。",
+      "toggleBody": "新しいキャンペーンごとに Chrome 通知。すべてのゲーム、または選んだゲームだけ。Twitch のタブが開いているときにリストを更新します。",
       "gamesLabel": "フォロー中のゲーム",
       "gamePlaceholder": "ゲームを追加（Enter）",
       "removeGame": "{{game}}を削除"
@@ -618,16 +655,25 @@ export default {
       "rankAmbassador": "アンバサダー · 紹介した友達：{{count}}",
       "intro": "Twitch チャットでの StreamPulse バッジと名前の見た目。他の StreamPulse ユーザーにも表示されます。"
     },
+    "referralAsk": {
+      "title": "友達を紹介",
+      "body": "リンクを共有しましょう：友達が登録するたびに、お金か無料の月がもらえます。",
+      "open": "リンクを取得"
+    },
     "referral": {
-      "generalBody": "あなたのコードで StreamPulse+ を利用した友だち 1 人につき、1 か月分の特典。",
-      "generalOpen": "コードを表示",
+      "generalBody": "リンクを共有しましょう：友達が登録するたびに、お金か無料の月がもらえます。",
+      "generalOpen": "リンクを取得",
       "plusTitle": "友達を招待しよう",
-      "plusBody": "友達は 2.99 € 引き（最初の1か月無料）。あなたはお金と次の特典がもらえます：",
+      "plusBody": "友達はあなたのリンクから申し込むだけで、何も入力しません。あなたはお金と次の特典がもらえます：",
       "title": "紹介",
-      "body": "コードをシェアしよう：友達は 2.99 € 引き（最初の1か月無料）。友達が加入している間は毎月 1 € を PayPal で受け取れます。",
-      "get": "コードを取得",
-      "copy": "コピー",
+      "body": "リンクを共有しましょう：友達は何も入力せず、リンクだけで大丈夫です。月額の友達が支払う月ごとに 1 €、年額の友達が支払う年ごとに 5 € を PayPal で受け取れます。",
+      "get": "リンクを取得",
+      "copy": "コードをコピー",
       "copied": "コードをコピーしました！",
+      "copyLink": "リンクをコピー",
+      "linkCopied": "短いメッセージ付きでリンクをコピーしました。友達に送ってください。入力は不要で、リンクだけで大丈夫です。",
+      "linkCopiedShort": "リンクをコピーしました！",
+      "shareMessage": "StreamPulse をおすすめします。Twitch・Kick・YouTube の配信者がライブを始めると知らせてくれる拡張機能です。StreamPulse+ に入るなら、私のリンクから申し込むと応援になります：{{link}}",
       "loading": "読み込み中…",
       "soon": "紹介プログラムはまもなく開始します。",
       "error": "現在コードを取得できません。後でもう一度お試しください。",
@@ -638,7 +684,7 @@ export default {
       "tierBadge": "バッジエフェクト",
       "tierDevice": "デバイスを1台追加",
       "each": "友達1人ごと",
-      "tierMoney": "加入中は毎月 1 €",
+      "tierMoney": "支払い1か月ごとに 1 €、1年ごとに 5 €",
       "balance": "支払い予定",
       "earned": "獲得：{{earned}} ・ 支払い済み：{{paid}}",
       "payoutRule": "{{min}} から PayPal に支払われます。成人のみ対象。",
@@ -646,13 +692,15 @@ export default {
       "paypalPlaceholder": "you@example.jp",
       "paypalSave": "保存",
       "paypalSaved": "PayPal のアドレスを保存しました。",
+      "paypalPending": "支払い用メールに送信したリンクでこのアドレスを確認してください。",
       "paypalInvalid": "このメールアドレスは無効です。",
       "paypalMissing": "報酬を受け取るには PayPal のアドレスを追加してください。",
-      "freeBody": "コードをシェアしよう：友だちは 2.99 € 割引（初月無料）。友だちが登録するたびに、あなたは StreamPulse+ を 1 か月もらえ、キーはメールで届きます。",
+      "freeBody": "リンクを共有しましょう：友達は何も入力せず、リンクだけで大丈夫です。友達が登録するたびに StreamPulse+ が1か月無料になり、キーはメールで届きます。",
       "freeLabel": "無料月を受け取るメールアドレス",
       "freeSubmit": "コードを作成",
       "freeTaken": "このアドレスは別のブラウザで使用されています。",
-      "freeReady": "コードの準備ができました。友だちが登録すると、キーがメールで届きます。"
+      "freeReady": "リンクの準備ができました。友だちが登録すると、キーがメールで届きます。",
+      "freeCheckEmail": "メールのリンクを開いてアドレスを確認し、戻ってコードを作成してください。"
     },
     "layout": {
       "title": "レイアウト",
@@ -1113,6 +1161,16 @@ export default {
     }
   },
   "background": {
+    "trialEnd": {
+      "soonTitle": "StreamPulse+ のお試しは明日で終了します",
+      "soonMessage": "ドロップ・バッジの自動受け取りとカスタム通知は 24 時間以内に止まります。購読して続けましょう。",
+      "endedTitle": "StreamPulse+ のお試しが終了しました",
+      "endedMessage": "ドロップとバッジは自動で受け取られなくなりました。StreamPulse+ で再開できます。"
+    },
+    "trialReminder": {
+      "title": "StreamPulse+ 7日間無料",
+      "message": "カード不要。StreamPulse を開いて「7 日間を解放」をクリック：ドロップとバッジを自動で受け取り、通知も自由に。"
+    },
     "dropAlerts": {
       "title": "Dropsキャンペーン：{{game}}",
       "message": "フォロー中のゲームでDropsキャンペーンが始まりました。"
@@ -1125,6 +1183,10 @@ export default {
       "bannerNext": "次：ほかの {{games}} ゲームで {{badges}} 個",
       "bannerHint": "このタブは開いたままにしてください。配信は自動で切り替わります。",
       "bannerStop": "止める",
+      "bannerElsewhere": "別のタブで Twitch の配信が再生中です。Twitch は一度に1つの配信しかカウントしないため、このドロップは止まっている可能性があります。",
+      "bannerRemaining": "残り {{minutes}} 分",
+      "bannerCollapse": "折りたたむ",
+      "bannerExpand": "展開",
       "obtained": "{{name}} を獲得しました。",
       "doneTitle": "自動モード完了",
       "doneMessage": "今は取得できるバッジがありません。タブを閉じました。",
@@ -1188,8 +1250,8 @@ export default {
     "platformsLabel": "集計するプラットフォーム",
     "platformsHint": "YouTube は計測の確認中のため、今のところオフになっています。必要ならオンにできます。",
     "referral": {
-      "body": "紹介プログラム：あなたのコードで利用した友だち 1 人につき、1 か月分の特典。",
-      "copy": "コードをコピー"
+      "body": "紹介：あなたのリンクから友達が登録するたびに、お金か無料の月がもらえます。",
+      "copy": "リンクをコピー"
     },
     "periodYear": "{{year}}年の振り返り",
     "plus": {
@@ -1303,7 +1365,7 @@ export default {
     "continueBtn": "続ける",
     "plusTitle": "StreamPulse+",
     "plusLine": "ドロップとバッジは、別のものを見ている間に自動で受け取れます。",
-    "plusCta": "7日間無料で試す",
+    "plusCta": "StreamPulse+ を見る",
     "clipsTitle": "StreamPulse Clips",
     "clipsLine": "TwitchやKickのクリップのリンクを貼るだけ：TikTok向けの縦型動画が完成。カメラ自動検出、アニメ字幕、編集不要。",
     "clipsCta": "StreamPulse Clips を見てみる",
@@ -1353,7 +1415,11 @@ export default {
       "months": "{{count}}か月利用中",
       "monthOne": "1か月利用中",
       "newMember": "新規メンバー",
-      "freeLine": "拡張機能ユーザー"
+      "freeLine": "拡張機能ユーザー",
+      "worn": "装着中",
+      "tenure": "加入歴",
+      "nameStyle": "名前のスタイル",
+      "bughunter": "バグハンター"
     },
     "topbar": {
       "previews": "ホバープレビュー",
@@ -1394,6 +1460,7 @@ export default {
       "clipDownload": "クリップをダウンロード (MP4)",
       "clipDownloading": "クリップをダウンロード中…",
       "clipDownloadFailed": "ダウンロードできませんでした。クリップのページを再読み込みして、もう一度お試しください。",
+      "clipOpenEditor": "StreamPulse Clips で編集",
       "latencyEmpty": "遅延：--",
       "latencyValue": "遅延：{{value}}秒",
       "offline": "オフライン"

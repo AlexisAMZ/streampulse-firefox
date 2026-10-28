@@ -5,13 +5,17 @@ import { syncUpdateBadge } from "./action-badge.js";
 import { scheduleKeepAliveAlarm, scheduleWatcherAlarm, setupAutoOpenInventoryAlarm } from "./alarms.js";
 import { syncChzzkAccess } from "./chzzk-access.js";
 import { fetchRemoteConfig } from "./config.js";
-import { dropsStore, scheduleDropsAlarm } from "./drops.js";
+import { currentTwitchId, dropsStore, scheduleDropsAlarm } from "./drops.js";
 import { translateWithPrefs } from "./i18n.js";
 import { NotificationCenter } from "./notifications.js";
+import { PlatformChecker } from "./platform-checker.js";
 import { pollStreamers } from "./polling.js";
 import { refreshRaidWatcher } from "./raids.js";
 import { DataStore, PreferenceStore } from "./stores.js";
 import { uninstallSurveyUrl } from "./uninstall-survey.js";
+import { repairYoutubeNames } from "./youtube-repair.js";
+import { requestPendingTrial } from "./trial.js";
+import { kickViewerId } from "./kick-account.js";
 
 export { uninstallSurveyUrl };
 
@@ -112,6 +116,8 @@ async function notifyUpdateOnce(version) {
   }
 }
 
+const trialDeps = () => ({ storage: chrome.storage.local, fetch: (...args) => fetch(...args), viewerId: currentTwitchId, kickId: kickViewerId, syncStorage: chrome.storage.sync });
+
 /** Listener chrome.runtime.onInstalled. */
 export async function handleInstalled(details) {
   initDone = true;
@@ -193,6 +199,8 @@ export async function handleStartup() {
 export async function initOnWake() {
   if (initDone) return;
   initDone = true;
+  // Essai demandé par le bouton, resté en attente (serveur injoignable).
+  requestPendingTrial(trialDeps()).catch((error) => console.warn("[StreamPulse+] essai :", error?.message || error));
   await PreferenceStore.ensureDefaults();
   await NotificationCenter.init();
   refreshRaidWatcher();
@@ -214,4 +222,11 @@ export async function initOnWake() {
   } catch (err) {
     console.warn("Init staleness check failed:", err?.message || err);
   }
+
+  // Chaînes YouTube ajoutées avec leur identifiant « UC… » pour nom : on retrouve le vrai nom.
+  repairYoutubeNames({
+    getStreamers: () => DataStore.getStreamers(),
+    saveStreamers: (streamers) => DataStore.saveStreamers(streamers),
+    resolve: (handle) => PlatformChecker.resolveYoutubeChannel(handle),
+  }).catch((err) => console.warn("Réparation des noms YouTube :", err?.message || err));
 }

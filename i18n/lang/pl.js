@@ -25,12 +25,12 @@ export default {
     "htmlLang": "pl",
     "stepProfile": "Nazwa użytkownika",
     "profileTitle": "Twoja nazwa użytkownika na Twitchu.",
-    "profileDescription": "Opcjonalnie: podaj swoją nazwę z Twitcha, a pobierzemy twoje zdjęcie profilowe, żeby cię przywitać. Nie masz konta na Twitchu albo wolisz go nie podawać? Pomiń ten krok, wszystko i tak działa.",
-    "profileInputLabel": "Twoja nazwa na Twitchu",
-    "profileHintIdle": "Wpisz swoją nazwę: automatycznie znajdziemy twój profil na Twitchu.",
+    "profileDescription": "Opcjonalnie: wybierz platformę, podaj swoją nazwę, a pobierzemy twoje zdjęcie profilowe, żeby cię przywitać. Wolisz nie podawać? Pomiń ten krok, wszystko i tak działa.",
+    "profileInputLabel": "Twoja nazwa użytkownika",
+    "profileHintIdle": "Wpisz swoją nazwę: automatycznie znajdziemy twój profil.",
     "profileHintSearching": "Szukam…",
     "profileHintFound": "✓ Znaleziono: {{handle}}",
-    "profileHintKept": "Nie znaleziono profilu na Twitchu: nic nie szkodzi, zostawiamy tę nazwę bez zmian. Możesz też pominąć ten krok.",
+    "profileHintKept": "Nie znaleziono profilu: nic nie szkodzi, zostawiamy tę nazwę bez zmian. Możesz też pominąć ten krok.",
     "documentTitle": "Pierwsza konfiguracja",
     "welcomeTagline": "ROZSZERZENIE FIREFOX · TWITCH · KICK · YOUTUBE",
     "welcomeDescription": "Witaj w StreamPulse: powiadomienia o transmisjach, automatyczne odbieranie punktów i Drops. Zacznij od wyboru języka interfejsu.",
@@ -207,7 +207,7 @@ export default {
       "intro": "Powiadomienia, punkty kanału i podglądy zostają darmowe. StreamPulse+ dodaje narzędzia dla najwierniejszych widzów.",
       "plansLabel": "Plan",
       "monthly": "Miesięczny",
-      "monthlyNote": "7 dni za darmo, bez zobowiązań",
+      "monthlyNote": "Bez zobowiązań, rezygnujesz w każdej chwili",
       "monthlyPrice": "2,99 €",
       "perMonth": "/mies.",
       "yearly": "Roczny",
@@ -215,10 +215,10 @@ export default {
       "yearlyPrice": "19 €",
       "perYear": "/rok",
       "checkout": "Odblokuj StreamPulse+",
-      "checkoutTrial": "Wypróbuj 7 dni za darmo",
+      "checkoutTrial": "Subskrybuj miesięcznie (2,99 €)",
       "checkoutYearly": "Subskrybuj na rok (19 €)",
       "savePercent": "-47 %",
-      "trustTrial": "7 dni za darmo bez natychmiastowej opłaty",
+      "trustTrial": "Bez zobowiązań, rezygnacja jednym kliknięciem",
       "trustYearly": "Oszczędź 16,88 € rocznie w porównaniu z planem miesięcznym",
       "trustCancel": "Rezygnacja 1 kliknięciem w rozszerzeniu",
       "trustDevices": "Klucz działa w 2 przeglądarkach",
@@ -237,9 +237,11 @@ export default {
       "activeTitle": "StreamPulse+ jest aktywny",
       "planMonthly": "Plan miesięczny · {{key}}",
       "planLifetime": "Plan dożywotni · {{key}}",
+      "planTrial": "Darmowy okres próbny · do {{date}}",
       "planYearly": "Plan roczny · {{key}}",
       "manage": "Zarządzaj subskrypcją",
       "manageError": "Nie można teraz otworzyć twojego konta. Spróbuj ponownie za kilka minut.",
+      "manageEmailed": "Aby chronić twoje konto, link został wysłany na twój adres e-mail płatności.",
       "deactivate": "Usuń licencję z tej przeglądarki",
       "close": "Zamknij"
     },
@@ -265,11 +267,46 @@ export default {
       "failed": "Odrzucony",
       "note": "Wyniki szacowane na podstawie zmian salda punktów."
     },
+    "alertScope": {
+      "label": "Zakres alertu",
+      "allGames": "Wszystkie gry",
+      "someGames": "Wybrane gry",
+      "allBadges": "Wszystkie odznaki"
+    },
+    "dropsRefresh": {
+      "title": "Odświeżanie odznak i Drops",
+      "body": "Jak często StreamPulse sprawdza odznaki i Drops. Niektóre trwają tylko kilka minut: wybierz 1 lub 2 min, by niczego nie przegapić. Tylko w StreamPulse+."
+    },
+    "trial": {
+      "days": "{{days}} dni",
+      "body": "Próbny StreamPulse+ · wszystko odblokowane",
+      "subscribe": "Subskrybuj",
+      "devReset": "Reset (dev)",
+      "unlockedLine": "> StreamPulse+ włączony",
+      "unlockedCaption": "Wszystko odblokowane na 7 dni. Bez karty.",
+      "start": "Odblokuj 7 dni",
+      "offerBadge": "7 D",
+      "offerBody": "StreamPulse+ za darmo · bez karty · przypisany do twojego konta Twitch",
+      "consent": "Bez karty, nic nie płacisz. Okres próbny jest przypisany do konta Twitch zalogowanego w tej przeglądarce: Drops i odznaki trafiają na to konto.",
+      "otherAccount": "Okres próbny przypisany do innego konta Twitch: StreamPulse+ wstrzymany"
+    },
+    "missed": {
+      "unit": "PRZEGAPIONE",
+      "cta": "Niczego nie przegap",
+      "newCampaign": "Nowa kampania",
+      "ended": "zakończona {{ago}}",
+      "left": "jeszcze {{time}}",
+      "newBadge": "Nowa odznaka"
+    },
+    "badgeScope": {
+      "title": "Alerty o nowych odznakach",
+      "body": "StreamPulse+ · Powiadomienie Chrome o każdej nowej odznace albo tylko z wybranych gier, gdy tylko stanie się dostępna."
+    },
     "dropAlerts": {
       "title": "Alerty Drops",
-      "lockedBody": "Powiadomienie, gdy kampania Drops startuje w grze, którą śledzisz: Valorant, CS2… Tylko StreamPulse+.",
+      "lockedBody": "Powiadomienie, gdy startuje kampania Drops, we wszystkich grach lub tylko w wybranych. Tylko w StreamPulse+.",
       "toggle": "Powiadamiaj o nowych kampaniach",
-      "toggleBody": "Lista kampanii jest odświeżana, gdy wchodzisz na Twitcha: alert przychodzi wtedy, raz na kampanię.",
+      "toggleBody": "Powiadomienie Chrome o każdej nowej kampanii, we wszystkich grach lub tylko w wybranych. Lista odświeża się, gdy otwarta jest karta Twitcha.",
       "gamesLabel": "Śledzone gry",
       "gamePlaceholder": "Dodaj grę (Enter)",
       "removeGame": "Usuń {{game}}"
@@ -618,16 +655,25 @@ export default {
       "rankAmbassador": "Ambasador · poleceni znajomi: {{count}}",
       "intro": "Wygląd twojej odznaki StreamPulse i nicku na czacie Twitcha, widoczny dla innych użytkowników StreamPulse."
     },
+    "referralAsk": {
+      "title": "Zaproś znajomego",
+      "body": "Udostępnij swój link: za każdego znajomego, który wykupi subskrypcję, zarabiasz pieniądze albo darmowe miesiące.",
+      "open": "Pobierz mój link"
+    },
     "referral": {
-      "generalBody": "Miesiąc gratis za każdego znajomego, który wykupi StreamPulse+ z twoim kodem.",
-      "generalOpen": "Pokaż mój kod",
+      "generalBody": "Udostępnij swój link: zarabiasz pieniądze albo darmowe miesiące za każdego znajomego, który wykupi subskrypcję.",
+      "generalOpen": "Pobierz mój link",
       "plusTitle": "Poleć znajomym",
-      "plusBody": "Twój znajomy dostaje 2,99 € zniżki (1. miesiąc za darmo). Ty zarabiasz pieniądze i te nagrody:",
+      "plusBody": "Twój znajomy po prostu używa twojego linku, nic nie wpisując. Ty zarabiasz pieniądze i te nagrody:",
       "title": "Polecenia",
-      "body": "Udostępnij swój kod: znajomy dostaje 2,99 € zniżki (1. miesiąc za darmo). Ty dostajesz 1 € miesięcznie, dopóki subskrybuje, wypłacane na PayPal.",
-      "get": "Pobierz mój kod",
-      "copy": "Kopiuj",
+      "body": "Udostępnij swój link: znajomy nie musi nic wpisywać, wystarczy link. Ty dostajesz 1 € za każdy miesiąc opłacony przez znajomego miesięcznego albo 5 € za każdy rok opłacony przez znajomego rocznego, przez PayPal.",
+      "get": "Pobierz mój link",
+      "copy": "Skopiuj kod",
       "copied": "Kod skopiowany!",
+      "copyLink": "Skopiuj mój link",
+      "linkCopied": "Link skopiowany z krótką wiadomością. Wyślij go znajomemu: nie musi nic wpisywać, wystarczy link.",
+      "linkCopiedShort": "Link skopiowany!",
+      "shareMessage": "Polecam StreamPulse, rozszerzenie, które powiadamia, gdy streamer z Twitcha, Kicka lub YouTube'a jest na żywo. Jeśli weźmiesz StreamPulse+, użyj mojego linku, to mnie wspiera: {{link}}",
       "loading": "Wczytywanie…",
       "soon": "Polecenia ruszą już wkrótce.",
       "error": "Kod jest teraz niedostępny. Spróbuj później.",
@@ -638,7 +684,7 @@ export default {
       "tierBadge": "Efekt odznaki",
       "tierDevice": "Jedno urządzenie więcej",
       "each": "Każdy znajomy",
-      "tierMoney": "1 €/mies. dopóki subskrybuje",
+      "tierMoney": "1 € za opłacony miesiąc, 5 € za opłacony rok",
       "balance": "Do wypłaty",
       "earned": "Zarobione: {{earned}} · już wypłacone: {{paid}}",
       "payoutRule": "Wypłata na twój PayPal od {{min}}. Tylko dla pełnoletnich.",
@@ -646,13 +692,15 @@ export default {
       "paypalPlaceholder": "ty@przyklad.pl",
       "paypalSave": "Zapisz",
       "paypalSaved": "Adres PayPal zapisany.",
+      "paypalPending": "Potwierdź ten adres linkiem wysłanym na twój e-mail płatności.",
       "paypalInvalid": "Ten adres e-mail jest nieprawidłowy.",
       "paypalMissing": "Dodaj adres PayPal, aby otrzymywać zarobki.",
-      "freeBody": "Udostępnij swój kod: twój znajomy dostaje 2,99 € zniżki (pierwszy miesiąc gratis). Ty dostajesz miesiąc StreamPulse+ za każdego znajomego, który wykupi subskrypcję, a klucz przyjdzie e-mailem.",
+      "freeBody": "Udostępnij swój link: znajomy nie musi nic wpisywać, wystarczy link. Ty dostajesz miesiąc StreamPulse+ za każdego znajomego, który wykupi subskrypcję, a klucz przychodzi e-mailem.",
       "freeLabel": "Twój e-mail, aby otrzymać darmowe miesiące",
       "freeSubmit": "Utwórz mój kod",
       "freeTaken": "Ten adres jest już używany w innej przeglądarce.",
-      "freeReady": "Twój kod jest gotowy. Gdy tylko znajomy wykupi subskrypcję, klucz przyjdzie e-mailem."
+      "freeReady": "Twój link jest gotowy. Gdy tylko znajomy wykupi subskrypcję, klucz przyjdzie e-mailem.",
+      "freeCheckEmail": "Otwórz link z e-maila, aby potwierdzić adres, a potem wróć utworzyć kod."
     },
     "layout": {
       "title": "Układ",
@@ -1113,6 +1161,16 @@ export default {
     }
   },
   "background": {
+    "trialEnd": {
+      "soonTitle": "Twój okres próbny StreamPulse+ kończy się jutro",
+      "soonMessage": "Automatyczne Drops, odznaki i własne powiadomienia wyłączą się za mniej niż 24 h. Subskrybuj, by nic nie stracić.",
+      "endedTitle": "Twój okres próbny StreamPulse+ się zakończył",
+      "endedMessage": "Drops i odznaki nie są już odbierane automatycznie. Wróć do StreamPulse+, by je odzyskać."
+    },
+    "trialReminder": {
+      "title": "7 dni StreamPulse+ za darmo",
+      "message": "Bez karty. Otwórz StreamPulse i kliknij „Odblokuj 7 dni”: Drops i odznaki odbierane same, alerty na miarę."
+    },
     "dropAlerts": {
       "title": "Kampania Drops: {{game}}",
       "message": "Kampania Drops wystartowała w grze, którą śledzisz."
@@ -1125,6 +1183,10 @@ export default {
       "bannerNext": "Potem: {{badges}} odznak(i) w {{games}} innych grach",
       "bannerHint": "Zostaw tę kartę otwartą: sama zmienia transmisję.",
       "bannerStop": "Zatrzymaj",
+      "bannerElsewhere": "W innej karcie leci live na Twitchu: Twitch liczy tylko jeden live naraz, więc ten Drop może stać w miejscu.",
+      "bannerRemaining": "zostało {{minutes}} min",
+      "bannerCollapse": "Zwiń",
+      "bannerExpand": "Rozwiń",
       "obtained": "{{name}} jest twoja.",
       "doneTitle": "Tryb auto zakończony",
       "doneMessage": "Na razie nie ma więcej odznak do zdobycia: karta została zamknięta.",
@@ -1188,8 +1250,8 @@ export default {
     "platformsLabel": "Liczone platformy",
     "platformsHint": "YouTube jest na razie odznaczony, bo jego pomiar jest sprawdzany. Możesz go dodać, jeśli chcesz.",
     "referral": {
-      "body": "Polecaj StreamPulse: miesiąc gratis za każdego znajomego, który wykupi go z twoim kodem.",
-      "copy": "Skopiuj mój kod"
+      "body": "Polecenia: za każdego znajomego, który wykupi subskrypcję z twojego linku, zarabiasz pieniądze albo darmowe miesiące.",
+      "copy": "Skopiuj mój link"
     },
     "periodYear": "Podsumowanie {{year}}",
     "plus": {
@@ -1303,7 +1365,7 @@ export default {
     "continueBtn": "Kontynuuj",
     "plusTitle": "StreamPulse+",
     "plusLine": "Dropy i odznaki odbierają się same, podczas gdy oglądasz coś innego.",
-    "plusCta": "Wypróbuj 7 dni za darmo",
+    "plusCta": "Poznaj StreamPulse+",
     "clipsTitle": "StreamPulse Clips",
     "clipsLine": "Wklej link do klipu z Twitcha lub Kicka: pionowe wideo gotowe na TikToka, z wykrytą kamerą i animowanymi napisami — bez montażu.",
     "clipsCta": "Odkryj StreamPulse Clips",
@@ -1353,7 +1415,11 @@ export default {
       "months": "Subskrybuje od {{count}} mies.",
       "monthOne": "Subskrybuje od 1 miesiąca",
       "newMember": "Nowy subskrybent",
-      "freeLine": "Użytkownik rozszerzenia"
+      "freeLine": "Użytkownik rozszerzenia",
+      "worn": "Noszony",
+      "tenure": "Staż",
+      "nameStyle": "Styl pseudonimu",
+      "bughunter": "Łowca błędów"
     },
     "topbar": {
       "previews": "Podgląd po najechaniu",
@@ -1394,6 +1460,7 @@ export default {
       "clipDownload": "Pobierz klip (MP4)",
       "clipDownloading": "Pobieranie klipu…",
       "clipDownloadFailed": "Nie udało się pobrać. Odśwież stronę klipu i spróbuj ponownie.",
+      "clipOpenEditor": "Edytuj w StreamPulse Clips",
       "latencyEmpty": "Opóźnienie: --",
       "latencyValue": "Opóźnienie: {{value}} s",
       "offline": "OFFLINE"
