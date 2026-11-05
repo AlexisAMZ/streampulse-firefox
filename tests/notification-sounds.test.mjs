@@ -71,7 +71,7 @@ test("le service worker applique le son par type seulement avec StreamPulse+", a
     }
     createOscillator() {
       return {
-        frequency: {},
+        frequency: { setValueAtTime(freq) { this.value = freq; }, exponentialRampToValueAtTime() {} },
         connect: () => ({ connect() {} }),
         start(when) { if (when === 0.02) firstFrequencies.push(this.frequency.value); },
         stop() {},
@@ -122,7 +122,7 @@ test("popup : choisir un son l'enregistre et le garde, sans toucher au menu quan
     observer.disconnect();
     return { options, writes, value: general.value, stored: prefs.notificationSound, mutations };
   });
-  assert.deepEqual(result.options, ["classic", "chime", "pulse", "bubble", "arpeggio", "drop"]);
+  assert.deepEqual(result.options, ["classic", "chime", "pulse", "bubble", "arpeggio", "drop", "punch", "airhorn", "siren", "laser"]);
   assert.deepEqual(result.writes, [{ notificationSound: "pulse" }]);
   assert.equal(result.value, "pulse");
   assert.equal(result.mutations, 0, "render() ne doit rien modifier quand les réglages n'ont pas changé");

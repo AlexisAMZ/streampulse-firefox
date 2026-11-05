@@ -1,0 +1,98 @@
+[
+ {
+  "key": "onboarding.stepperLabel",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.history.count.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.smart.ruleCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.cplus.dropsToday.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.bandMore.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.rewards.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.badgeSub.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.greetingLiveCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.settings.unitMs",
+  "verdict": "ok"
+ },
+ {
+  "key": "changelog.changeCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.badge.months.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.live",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.loading",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.plus.compareBadges",
+  "verdict": "fix",
+  "suggestion": "Insignias",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.compareFxPlus",
+  "verdict": "fix",
+  "suggestion": "Insignia y nombre animados",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.value",
+  "verdict": "fix",
+  "suggestion": "StreamPulse+ te hizo ganar {{badges}} insignias y {{drops}} Drops",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.valueBothOne",
+  "verdict": "fix",
+  "suggestion": "StreamPulse+ te hizo ganar 1 insignia y 1 Drop",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.valueBadgeOne",
+  "verdict": "fix",
+  "suggestion": "StreamPulse+ te hizo ganar 1 insignia y {{drops}} Drops",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.valueDropOne",
+  "verdict": "fix",
+  "suggestion": "StreamPulse+ te hizo ganar {{badges}} insignias y 1 Drop",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ }
+]

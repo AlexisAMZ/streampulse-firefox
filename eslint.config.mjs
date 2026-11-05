@@ -111,12 +111,16 @@ const ES_MODULES = [
   "js/alert-coverage.js",
   "js/popup-link-picker.js",
   "js/settings-filter.js",
+  "js/category-search.js",
+  "js/custom-sounds.js",
+  "js/popup-category-picker.js",
+  "js/popup-profile-card.js",
   "eslint.config.mjs",
 ];
 
 export default [
   {
-    ignores: ["js/vendor/**", "node_modules/**", "coverage/**", "stream-247/**", "DevKit/**", "promo/**"],
+    ignores: ["js/vendor/**", "node_modules/**", "coverage/**", "stream-247/**", "DevKit/**", "promo/**", "localization/.cache/**"],
   },
   js.configs.recommended,
   {

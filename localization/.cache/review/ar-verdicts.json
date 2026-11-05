@@ -1,0 +1,178 @@
+[
+ {
+  "key": "onboarding.stepperLabel",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.history.count.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.smart.ruleCount.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.cplus.dropsToday.two",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.cplus.dropsToday.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.cplus.dropsToday.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.bandMore.two",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.bandMore.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.bandMore.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.rewards.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.badgeSub.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.two",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.two",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.greetingLiveCount.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.settings.unitMs",
+  "verdict": "ok"
+ },
+ {
+  "key": "changelog.changeCount.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.badge.months.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.live",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.loading",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.history.count.two",
+  "verdict": "fix",
+  "suggestion": "بثّان مباشران",
+  "reason": "forme duelle arabe (2) : le nom au duel, sans chiffre"
+ },
+ {
+  "key": "popup.history.count.many",
+  "verdict": "fix",
+  "suggestion": "{{count}} بثًّا مباشرًا",
+  "reason": "arabe 11 à 99 (many) : nom au singulier accusatif"
+ },
+ {
+  "key": "popup.smart.ruleCount.two",
+  "verdict": "fix",
+  "suggestion": "قاعدتان",
+  "reason": "forme duelle arabe (2) : le nom au duel, sans chiffre"
+ },
+ {
+  "key": "popup.smart.ruleCount.many",
+  "verdict": "fix",
+  "suggestion": "{{count}} قاعدةً",
+  "reason": "arabe 11 à 99 (many) : nom au singulier accusatif"
+ },
+ {
+  "key": "popup.drops.rewards.two",
+  "verdict": "fix",
+  "suggestion": "مكافأتان",
+  "reason": "forme duelle arabe (2) : le nom au duel, sans chiffre"
+ },
+ {
+  "key": "popup.drops.rewards.many",
+  "verdict": "fix",
+  "suggestion": "{{count}} مكافأةً",
+  "reason": "arabe 11 à 99 (many) : nom au singulier accusatif"
+ },
+ {
+  "key": "popup.drops.badgeSub.two",
+  "verdict": "fix",
+  "suggestion": "اشتراكان",
+  "reason": "forme duelle arabe (2) : le nom au duel, sans chiffre"
+ },
+ {
+  "key": "popup.drops.badgeSub.many",
+  "verdict": "fix",
+  "suggestion": "{{count}} اشتراكًا",
+  "reason": "arabe 11 à 99 (many) : nom au singulier accusatif"
+ },
+ {
+  "key": "popup.greetingLiveCount.two",
+  "verdict": "fix",
+  "suggestion": "بثّاثان يبثّان الآن",
+  "reason": "forme duelle arabe (2) : le nom au duel, sans chiffre"
+ },
+ {
+  "key": "popup.greetingLiveCount.many",
+  "verdict": "fix",
+  "suggestion": "{{count}} بثّاثًا يبثّون الآن",
+  "reason": "arabe 11 à 99 (many) : nom au singulier accusatif"
+ },
+ {
+  "key": "changelog.changeCount.two",
+  "verdict": "fix",
+  "suggestion": "تغييران في هذا الإصدار.",
+  "reason": "forme duelle arabe (2) : le nom au duel, sans chiffre"
+ },
+ {
+  "key": "changelog.changeCount.many",
+  "verdict": "fix",
+  "suggestion": "{{count}} تغييرًا في هذا الإصدار.",
+  "reason": "arabe 11 à 99 (many) : nom au singulier accusatif"
+ },
+ {
+  "key": "inject.badge.months.two",
+  "verdict": "fix",
+  "suggestion": "مشترك منذ شهرين",
+  "reason": "forme duelle arabe (2) : le nom au duel, sans chiffre"
+ },
+ {
+  "key": "inject.badge.months.many",
+  "verdict": "fix",
+  "suggestion": "مشترك منذ {{count}} شهرًا",
+  "reason": "arabe 11 à 99 (many) : nom au singulier accusatif"
+ }
+]

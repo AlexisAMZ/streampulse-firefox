@@ -1,0 +1,126 @@
+[
+ {
+  "key": "onboarding.stepperLabel",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.history.count.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.history.count.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.smart.ruleCount.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.smart.ruleCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.cplus.dropsToday.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.bandMore.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.rewards.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.rewards.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.badgeSub.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.badgeSub.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.greetingLiveCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.settings.unitMs",
+  "verdict": "ok"
+ },
+ {
+  "key": "changelog.changeCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.badge.months.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.badge.months.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.live",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.loading",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.plus.compareBadges",
+  "verdict": "fix",
+  "suggestion": "Emblemas",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.compareFxPlus",
+  "verdict": "fix",
+  "suggestion": "Emblema e nome animados",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.value",
+  "verdict": "fix",
+  "suggestion": "O StreamPulse+ te rendeu {{badges}} emblemas e {{drops}} Drops",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.valueBothOne",
+  "verdict": "fix",
+  "suggestion": "O StreamPulse+ te rendeu 1 emblema e 1 Drop",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.valueBadgeOne",
+  "verdict": "fix",
+  "suggestion": "O StreamPulse+ te rendeu 1 emblema e {{drops}} Drops",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.valueDropOne",
+  "verdict": "fix",
+  "suggestion": "O StreamPulse+ te rendeu {{badges}} emblemas e 1 Drop",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ }
+]

@@ -88,8 +88,8 @@ export const PATCHES = [
     why: "chrome.offscreen n'existe pas sur Firefox. Inutile ici : la page d'arriere-plan Firefox est une vraie page, elle a un DOM et joue le son elle-meme (meme lecteur que le document hors ecran de Chrome).",
     edits: [
       {
-        find: `import { DEFAULT_SOUND, resolveSound } from "../notification-sounds.js";`,
-        replace: `import { DEFAULT_SOUND, resolveSound } from "../notification-sounds.js";
+        find: `import { DEFAULT_SOUND, SMART_SOUND, resolveSmartSound, resolveSound } from "../notification-sounds.js";`,
+        replace: `import { DEFAULT_SOUND, SMART_SOUND, resolveSmartSound, resolveSound } from "../notification-sounds.js";
 import { playNotificationSound } from "../notification-sound-player.js";`,
       },
       {
@@ -113,6 +113,7 @@ import { playNotificationSound } from "../notification-sound-player.js";`,
         audioCommand: {
           action: "play",
           preset,
+          dataUrl,
           volume: 1.0,
         },
       });
@@ -123,7 +124,7 @@ import { playNotificationSound } from "../notification-sound-player.js";`,
     // offscreen. La page d'arriere-plan Firefox est une vraie page : on joue
     // le son sur place, avec le meme lecteur (fichier ou synthese Web Audio).
     try {
-      await playNotificationSound(preset, { volume: 1, getUrl: (path) => chrome.runtime.getURL(path) });
+      await playNotificationSound(preset, { volume: 1, dataUrl, getUrl: (path) => chrome.runtime.getURL(path) });
     } catch (error) {
       console.warn("Audio playback error:", error?.message);
     }`,
@@ -250,7 +251,7 @@ import { playNotificationSound } from "../notification-sound-player.js";`,
     }
     createOscillator() {
       return {
-        frequency: {},
+        frequency: { setValueAtTime(freq) { this.value = freq; }, exponentialRampToValueAtTime() {} },
         connect: () => ({ connect() {} }),
         start(when) { if (when === 0.02) firstFrequencies.push(this.frequency.value); },
         stop() {},

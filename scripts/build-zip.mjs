@@ -19,7 +19,7 @@ const OUT_DIR = process.env.STREAMPULSE_ZIP_DIR || path.join(os.homedir(), "Desk
 // Versionne mais reserve au developpement : jamais livre.
 // Toute la documentation est exclue, pas seulement le README : CHROMEWEBSTORE.md
 // partait dans l'archive livrée, avec la fiche Store et l'historique interne.
-const DEV_ONLY = [/\.md$/i, /^\.gitignore$/, /^package(-lock)?\.json$/, /^eslint\.config\.mjs$/, /^scripts\//,
+const DEV_ONLY = [/^localization\//, /\.md$/i, /^\.gitignore$/, /^package(-lock)?\.json$/, /^eslint\.config\.mjs$/, /^scripts\//,
   // Captures et visuels de la fiche du store : ils appartiennent au formulaire
   // AMO, pas au paquet telecharge par chaque utilisateur.
   /^images\/cws_screenshots\//, /^images\/promo\//,

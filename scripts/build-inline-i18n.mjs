@@ -1,15 +1,16 @@
 /**
- * Génère js/inject/i18n-inline.js depuis i18n/translations.js.
+ * Génère js/inject/i18n-inline.js depuis i18n/lang/<code>.js (via
+ * l'agrégateur i18n/translations.js).
  *
  * POURQUOI CE FICHIER EXISTE
  * Les content scripts sont injectés comme scripts classiques (manifest.json),
- * ils ne peuvent donc pas `import` le module ES i18n/translations.js. Chacun
+ * ils ne peuvent donc pas `import` les modules ES de i18n/. Chacun
  * embarquait sa propre petite table de traductions, limitée à 4 langues et
- * dupliquée : impossible à maintenir sur 16 langues.
+ * dupliquée : impossible à maintenir sur 11 langues.
  *
  * Ce script extrait le sous-ensemble de clés dont les content scripts ont
  * besoin et l'émet en script classique exposant window.__SP_I18N__.
- * translations.js reste la source unique de vérité.
+ * Les fichiers i18n/lang/<code>.js restent la source unique de vérité.
  *
  * Relancer après toute modification des clés `inject.*` :
  *   node scripts/build-inline-i18n.mjs
@@ -28,17 +29,23 @@ const NAMESPACE = "inject";
  */
 const SHARED_SETTINGS = [
   "groupAutomation", "groupPreviews", "groupNotifications", "groupChat",
-  "autoClaimTitle", "autoClaimDropsTitle", "autoClaimMomentsTitle", "autoCancelRaidsTitle",
-  "autoRefreshTitle", "fastForwardTitle", "hideTwitchExtensionsTitle", "communityBadgeTitle",
+  "autoClaimTitle", "autoClaimDropsTitle", "autoCancelRaidsTitle",
+  "autoRefreshTitle", "keepQualityTitle", "fastForwardTitle", "pipButtonTitle", "hideTwitchExtensionsTitle", "communityBadgeTitle",
   "previewsEnableTitle", "previewsModeTitle", "previewsModeImage", "previewsModeVideo",
   "previewsSurfaceDirectory", "previewsSurfaceSidebar", "previewsAudioTitle",
-  "liveNotificationsTitle", "gameAlertsTitle", "titleAlertsTitle", "soundsTitle",
+  "liveAlertsTitle", "gameAlertsTitle", "titleAlertsTitle", "soundsTitle",
 ];
+
+/** Titres de rubriques vivant dans popup.osd (noms du menu du popup). */
+const SHARED_OSD = ["groupRewards", "groupPlayer", "groupProfile"];
 
 function sharedPopupStrings(popup) {
   const settings = {};
   for (const key of SHARED_SETTINGS) {
     if (popup?.settings?.[key]) settings[key] = popup.settings[key];
+  }
+  for (const key of SHARED_OSD) {
+    if (popup?.osd?.[key]) settings[key] = popup.osd[key];
   }
   return { settings, cosmetics: popup?.cosmetics || {} };
 }
@@ -48,10 +55,12 @@ const payload = {};
 // doivent quand même être résolvables si Chrome les demande.
 for (const { code } of ALL_LANGUAGES) {
   const block = translations[code]?.[NAMESPACE];
-  if (!block) {
-    throw new Error(`translations.${code}.${NAMESPACE} manquant : lancer expand-languages d'abord.`);
+  if (!block && code === "en") {
+    throw new Error(`i18n/lang/en.js n'a pas de bloc ${NAMESPACE}.*`);
   }
-  payload[code] = { ...block, shared: sharedPopupStrings(translations[code]?.popup) };
+  // Une langue déclarée mais pas encore traduite n'a pas de bloc : get()
+  // retombe alors clé par clé sur l'anglais.
+  payload[code] = { ...(block ?? {}), shared: sharedPopupStrings(translations[code]?.popup) };
 }
 
 const banner = `/**
@@ -75,11 +84,12 @@ const body = `(function () {
   var DEFAULT_LANG = ${JSON.stringify("en")};
 
   /**
-   * Résout une préférence stockée ("pt_BR", "EN", "de-DE") vers une langue
-   * disponible. Exact d'abord, puis sous-étiquette de base.
+   * Résout une étiquette de langue ("pt_BR", "EN", "de-DE") vers une langue
+   * disponible. Exact d'abord, puis sous-étiquette de base. Chaîne vide si
+   * rien ne correspond : l'appelant décide du repli.
    */
-  function resolve(value) {
-    if (typeof value !== "string" || !value.trim()) return DEFAULT_LANG;
+  function resolveCode(value) {
+    if (typeof value !== "string" || !value.trim()) return "";
     var raw = value.trim().replace(/_/g, "-").toLowerCase();
     var codes = Object.keys(STRINGS);
     for (var i = 0; i < codes.length; i++) {
@@ -90,7 +100,28 @@ const body = `(function () {
       if (codes[j].toLowerCase() === base) return codes[j];
       if (codes[j].toLowerCase().split("-")[0] === base) return codes[j];
     }
-    return DEFAULT_LANG;
+    return "";
+  }
+
+  /** Langue de l'interface Chrome, disponible dans les content scripts. */
+  function uiLanguage() {
+    try {
+      if (typeof chrome !== "undefined" && chrome.i18n && typeof chrome.i18n.getUILanguage === "function") {
+        return chrome.i18n.getUILanguage();
+      }
+    } catch (_e) {
+      // Pas d'API chrome (tests, hors extension) : le repli ci-dessous s'applique.
+    }
+    return "";
+  }
+
+  /**
+   * Résout une préférence stockée vers une langue disponible. Sans choix
+   * valide, même règle que le popup (js/i18n.js, readStoredLanguage) : suivre
+   * la langue de Chrome plutôt que tomber sur l'anglais.
+   */
+  function resolve(value) {
+    return resolveCode(value) || resolveCode(uiLanguage()) || DEFAULT_LANG;
   }
 
   /** Lit une clé "a.b.c", avec repli sur l'anglais puis sur la clé brute. */
@@ -104,6 +135,33 @@ const body = `(function () {
       });
     }
     return value;
+  }
+
+  /**
+   * Pluriel CLDR : la clé désigne un groupe { one, few, many, other }.
+   * Forme absente → other de la même langue, puis l'anglais.
+   */
+  function plural(lang, key, count, params) {
+    var vars = { count: count };
+    if (params) for (var name in params) vars[name] = params[name];
+    var form = pickForm(dig(STRINGS[lang], key), lang, count);
+    if (form == null) form = pickForm(dig(STRINGS[DEFAULT_LANG], key), DEFAULT_LANG, count);
+    if (form == null) return key;
+    return form.replace(/{{\\s*([^}\\s]+)\\s*}}/g, function (match, name) {
+      return Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : match;
+    });
+  }
+
+  function pickForm(group, lang, count) {
+    if (!group || typeof group !== "object") return null;
+    var category = "other";
+    try {
+      category = new Intl.PluralRules(lang === "ar" ? "ar-AE" : lang).select(Number(count));
+    } catch (_e) {
+      // Locale inconnue d'Intl : forme générale.
+    }
+    var form = group[category] != null ? group[category] : group.other;
+    return typeof form === "string" ? form : null;
   }
 
   function dig(root, key) {
@@ -120,6 +178,7 @@ const body = `(function () {
   window.__SP_I18N__ = {
     resolve: resolve,
     get: get,
+    plural: plural,
     languages: Object.keys(STRINGS),
     defaultLanguage: DEFAULT_LANG,
   };

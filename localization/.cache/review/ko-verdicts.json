@@ -1,0 +1,18 @@
+[
+ {
+  "key": "onboarding.stepperLabel",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.settings.unitMs",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.live",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.loading",
+  "verdict": "ok"
+ }
+]

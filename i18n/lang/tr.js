@@ -1,5 +1,43 @@
 // StreamPulse, langue « tr ». Fichier source à éditer (i18n/translations.js ne fait que regrouper les langues).
 export default {
+  "bulk": {
+    "documentTitle": "Yayıncıları toplu olarak ekleyin | StreamPulse",
+    "title": "Yayıncıları toplu olarak ekleyin",
+    "intro": "En fazla 50 kullanıcı adı veya kanal bağlantısı yapıştırın, ardından hangilerinin StreamPulse'a ekleneceğini seçin.",
+    "listLabel": "Listeniz",
+    "listHint": "Her satıra bir kullanıcı adı veya bağlantı yazın. Virgül, noktalı virgül ve sekme karakterleri de kullanılabilir.",
+    "platformLabel": "Bağlantısı olmayan kullanıcı adları için platform",
+    "groupLabel": "Grup (isteğe bağlı)",
+    "noGroup": "Grup yok",
+    "groupHint": "Diğer gruplarınızı değiştirmeden yeni yayıncıları mevcut bir gruba ekleyin.",
+    "preview": "Listeyi gözden geçirin",
+    "previewTitle": "Eklemeden önce gözden geçirin",
+    "previewHint": "Bu, biçimi ve yinelenenleri kontrol eder. Her hesap, eklendiğinde doğrulanır.",
+    "selectAll": "Tüm adayları seçin",
+    "emptyPreview": "Listenizi yapıştırın, ardından adayları, yinelenenleri ve geçersiz girdileri görmek için gözden geçirin.",
+    "keepOpen": "StreamPulse açılır penceresi kapandığında girdileriniz burada kalır. Ekleme işlemi sırasında bu sekmeyi açık tutun.",
+    "ready": "Eklemeye hazır",
+    "duplicate": "Bu listede yinelenenler",
+    "existing": "Zaten takip ediliyor",
+    "invalid": "Geçersiz kullanıcı adı veya bağlantı",
+    "adding": "Ekleniyor…",
+    "success": "Eklendi",
+    "error": "Eklenemedi",
+    "stale": "Liste değişti: eklemeden önce tekrar gözden geçirin.",
+    "summary": "Eklenecek {{candidates}} · Çift olan {{duplicates}} · Geçersiz {{invalid}}",
+    "tooMany": "{{count}} giriş bulundu; bir seferde yalnızca {{max}} tane eklenebilir.",
+    "retrySelected": "{{count}} kez yeniden dene",
+    "addSelected": "{{count}} ekleyin",
+    "progress": "{{total}}'ın {{done}}'u ekleniyor…",
+    "finished": "{{added}} eklendi · {{failed}} başarısız",
+    "partial": "Bazı hesaplar eklenemedi. Bu hesaplar saklanmaktadır ve daha sonra tekrar denenebilir.",
+    "addFailed": "Hesap eklenemedi.",
+    "readFailed": "StreamPulse verilerinizi okuyamadık.",
+    "verifyFailed": "Hesap doğrulanamadı.",
+    "groupFailed": "Hesap eklendi ancak grubu güncellenemedi.",
+    "groupMissing": "Hesap eklendi ancak artık seçilen grupta yer almıyor.",
+    "missingGroupOption": "Grup artık mevcut değil"
+  },
   "meta": {
     "languageSwitcherLabel": "Dil"
   },
@@ -122,7 +160,8 @@ export default {
     "plusStyleDesc": "Kullanıcı adın ve sohbet rozetin aboneliğinin efektlerini taşır — geçişler, dokular, animasyonlar. Hepsi açılır pencerenin Rozet bölümünden seçilir. Twitch klipleri de kendi sayfalarından MP4 olarak indirilir.",
     "plusStyleNameTitle": "Kullanıcı adın",
     "plusStyleBadgeTitle": "Rozetin",
-    "plusFinish": "StreamPulse+'ın tadını çıkar"
+    "plusFinish": "StreamPulse+'ın tadını çıkar",
+    "stepperLabel": "İlerleme"
   },
   "popup": {
     "settingsFilter": {
@@ -137,8 +176,24 @@ export default {
       "listen": "Dinle",
       "perKind": "Uyarı türüne göre farklı ses",
       "plusNote": "Uyarı türüne göre farklı ses, StreamPulse+ özelliğidir.",
-      "preset": { "classic": "Klasik", "chime": "Çan", "pulse": "Nabız", "bubble": "Baloncuk", "arpeggio": "Arpej", "drop": "Damla" },
-      "kind": { "live": "Yayın başladı", "game": "Kategori değişikliği", "title": "Başlık değişikliği", "raid": "Gelen raid" }
+      "preset": {
+        "classic": "Klasik",
+        "chime": "Çan",
+        "pulse": "Nabız",
+        "bubble": "Baloncuk",
+        "arpeggio": "Arpej",
+        "drop": "Damla",
+        "punch": "Yumruk",
+        "airhorn": "Korna",
+        "siren": "Siren",
+        "laser": "Lazer"
+      },
+      "kind": {
+        "live": "Yayın başladı",
+        "game": "Kategori değişikliği",
+        "title": "Başlık değişikliği",
+        "raid": "Gelen raid"
+      }
     },
     "greetingSubNobody": "Şu an kimse yayında değil.",
     "greetingSubEmpty": "StreamPulse'a hoş geldin.",
@@ -159,8 +214,10 @@ export default {
       "durationHoursShort": "{{h}} sa {{m}}",
       "filterLabel": "Platforma göre filtrele",
       "filterAll": "Tümü",
-      "countSingular": "1 yayın",
-      "countPlural": "{{count}} yayın",
+      "count": {
+        "one": "1 yayın",
+        "other": "{{count}} yayın"
+      },
       "summary": "son 14 günde kaçırıldı · {{duration}} içerik",
       "emptyTitle": "Kaçırılan yayın yok",
       "emptyBody": "Takip ettiğin bir yayıncı, izlemediğin bir yayını bitirdiğinde, tekrarıyla birlikte burada görünür.",
@@ -177,10 +234,10 @@ export default {
       "compareFree": "Ücretsiz",
       "comparePlus": "StreamPulse+",
       "compareNone": "·",
-      "compareDrops": "Drops",
+      "compareDrops": "Drops (Twitch)",
       "compareDropsFree": "Elle toplanır",
       "compareDropsPlus": "Otomatik toplanır",
-      "compareBadges": "Badgeler",
+      "compareBadges": "Rozetler (Twitch)",
       "compareBadgesFree": "Günde 1",
       "compareBadgesPlus": "Hepsi, sınırsız",
       "compareAlerts": "Uyarılar",
@@ -194,11 +251,11 @@ export default {
       "compareClips": "Klipler",
       "compareClipsPlus": "MP4 indirme",
       "compareFx": "Efektler",
-      "compareFxPlus": "Animasyonlu badge ve isim",
-      "value": "StreamPulse+ sana {{badges}} badge ve {{drops}} Drops kazandırdı",
-      "valueBothOne": "StreamPulse+ sana 1 badge ve 1 Drop kazandırdı",
-      "valueBadgeOne": "StreamPulse+ sana 1 badge ve {{drops}} Drop kazandırdı",
-      "valueDropOne": "StreamPulse+ sana {{badges}} badge ve 1 Drop kazandırdı",
+      "compareFxPlus": "Animasyonlu rozet ve isim",
+      "value": "StreamPulse+ sana {{badges}} rozet ve {{drops}} Drops kazandırdı",
+      "valueBothOne": "StreamPulse+ sana 1 rozet ve 1 Drop kazandırdı",
+      "valueBadgeOne": "StreamPulse+ sana 1 rozet ve {{drops}} Drop kazandırdı",
+      "valueDropOne": "StreamPulse+ sana {{badges}} rozet ve 1 Drop kazandırdı",
       "badge": "PLUS",
       "open": "StreamPulse+ aboneliğini keşfet",
       "openActive": "StreamPulse+: aboneliğimi yönet",
@@ -290,8 +347,8 @@ export default {
       "otherAccount": "Deneme başka bir Twitch hesabına bağlı: StreamPulse+ duraklatıldı"
     },
     "missed": {
-      "unit": "KAÇIRILDI",
-      "cta": "Hiçbirini kaçırma",
+      "unit": "YENİ",
+      "cta": "Otomatik topla",
       "newCampaign": "Yeni kampanya",
       "ended": "bitti {{ago}}",
       "left": "{{time}} kaldı",
@@ -387,8 +444,10 @@ export default {
       "streamersLabel": "Yayıncılar",
       "rulesFor": "{{name}} için uyarılar",
       "addRule": "Yeni kural",
-      "ruleCountSingular": "1 kural",
-      "ruleCountPlural": "{{count}} kural",
+      "ruleCount": {
+        "one": "1 kural",
+        "other": "{{count}} kural"
+      },
       "noRules": "Kural yok: her yayında normal bildirim.",
       "ruleName": "Kural adı",
       "ruleNamePlaceholder": "örn. GTA gecesi",
@@ -402,7 +461,30 @@ export default {
       "removeTerm": "{{term}} kaldır",
       "deleteRule": "Kuralı sil",
       "enableRule": "Kuralı etkinleştir",
-      "noStreamers": "Önce ana ekrandan bir yayıncı ekle."
+      "noStreamers": "Önce ana ekrandan bir yayıncı ekle.",
+      "useCurrent": "Şu an oynuyor: {{game}}",
+      "categorySearch": "Kategori ara",
+      "categoryNone": "Kategori bulunamadı. Yazımı kontrol et.",
+      "categoryOffline": "Arama kullanılamıyor. Biraz sonra tekrar dene.",
+      "noCategory": "kategori yok",
+      "verdictOff": "Kural kapalı.",
+      "verdictOffline": "Canlı değil: bu kural bir sonraki yayında denetlenecek.",
+      "verdictMatch": "Bu kural mevcut yayınla eşleşiyor: bildirim alırdın.",
+      "verdictMismatch": "Mevcut yayınla eşleşmiyor.",
+      "whyGame": "Kategori \"{{game}}\".",
+      "whyTitle": "Başlık kelimelerinden hiçbirini içermiyor.",
+      "whyViewers": "Yalnızca {{count}} izleyici.",
+      "soundLine": "Ses",
+      "soundTarget": "Hedefli uyarı sesi",
+      "soundOff": "Ses yok",
+      "soundMine": "Seslerim",
+      "soundDelete": "Bu sesi sil",
+      "soundImport": "Ses içe aktar",
+      "soundImportHint": "Ses dosyası, en fazla {{kb}} KB ve {{seconds}} sn. Bu cihazda kalır.",
+      "soundBadFile": "Bu dosya okunabilir bir ses dosyası değil.",
+      "soundTooBig": "Bu dosya çok büyük (en fazla {{kb}} KB).",
+      "soundTooLong": "Bu ses çok uzun (en fazla {{seconds}} sn).",
+      "soundFull": "Sınıra ulaşıldı: {{count}} kişisel ses. Önce birini sil."
     },
     "cplus": {
       "addFromSearch": "“{{name}}” ekle",
@@ -416,8 +498,10 @@ export default {
       "activityLabel": "Bugünkü etkinlik",
       "autoClaimOn": "Otomatik alma açık",
       "pointsToday": "Bugün +{{count}} puan",
-      "dropsToday": "Bugün {{count}} Drop",
-      "dropsTodayPlural": "Bugün {{count}} Drop",
+      "dropsToday": {
+        "one": "Bugün {{count}} Drop",
+        "other": "Bugün {{count}} Drop"
+      },
       "search": "Yayıncı ara",
       "searchLabel": "Ara",
       "allChannels": "Tüm kanallar",
@@ -504,7 +588,7 @@ export default {
       "title": "Drops",
       "autoOn": "Otomatik alma",
       "autoOff": "Elle alma",
-      "autoHint": "Ödüller bölümünden ayarla",
+      "autoHint": "Aşağıda, bu bölümde ayarla",
       "inProgress": "Devam eden",
       "updatedAgo": "{{ago}} güncellendi",
       "neverRead": "henüz Twitch'ten okunmadı",
@@ -525,9 +609,11 @@ export default {
       "staleHint": "güncellemek için Twitch'i aç",
       "bandOpen": "Drops panelini aç",
       "bandClaimed": "Drop alındı · {{name}}",
-      "bandMoreOne": "+{{count}} tane daha",
+      "bandMore": {
+        "one": "+{{count}} tane daha",
+        "other": "+{{count}} tane daha"
+      },
       "timeLeft": "{{time}} kaldı",
-      "bandMoreOther": "+{{count}} tane daha",
       "campaigns": "Kampanyalar",
       "campaignsMeta": "{{count}} aktif · Twitch'ten okundu, {{ago}}",
       "campaignsNone": "Listeyi yüklemek için Twitch'te Drops kampanyaları sayfasını aç.",
@@ -544,8 +630,10 @@ export default {
       "filterNew": "Yeni",
       "filterEnding": "Yakında bitiyor",
       "filterUpcoming": "Yakında",
-      "rewardsOne": "1 ödül",
-      "rewardsOther": "{{count}} ödül",
+      "rewards": {
+        "one": "1 ödül",
+        "other": "{{count}} ödül"
+      },
       "linkAccount": "bağlanacak hesap",
       "yourGames": "oyunların",
       "badge": "ROZET",
@@ -557,8 +645,10 @@ export default {
       "rewardTypeBadge": "Rozet",
       "rewardTypeEmote": "Emote",
       "rewardTypeItem": "Öğe",
-      "badgeSubOne": "1 abonelik",
-      "badgeSubOther": "{{count}} abonelik",
+      "badgeSub": {
+        "one": "1 abonelik",
+        "other": "{{count}} abonelik"
+      },
       "badgeOr": "veya",
       "badgesKnown": "{{count}} rozet takipte",
       "badgesSyncing": "Twitch rozetleri senkronize ediliyor…",
@@ -582,7 +672,7 @@ export default {
       "badgeAutoAll": "Alınabilecek tüm rozetleri al",
       "badgeAutoAllStop": "Otomatik modu durdur",
       "badgeAutoStatus": "Otomatik mod: sırada {{count}} rozet · şu an {{game}}",
-      "badgeAutoAllHint": "Sabitlenmiş ve sessiz bir sekme aynı anda tek bir yayını izler (Twitch aynı anda yalnızca birini sayar). Aynı oyunun kademeleri (30 dk, 1 sa, 90 dk…) birlikte ilerler, sonra sekme sıradaki oyuna geçer.",
+      "badgeAutoAllHint": "Twitch aynı anda yalnızca bir yayını sayar: sabitlenmiş, sessiz bir sekme onları sırayla izler. Aynı oyunun kademeleri birlikte ilerler.",
       "badgesUnit": "AKTİF",
       "badgesLcdFree": "Ücretsiz: {{count}}",
       "badgeCondSub": "abone ol",
@@ -623,14 +713,18 @@ export default {
       "isNew": "yeni",
       "dateRange": "{{start}} → {{end}}",
       "history": "Geçmiş",
-      "historyMetaOne": "Kurulumdan beri 1 Drop kazanıldı",
-      "historyMetaOther": "Kurulumdan beri {{count}} Drop kazanıldı",
-      "historyMonthOne": "{{month}} · 1 Drop",
-      "historyMonthOther": "{{month}} · {{count}} Drop",
+      "historyMeta": {
+        "one": "Kurulumdan beri 1 Drop kazanıldı",
+        "other": "Kurulumdan beri {{count}} Drop kazanıldı"
+      },
+      "historyMonth": {
+        "one": "{{month}} · 1 Drop",
+        "other": "{{month}} · {{count}} Drop"
+      },
       "historyEmpty": "Takip başladığından beri henüz Drop kazanılmadı. Burada ay ay görünecekler.",
       "lockedBody": "Kazandığın tüm Drop'ların geçmişi, ay ay, oyun ve kanalla birlikte. Yalnızca StreamPulse+ ile.",
       "trackingTitle": "Drops geçmişi",
-      "trackingBody": "Twitch sekmesi açık olmasa bile ilerleme ve alma. Drops'ları otomatik alma bu geçmişe dayanır; kampanya listesi Twitch'e girdiğinde güncellenir.",
+      "trackingBody": "Açık bir Twitch sekmesi olmasa bile ilerlemeyi ve alınan Drops'ları tutar. Otomatik alma bu geçmişe dayanır.",
       "badgesCampaign": "Rozet kampanyası"
     },
     "review": {
@@ -654,14 +748,29 @@ export default {
       "rankAmbassador": "Elçi · davet edilen arkadaş: {{count}}",
       "intro": "StreamPulse rozetinin ve adının Twitch sohbetindeki görünümü, diğer StreamPulse kullanıcılarına görünür."
     },
+    "profileCard": {
+      "sourceNone": "Fotoğraf: yok",
+      "sourceFrom": "Fotoğraf: {{platform}}",
+      "sourceLooking": "{{platform}} üzerinde aranıyor",
+      "sourceMissing": "{{platform}} üzerinde bulunamadı",
+      "platformLabel": "Hesabının platformu",
+      "handleLabel": "Bu platformdaki kullanıcı adın",
+      "namePlaceholder": "Kullanıcı adın",
+      "note": "Seçtiğin platform fotoğrafını bulmak için kullanılır. Kullanıcı adın yalnızca karşılama mesajında kullanılır.",
+      "savedNoPhoto": "Kullanıcı adı kaydedildi, ancak {{platform}} hesabı bulunamadı: fotoğraf yok.",
+      "accentLabel": "Arayüz rengi",
+      "accentViolet": "Mor",
+      "accentLcd": "LCD yeşili",
+      "accentOcean": "Okyanus",
+      "accentEmber": "Kor",
+      "accentCrimson": "Kızıl"
+    },
     "referralAsk": {
       "title": "Bir arkadaşını davet et",
       "body": "Bağlantını paylaş: abone olan her arkadaşın için para ya da ücretsiz aylar kazanırsın.",
       "open": "Bağlantımı al"
     },
     "referral": {
-      "generalBody": "Bağlantını paylaş: abone olan her arkadaşın için para ya da ücretsiz aylar kazanırsın.",
-      "generalOpen": "Bağlantımı al",
       "plusTitle": "Arkadaşlarını davet et",
       "plusBody": "Arkadaşın yalnızca bağlantını kullanır, hiçbir şey yazmaz. Sen de para ve şu ödülleri kazanırsın:",
       "title": "Davet",
@@ -714,6 +823,7 @@ export default {
       "tabsLabel": "Açılır pencere görünümleri",
       "changelog": "Yenilikler",
       "sectionLive": "Canlı",
+      "moreLives": "Diğer yayınları göster",
       "filterLabel": "Platforma göre filtrele",
       "filterAll": "Tümü",
       "sortLabel": "Kanalları sırala",
@@ -735,7 +845,7 @@ export default {
       "rowLive": "{{name}}, {{platform}} üzerinde canlı. {{game}}",
       "menuLabel": "Ayar bölümleri",
       "menuPlayer": "Oynatıcı",
-      "menuPreviewsChat": "Önizlemeler ve sohbet",
+      "menuPreviews": "Önizlemeler",
       "menuChat": "Sohbet",
       "menuDrops": "Drops",
       "menuBadges": "Rozetler",
@@ -771,8 +881,10 @@ export default {
       "settings": "Ayarlar"
     },
     "refresh": "Yenile",
-    "greetingLiveCountSingular": "{{count}} yayıncı canlı yayında",
-    "greetingLiveCountPlural": "{{count}} canlı yayıncı",
+    "greetingLiveCount": {
+      "one": "{{count}} yayıncı canlı yayında",
+      "other": "{{count}} canlı yayıncı"
+    },
     "platformFilter": {
       "twitch": "twitch",
       "kick": "kick"
@@ -839,8 +951,8 @@ export default {
       "soundsTitle": "Bildirim sesi",
       "alertsPerStreamerNote": "Tek tıkla ayar tüm yayıncılarına, sonradan ekleyeceklerine de uygulanır. Tek bir yayıncı için kartındaki simgeleri kullan.",
       "alertsMixed": "Yayıncıya göre farklı ayarlanmış: {{total}} yayıncıdan {{on}} tanesinde açık. Tek tıkla aynı ayar hepsine uygulanır.",
-      "dropsWhereNote": "Drop uyarıları Bildirimler'de (Drop alındı) ve Drops bölümünde (yeni kampanyalar) ayarlanır.",
-      "raidsWhereNote": "Raid'leri otomatik iptal etme Ödüller'de ayarlanır; gelen raid uyarıları açıkken kapanır.",
+      "rewardsDropsNote": "Drop'ları otomatik alma, Drops bölümünde ayarlanır.",
+      "otherNotificationsNote": "Drop, rozet ve raid bildirimleri kendi bölümlerinde ayarlanır: Drops, Rozetler ve Ödüller.",
       "soundsDescription": "Canlı yayın, kategori ve başlık bildirimleriyle birlikte ses çalar. Diğer bildirimler sessiz kalır.",
       "updateNotificationsTitle": "Güncelleme bildirimi",
       "updateNotificationsDescription": "StreamPulse güncellendiğinde haber ver (sürüm başına bir kez), tek tıkla yeniliklere götürsün.",
@@ -848,13 +960,13 @@ export default {
       "latencyViewers": "Oynatıcının altında",
       "latencyChat": "Sohbet başlığında",
       "backgroundRaidAlertsTitle": "Gelen baskın uyarıları (beta)",
-      "backgroundRaidAlertsDescription": "StreamPulse'taki Twitch yayıncılarını izler ve Twitch sekmesi açık olmasa bile bir baskın gelir gelmez sana bildirim gönderir. Baskınları otomatik iptal etmeyi kapatır.",
+      "backgroundRaidAlertsDescription": "Twitch yayıncılarını izler ve Twitch sekmesi açık olmasa bile bir baskın gelir gelmez sana bildirim gönderir. Otomatik iptali kapatır.",
       "autoClaimTitle": "Puanları otomatik al",
       "autoClaimDescription": "Twitch: Kanal Puanı bonus sandığı belirir belirmez senin yerine tıklar. Kick: puan bakiyeni gösterir.",
       "autoClaimDropsTitle": "Drops'ları otomatik al",
       "autoClaimDropsDescription": "Drops'ların alınmaya hazır olur olmaz onları alır. Yalnızca Twitch.",
       "autoOpenInventoryTitle": "Drops envanterini otomatik aç",
-      "autoOpenInventoryDescription": "Biten Drops'larını almak için Twitch envanterini seçtiğin sıklıkta arka plandaki bir sekmede açar. Yalnızca Twitch; açık bir Twitch oturumu gerekir.",
+      "autoOpenInventoryDescription": "Biten Drops'larını almak için Twitch envanterini seçtiğin sıklıkta arka planda açar. Açık bir Twitch oturumu gerekir.",
       "inventoryFrequencyLabel": "Açılma sıklığı",
       "inventoryEvery1h": "Her saat",
       "inventoryEvery2h": "Her 2 saatte bir",
@@ -879,11 +991,11 @@ export default {
       "faqPredictionsTitle": "Tahminler ve Baskınlar",
       "faqPredictionsBody": "Hızlıca oy vermen için videonun üzerinde sürüklenebilir bir widget belirir. Seçenek açıksa baskın yönlendirmeleri iptal edilir.",
       "autoCancelRaidsTitle": "Baskınları otomatik iptal et",
-      "autoCancelRaidsDescription": "Bir Twitch baskını seni başka yere götürmek istediğinde kanalda kalırsın. Gelen baskın uyarıları açıkken kapanır: puanlar baskını takip ederek kazanılır.",
+      "autoCancelRaidsDescription": "Bir Twitch baskını seni başka yere götürmek istediğinde kanalda kalırsın. Gelen baskın uyarıları açıkken kapanır.",
       "hideTwitchExtensionsTitle": "Twitch uzantılarını gizle",
       "hideTwitchExtensionsDescription": "Twitch videosunun üzerinde görünen yayıncı uzantılarını gizler (anketler, sıralamalar, mağazalar…).",
       "keepQualityTitle": "Arka planda kaliteyi koru",
-      "keepQualityDescription": "Sekme görünmezken Twitch'in kaliteyi düşürmesini veya duraklatmasını engeller. Daha fazla kaynak kullanır; sayfa bir sonraki yüklendiğinde uygulanır.",
+      "keepQualityDescription": "Sekme gizliyken Twitch'in kaliteyi düşürmesini veya duraklatmasını engeller. Daha fazla kaynak kullanır; sayfa bir sonraki yüklendiğinde uygulanır.",
       "autoRefreshTitle": "Hata olunca oynatıcıyı yeniden başlat",
       "autoRefreshDescription": "Twitch oynatıcısı bir hatayla durduğunda StreamPulse senin yerine « Tekrar dene »ye basar, yetmezse sekmeyi yeniler.",
       "pipButtonTitle": "Resim içinde resim düğmesi",
@@ -895,16 +1007,14 @@ export default {
       "clipDownloadTitle": "Klip indirme",
       "clipDownloadDescription": "Twitch klip sayfalarına, klipleri MP4 olarak kaydetmek için bir düğme ekler. StreamPulse+'a özel.",
       "preventTabDiscardTitle": "Sekmenin uykuya geçmesini engelle",
-      "preventTabDiscardDescription": "Firefox'un Twitch ve Kick kanal sayfalarını uykuya almasını engeller, böylece puanlar ve Drops gelmeye devam eder. Kapatılınca zaten korunan sekmeler normal davranışlarına döner.",
+      "preventTabDiscardDescription": "Firefox'un Twitch ve Kick kanal sekmelerini uykuya almasını engeller, böylece puanlar ve Drops gelmeye devam eder.",
       "fastForwardTitle": "İleri sarma düğmesi",
       "fastForwardDescription": "Video geride kaldığında canlı yayına yetişmek için Twitch ve Kick oynatıcısına bir düğme ekler.",
       "communityBadgeTitle": "Topluluk rozeti",
       "betaLabel": "beta",
       "saved": "Ayar kaydedildi",
-      "communityBadgeDescription": "Twitch sohbetinde kullanıcı adının ve diğer StreamPulse kullanıcılarının adlarının yanında StreamPulse simgesini gösterir. Kullanıcı adının tarayıcında hesaplanan bir parmak izi streampulse.tech'ye gönderilir; adın kendisi asla iletilmez.",
+      "communityBadgeDescription": "Twitch sohbetinde StreamPulse kullanıcılarının adlarının yanında StreamPulse simgesini gösterir. streampulse.tech'ye kullanıcı adının bir parmak izi gönderilir, adın kendisi asla gönderilmez.",
       "chatFilterDescription": "Twitch ve Kick sohbetinde bu kelimeleri içeren mesajları gizler (virgülle ayır).",
-      "pseudoTitle": "Karşılamadaki ad",
-      "pseudoDescription": "Karşılama mesajında kullanılır.",
       "pseudoPlaceholder": "Kullanıcı adın",
       "pseudoSave": "Kaydet",
       "pseudoSaved": "Kullanıcı adı güncellendi.",
@@ -932,13 +1042,14 @@ export default {
       "previewsAudioTitle": "Ses (video modu)",
       "previewsAudioDescription": "Video modundaki önizlemelerde sesi çalar.",
       "previewsDelayTitle": "Gösterim gecikmesi",
+      "unitMs": "ms",
       "previewsAnimationsTitle": "Animasyonlar",
       "previewsAnimationsDescription": "Önizlemeyi yumuşakça gösterip gizler. Anında görünmesi için kapat.",
       "groupChat": "Sohbet",
       "groupWatchTime": "İzleme Süresi",
       "watchTimeDescription": "İstatistiklerin ve Özetin için her Twitch ve Kick kanalında geçirdiğin süreyi sayar.",
       "syncTitle": "Cihazlarım arasında eşitle",
-      "syncDescription": "Yayıncıların, ayarların ve dilin tarayıcı profilini takip eder — hesap yok, StreamPulse sunucusu yok. İzleme süren, puanların ve Drops'ların bu cihazda kalır.",
+      "syncDescription": "Yayıncıların, ayarların ve dilin tarayıcı profilini takip eder; hesap ve StreamPulse sunucusu gerekmez. İzleme süresi, puanlar ve Drops bu cihazda kalır.",
       "syncStatus": "Son eşitleme: {{time}}",
       "syncError": "Eşitleme duraklatıldı: tarayıcının depolama sınırına ulaşıldı, yayıncı listeni kısalt."
     },
@@ -1056,6 +1167,8 @@ export default {
       "open": "Aynı anda birden fazla yayıncı ekleyin"
     },
     "notificationTools": {
+      "pauseOneHour": "Uyarıları 1 saat süreyle sessize al",
+      "pauseUntilTomorrow": "Yarın saat 8:00'e kadar uyarıları sessize alın",
       "pauseTitle": "Uyarılarınızı duraklatın",
       "pauseHour": "Uyarıları 1 saat süreyle sessize al",
       "pauseTomorrow": "Yarın saat 8:00'e kadar uyarıları sessize alın",
@@ -1104,12 +1217,16 @@ export default {
         "catchUp": "Bu canlı yayın, geri izleme bildirimleri grubuna dahil edilmiştir.",
         "changes": "Kategori veya başlıkta bir değişiklik olması durumunda uyarı verilir.",
         "noChange": "Son kontrolden bu yana hiçbir değişiklik yapılmamıştır."
-      },
-      "pauseOneHour": "Uyarıları 1 saat süreyle sessize al",
-      "pauseUntilTomorrow": "Yarın saat 8:00'e kadar uyarıları sessize alın"
+      }
     },
     "rewardPlan": {
       "title": "Bir Drops oturumu planlayın",
+      "description": "Drops'ları seçin, gerçekte ne kadar zamanınız olduğunu belirleyin ve neleri bitirebileceğinizi görün. Bu bir tahmindir: Neyin sayılacağına Twitch karar verir.",
+      "minutes": "{{count}} dakika",
+      "unknownDuration": "Süre bilinmiyor",
+      "remaining": "{{time}} kaldı",
+      "selectedCount": "{{count}} seçili",
+      "impossible": "Bu hızla son tarihten önce bitmez",
       "hint": "Drops'u seçin ve gereken süreyi tahmin edin. Süreler tahmini değerlerdir: Neyin sayılacağına Twitch karar verir.",
       "select": "{{name}}'ı seçin",
       "budget": "Bu oturum için kalan süre (dakika)",
@@ -1121,13 +1238,7 @@ export default {
       "empty": "İzleme planınızı tahmin etmek için bir Drop seçin.",
       "loading": "Kampanyalar yükleniyor…",
       "readError": "Seçilen Drops yüklenemedi.",
-      "writeError": "İzleme planınız kaydedilemedi.",
-      "description": "Drops'ları seçin, gerçekte ne kadar zamanınız olduğunu belirleyin ve neleri bitirebileceğinizi görün. Bu bir tahmindir: Neyin sayılacağına Twitch karar verir.",
-      "minutes": "{{count}} dakika",
-      "unknownDuration": "Süre bilinmiyor",
-      "remaining": "{{time}} kaldı",
-      "selectedCount": "{{count}} seçili",
-      "impossible": "Bu hızla son tarihten önce bitmez"
+      "writeError": "İzleme planınız kaydedilemedi."
     },
     "linkPicker": {
       "button": "Başka bir hesapla bağla",
@@ -1190,8 +1301,6 @@ export default {
       "doneTitle": "Otomatik mod bitti",
       "doneMessage": "Şimdilik alınacak rozet kalmadı: sekme kapatıldı.",
       "stoppedPlus": "StreamPulse+ etkin değil: rozetlerin otomatik alınması durdu.",
-      "freeDoneTitle": "Rozet kazanıldı ✓",
-      "freeDoneMessage": "Bugün {{count}} rozet daha var. StreamPulse+ ile hepsini al.",
       "autoFarmTitle": "Yeni rozetler yolda",
       "autoFarmMessage": "{{count}} yeni Twitch rozeti sessiz bir sekmede toplanıyor."
     },
@@ -1205,6 +1314,8 @@ export default {
     },
     "notifications": {
       "liveTitle": "{{name}} yayında",
+      "smartTitle": "Uyarın tetiklendi: {{name}} yayında",
+      "smartRule": "Uyarı “{{rule}}”",
       "startupBatchTitle": "Şu anda canlı",
       "startupBatchBody": "Hâlihazırda canlı: {{names}}",
       "liveMessage": "{{game}} • {{viewers}} izleyici",
@@ -1239,7 +1350,6 @@ export default {
       "updateTitle": "StreamPulse güncellendi",
       "updateMessage": "Yenilikleri ve düzeltmeleri görmek için tıkla."
     },
-    "diagnostics": {},
     "badge": {
       "idle": "StreamPulse",
       "live": "{{count}} canlı"
@@ -1281,8 +1391,8 @@ export default {
     "formatDesktop": "PC · 16:9",
     "formatMobile": "Mobil · 9:16",
     "loading": "İstatistiklerin yükleniyor…",
-    "emptyTitle": "Bu dönem için gösterilecek bir şey yok.",
     "canvasSummary": "Özet görseli: dönemde {{time}} izleme. En çok izlenen kanal: {{top}}.",
+    "emptyTitle": "Bu dönem için gösterilecek bir şey yok.",
     "emptyBody": "Bu dönemde kaydedilmiş izleme süresi yok. Ayarlar'da, Süre ve veriler bölümünde « İzleme süresini say » seçeneğinin açık olduğundan emin ol.",
     "download": "Görseli indir",
     "share": "X'te paylaş",
@@ -1375,8 +1485,10 @@ export default {
     "tagImproved": "GELİŞTİRİLMİŞ",
     "tagOther": "DİĞER",
     "genericChanges": "İç düzeltmeler ve kararlılık iyileştirmeleri.",
-    "changeCountSingular": "Bu sürümde {{count}} değişiklik yapıldı.",
-    "changeCountPlural": "Bu sürümde {{count}} değişiklik yapıldı.",
+    "changeCount": {
+      "one": "Bu sürümde {{count}} değişiklik yapıldı.",
+      "other": "Bu sürümde {{count}} değişiklik yapıldı."
+    },
     "noNotes": "Yayın notları mevcut değil",
     "noNotesBody": "Bu sürümün notları henüz yayınlanmadı."
   },
@@ -1411,8 +1523,10 @@ export default {
       "founder": "StreamPulse kurucusu",
       "ambassador": "Elçi",
       "lifetime": "Ömür boyu üye",
-      "months": "{{count}} aydır abone",
-      "monthOne": "1 aydır abone",
+      "months": {
+        "one": "1 aydır abone",
+        "other": "{{count}} aydır abone"
+      },
       "newMember": "Yeni abone",
       "freeLine": "Eklenti kullanıcısı",
       "worn": "Takılı",
@@ -1466,44 +1580,10 @@ export default {
     },
     "chatFilter": {
       "replacement": "Mesaj, StreamPulse tarafından kaldırıldı"
+    },
+    "previews": {
+      "live": "CANLI",
+      "loading": "Yükleniyor…"
     }
-  },
-  "bulk": {
-    "documentTitle": "Yayıncıları toplu olarak ekleyin | StreamPulse",
-    "title": "Yayıncıları toplu olarak ekleyin",
-    "intro": "En fazla 50 kullanıcı adı veya kanal bağlantısı yapıştırın, ardından hangilerinin StreamPulse'a ekleneceğini seçin.",
-    "listLabel": "Listeniz",
-    "listHint": "Her satıra bir kullanıcı adı veya bağlantı yazın. Virgül, noktalı virgül ve sekme karakterleri de kullanılabilir.",
-    "platformLabel": "Bağlantısı olmayan kullanıcı adları için platform",
-    "groupLabel": "Grup (isteğe bağlı)",
-    "noGroup": "Grup yok",
-    "groupHint": "Diğer gruplarınızı değiştirmeden yeni yayıncıları mevcut bir gruba ekleyin.",
-    "preview": "Listeyi gözden geçirin",
-    "previewTitle": "Eklemeden önce gözden geçirin",
-    "previewHint": "Bu, biçimi ve yinelenenleri kontrol eder. Her hesap, eklendiğinde doğrulanır.",
-    "selectAll": "Tüm adayları seçin",
-    "emptyPreview": "Listenizi yapıştırın, ardından adayları, yinelenenleri ve geçersiz girdileri görmek için gözden geçirin.",
-    "keepOpen": "StreamPulse açılır penceresi kapandığında girdileriniz burada kalır. Ekleme işlemi sırasında bu sekmeyi açık tutun.",
-    "ready": "Eklemeye hazır",
-    "duplicate": "Bu listede yinelenenler",
-    "existing": "Zaten takip ediliyor",
-    "invalid": "Geçersiz kullanıcı adı veya bağlantı",
-    "adding": "Ekleniyor…",
-    "success": "Eklendi",
-    "error": "Eklenemedi",
-    "stale": "Liste değişti: eklemeden önce tekrar gözden geçirin.",
-    "summary": "Eklenecek {{candidates}} · Çift olan {{duplicates}} · Geçersiz {{invalid}}",
-    "tooMany": "{{count}} giriş bulundu; bir seferde yalnızca {{max}} tane eklenebilir.",
-    "retrySelected": "{{count}} kez yeniden dene",
-    "addSelected": "{{count}} ekleyin",
-    "progress": "{{total}}'ın {{done}}'u ekleniyor…",
-    "finished": "{{added}} eklendi · {{failed}} başarısız",
-    "partial": "Bazı hesaplar eklenemedi. Bu hesaplar saklanmaktadır ve daha sonra tekrar denenebilir.",
-    "addFailed": "Hesap eklenemedi.",
-    "readFailed": "StreamPulse verilerinizi okuyamadık.",
-    "verifyFailed": "Hesap doğrulanamadı.",
-    "groupFailed": "Hesap eklendi ancak grubu güncellenemedi.",
-    "groupMissing": "Hesap eklendi ancak artık seçilen grupta yer almıyor.",
-    "missingGroupOption": "Grup artık mevcut değil"
   }
 };

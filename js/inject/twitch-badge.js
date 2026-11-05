@@ -653,6 +653,11 @@
     return api ? api.get(badgeLang, "badge." + key, params) : key;
   }
 
+  function trPlural(key, count) {
+    var api = typeof window !== "undefined" ? window.__SP_I18N__ : null;
+    return api && api.plural ? api.plural(badgeLang, "badge." + key, count) : key;
+  }
+
   /** Une seule carte pour tout le tchat, creee au premier survol. */
   var NAME_SELECTOR = '[data-a-target="chat-message-username"], .chat-author__display-name, .seventv-chat-user-username';
 
@@ -771,7 +776,7 @@
     if (style.p === "lifetime") return tr("lifetime");
     var months = style.s ? Math.floor((Date.now() - style.s) / MONTH_MS) : 0;
     if (months < 1) return tr("newMember");
-    return months === 1 ? tr("monthOne") : tr("months", { count: months });
+    return trPlural("months", months);
   }
 
   /** Deuxieme ligne de la carte : le rang d'abord, puis l'anciennete d'abonne. */
@@ -917,10 +922,33 @@
     '.chat-room'
   ].join(", ");
 
+  /**
+   * Repose le pseudo special d'une ligne deja badgee. React reecrit l'attribut
+   * class du pseudo a chaque re-rendu (message confirme par le serveur, survol)
+   * ou remplace le noeud : nos classes sp-paint disparaissent alors sans que la
+   * ligne soit rajoutee au tchat.
+   */
+  function repaintFrom(node) {
+    try {
+      var line = node.closest && node.closest(MESSAGE_SELECTORS);
+      var badge = line && line.querySelector(".sp-chat-badge[data-sp-hash]");
+      if (badge) applyPaint(line, badge.getAttribute("data-sp-hash"));
+    } catch (_e) {
+      // Twitch reconstruit son DOM en permanence : le noeud peut disparaitre entre sa selection et son usage.
+    }
+  }
+
   function setupChatObserver() {
     var chatObserver = new MutationObserver(function (mutations) {
       for (var i = 0; i < mutations.length; i++) {
         var mut = mutations[i];
+        if (mut.type === "attributes") {
+          var target = mut.target;
+          if (target.matches && target.matches(NAME_SELECTOR) && !target.classList.contains("sp-paint")) {
+            repaintFrom(target);
+          }
+          continue;
+        }
         for (var j = 0; j < mut.addedNodes.length; j++) {
           var node = mut.addedNodes[j];
           if (node.nodeType !== 1) continue;
@@ -936,6 +964,10 @@
             for (var k = 0; k < subMessages.length; k++) {
               processMessageLine(subMessages[k]);
             }
+            // Pseudo remonte a neuf dans une ligne deja traitee.
+            if (!subMessages.length && (node.matches(NAME_SELECTOR) || node.querySelector(NAME_SELECTOR))) {
+              repaintFrom(node);
+            }
           }
         }
       }
@@ -947,7 +979,12 @@
       var chatContainer = document.querySelector(CONTAINER_SELECTORS);
       if (chatContainer && chatContainer !== currentContainer) {
         chatObserver.disconnect();
-        chatObserver.observe(chatContainer, { childList: true, subtree: true });
+        chatObserver.observe(chatContainer, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["class"]
+        });
         currentContainer = chatContainer;
         log("observe sur", chatContainer.className || chatContainer.tagName);
 
@@ -1058,9 +1095,8 @@
         if (newPrefs.language) {
           badgeLang = i18n ? i18n.resolve(newPrefs.language) : badgeLang;
         }
-        // Badge desactive par defaut depuis 26.9.18 : il envoie une empreinte
-        // du pseudo, donc seule la valeur true explicite le demarre.
-        if (newPrefs.communityBadge === true) startCommunityBadge();
+        // Badge actif par defaut (2026-11-05) : seul un false explicite l'arrete.
+        if (newPrefs.communityBadge !== false) startCommunityBadge();
         else stopCommunityBadge();
       }
     });
@@ -1082,10 +1118,9 @@
       var i18n = typeof window !== "undefined" ? window.__SP_I18N__ : null;
       badgeLang = i18n ? i18n.resolve(prefs.language || navigator.language) : badgeLang;
       readOwnLocal(res && res[COSMETICS_KEY]);
-      // Badge desactive par defaut depuis 26.9.18 : il envoie une empreinte du
-      // pseudo, donc il ne demarre qu'avec l'accord explicite de l'utilisateur.
-      if (prefs.communityBadge !== true) {
-        log("desactive (non active par l utilisateur)");
+      // Badge actif par defaut (2026-11-05) : seul un false explicite l'arrete.
+      if (prefs.communityBadge === false) {
+        log("desactive par l utilisateur");
         return;
       }
       startCommunityBadge();

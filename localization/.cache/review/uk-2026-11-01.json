@@ -1,0 +1,350 @@
+{
+  "format": "streampulse-review/1",
+  "locale": "uk",
+  "language": "Українська",
+  "instructions": "Relis chaque traduction face à l'anglais. Pour chacune, rends verdict « ok » ou « fix ». Avec « fix », donne `suggestion` (la traduction complète corrigée) et `reason` (courte, en français). Garde à l'identique les variables {{x}}, les balises HTML et les termes protégés. Respecte le glossaire et les règles. Ne propose pas de changement de goût : seulement grammaire, sens, terminologie, naturel, longueur, cohérence. Pour les clés de pluriel (.one/.few/.many/.other), accorde le nom au nombre selon la catégorie CLDR de la langue.",
+  "rules": "## Général\n\n- La source est l'anglais (`i18n/lang/en.js`). Traduire le sens et le ton, pas les mots : une interface courte, directe, sans jargon marketing.\n- Les variables `{{count}}`, `{{name}}`… restent identiques, ni traduites ni déplacées hors de la phrase. L'ordre peut changer si la langue l'exige.\n- Les balises HTML (`<strong>`, `<span class=\"accent\">`, `<a href=\"…\">`) restent identiques ; seul le texte entre elles se traduit.\n- Les marques et noms de produits restent tels quels : StreamPulse, StreamPulse+, StreamPulse Clips, Twitch, Kick, YouTube, CHZZK, TikTok, Discord… (liste complète : `protected-terms.json`). Une langue à déclinaisons peut les décliner (« Twitcha » en polonais).\n- La plateforme s'appelle toujours par son nom. Ne jamais écrire « Twitch & Kick » seuls quand le texte parle de toutes les plateformes : Twitch, Kick et YouTube.\n- La terminologie du streaming suit `glossary.json` : une même notion garde le même mot sur tous les écrans d'une langue.\n- « Live » est un état (« en direct ») ou un nom (« un live ») selon l'écran : traduire le sens.\n- Les libellés de boutons restent courts : au-delà de 2,2 fois la longueur anglaise, ils débordent.\n- Les exemples dans les champs (`you@example.com`, `@handle`) peuvent être localisés.\n- Les clés `htmlLang` contiennent le code de langue, jamais une traduction.\n- Pluriels : une clé de pluriel a une forme par catégorie CLDR de la langue (`one`, `few`, `many`, `other`…). Chaque forme doit être juste pour tous les nombres de sa catégorie (en ukrainien, `one` sert aussi à 21, 31…) : mettre `{{count}}`, jamais un « 1 » écrit en dur. Une tournure neutre « Libellé : {{count}} » est acceptable quand elle sonne naturel.\n- Une traduction approuvée (`approved`) ne se change qu'avec une raison, consignée dans `history.jsonl`.\n\n## uk — Українська\n\n- Vouvoiement (« ви »), registre courant d'application.\n- Badges = « значки » (jamais « бейджі ») ; Drops reste en latin ; « StreamPulse Clips » reste en anglais ; channel points = « бали каналу ».\n- Le site n'a pas de section `/uk` : les liens d'aide pointent vers `/en/…`.\n- Pluriels : one (1, 21, 31…), few (2-4, 22-24…), many (0, 5-20, 25…). Les tournures « Libellé : {{count}} » de la première traduction sont valides pour tous les nombres et sont conservées.\n- Traduction du 1er novembre 2026 : DeepL puis environ 880 clés corrigées à la main. Une relecture par un locuteur natif reste à faire avant de passer les clés en `approved`.",
+  "glossary": [
+    {
+      "term": "channel points",
+      "definition": "Twitch's loyalty currency earned by watching a channel, spent on that channel's rewards.",
+      "context": "Twitch feature name. StreamPulse claims the bonus chests automatically.",
+      "expected": "бали каналу",
+      "variants": [
+        "бал",
+        "балів"
+      ],
+      "forbidden": []
+    },
+    {
+      "term": "badge",
+      "definition": "Small icon shown next to a viewer's name in Twitch chat (event, subscriber or StreamPulse badges).",
+      "context": "Badges tab, badge alerts, StreamPulse community badge.",
+      "expected": "значок",
+      "variants": [
+        "значк",
+        "знач"
+      ],
+      "forbidden": [
+        "бейдж"
+      ]
+    },
+    {
+      "term": "Drops",
+      "definition": "In-game rewards granted by watching streams of a game during a campaign.",
+      "context": "Twitch and Kick feature name, written with a capital letter in English.",
+      "expected": "Drops",
+      "variants": [
+        "Drop"
+      ],
+      "forbidden": []
+    },
+    {
+      "term": "streamer",
+      "definition": "The person who broadcasts a live stream.",
+      "context": "Followed streamers list, notifications.",
+      "expected": "стрімер",
+      "variants": [],
+      "forbidden": []
+    },
+    {
+      "term": "live",
+      "definition": "Status of a channel broadcasting right now; also the noun for one broadcast in French slang (« un live »).",
+      "context": "Adjective or noun depending on the screen: translate the meaning, not the word.",
+      "expected": "в ефірі",
+      "variants": [
+        "ефір",
+        "трансляц"
+      ],
+      "forbidden": []
+    },
+    {
+      "term": "chat",
+      "definition": "The live text conversation next to a stream.",
+      "context": "Chat filters, chat badges.",
+      "expected": "чат",
+      "variants": [],
+      "forbidden": []
+    },
+    {
+      "term": "sub",
+      "definition": "A paid subscription to a channel, and the person who holds it.",
+      "context": "Sub bonus, Drops that require subs, subscriber badges.",
+      "expected": "підписка",
+      "variants": [
+        "підпис",
+        "учасник"
+      ],
+      "forbidden": []
+    }
+  ],
+  "items": [
+    {
+      "key": "onboarding.stepperLabel",
+      "status": "pending",
+      "by": "claude",
+      "source": "Setup progress",
+      "translation": "Прогрес"
+    },
+    {
+      "key": "popup.history.count.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} live",
+      "translation": "{{count}} трансляція",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.history.count.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} lives",
+      "translation": "Трансляцій: {{count}}",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "popup.history.count.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} lives",
+      "translation": "Трансляцій: {{count}}",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.smart.ruleCount.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} rule",
+      "translation": "{{count}} правило",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.smart.ruleCount.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} rules",
+      "translation": "Правил: {{count}}",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "popup.smart.ruleCount.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} rules",
+      "translation": "Правил: {{count}}",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.cplus.dropsToday.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} Drops today",
+      "translation": "Drops сьогодні: {{count}}",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "popup.cplus.dropsToday.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} Drops today",
+      "translation": "Drops сьогодні: {{count}}",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.bandMore.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "+{{count}} more",
+      "translation": "+{{count}} ще",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "popup.drops.bandMore.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "+{{count}} more",
+      "translation": "+{{count}} ще",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.rewards.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} reward",
+      "translation": "{{count}} винагорода",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.drops.rewards.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} rewards",
+      "translation": "Нагород: {{count}}",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "popup.drops.rewards.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} rewards",
+      "translation": "Нагород: {{count}}",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.badgeSub.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} sub",
+      "translation": "{{count}} підписка",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.drops.badgeSub.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} subs",
+      "translation": "Підписок: {{count}}",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "popup.drops.badgeSub.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} subs",
+      "translation": "Підписок: {{count}}",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.historyMeta.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} Drop earned since install",
+      "translation": "{{count}} Drop отримано з моменту встановлення",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.drops.historyMeta.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} Drops earned since install",
+      "translation": "Drops отримано з моменту встановлення: {{count}}",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "popup.drops.historyMeta.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} Drops earned since install",
+      "translation": "Drops отримано з моменту встановлення: {{count}}",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.historyMonth.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{month}} · {{count}} Drop",
+      "translation": "{{month}} · {{count}} Drop",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.drops.historyMonth.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{month}} · {{count}} Drops",
+      "translation": "{{month}} · Drops: {{count}}",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "popup.drops.historyMonth.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{month}} · {{count}} Drops",
+      "translation": "{{month}} · Drops: {{count}}",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.greetingLiveCount.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} streamers live",
+      "translation": "У прямому ефірі: {{count}}",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "popup.greetingLiveCount.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} streamers live",
+      "translation": "У прямому ефірі: {{count}}",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.settings.unitMs",
+      "status": "pending",
+      "by": "claude",
+      "source": "ms",
+      "translation": "мс"
+    },
+    {
+      "key": "changelog.changeCount.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} changes in this release.",
+      "translation": "Змін у цьому випуску: {{count}}.",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "changelog.changeCount.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} changes in this release.",
+      "translation": "Змін у цьому випуску: {{count}}.",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "inject.badge.months.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "Subscribed for {{count}} month",
+      "translation": "Підписка: {{count}} місяць",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "inject.badge.months.few",
+      "status": "pending",
+      "by": "copy",
+      "source": "Subscribed for {{count}} months",
+      "translation": "Підписка: {{count}} міс.",
+      "pluralCategory": "few"
+    },
+    {
+      "key": "inject.badge.months.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "Subscribed for {{count}} months",
+      "translation": "Підписка: {{count}} міс.",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "inject.previews.live",
+      "status": "pending",
+      "by": "claude",
+      "source": "LIVE",
+      "translation": "В ЕФІРІ"
+    },
+    {
+      "key": "inject.previews.loading",
+      "status": "pending",
+      "by": "claude",
+      "source": "Loading…",
+      "translation": "Завантаження…"
+    },
+    {
+      "key": "@manifest.appDesc",
+      "status": "pending",
+      "by": "manual",
+      "source": "Auto-claim Twitch channel points, Drops & badge alerts. Live notifications for Twitch, Kick & YouTube, hover previews, chat filters.",
+      "translation": "Автозбір балів каналу Twitch, сповіщення про Drops і значки. Сповіщення про ефіри Twitch, Kick і YouTube, прев’ю, фільтри чату."
+    }
+  ]
+}

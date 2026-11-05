@@ -1,0 +1,48 @@
+[
+ {
+  "key": "onboarding.stepperLabel",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.settings.unitMs",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.live",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.loading",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.plus.compareFxPlus",
+  "verdict": "fix",
+  "suggestion": "Animasyonlu rozet ve isim",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.value",
+  "verdict": "fix",
+  "suggestion": "StreamPulse+ sana {{badges}} rozet ve {{drops}} Drops kazandırdı",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.valueBothOne",
+  "verdict": "fix",
+  "suggestion": "StreamPulse+ sana 1 rozet ve 1 Drop kazandırdı",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.valueBadgeOne",
+  "verdict": "fix",
+  "suggestion": "StreamPulse+ sana 1 rozet ve {{drops}} Drop kazandırdı",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ },
+ {
+  "key": "popup.plus.valueDropOne",
+  "verdict": "fix",
+  "suggestion": "StreamPulse+ sana {{badges}} rozet ve 1 Drop kazandırdı",
+  "reason": "harmonisation terminologique : même mot pour « badge » que dans le reste de l'interface (glossaire)"
+ }
+]

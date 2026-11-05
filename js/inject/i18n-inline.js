@@ -46,8 +46,11 @@
       "founder": "Fondateur de StreamPulse",
       "ambassador": "Ambassadeur",
       "lifetime": "Membre à vie",
-      "months": "Abonné depuis {{count}} mois",
-      "monthOne": "Abonné depuis 1 mois",
+      "months": {
+        "one": "Abonné depuis {{count}} mois",
+        "many": "Abonné depuis {{count}} mois",
+        "other": "Abonné depuis {{count}} mois"
+      },
       "newMember": "Nouvel abonné",
       "freeLine": "Utilisateur de l'extension",
       "worn": "Porté",
@@ -102,6 +105,10 @@
     "chatFilter": {
       "replacement": "Message supprimé par StreamPulse"
     },
+    "previews": {
+      "live": "EN DIRECT",
+      "loading": "Chargement…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "Automatisation",
@@ -112,7 +119,9 @@
         "autoClaimDropsTitle": "Récupération auto des Drops",
         "autoCancelRaidsTitle": "Annulation automatique des Raids",
         "autoRefreshTitle": "Relancer le lecteur en cas d'erreur",
+        "keepQualityTitle": "Garder la qualité en arrière-plan",
         "fastForwardTitle": "Bouton d'avance rapide",
+        "pipButtonTitle": "Bouton Picture-in-Picture",
         "hideTwitchExtensionsTitle": "Masquer les extensions Twitch",
         "communityBadgeTitle": "Badge communautaire",
         "previewsEnableTitle": "Aperçus au survol",
@@ -122,9 +131,13 @@
         "previewsSurfaceDirectory": "Répertoire",
         "previewsSurfaceSidebar": "Barre latérale",
         "previewsAudioTitle": "Audio (mode vidéo)",
+        "liveAlertsTitle": "Alertes de live",
         "gameAlertsTitle": "Alertes changement de catégorie",
         "titleAlertsTitle": "Alertes changement de titre",
-        "soundsTitle": "Son des notifications"
+        "soundsTitle": "Son des notifications",
+        "groupRewards": "Récompenses",
+        "groupPlayer": "Lecteur",
+        "groupProfile": "Profil"
       },
       "cosmetics": {
         "tabBadge": "Badge",
@@ -221,8 +234,10 @@
       "founder": "StreamPulse founder",
       "ambassador": "Ambassador",
       "lifetime": "Lifetime member",
-      "months": "Subscribed for {{count}} months",
-      "monthOne": "Subscribed for 1 month",
+      "months": {
+        "one": "Subscribed for {{count}} month",
+        "other": "Subscribed for {{count}} months"
+      },
       "newMember": "New subscriber",
       "freeLine": "Extension user",
       "worn": "Worn",
@@ -277,6 +292,10 @@
     "chatFilter": {
       "replacement": "Message removed by StreamPulse"
     },
+    "previews": {
+      "live": "LIVE",
+      "loading": "Loading…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "Automation",
@@ -287,7 +306,9 @@
         "autoClaimDropsTitle": "Auto-claim Twitch Drops",
         "autoCancelRaidsTitle": "Auto-cancel Raids",
         "autoRefreshTitle": "Recover the player on errors",
+        "keepQualityTitle": "Keep quality in background",
         "fastForwardTitle": "Fast-forward button",
+        "pipButtonTitle": "Picture-in-Picture button",
         "hideTwitchExtensionsTitle": "Hide Twitch extensions",
         "communityBadgeTitle": "Community badge",
         "previewsEnableTitle": "Hover previews",
@@ -297,9 +318,13 @@
         "previewsSurfaceDirectory": "Directory",
         "previewsSurfaceSidebar": "Sidebar",
         "previewsAudioTitle": "Audio (video mode)",
+        "liveAlertsTitle": "Live alerts",
         "gameAlertsTitle": "Category change alerts",
         "titleAlertsTitle": "Title change alerts",
-        "soundsTitle": "Notification sound"
+        "soundsTitle": "Notification sound",
+        "groupRewards": "Rewards",
+        "groupPlayer": "Player",
+        "groupProfile": "Profile"
       },
       "cosmetics": {
         "tabBadge": "Badge",
@@ -396,8 +421,11 @@
       "founder": "Fundador de StreamPulse",
       "ambassador": "Embajador",
       "lifetime": "Miembro de por vida",
-      "months": "Suscrito desde hace {{count}} meses",
-      "monthOne": "Suscrito desde hace 1 mes",
+      "months": {
+        "one": "Suscrito desde hace 1 mes",
+        "many": "Suscrito desde hace {{count}} meses",
+        "other": "Suscrito desde hace {{count}} meses"
+      },
       "newMember": "Nuevo suscriptor",
       "freeLine": "Usuario de la extensión",
       "worn": "Equipado",
@@ -452,6 +480,10 @@
     "chatFilter": {
       "replacement": "Mensaje eliminado por StreamPulse"
     },
+    "previews": {
+      "live": "EN DIRECTO",
+      "loading": "Cargando…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "Automatización",
@@ -462,7 +494,9 @@
         "autoClaimDropsTitle": "Reclamo auto de Drops",
         "autoCancelRaidsTitle": "Cancelar raids automáticamente",
         "autoRefreshTitle": "Recuperar el reproductor si falla",
+        "keepQualityTitle": "Mantener la calidad en segundo plano",
         "fastForwardTitle": "Botón de avance rápido",
+        "pipButtonTitle": "Botón de imagen en imagen",
         "hideTwitchExtensionsTitle": "Ocultar extensiones de Twitch",
         "communityBadgeTitle": "Insignia comunitaria",
         "previewsEnableTitle": "Vistas previas al pasar",
@@ -472,9 +506,13 @@
         "previewsSurfaceDirectory": "Directorio",
         "previewsSurfaceSidebar": "Barra lateral",
         "previewsAudioTitle": "Audio (modo vídeo)",
+        "liveAlertsTitle": "Alertas de directo",
         "gameAlertsTitle": "Alertas de cambio de categoría",
         "titleAlertsTitle": "Alertas de cambio de título",
-        "soundsTitle": "Sonido de las notificaciones"
+        "soundsTitle": "Sonido de las notificaciones",
+        "groupRewards": "Recompensas",
+        "groupPlayer": "Reproductor",
+        "groupProfile": "Perfil"
       },
       "cosmetics": {
         "tabBadge": "Insignia",
@@ -571,8 +609,11 @@
       "founder": "Fundador do StreamPulse",
       "ambassador": "Embaixador",
       "lifetime": "Membro vitalício",
-      "months": "Assinante há {{count}} meses",
-      "monthOne": "Assinante há 1 mês",
+      "months": {
+        "one": "Assinante há {{count}} mês",
+        "many": "Assinante há {{count}} meses",
+        "other": "Assinante há {{count}} meses"
+      },
       "newMember": "Novo assinante",
       "freeLine": "Usuário da extensão",
       "worn": "Equipado",
@@ -627,6 +668,10 @@
     "chatFilter": {
       "replacement": "Mensagem removida pelo StreamPulse"
     },
+    "previews": {
+      "live": "AO VIVO",
+      "loading": "Carregando…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "Automação",
@@ -637,7 +682,9 @@
         "autoClaimDropsTitle": "Resgate automático de Drops",
         "autoCancelRaidsTitle": "Cancelamento automático de raids",
         "autoRefreshTitle": "Reiniciar o player em caso de erro",
+        "keepQualityTitle": "Manter a qualidade em segundo plano",
         "fastForwardTitle": "Botão de avanço rápido",
+        "pipButtonTitle": "Botão Picture-in-Picture",
         "hideTwitchExtensionsTitle": "Ocultar extensões da Twitch",
         "communityBadgeTitle": "Emblema da comunidade",
         "previewsEnableTitle": "Prévias ao passar o mouse",
@@ -647,9 +694,13 @@
         "previewsSurfaceDirectory": "Diretório",
         "previewsSurfaceSidebar": "Barra lateral",
         "previewsAudioTitle": "Áudio (modo vídeo)",
+        "liveAlertsTitle": "Alertas de live",
         "gameAlertsTitle": "Alertas de mudança de categoria",
         "titleAlertsTitle": "Alertas de mudança de título",
-        "soundsTitle": "Som das notificações"
+        "soundsTitle": "Som das notificações",
+        "groupRewards": "Recompensas",
+        "groupPlayer": "Player",
+        "groupProfile": "Perfil"
       },
       "cosmetics": {
         "tabBadge": "Selo",
@@ -746,8 +797,10 @@
       "founder": "Gründer von StreamPulse",
       "ambassador": "Botschafter",
       "lifetime": "Mitglied auf Lebenszeit",
-      "months": "Seit {{count}} Monaten dabei",
-      "monthOne": "Seit 1 Monat dabei",
+      "months": {
+        "one": "Seit 1 Monat dabei",
+        "other": "Seit {{count}} Monaten dabei"
+      },
       "newMember": "Neues Mitglied",
       "freeLine": "Nutzt die Erweiterung",
       "worn": "Getragen",
@@ -802,6 +855,10 @@
     "chatFilter": {
       "replacement": "Nachricht von StreamPulse entfernt"
     },
+    "previews": {
+      "live": "LIVE",
+      "loading": "Wird geladen…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "Automatisierung",
@@ -812,7 +869,9 @@
         "autoClaimDropsTitle": "Drops automatisch abholen",
         "autoCancelRaidsTitle": "Raids automatisch abbrechen",
         "autoRefreshTitle": "Player bei Fehlern neu starten",
+        "keepQualityTitle": "Qualität im Hintergrund halten",
         "fastForwardTitle": "Schnellvorlauf-Schaltfläche",
+        "pipButtonTitle": "Bild-im-Bild-Schaltfläche",
         "hideTwitchExtensionsTitle": "Twitch-Erweiterungen ausblenden",
         "communityBadgeTitle": "Community-Abzeichen",
         "previewsEnableTitle": "Hover-Vorschau",
@@ -822,9 +881,13 @@
         "previewsSurfaceDirectory": "Verzeichnis",
         "previewsSurfaceSidebar": "Seitenleiste",
         "previewsAudioTitle": "Audio (Videomodus)",
+        "liveAlertsTitle": "Live-Benachrichtigungen",
         "gameAlertsTitle": "Benachrichtigung bei Kategoriewechsel",
         "titleAlertsTitle": "Benachrichtigung bei Titelwechsel",
-        "soundsTitle": "Benachrichtigungston"
+        "soundsTitle": "Benachrichtigungston",
+        "groupRewards": "Belohnungen",
+        "groupPlayer": "Player",
+        "groupProfile": "Profil"
       },
       "cosmetics": {
         "tabBadge": "Abzeichen",
@@ -921,8 +984,11 @@
       "founder": "Fondatore di StreamPulse",
       "ambassador": "Ambasciatore",
       "lifetime": "Membro a vita",
-      "months": "Abbonato da {{count}} mesi",
-      "monthOne": "Abbonato da 1 mese",
+      "months": {
+        "one": "Abbonato da 1 mese",
+        "many": "Abbonato da {{count}} mesi",
+        "other": "Abbonato da {{count}} mesi"
+      },
       "newMember": "Nuovo abbonato",
       "freeLine": "Utente dell'estensione",
       "worn": "Indossato",
@@ -977,6 +1043,10 @@
     "chatFilter": {
       "replacement": "Messaggio rimosso da StreamPulse"
     },
+    "previews": {
+      "live": "LIVE",
+      "loading": "Caricamento…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "Automazione",
@@ -987,7 +1057,9 @@
         "autoClaimDropsTitle": "Riscatto auto dei Drop",
         "autoCancelRaidsTitle": "Annullamento auto dei raid",
         "autoRefreshTitle": "Riavvia il player in caso di errore",
+        "keepQualityTitle": "Mantieni la qualità in background",
         "fastForwardTitle": "Pulsante di avanzamento veloce",
+        "pipButtonTitle": "Pulsante Picture-in-Picture",
         "hideTwitchExtensionsTitle": "Nascondi le estensioni Twitch",
         "communityBadgeTitle": "Badge della comunità",
         "previewsEnableTitle": "Anteprime al passaggio",
@@ -997,9 +1069,13 @@
         "previewsSurfaceDirectory": "Elenco",
         "previewsSurfaceSidebar": "Barra laterale",
         "previewsAudioTitle": "Audio (modalità video)",
+        "liveAlertsTitle": "Avvisi di live",
         "gameAlertsTitle": "Avvisi cambio categoria",
         "titleAlertsTitle": "Avvisi cambio titolo",
-        "soundsTitle": "Suono delle notifiche"
+        "soundsTitle": "Suono delle notifiche",
+        "groupRewards": "Ricompense",
+        "groupPlayer": "Player",
+        "groupProfile": "Profilo"
       },
       "cosmetics": {
         "tabBadge": "Badge",
@@ -1096,8 +1172,12 @@
       "founder": "Założyciel StreamPulse",
       "ambassador": "Ambasador",
       "lifetime": "Członek dożywotni",
-      "months": "Subskrybuje od {{count}} mies.",
-      "monthOne": "Subskrybuje od 1 miesiąca",
+      "months": {
+        "one": "Subskrybuje od 1 miesiąca",
+        "few": "Subskrybuje od {{count}} mies.",
+        "many": "Subskrybuje od {{count}} mies.",
+        "other": "Subskrybuje od {{count}} mies."
+      },
       "newMember": "Nowy subskrybent",
       "freeLine": "Użytkownik rozszerzenia",
       "worn": "Noszony",
@@ -1152,6 +1232,10 @@
     "chatFilter": {
       "replacement": "Wiadomość usunięta przez StreamPulse"
     },
+    "previews": {
+      "live": "NA ŻYWO",
+      "loading": "Ładowanie…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "Automatyzacja",
@@ -1162,7 +1246,9 @@
         "autoClaimDropsTitle": "Automatyczne odbieranie Drops",
         "autoCancelRaidsTitle": "Automatyczne anulowanie rajdów",
         "autoRefreshTitle": "Restartuj odtwarzacz po błędzie",
+        "keepQualityTitle": "Zachowaj jakość w tle",
         "fastForwardTitle": "Przycisk przewijania do przodu",
+        "pipButtonTitle": "Przycisk obrazu w obrazie",
         "hideTwitchExtensionsTitle": "Ukryj rozszerzenia Twitcha",
         "communityBadgeTitle": "Odznaka społeczności",
         "previewsEnableTitle": "Podgląd po najechaniu",
@@ -1172,9 +1258,13 @@
         "previewsSurfaceDirectory": "Katalog",
         "previewsSurfaceSidebar": "Pasek boczny",
         "previewsAudioTitle": "Dźwięk (tryb wideo)",
+        "liveAlertsTitle": "Alerty o transmisjach",
         "gameAlertsTitle": "Alerty o zmianie kategorii",
         "titleAlertsTitle": "Alerty o zmianie tytułu",
-        "soundsTitle": "Dźwięk powiadomień"
+        "soundsTitle": "Dźwięk powiadomień",
+        "groupRewards": "Nagrody",
+        "groupPlayer": "Odtwarzacz",
+        "groupProfile": "Profil"
       },
       "cosmetics": {
         "tabBadge": "Odznaka",
@@ -1271,8 +1361,10 @@
       "founder": "StreamPulse kurucusu",
       "ambassador": "Elçi",
       "lifetime": "Ömür boyu üye",
-      "months": "{{count}} aydır abone",
-      "monthOne": "1 aydır abone",
+      "months": {
+        "one": "1 aydır abone",
+        "other": "{{count}} aydır abone"
+      },
       "newMember": "Yeni abone",
       "freeLine": "Eklenti kullanıcısı",
       "worn": "Takılı",
@@ -1327,6 +1419,10 @@
     "chatFilter": {
       "replacement": "Mesaj, StreamPulse tarafından kaldırıldı"
     },
+    "previews": {
+      "live": "CANLI",
+      "loading": "Yükleniyor…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "Otomasyon",
@@ -1337,7 +1433,9 @@
         "autoClaimDropsTitle": "Drops'ları otomatik al",
         "autoCancelRaidsTitle": "Baskınları otomatik iptal et",
         "autoRefreshTitle": "Hata olunca oynatıcıyı yeniden başlat",
+        "keepQualityTitle": "Arka planda kaliteyi koru",
         "fastForwardTitle": "İleri sarma düğmesi",
+        "pipButtonTitle": "Resim içinde resim düğmesi",
         "hideTwitchExtensionsTitle": "Twitch uzantılarını gizle",
         "communityBadgeTitle": "Topluluk rozeti",
         "previewsEnableTitle": "Üzerine gelince önizleme",
@@ -1347,9 +1445,13 @@
         "previewsSurfaceDirectory": "Dizin",
         "previewsSurfaceSidebar": "Kenar çubuğu",
         "previewsAudioTitle": "Ses (video modu)",
+        "liveAlertsTitle": "Canlı yayın uyarıları",
         "gameAlertsTitle": "Kategori değişikliği uyarıları",
         "titleAlertsTitle": "Başlık değişikliği uyarıları",
-        "soundsTitle": "Bildirim sesi"
+        "soundsTitle": "Bildirim sesi",
+        "groupRewards": "Ödüller",
+        "groupPlayer": "Oynatıcı",
+        "groupProfile": "Profil"
       },
       "cosmetics": {
         "tabBadge": "Rozet",
@@ -1446,8 +1548,12 @@
       "founder": "Основатель StreamPulse",
       "ambassador": "Посол",
       "lifetime": "Участник навсегда",
-      "months": "Подписчик {{count}} мес.",
-      "monthOne": "Подписчик 1 месяц",
+      "months": {
+        "one": "Подписчик {{count}} месяц",
+        "few": "Подписчик {{count}} мес.",
+        "many": "Подписчик {{count}} мес.",
+        "other": "Подписчик {{count}} мес."
+      },
       "newMember": "Новый подписчик",
       "freeLine": "Пользователь расширения",
       "worn": "Надет",
@@ -1502,6 +1608,10 @@
     "chatFilter": {
       "replacement": "Сообщение удалено StreamPulse"
     },
+    "previews": {
+      "live": "В ЭФИРЕ",
+      "loading": "Загрузка…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "Автоматизация",
@@ -1512,7 +1622,9 @@
         "autoClaimDropsTitle": "Автосбор Drops",
         "autoCancelRaidsTitle": "Автоматическая отмена рейдов",
         "autoRefreshTitle": "Перезапуск плеера при ошибке",
+        "keepQualityTitle": "Сохранять качество в фоне",
         "fastForwardTitle": "Кнопка перемотки",
+        "pipButtonTitle": "Кнопка «Картинка в картинке»",
         "hideTwitchExtensionsTitle": "Скрыть расширения Twitch",
         "communityBadgeTitle": "Значок сообщества",
         "previewsEnableTitle": "Превью при наведении",
@@ -1522,9 +1634,13 @@
         "previewsSurfaceDirectory": "Каталог",
         "previewsSurfaceSidebar": "Боковая панель",
         "previewsAudioTitle": "Аудио (режим видео)",
+        "liveAlertsTitle": "Оповещения об эфирах",
         "gameAlertsTitle": "Оповещения о смене категории",
         "titleAlertsTitle": "Оповещения о смене названия",
-        "soundsTitle": "Звук уведомлений"
+        "soundsTitle": "Звук уведомлений",
+        "groupRewards": "Награды",
+        "groupPlayer": "Плеер",
+        "groupProfile": "Профиль"
       },
       "cosmetics": {
         "tabBadge": "Значок",
@@ -1621,8 +1737,9 @@
       "founder": "StreamPulse 創設者",
       "ambassador": "アンバサダー",
       "lifetime": "永久メンバー",
-      "months": "{{count}}か月利用中",
-      "monthOne": "1か月利用中",
+      "months": {
+        "other": "{{count}}か月利用中"
+      },
       "newMember": "新規メンバー",
       "freeLine": "拡張機能ユーザー",
       "worn": "装着中",
@@ -1677,6 +1794,10 @@
     "chatFilter": {
       "replacement": "StreamPulse によりメッセージが削除されました"
     },
+    "previews": {
+      "live": "ライブ",
+      "loading": "読み込み中…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "自動化",
@@ -1687,7 +1808,9 @@
         "autoClaimDropsTitle": "ドロップの自動受け取り",
         "autoCancelRaidsTitle": "レイドの自動キャンセル",
         "autoRefreshTitle": "エラー時にプレーヤーを復帰させる",
+        "keepQualityTitle": "バックグラウンドでも画質を維持",
         "fastForwardTitle": "早送りボタン",
+        "pipButtonTitle": "ピクチャー・イン・ピクチャーボタン",
         "hideTwitchExtensionsTitle": "Twitchの拡張機能を非表示にする",
         "communityBadgeTitle": "コミュニティバッジ",
         "previewsEnableTitle": "ホバープレビュー",
@@ -1697,9 +1820,13 @@
         "previewsSurfaceDirectory": "ディレクトリ",
         "previewsSurfaceSidebar": "サイドバー",
         "previewsAudioTitle": "音声（動画モード）",
+        "liveAlertsTitle": "配信開始の通知",
         "gameAlertsTitle": "カテゴリ変更の通知",
         "titleAlertsTitle": "タイトル変更の通知",
-        "soundsTitle": "通知音"
+        "soundsTitle": "通知音",
+        "groupRewards": "報酬",
+        "groupPlayer": "プレーヤー",
+        "groupProfile": "プロフィール"
       },
       "cosmetics": {
         "tabBadge": "バッジ",
@@ -1796,8 +1923,9 @@
       "founder": "StreamPulse 창립자",
       "ambassador": "앰배서더",
       "lifetime": "평생 멤버",
-      "months": "{{count}}개월째 구독 중",
-      "monthOne": "1개월째 구독 중",
+      "months": {
+        "other": "{{count}}개월째 구독 중"
+      },
       "newMember": "새 구독자",
       "freeLine": "확장 프로그램 사용자",
       "worn": "장착 중",
@@ -1852,6 +1980,10 @@
     "chatFilter": {
       "replacement": "StreamPulse에 의해 메시지가 삭제되었습니다."
     },
+    "previews": {
+      "live": "생방송",
+      "loading": "불러오는 중…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "자동화",
@@ -1862,7 +1994,9 @@
         "autoClaimDropsTitle": "드롭 자동 수령",
         "autoCancelRaidsTitle": "레이드 자동 취소",
         "autoRefreshTitle": "오류 시 플레이어 다시 시작",
+        "keepQualityTitle": "백그라운드에서 화질 유지",
         "fastForwardTitle": "빨리 감기 버튼",
+        "pipButtonTitle": "PIP 버튼",
         "hideTwitchExtensionsTitle": "Twitch 확장 프로그램 숨기기",
         "communityBadgeTitle": "커뮤니티 배지",
         "previewsEnableTitle": "마우스 오버 미리보기",
@@ -1872,9 +2006,13 @@
         "previewsSurfaceDirectory": "둘러보기",
         "previewsSurfaceSidebar": "사이드바",
         "previewsAudioTitle": "오디오 (동영상 모드)",
+        "liveAlertsTitle": "라이브 알림",
         "gameAlertsTitle": "카테고리 변경 알림",
         "titleAlertsTitle": "제목 변경 알림",
-        "soundsTitle": "알림 소리"
+        "soundsTitle": "알림 소리",
+        "groupRewards": "보상",
+        "groupPlayer": "플레이어",
+        "groupProfile": "프로필"
       },
       "cosmetics": {
         "tabBadge": "배지",
@@ -1971,8 +2109,14 @@
       "founder": "مؤسس StreamPulse",
       "ambassador": "سفير",
       "lifetime": "عضو مدى الحياة",
-      "months": "مشترك منذ {{count}} أشهر",
-      "monthOne": "مشترك منذ شهر واحد",
+      "months": {
+        "zero": "مشترك منذ {{count}} أشهر",
+        "one": "مشترك منذ شهر واحد",
+        "two": "مشترك منذ شهرين",
+        "few": "مشترك منذ {{count}} أشهر",
+        "many": "مشترك منذ {{count}} شهرًا",
+        "other": "مشترك منذ {{count}} أشهر"
+      },
       "newMember": "مشترك جديد",
       "freeLine": "مستخدم الإضافة",
       "worn": "مُجهَّز",
@@ -2027,6 +2171,10 @@
     "chatFilter": {
       "replacement": "حذف StreamPulse هذه الرسالة"
     },
+    "previews": {
+      "live": "مباشر",
+      "loading": "جارٍ التحميل…"
+    },
     "shared": {
       "settings": {
         "groupAutomation": "الأتمتة",
@@ -2037,7 +2185,9 @@
         "autoClaimDropsTitle": "استلام Twitch Drops تلقائيًا",
         "autoCancelRaidsTitle": "إلغاء الغارات تلقائيًا",
         "autoRefreshTitle": "استعادة المشغّل عند الأخطاء",
+        "keepQualityTitle": "الحفاظ على الجودة في الخلفية",
         "fastForwardTitle": "زر التقديم السريع",
+        "pipButtonTitle": "زر صورة داخل صورة",
         "hideTwitchExtensionsTitle": "إخفاء إضافات Twitch",
         "communityBadgeTitle": "شارة المجتمع",
         "previewsEnableTitle": "معاينات التمرير",
@@ -2047,9 +2197,13 @@
         "previewsSurfaceDirectory": "الدليل",
         "previewsSurfaceSidebar": "الشريط الجانبي",
         "previewsAudioTitle": "الصوت (وضع الفيديو)",
+        "liveAlertsTitle": "تنبيهات البث",
         "gameAlertsTitle": "تنبيهات تغيّر الفئة",
         "titleAlertsTitle": "تنبيهات تغيّر العنوان",
-        "soundsTitle": "صوت الإشعار"
+        "soundsTitle": "صوت الإشعار",
+        "groupRewards": "المكافآت",
+        "groupPlayer": "المشغّل",
+        "groupProfile": "الملف الشخصي"
       },
       "cosmetics": {
         "tabBadge": "الشارة",
@@ -2114,16 +2268,206 @@
         "neon": "نيون"
       }
     }
+  },
+  "uk": {
+    "enhancer": {
+      "jumpToLive": "Перейти до ефіру (StreamPulse)"
+    },
+    "twitchUi": {
+      "favorites": "Обране StreamPulse",
+      "pin": "Додати до обраного StreamPulse",
+      "unpin": "Прибрати з обраного StreamPulse",
+      "offline": "Офлайн",
+      "emptyFavorites": "Наведіть курсор на канал, який ви відстежуєте, і натисніть зірочку.",
+      "drawerTitle": "Налаштування",
+      "tabGeneral": "Загальні",
+      "tabPreviews": "Перегляд",
+      "tabAlerts": "Сповіщення",
+      "tabRewards": "Нагороди",
+      "tabPlayer": "Плеєр Twitch",
+      "tabProfile": "Профіль і значки",
+      "tabPlus": "StreamPulse+",
+      "liveMassHint": "Застосовується до всіх ваших стрімерів, окремо можна змінити на кожній картці.",
+      "autoCancelRaidsHint": "Вимикається, коли відстежуються вхідні рейди: бали заробляються переходом за рейдом.",
+      "close": "Закрити",
+      "fullPage": "Повна сторінка",
+      "plusOnly": "Лише StreamPulse+",
+      "discoverPlus": "Дізнатися про StreamPulse+",
+      "chatRow": "Ефекти StreamPulse+",
+      "chatRowNote": "Їх бачать інші користувачі StreamPulse."
+    },
+    "badge": {
+      "founder": "Засновник StreamPulse",
+      "ambassador": "Амбасадор",
+      "lifetime": "Довічний учасник",
+      "months": {
+        "one": "Підписка: {{count}} місяць",
+        "few": "Підписка: {{count}} міс.",
+        "many": "Підписка: {{count}} міс.",
+        "other": "Підписка: {{count}} міс."
+      },
+      "newMember": "Новий учасник",
+      "freeLine": "Користувач розширення",
+      "worn": "Надягнено",
+      "tenure": "Стаж",
+      "nameStyle": "Стиль ніка",
+      "bughunter": "Мисливець за багами"
+    },
+    "topbar": {
+      "previews": "Перегляд при наведенні",
+      "thisChannel": "Цей канал",
+      "liveNow": "Зараз в ефірі",
+      "noneLive": "Зараз ніхто не в ефірі",
+      "watchedHere": "Переглянуто тут",
+      "quickSettings": "Швидкі налаштування",
+      "follow": "Додати до StreamPulse",
+      "followed": "Додано",
+      "autoClaim": "Автоматично забирати бали каналу",
+      "fastForward": "Наздогнати ефір",
+      "more": "+{{count}} ще",
+      "tip": "Пригостити бабл-ті",
+      "settings": "Усі налаштування"
+    },
+    "predictions": {
+      "label": "Триває прогноз",
+      "loading": "Завантаження…",
+      "action": "Ставка / голосування в чаті",
+      "close": "Закрити",
+      "fallbackTitle": "Прогноз Twitch"
+    },
+    "quickFollow": {
+      "add": "Додати до StreamPulse",
+      "tracked": "Уже в StreamPulse",
+      "remove": "Видалити з StreamPulse",
+      "added": "{{name}} додано до StreamPulse",
+      "removed": "{{name}} видалено з StreamPulse",
+      "error": "Не вдалося виконати дію. Спробуйте ще раз."
+    },
+    "player": {
+      "skipToLive": "Перейти до ефіру",
+      "holdToFastForward": "Утримуйте, щоб перемотувати вперед ×2",
+      "volumeBoostLabel": "Підсилити гучність",
+      "volumeBoostHint": "Клік: увімкнути/вимкнути · коліщатко чи стрілки: регулювання до 200%",
+      "pictureInPicture": "Картинка в картинці",
+      "clipDownload": "Завантажити кліп (MP4)",
+      "clipDownloading": "Завантаження кліпу…",
+      "clipDownloadFailed": "Завантаження не вдалося. Оновіть сторінку кліпу й спробуйте ще раз.",
+      "clipOpenEditor": "Редагувати в StreamPulse Clips",
+      "latencyEmpty": "Затримка: --",
+      "latencyValue": "Затримка: {{value}} с",
+      "offline": "ОФЛАЙН"
+    },
+    "chatFilter": {
+      "replacement": "Повідомлення видалено StreamPulse"
+    },
+    "previews": {
+      "live": "В ЕФІРІ",
+      "loading": "Завантаження…"
+    },
+    "shared": {
+      "settings": {
+        "groupAutomation": "Автоматизація",
+        "groupPreviews": "Перегляд при наведенні",
+        "groupNotifications": "Сповіщення",
+        "groupChat": "Чат",
+        "autoClaimTitle": "Автоматично забирати бали каналу",
+        "autoClaimDropsTitle": "Автоматично забирати Drops Twitch",
+        "autoCancelRaidsTitle": "Автоматично скасовувати рейди",
+        "autoRefreshTitle": "Автовідновлення відтворення",
+        "keepQualityTitle": "Зберігати якість у фоні",
+        "fastForwardTitle": "Кнопка «Наздогнати ефір»",
+        "pipButtonTitle": "Кнопка «Картинка в картинці»",
+        "hideTwitchExtensionsTitle": "Приховати розширення Twitch",
+        "communityBadgeTitle": "Значок спільноти",
+        "previewsEnableTitle": "Перегляд при наведенні",
+        "previewsModeTitle": "Режим перегляду",
+        "previewsModeImage": "Зображення",
+        "previewsModeVideo": "Відео",
+        "previewsSurfaceDirectory": "Каталог",
+        "previewsSurfaceSidebar": "Бічна панель",
+        "previewsAudioTitle": "Звук (режим відео)",
+        "liveAlertsTitle": "Сповіщення про ефір",
+        "gameAlertsTitle": "Сповіщення про зміну категорії",
+        "titleAlertsTitle": "Сповіщення про зміну назви",
+        "soundsTitle": "Звук сповіщень",
+        "groupRewards": "Нагороди",
+        "groupPlayer": "Плеєр",
+        "groupProfile": "Профіль"
+      },
+      "cosmetics": {
+        "tabBadge": "Значок",
+        "tabName": "Нік",
+        "showPaintName": "Назва стилю",
+        "showUsername": "Ваш нік",
+        "tenureBody": "Ваш значок змінюється залежно від тривалості підписки й має власні анімації.",
+        "none": "Класичний",
+        "fire": "Жар",
+        "frost": "Іній",
+        "crown": "Корона",
+        "founder": "Засновник",
+        "ambassador": "Амбасадор",
+        "halo": "Золотий німб",
+        "galaxy": "Галактика",
+        "holo": "Голографічний",
+        "lava": "Лава",
+        "marble": "Мармур",
+        "chrome": "Chrome",
+        "glitter": "Блискітки",
+        "candy": "Льодяник",
+        "toxic": "Токсичний",
+        "matrix": "Матриця",
+        "bughunterOnly": "Для тих, хто знайшов помилку",
+        "ocean": "Океан",
+        "tenure": "Лояльність · Шкала",
+        "pager": "Лояльність · Пейджер",
+        "tier_m1": "1 місяць",
+        "tier_m3": "3 місяці",
+        "tier_m6": "6 місяців",
+        "tier_m9": "9 місяців",
+        "tier_y1": "1 рік",
+        "tier_y1h": "1½ року",
+        "tier_y2": "2 роки",
+        "tier_y3": "3 роки",
+        "tier_y4": "4 роки",
+        "tier_life": "Назавжди",
+        "tier_founder": "Засновник",
+        "rainbow": "Веселка",
+        "aurora": "Північне сяйво",
+        "sunset": "Захід сонця",
+        "lcd": "LCD-екран",
+        "gold": "Золото",
+        "preview": "Попередній перегляд у чаті",
+        "sampleName": "ВашНік",
+        "nameBody": "Та сама палітра, що й у вашого значка, — її бачать користувачі StreamPulse.",
+        "heartbeat": "Серцебиття",
+        "float": "Левітація",
+        "wobble": "Погойдування",
+        "prism": "Призма",
+        "glitch": "Глітч",
+        "tenureTitle": "Значок лояльності",
+        "badgeTitle": "Ефект значка",
+        "badgeBody": "Анімує логотип StreamPulse поруч із вашим ніком.",
+        "nameTitle": "Особливий нік",
+        "pulse": "Пульс",
+        "shine": "Сяйво",
+        "glow": "Світіння",
+        "bounce": "Підскок",
+        "spin": "Обертання",
+        "flicker": "Неон, що мерехтить",
+        "neon": "Неон"
+      }
+    }
   }
 };
   var DEFAULT_LANG = "en";
 
   /**
-   * Résout une préférence stockée ("pt_BR", "EN", "de-DE") vers une langue
-   * disponible. Exact d'abord, puis sous-étiquette de base.
+   * Résout une étiquette de langue ("pt_BR", "EN", "de-DE") vers une langue
+   * disponible. Exact d'abord, puis sous-étiquette de base. Chaîne vide si
+   * rien ne correspond : l'appelant décide du repli.
    */
-  function resolve(value) {
-    if (typeof value !== "string" || !value.trim()) return DEFAULT_LANG;
+  function resolveCode(value) {
+    if (typeof value !== "string" || !value.trim()) return "";
     var raw = value.trim().replace(/_/g, "-").toLowerCase();
     var codes = Object.keys(STRINGS);
     for (var i = 0; i < codes.length; i++) {
@@ -2134,7 +2478,28 @@
       if (codes[j].toLowerCase() === base) return codes[j];
       if (codes[j].toLowerCase().split("-")[0] === base) return codes[j];
     }
-    return DEFAULT_LANG;
+    return "";
+  }
+
+  /** Langue de l'interface Chrome, disponible dans les content scripts. */
+  function uiLanguage() {
+    try {
+      if (typeof chrome !== "undefined" && chrome.i18n && typeof chrome.i18n.getUILanguage === "function") {
+        return chrome.i18n.getUILanguage();
+      }
+    } catch (_e) {
+      // Pas d'API chrome (tests, hors extension) : le repli ci-dessous s'applique.
+    }
+    return "";
+  }
+
+  /**
+   * Résout une préférence stockée vers une langue disponible. Sans choix
+   * valide, même règle que le popup (js/i18n.js, readStoredLanguage) : suivre
+   * la langue de Chrome plutôt que tomber sur l'anglais.
+   */
+  function resolve(value) {
+    return resolveCode(value) || resolveCode(uiLanguage()) || DEFAULT_LANG;
   }
 
   /** Lit une clé "a.b.c", avec repli sur l'anglais puis sur la clé brute. */
@@ -2148,6 +2513,33 @@
       });
     }
     return value;
+  }
+
+  /**
+   * Pluriel CLDR : la clé désigne un groupe { one, few, many, other }.
+   * Forme absente → other de la même langue, puis l'anglais.
+   */
+  function plural(lang, key, count, params) {
+    var vars = { count: count };
+    if (params) for (var name in params) vars[name] = params[name];
+    var form = pickForm(dig(STRINGS[lang], key), lang, count);
+    if (form == null) form = pickForm(dig(STRINGS[DEFAULT_LANG], key), DEFAULT_LANG, count);
+    if (form == null) return key;
+    return form.replace(/{{\s*([^}\s]+)\s*}}/g, function (match, name) {
+      return Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : match;
+    });
+  }
+
+  function pickForm(group, lang, count) {
+    if (!group || typeof group !== "object") return null;
+    var category = "other";
+    try {
+      category = new Intl.PluralRules(lang === "ar" ? "ar-AE" : lang).select(Number(count));
+    } catch (_e) {
+      // Locale inconnue d'Intl : forme générale.
+    }
+    var form = group[category] != null ? group[category] : group.other;
+    return typeof form === "string" ? form : null;
   }
 
   function dig(root, key) {
@@ -2164,6 +2556,7 @@
   window.__SP_I18N__ = {
     resolve: resolve,
     get: get,
+    plural: plural,
     languages: Object.keys(STRINGS),
     defaultLanguage: DEFAULT_LANG,
   };

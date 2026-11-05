@@ -1,0 +1,62 @@
+[
+ {
+  "key": "onboarding.stepperLabel",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.history.count.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.smart.ruleCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.cplus.dropsToday.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.bandMore.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.rewards.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.badgeSub.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.greetingLiveCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.settings.unitMs",
+  "verdict": "ok"
+ },
+ {
+  "key": "changelog.changeCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.badge.months.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.live",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.loading",
+  "verdict": "ok"
+ }
+]

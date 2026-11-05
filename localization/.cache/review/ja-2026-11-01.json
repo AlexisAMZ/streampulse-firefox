@@ -1,0 +1,50 @@
+{
+  "format": "streampulse-review/1",
+  "locale": "ja",
+  "language": "日本語",
+  "instructions": "Relis chaque traduction face à l'anglais. Pour chacune, rends verdict « ok » ou « fix ». Avec « fix », donne `suggestion` (la traduction complète corrigée) et `reason` (courte, en français). Garde à l'identique les variables {{x}}, les balises HTML et les termes protégés. Respecte le glossaire et les règles. Ne propose pas de changement de goût : seulement grammaire, sens, terminologie, naturel, longueur, cohérence. Pour les clés de pluriel (.one/.few/.many/.other), accorde le nom au nombre selon la catégorie CLDR de la langue.",
+  "rules": "## Général\n\n- La source est l'anglais (`i18n/lang/en.js`). Traduire le sens et le ton, pas les mots : une interface courte, directe, sans jargon marketing.\n- Les variables `{{count}}`, `{{name}}`… restent identiques, ni traduites ni déplacées hors de la phrase. L'ordre peut changer si la langue l'exige.\n- Les balises HTML (`<strong>`, `<span class=\"accent\">`, `<a href=\"…\">`) restent identiques ; seul le texte entre elles se traduit.\n- Les marques et noms de produits restent tels quels : StreamPulse, StreamPulse+, StreamPulse Clips, Twitch, Kick, YouTube, CHZZK, TikTok, Discord… (liste complète : `protected-terms.json`). Une langue à déclinaisons peut les décliner (« Twitcha » en polonais).\n- La plateforme s'appelle toujours par son nom. Ne jamais écrire « Twitch & Kick » seuls quand le texte parle de toutes les plateformes : Twitch, Kick et YouTube.\n- La terminologie du streaming suit `glossary.json` : une même notion garde le même mot sur tous les écrans d'une langue.\n- « Live » est un état (« en direct ») ou un nom (« un live ») selon l'écran : traduire le sens.\n- Les libellés de boutons restent courts : au-delà de 2,2 fois la longueur anglaise, ils débordent.\n- Les exemples dans les champs (`you@example.com`, `@handle`) peuvent être localisés.\n- Les clés `htmlLang` contiennent le code de langue, jamais une traduction.\n- Pluriels : une clé de pluriel a une forme par catégorie CLDR de la langue (`one`, `few`, `many`, `other`…). Chaque forme doit être juste pour tous les nombres de sa catégorie (en ukrainien, `one` sert aussi à 21, 31…) : mettre `{{count}}`, jamais un « 1 » écrit en dur. Une tournure neutre « Libellé : {{count}} » est acceptable quand elle sonne naturel.\n- Une traduction approuvée (`approved`) ne se change qu'avec une raison, consignée dans `history.jsonl`.\n\n## ja — 日本語\n\n- Style poli (です・ます), phrases courtes. Pas de pluriel grammatical : une seule forme (`other`).\n- Drops = « ドロップ » ; badge = « バッジ » ; streamer = « ストリーマー » ou « 配信者 ».\n- Espace entre une marque latine et le japonais quand elle est en milieu de phrase (« Twitch の予想 »).",
+  "glossary": [
+    {
+      "term": "live",
+      "definition": "Status of a channel broadcasting right now; also the noun for one broadcast in French slang (« un live »).",
+      "context": "Adjective or noun depending on the screen: translate the meaning, not the word.",
+      "expected": "配信中",
+      "variants": [
+        "ライブ",
+        "配信"
+      ],
+      "forbidden": []
+    }
+  ],
+  "items": [
+    {
+      "key": "onboarding.stepperLabel",
+      "status": "pending",
+      "by": "claude",
+      "source": "Setup progress",
+      "translation": "進行状況"
+    },
+    {
+      "key": "popup.settings.unitMs",
+      "status": "pending",
+      "by": "claude",
+      "source": "ms",
+      "translation": "ミリ秒"
+    },
+    {
+      "key": "inject.previews.live",
+      "status": "pending",
+      "by": "claude",
+      "source": "LIVE",
+      "translation": "ライブ"
+    },
+    {
+      "key": "inject.previews.loading",
+      "status": "pending",
+      "by": "claude",
+      "source": "Loading…",
+      "translation": "読み込み中…"
+    }
+  ]
+}

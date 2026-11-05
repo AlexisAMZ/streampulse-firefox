@@ -1,0 +1,224 @@
+{
+  "format": "streampulse-review/1",
+  "locale": "pt-BR",
+  "language": "Português (Brasil)",
+  "instructions": "Relis chaque traduction face à l'anglais. Pour chacune, rends verdict « ok » ou « fix ». Avec « fix », donne `suggestion` (la traduction complète corrigée) et `reason` (courte, en français). Garde à l'identique les variables {{x}}, les balises HTML et les termes protégés. Respecte le glossaire et les règles. Ne propose pas de changement de goût : seulement grammaire, sens, terminologie, naturel, longueur, cohérence. Pour les clés de pluriel (.one/.few/.many/.other), accorde le nom au nombre selon la catégorie CLDR de la langue.",
+  "rules": "## Général\n\n- La source est l'anglais (`i18n/lang/en.js`). Traduire le sens et le ton, pas les mots : une interface courte, directe, sans jargon marketing.\n- Les variables `{{count}}`, `{{name}}`… restent identiques, ni traduites ni déplacées hors de la phrase. L'ordre peut changer si la langue l'exige.\n- Les balises HTML (`<strong>`, `<span class=\"accent\">`, `<a href=\"…\">`) restent identiques ; seul le texte entre elles se traduit.\n- Les marques et noms de produits restent tels quels : StreamPulse, StreamPulse+, StreamPulse Clips, Twitch, Kick, YouTube, CHZZK, TikTok, Discord… (liste complète : `protected-terms.json`). Une langue à déclinaisons peut les décliner (« Twitcha » en polonais).\n- La plateforme s'appelle toujours par son nom. Ne jamais écrire « Twitch & Kick » seuls quand le texte parle de toutes les plateformes : Twitch, Kick et YouTube.\n- La terminologie du streaming suit `glossary.json` : une même notion garde le même mot sur tous les écrans d'une langue.\n- « Live » est un état (« en direct ») ou un nom (« un live ») selon l'écran : traduire le sens.\n- Les libellés de boutons restent courts : au-delà de 2,2 fois la longueur anglaise, ils débordent.\n- Les exemples dans les champs (`you@example.com`, `@handle`) peuvent être localisés.\n- Les clés `htmlLang` contiennent le code de langue, jamais une traduction.\n- Pluriels : une clé de pluriel a une forme par catégorie CLDR de la langue (`one`, `few`, `many`, `other`…). Chaque forme doit être juste pour tous les nombres de sa catégorie (en ukrainien, `one` sert aussi à 21, 31…) : mettre `{{count}}`, jamais un « 1 » écrit en dur. Une tournure neutre « Libellé : {{count}} » est acceptable quand elle sonne naturel.\n- Une traduction approuvée (`approved`) ne se change qu'avec une raison, consignée dans `history.jsonl`.\n\n## pt-BR — Português (Brasil)\n\n- « Você », registre brasilien informel (« te rendeu »).\n- Badges = « emblemas » (pas « badges ») ; Drops reste « Drops » ; clip = « clipe ».",
+  "glossary": [
+    {
+      "term": "Drops",
+      "definition": "In-game rewards granted by watching streams of a game during a campaign.",
+      "context": "Twitch and Kick feature name, written with a capital letter in English.",
+      "expected": "Drops",
+      "variants": [
+        "Drop"
+      ],
+      "forbidden": []
+    },
+    {
+      "term": "streamer",
+      "definition": "The person who broadcasts a live stream.",
+      "context": "Followed streamers list, notifications.",
+      "expected": "streamer",
+      "variants": [],
+      "forbidden": []
+    },
+    {
+      "term": "live",
+      "definition": "Status of a channel broadcasting right now; also the noun for one broadcast in French slang (« un live »).",
+      "context": "Adjective or noun depending on the screen: translate the meaning, not the word.",
+      "expected": "ao vivo",
+      "variants": [
+        "live"
+      ],
+      "forbidden": []
+    },
+    {
+      "term": "sub",
+      "definition": "A paid subscription to a channel, and the person who holds it.",
+      "context": "Sub bonus, Drops that require subs, subscriber badges.",
+      "expected": "inscrição",
+      "variants": [
+        "inscrito",
+        "assinante",
+        "assinatura",
+        "sub"
+      ],
+      "forbidden": []
+    }
+  ],
+  "items": [
+    {
+      "key": "onboarding.stepperLabel",
+      "status": "pending",
+      "by": "claude",
+      "source": "Setup progress",
+      "translation": "Progresso"
+    },
+    {
+      "key": "popup.history.count.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} live",
+      "translation": "{{count}} live",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.history.count.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} lives",
+      "translation": "{{count}} lives",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.smart.ruleCount.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} rule",
+      "translation": "{{count}} regra",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.smart.ruleCount.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} rules",
+      "translation": "{{count}} regras",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.cplus.dropsToday.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} Drops today",
+      "translation": "{{count}} Drops hoje",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.bandMore.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "+{{count}} more",
+      "translation": "+{{count}} outros",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.rewards.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} reward",
+      "translation": "{{count}} recompensa",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.drops.rewards.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} rewards",
+      "translation": "{{count}} recompensas",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.badgeSub.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} sub",
+      "translation": "{{count}} inscrição",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.drops.badgeSub.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} subs",
+      "translation": "{{count}} inscrições",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.historyMeta.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{count}} Drop earned since install",
+      "translation": "{{count}} Drop obtido desde a instalação",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.drops.historyMeta.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} Drops earned since install",
+      "translation": "{{count}} Drops obtidos desde a instalação",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.drops.historyMonth.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "{{month}} · {{count}} Drop",
+      "translation": "{{month}} · {{count}} Drop",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "popup.drops.historyMonth.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{month}} · {{count}} Drops",
+      "translation": "{{month}} · {{count}} Drops",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.greetingLiveCount.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} streamers live",
+      "translation": "{{count}} streamers ao vivo",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "popup.settings.unitMs",
+      "status": "pending",
+      "by": "claude",
+      "source": "ms",
+      "translation": "ms"
+    },
+    {
+      "key": "changelog.changeCount.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "{{count}} changes in this release.",
+      "translation": "{{count}} alterações nesta versão.",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "inject.badge.months.one",
+      "status": "pending",
+      "by": "claude",
+      "source": "Subscribed for {{count}} month",
+      "translation": "Assinante há {{count}} mês",
+      "pluralCategory": "one"
+    },
+    {
+      "key": "inject.badge.months.many",
+      "status": "pending",
+      "by": "copy",
+      "source": "Subscribed for {{count}} months",
+      "translation": "Assinante há {{count}} meses",
+      "pluralCategory": "many"
+    },
+    {
+      "key": "inject.previews.live",
+      "status": "pending",
+      "by": "claude",
+      "source": "LIVE",
+      "translation": "AO VIVO"
+    },
+    {
+      "key": "inject.previews.loading",
+      "status": "pending",
+      "by": "claude",
+      "source": "Loading…",
+      "translation": "Carregando…"
+    }
+  ]
+}

@@ -160,7 +160,8 @@ export default {
     "plusStyleDesc": "Your name and chat badge carry your subscription's effects — gradients, textures, animations. Everything is picked in the popup, Badge section. And Twitch clips download as MP4 from their page.",
     "plusStyleNameTitle": "Your name",
     "plusStyleBadgeTitle": "Your badge",
-    "plusFinish": "Enjoy StreamPulse+"
+    "plusFinish": "Enjoy StreamPulse+",
+    "stepperLabel": "Setup progress"
   },
   "popup": {
     "settingsFilter": {
@@ -175,8 +176,24 @@ export default {
       "listen": "Listen",
       "perKind": "A different sound per alert type",
       "plusNote": "A different sound per alert type is a StreamPulse+ feature.",
-      "preset": { "classic": "Classic", "chime": "Chime", "pulse": "Pulse", "bubble": "Bubble", "arpeggio": "Arpeggio", "drop": "Drop" },
-      "kind": { "live": "Stream started", "game": "Category change", "title": "Title change", "raid": "Incoming raid" }
+      "preset": {
+        "classic": "Classic",
+        "chime": "Chime",
+        "pulse": "Pulse",
+        "bubble": "Bubble",
+        "arpeggio": "Arpeggio",
+        "drop": "Drop",
+        "punch": "Punch",
+        "airhorn": "Air horn",
+        "siren": "Siren",
+        "laser": "Laser"
+      },
+      "kind": {
+        "live": "Stream started",
+        "game": "Category change",
+        "title": "Title change",
+        "raid": "Incoming raid"
+      }
     },
     "greetingSubNobody": "Nobody's live right now.",
     "greetingSubEmpty": "Welcome to StreamPulse.",
@@ -197,8 +214,10 @@ export default {
       "durationHoursShort": "{{h}} hr {{m}}",
       "filterLabel": "Filter by platform",
       "filterAll": "All",
-      "countSingular": "1 live",
-      "countPlural": "{{count}} lives",
+      "count": {
+        "one": "{{count}} live",
+        "other": "{{count}} lives"
+      },
       "summary": "missed in the last 14 days · {{duration}} of content",
       "emptyTitle": "No missed lives",
       "emptyBody": "When a streamer you follow ends a live you didn't watch, it shows up here with its replay.",
@@ -215,10 +234,10 @@ export default {
       "compareFree": "Free",
       "comparePlus": "StreamPulse+",
       "compareNone": "·",
-      "compareDrops": "Drops",
+      "compareDrops": "Drops (Twitch)",
       "compareDropsFree": "Claimed by hand",
       "compareDropsPlus": "Claimed for you",
-      "compareBadges": "Badges",
+      "compareBadges": "Badges (Twitch)",
       "compareBadgesFree": "1 a day",
       "compareBadgesPlus": "All of them, no limit",
       "compareAlerts": "Alerts",
@@ -328,8 +347,8 @@ export default {
       "otherAccount": "Trial linked to another Twitch account: StreamPulse+ paused"
     },
     "missed": {
-      "unit": "MISSED",
-      "cta": "Never miss one",
+      "unit": "NEW",
+      "cta": "Claim them automatically",
       "newCampaign": "New campaign",
       "ended": "ended {{ago}}",
       "left": "{{time}} left",
@@ -425,8 +444,10 @@ export default {
       "streamersLabel": "Streamers",
       "rulesFor": "Alerts for {{name}}",
       "addRule": "New rule",
-      "ruleCountSingular": "1 rule",
-      "ruleCountPlural": "{{count}} rules",
+      "ruleCount": {
+        "one": "{{count}} rule",
+        "other": "{{count}} rules"
+      },
       "noRules": "No rules: regular alert on every live.",
       "ruleName": "Rule name",
       "ruleNamePlaceholder": "e.g. GTA night",
@@ -440,7 +461,30 @@ export default {
       "removeTerm": "Remove {{term}}",
       "deleteRule": "Delete rule",
       "enableRule": "Enable rule",
-      "noStreamers": "Add a streamer from the home screen first."
+      "noStreamers": "Add a streamer from the home screen first.",
+      "useCurrent": "Playing now: {{game}}",
+      "categorySearch": "Search a category",
+      "categoryNone": "No category found. Check the spelling.",
+      "categoryOffline": "Search unavailable. Try again in a moment.",
+      "noCategory": "no category",
+      "verdictOff": "Rule turned off.",
+      "verdictOffline": "Not live right now: this rule is checked at the next live.",
+      "verdictMatch": "This rule matches the current live: you would be notified.",
+      "verdictMismatch": "Doesn't match the current live.",
+      "whyGame": "Category is \"{{game}}\".",
+      "whyTitle": "The title has none of your words.",
+      "whyViewers": "Only {{count}} viewers.",
+      "soundLine": "Sound",
+      "soundTarget": "Targeted-alert sound",
+      "soundOff": "No sound",
+      "soundMine": "My sounds",
+      "soundDelete": "Delete this sound",
+      "soundImport": "Import a sound",
+      "soundImportHint": "Audio file, up to {{kb}} KB and {{seconds}} s. It stays on this device.",
+      "soundBadFile": "This file isn't a readable audio file.",
+      "soundTooBig": "This file is too big (max {{kb}} KB).",
+      "soundTooLong": "This sound is too long (max {{seconds}} s).",
+      "soundFull": "Limit reached: {{count}} personal sounds. Delete one first."
     },
     "cplus": {
       "addFromSearch": "Add “{{name}}”",
@@ -454,8 +498,10 @@ export default {
       "activityLabel": "Today's activity",
       "autoClaimOn": "Auto-claim on",
       "pointsToday": "+{{count}} pts today",
-      "dropsToday": "{{count}} Drop today",
-      "dropsTodayPlural": "{{count}} Drops today",
+      "dropsToday": {
+        "one": "{{count}} Drop today",
+        "other": "{{count}} Drops today"
+      },
       "search": "Search a channel",
       "searchLabel": "Search",
       "allChannels": "All channels",
@@ -542,7 +588,7 @@ export default {
       "title": "Drops",
       "autoOn": "Auto-claim",
       "autoOff": "Manual claim",
-      "autoHint": "Change in Rewards",
+      "autoHint": "Change below, in this section",
       "inProgress": "In progress",
       "updatedAgo": "updated {{ago}}",
       "neverRead": "not read from Twitch yet",
@@ -563,9 +609,11 @@ export default {
       "staleHint": "open Twitch to update",
       "bandOpen": "Open the Drops panel",
       "bandClaimed": "Drop claimed · {{name}}",
-      "bandMoreOne": "+{{count}} more",
+      "bandMore": {
+        "one": "+{{count}} more",
+        "other": "+{{count}} more"
+      },
       "timeLeft": "{{time}} left",
-      "bandMoreOther": "+{{count}} more",
       "campaigns": "Campaigns",
       "campaignsMeta": "{{count}} active · read on Twitch {{ago}}",
       "campaignsNone": "Open the Drops campaigns page on Twitch to load the list.",
@@ -582,8 +630,10 @@ export default {
       "filterNew": "New",
       "filterEnding": "Ending soon",
       "filterUpcoming": "Upcoming",
-      "rewardsOne": "1 reward",
-      "rewardsOther": "{{count}} rewards",
+      "rewards": {
+        "one": "{{count}} reward",
+        "other": "{{count}} rewards"
+      },
       "linkAccount": "account to link",
       "yourGames": "your games",
       "badge": "BADGE",
@@ -595,8 +645,10 @@ export default {
       "rewardTypeBadge": "Badge",
       "rewardTypeEmote": "Emote",
       "rewardTypeItem": "Item",
-      "badgeSubOne": "1 sub",
-      "badgeSubOther": "{{count}} subs",
+      "badgeSub": {
+        "one": "{{count}} sub",
+        "other": "{{count}} subs"
+      },
       "badgeOr": "or",
       "badgesKnown": "{{count}} badges tracked",
       "badgesSyncing": "Syncing Twitch badges…",
@@ -620,7 +672,7 @@ export default {
       "badgeAutoAll": "Get every available badge",
       "badgeAutoAllStop": "Stop auto mode",
       "badgeAutoStatus": "Auto mode: {{count}} badge(s) queued · now on {{game}}",
-      "badgeAutoAllHint": "A pinned, muted tab watches one live at a time (Twitch only counts one live at a time). Tiers of the same game (30 min, 1 h, 90 min…) progress together, then the tab moves to the next game.",
+      "badgeAutoAllHint": "Twitch only counts one live at a time: a pinned, muted tab watches them in turn. Tiers of the same game advance together.",
       "badgesUnit": "ACTIVE",
       "badgesLcdFree": "Free: {{count}}",
       "badgeCondSub": "subscribe",
@@ -661,14 +713,18 @@ export default {
       "isNew": "new",
       "dateRange": "{{start}} → {{end}}",
       "history": "History",
-      "historyMetaOne": "1 Drop earned since install",
-      "historyMetaOther": "{{count}} Drops earned since install",
-      "historyMonthOne": "{{month}} · 1 Drop",
-      "historyMonthOther": "{{month}} · {{count}} Drops",
+      "historyMeta": {
+        "one": "{{count}} Drop earned since install",
+        "other": "{{count}} Drops earned since install"
+      },
+      "historyMonth": {
+        "one": "{{month}} · {{count}} Drop",
+        "other": "{{month}} · {{count}} Drops"
+      },
       "historyEmpty": "No Drop earned since tracking started. They will show up here, month by month.",
       "lockedBody": "The history of every Drop you earned, month by month, with the game and the channel. StreamPulse+ only.",
       "trackingTitle": "Track Drops",
-      "trackingBody": "Progress and claiming even without a Twitch tab open. The campaign list updates when you visit Twitch.",
+      "trackingBody": "Keeps progress and claimed Drops even with no Twitch tab open. Auto-claim relies on this history.",
       "badgesCampaign": "Badge campaign"
     },
     "review": {
@@ -692,14 +748,29 @@ export default {
       "rankAmbassador": "Ambassador · friends referred: {{count}}",
       "intro": "How your StreamPulse badge and your name look in Twitch chat, visible to other StreamPulse users."
     },
+    "profileCard": {
+      "sourceNone": "Photo: none",
+      "sourceFrom": "Photo: {{platform}}",
+      "sourceLooking": "Looking on {{platform}}",
+      "sourceMissing": "Not found on {{platform}}",
+      "platformLabel": "Platform of your account",
+      "handleLabel": "Your handle on this platform",
+      "namePlaceholder": "Your handle",
+      "note": "The platform you pick is where your photo is found. Your handle is only used in the greeting.",
+      "savedNoPhoto": "Handle saved, but no {{platform}} account was found: no photo.",
+      "accentLabel": "Interface colour",
+      "accentViolet": "Violet",
+      "accentLcd": "LCD green",
+      "accentOcean": "Ocean",
+      "accentEmber": "Ember",
+      "accentCrimson": "Crimson"
+    },
     "referralAsk": {
       "title": "Refer a friend",
       "body": "Share your link: for every friend who subscribes, you earn money or free months.",
       "open": "Get my link"
     },
     "referral": {
-      "generalBody": "Share your link: you earn money or free months for every friend who subscribes.",
-      "generalOpen": "Get my link",
       "plusTitle": "Refer your friends",
       "plusBody": "Your friend just uses your link, nothing to type. You earn money and these rewards:",
       "title": "Referral",
@@ -752,6 +823,7 @@ export default {
       "tabsLabel": "Popup view tabs",
       "changelog": "What's new",
       "sectionLive": "Live",
+      "moreLives": "Show more lives",
       "filterLabel": "Filter by platform",
       "filterAll": "All",
       "sortLabel": "Sort channels",
@@ -773,7 +845,7 @@ export default {
       "rowLive": "{{name}}, live on {{platform}}. {{game}}",
       "menuLabel": "Settings sections",
       "menuPlayer": "Player",
-      "menuPreviewsChat": "Previews and chat",
+      "menuPreviews": "Previews",
       "menuChat": "Chat",
       "menuDrops": "Drops",
       "menuBadges": "Badges",
@@ -809,8 +881,10 @@ export default {
       "settings": "Settings"
     },
     "refresh": "Refresh",
-    "greetingLiveCountSingular": "{{count}} streamer live",
-    "greetingLiveCountPlural": "{{count}} streamers live",
+    "greetingLiveCount": {
+      "one": "{{count}} streamer live",
+      "other": "{{count}} streamers live"
+    },
     "platformFilter": {
       "twitch": "twitch",
       "kick": "kick"
@@ -877,8 +951,8 @@ export default {
       "soundsTitle": "Notification sound",
       "alertsPerStreamerNote": "One click applies the setting to all your streamers, including ones you add later. For a single streamer, use the icons on their card.",
       "alertsMixed": "Set differently per streamer: on for {{on}} of {{total}}. One click applies the same setting to all.",
-      "dropsWhereNote": "Drop alerts are set in Notifications (Drop earned) and in the Drops section (new campaigns).",
-      "raidsWhereNote": "Automatic Raid cancelling is set in Rewards; it switches off when incoming raid alerts are on.",
+      "rewardsDropsNote": "Auto-claiming Drops is set in the Drops section.",
+      "otherNotificationsNote": "Notifications for Drops, badges and raids are set in their own section: Drops, Badges and Rewards.",
       "soundsDescription": "Play or mute the sound when alerts fire.",
       "updateNotificationsTitle": "Update notification",
       "updateNotificationsDescription": "Let me know when StreamPulse has been updated (once per version), with a click through to What's new.",
@@ -886,13 +960,13 @@ export default {
       "latencyViewers": "Under the player",
       "latencyChat": "In the chat header",
       "backgroundRaidAlertsTitle": "Incoming raid alerts (beta)",
-      "backgroundRaidAlertsDescription": "Watch every Twitch channel you follow on StreamPulse and notify as soon as a raid lands, even off the page.",
+      "backgroundRaidAlertsDescription": "Watches your Twitch streamers and notifies you as soon as a raid arrives, even with no Twitch tab open. Turns off auto-cancel.",
       "autoClaimTitle": "Auto-claim channel points",
       "autoClaimDescription": "Automatically click Twitch channel point bonuses for you.",
       "autoClaimDropsTitle": "Auto-claim Twitch Drops",
       "autoClaimDropsDescription": "Automatically claim Twitch Drops as soon as they become available.",
       "autoOpenInventoryTitle": "Auto-open Drops inventory",
-      "autoOpenInventoryDescription": "Open the Twitch inventory in the background to claim your Drops automatically.",
+      "autoOpenInventoryDescription": "Opens the Twitch inventory in the background at the chosen frequency to claim your finished Drops. Needs an open Twitch session.",
       "inventoryFrequencyLabel": "Opening frequency",
       "inventoryEvery1h": "Every 1h",
       "inventoryEvery2h": "Every 2h",
@@ -917,11 +991,11 @@ export default {
       "faqPredictionsTitle": "Predictions & Raids",
       "faqPredictionsBody": "A draggable widget appears over the video so you can vote quickly. Raid redirections are cancelled when the option is on.",
       "autoCancelRaidsTitle": "Auto-cancel Raids",
-      "autoCancelRaidsDescription": "Automatically cancel the redirect on a Twitch raid. Turns off when background raid alerts are active: the points are earned by following the raid.",
+      "autoCancelRaidsDescription": "Stays on the channel when a Twitch Raid tries to take you elsewhere. Turns off when incoming raid alerts are on.",
       "hideTwitchExtensionsTitle": "Hide Twitch extensions",
       "hideTwitchExtensionsDescription": "Hide Twitch extension overlays on the video player.",
       "keepQualityTitle": "Keep quality in background",
-      "keepQualityDescription": "Stop Twitch from lowering quality or pausing when the tab isn't visible. Uses more resources. Applies the next time the tab loads.",
+      "keepQualityDescription": "Stops Twitch from lowering quality or pausing when the tab is hidden. Uses more resources; applies on the next page load.",
       "autoRefreshTitle": "Recover the player on errors",
       "autoRefreshDescription": "Press \"Try again\" for you on errors #1000 to #5000, and reload the tab if that isn't enough.",
       "pipButtonTitle": "Picture-in-Picture button",
@@ -933,16 +1007,14 @@ export default {
       "clipDownloadTitle": "Clip downloads",
       "clipDownloadDescription": "Add a button on clip pages to save clips as MP4. StreamPulse+.",
       "preventTabDiscardTitle": "Prevent tab discarding",
-      "preventTabDiscardDescription": "Prevent Firefox from discarding inactive Twitch, Kick or YouTube tabs.",
+      "preventTabDiscardDescription": "Stops Firefox from putting your Twitch and Kick channel tabs to sleep, so points and Drops keep coming.",
       "fastForwardTitle": "Fast-forward button",
       "fastForwardDescription": "Add a button to instantly catch up to live when the stream lags behind.",
       "communityBadgeTitle": "Community badge",
       "betaLabel": "beta",
       "saved": "Setting saved",
-      "communityBadgeDescription": "Shows the StreamPulse icon next to your username and those of other users in Twitch chat. A fingerprint of your username, computed in your browser, is sent to streampulse.tech; the username itself is never transmitted.",
+      "communityBadgeDescription": "Shows the StreamPulse icon next to StreamPulse users' names in Twitch chat. A fingerprint of your username is sent to streampulse.tech, never the username itself.",
       "chatFilterDescription": "Hide messages containing these words (comma separated).",
-      "pseudoTitle": "Name in the greeting",
-      "pseudoDescription": "Shown in the greeting.",
       "pseudoPlaceholder": "Your handle",
       "pseudoSave": "Save",
       "pseudoSaved": "Handle updated.",
@@ -970,13 +1042,14 @@ export default {
       "previewsAudioTitle": "Audio (video mode)",
       "previewsAudioDescription": "Enable sound in video previews.",
       "previewsDelayTitle": "Preview delay",
+      "unitMs": "ms",
       "previewsAnimationsTitle": "Animations",
       "previewsAnimationsDescription": "Fades the preview in and out. Turn off to show it instantly.",
       "groupChat": "Chat",
       "groupWatchTime": "Time watched",
       "watchTimeDescription": "Track time spent on each channel.",
       "syncTitle": "Sync across my devices",
-      "syncDescription": "Your streamers, settings and language follow your browser profile — no account, no StreamPulse server. Watch time, points and Drops stay on this device.",
+      "syncDescription": "Your streamers, settings and language follow your browser profile, with no account or StreamPulse server. Watch time, points and Drops stay on this device.",
       "syncStatus": "Last sync: {{time}}",
       "syncError": "Sync paused: the browser storage limit is reached, trim your streamer list."
     },
@@ -1228,8 +1301,6 @@ export default {
       "doneTitle": "Auto mode finished",
       "doneMessage": "No more badges to get for now: the tab was closed.",
       "stoppedPlus": "StreamPulse+ is inactive: automatic badge collection has stopped.",
-      "freeDoneTitle": "Badge earned ✓",
-      "freeDoneMessage": "{{count}} more badges are available today. Get them all with StreamPulse+.",
       "autoFarmTitle": "New badges on the way",
       "autoFarmMessage": "{{count}} new Twitch badge(s) being collected in a muted tab."
     },
@@ -1243,6 +1314,8 @@ export default {
     },
     "notifications": {
       "liveTitle": "{{name}} is live",
+      "smartTitle": "Your alert fired: {{name}} is live",
+      "smartRule": "Alert “{{rule}}”",
       "startupBatchTitle": "Live right now",
       "startupBatchBody": "Already live: {{names}}",
       "liveMessage": "{{game}} • {{viewers}} viewers",
@@ -1413,8 +1486,10 @@ export default {
     "tagImproved": "IMPROVED",
     "tagOther": "OTHER",
     "genericChanges": "Internal fixes and stability improvements.",
-    "changeCountSingular": "{{count}} change in this release.",
-    "changeCountPlural": "{{count}} changes in this release.",
+    "changeCount": {
+      "one": "{{count}} change in this release.",
+      "other": "{{count}} changes in this release."
+    },
     "noNotes": "No release notes available",
     "noNotesBody": "The notes for this version have not been published yet."
   },
@@ -1449,8 +1524,10 @@ export default {
       "founder": "StreamPulse founder",
       "ambassador": "Ambassador",
       "lifetime": "Lifetime member",
-      "months": "Subscribed for {{count}} months",
-      "monthOne": "Subscribed for 1 month",
+      "months": {
+        "one": "Subscribed for {{count}} month",
+        "other": "Subscribed for {{count}} months"
+      },
       "newMember": "New subscriber",
       "freeLine": "Extension user",
       "worn": "Worn",
@@ -1504,6 +1581,10 @@ export default {
     },
     "chatFilter": {
       "replacement": "Message removed by StreamPulse"
+    },
+    "previews": {
+      "live": "LIVE",
+      "loading": "Loading…"
     }
   }
 };

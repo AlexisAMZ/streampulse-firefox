@@ -1,0 +1,138 @@
+[
+ {
+  "key": "onboarding.stepperLabel",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.history.count.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.history.count.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.history.count.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.smart.ruleCount.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.smart.ruleCount.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.smart.ruleCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.cplus.dropsToday.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.cplus.dropsToday.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.bandMore.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.bandMore.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.rewards.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.rewards.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.rewards.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.badgeSub.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.badgeSub.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.badgeSub.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMeta.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.drops.historyMonth.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.greetingLiveCount.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.greetingLiveCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "popup.settings.unitMs",
+  "verdict": "ok"
+ },
+ {
+  "key": "changelog.changeCount.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "changelog.changeCount.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.badge.months.one",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.badge.months.few",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.badge.months.many",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.live",
+  "verdict": "ok"
+ },
+ {
+  "key": "inject.previews.loading",
+  "verdict": "ok"
+ },
+ {
+  "key": "@manifest.appDesc",
+  "verdict": "ok"
+ }
+]

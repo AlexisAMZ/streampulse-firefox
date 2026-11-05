@@ -122,9 +122,10 @@ else {
   pass(`${locales.length} locales (${locales.join(", ")}) parse with matching key sets`);
 }
 
-// ── 2b. translations.js ─────────────────────────────────────────────────────
+// ── 2b. translations (i18n/lang/<code>.js) ──────────────────────────────────
 // _locales/ only carries appName/appDesc (what the manifest needs). The real UI
-// strings live in i18n/translations.js, so completeness must be checked there:
+// strings live in i18n/lang/<code>.js (one file per language, gathered by the
+// i18n/translations.js aggregator), so completeness must be checked there:
 // a missing key silently falls back to English at runtime and ships unnoticed.
 {
   const flatten = (node, prefix = "") =>
@@ -147,11 +148,12 @@ else {
       warn(`translations.js defines blocks absent from ALL_LANGUAGES: ${orphanBlocks.join(", ")}`);
     }
 
-    // Clés littéralement utilisées : t("…"), translate(WithPrefs)(…),
-    // __SP_I18N__.get(…), data-i18n — mêmes motifs que le contrôle
-    // « used → exists » de Chrome.
     const referenceKeys = flatten(translations[DEFAULT_LANGUAGE]);
     const referenceKeySet = new Set(referenceKeys);
+
+    // Toute cle t("…") ou translate(lang, "…") litterale du code applicatif
+    // doit exister dans translations.js : une cle absente tombe sur la cle
+    // brute a l'ecran (deja arrive : popup.history.newBadge).
     const usedKeys = new Set();
     const appDirs = ["js", "html"];
     const skip = (f) =>
@@ -160,9 +162,26 @@ else {
       f.includes("predictions-data-inline") || f.includes("points-bonus-inline");
     const keyPatterns = [
       /\bt\("([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g,
-      /translate(?:WithPrefs)?\([^,\n]+,\s*"([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g,
-      /__SP_I18N__\.get\([^,\n]+,\s*"([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g,
+      /\btp\("([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g,
+      /translate(?:WithPrefs|Plural)?\([^,\n]+,\s*"([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g,
+      /__SP_I18N__\.(?:get|plural)\([^,\n]+,\s*"([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g,
     ];
+    // Un groupe de pluriel (tp("popup.history.count", n)) se nomme par sa
+    // base : la référencer compte pour toutes ses formes (.one, .other…).
+    const { expectedEntries, isPluralGroup } = await import(new URL("./i18n/lib/core.mjs", import.meta.url).href);
+    const pluralBases = new Set();
+    const collectGroups = (node, prefix) => {
+      for (const [k, v] of Object.entries(node ?? {})) {
+        const key = prefix ? `${prefix}.${k}` : k;
+        if (isPluralGroup(v)) pluralBases.add(key);
+        else if (v && typeof v === "object") collectGroups(v, key);
+      }
+    };
+    collectGroups(translations[DEFAULT_LANGUAGE], "");
+    const markUsed = (key) => {
+      if (pluralBases.has(key)) referenceKeys.filter((k) => k.startsWith(`${key}.`)).forEach((k) => usedKeys.add(k));
+      else usedKeys.add(key);
+    };
     const scanDir = (dir) => {
       for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         const full = path.join(dir, entry.name);
@@ -173,21 +192,60 @@ else {
         if (!/\.(js|mjs|html)$/.test(entry.name) || skip(full)) continue;
         const text = fs.readFileSync(full, "utf8");
         for (const re of keyPatterns) {
-          for (const m of text.matchAll(re)) usedKeys.add(m[1]);
+          for (const m of text.matchAll(re)) markUsed(m[1]);
         }
         // Clé écrite en entier comme littéral (table de clés, code d'erreur
-        // traduit plus loin) : référencée même hors d'un appel t(). Seules les
-        // clés existantes comptent (porté de Chrome).
+        // traduit plus loin) : elle est référencée même hors d'un appel t().
+        // Seules les clés existantes comptent, pour ne pas polluer « unknown ».
         for (const m of text.matchAll(/"([a-zA-Z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9-]+)+)"/g)) {
-          if (referenceKeySet.has(m[1])) usedKeys.add(m[1]);
+          if (referenceKeySet.has(m[1]) || pluralBases.has(m[1])) markUsed(m[1]);
         }
         if (full.endsWith(".html")) {
+          // pas de DOM en node : grep sur les attributs suffit
           for (const m of text.matchAll(/data-i18n="([^"]+)"/g)) usedKeys.add(m[1]);
         }
       }
     };
     for (const dir of appDirs) scanDir(path.join(REPO, dir));
+    const unknown = [...usedKeys].filter((k) => !referenceKeySet.has(k));
+    if (unknown.length) {
+      unknown.forEach((k) =>
+        fail(`translation key "${k}" is used in code but missing from translations.js: it renders as the raw key on screen`)
+      );
+    } else {
+      pass(`${usedKeys.size} literal translation keys used in code all exist in translations.js`);
+    }
 
+    // Sens inverse : les clés définies mais plus référencées ne cassent rien,
+    // donc elles s'accumulaient en silence (143 clés mortes × 11 langues
+    // purgeées le 2026-10-13). Le compte inclut volontairement les clés
+    // résolues dynamiquement — nuancier popup.cosmetics.*, paliers
+    // d'ancienneté, périodes du récap, resolveurs scopés inject.*, libellés du
+    // tiroir pilotés par données, changelog.areas.* — les 3 clés du tooling
+    // store (onboarding.welcomeTagline, popup.platformFilter.*), et tout le
+    // sous-arbre popup.cosmetics.* : build-inline-i18n.mjs le copie en entier
+    // vers shared.cosmetics.*, consommé par l'éditeur d'effets du tiroir
+    // Twitch (settings-drawer.js : titres, noms d'effets, sampleName). Si
+    // ce contrôle échoue : soit une clé morte vient d'être ajoutée (à
+    // supprimer), soit un nouveau mécanisme dynamique demande d'ajuster
+    // MAX_UNUSED_KEYS et de le documenter ici.
+    // 338 : les textes de la bannière du mode auto passent par
+    // deps.translate(cle, ...) — clé en premier argument, invisible du scanner
+    // littéral ci-dessous. Ajouter une clé banner* l'augmente d'un.
+    // 168 (2026-10-17) : les clés écrites en entier comme littéral comptent
+    // désormais ; le reste est dynamique (reason.${…}, statuts bulk.*,
+    // popup.notificationTools.state.*) ou attend l'interface du planificateur.
+    // 172 (2026-10-27) : carte du badge dans le chat (inject.badge.worn,
+    // tenure, nameStyle, bughunter), lue par tr("clé courte") dans twitch-badge.js.
+    // 174 (2026-11-01) : libellés de la carte d'aperçu (inject.previews.live,
+    // .loading), lus par label("clé courte") dans js/previews/card.js.
+    const MAX_UNUSED_KEYS = 174;
+    const unusedKeys = referenceKeys.filter((k) => !usedKeys.has(k));
+    if (unusedKeys.length > MAX_UNUSED_KEYS) {
+      fail(`${unusedKeys.length} translation keys are never referenced by any literal call (max ${MAX_UNUSED_KEYS}) : une clé morte vient probablement d'être ajoutée, ou un nouveau mécanisme dynamique demande d'ajuster MAX_UNUSED_KEYS`);
+    } else {
+      pass(`${unusedKeys.length} translation keys unreferenced, within the dynamic-tooling-and-shared allowance (max ${MAX_UNUSED_KEYS})`);
+    }
     let incomplete = 0;
 
     for (const code of declared) {
@@ -197,13 +255,17 @@ else {
         incomplete += 1;
         continue;
       }
+      // Clés attendues de CETTE langue : un groupe de pluriel anglais
+      // (one/other) devient one/few/many/other en ukrainien, other en japonais.
       const keys = new Set(flatten(block));
-      const missing = referenceKeys.filter((k) => !keys.has(k));
+      const missing = [...expectedEntries(translations[DEFAULT_LANGUAGE], code).keys()].filter((k) => !keys.has(k));
       if (missing.length) {
         const preview = missing.slice(0, 5).join(", ");
         const rest = missing.length > 5 ? ` (+${missing.length - 5} more)` : "";
-        fail(`translations.js "${code}" is missing ${missing.length} key(s): ${preview}${rest}`);
-        incomplete += 1;
+        // Une langue pas encore publiée retombe sur l'anglais clé par clé :
+        // le manque est attendu tant qu'elle se traduit.
+        (published.includes(code) ? fail : warn)(`translations.js "${code}" is missing ${missing.length} key(s): ${preview}${rest}`);
+        if (published.includes(code)) incomplete += 1;
       }
     }
 
@@ -211,24 +273,34 @@ else {
       pass(`translations.js: ${declared.length} languages complete (${referenceKeys.length} keys each)`);
     }
 
-    // Sens inverse (porté de Chrome) : les clés définies mais plus référencées
-    // s'accumulaient en silence (143 clés mortes × 11 langues purgeées le
-    // 2026-10-13). Le compte inclut volontairement les clés résolues
-    // dynamiquement — nuancier popup.cosmetics.*, paliers d'ancienneté,
-    // périodes du récap, resolveurs scopés inject.*, libellés du tiroir,
-    // changelog.areas.* — les 3 clés du tooling store
-    // (onboarding.welcomeTagline, popup.platformFilter.*) et tout le
-    // sous-arbre popup.cosmetics.* (copié vers shared.cosmetics.*). Si ce
-    // contrôle échoue : clé morte ajoutée (à supprimer) ou nouveau mécanisme
-    // dynamique (ajuster MAX_UNUSED_KEYS et le documenter ici).
-    // 168 (2026-10-20) : comme Chrome, depuis que les clés écrites en entier
-    // comptent ; le reste est dynamique ou attend une interface (165 mesurées).
-    const MAX_UNUSED_KEYS = 172;
-    const unusedKeys = referenceKeys.filter((k) => !usedKeys.has(k));
-    if (unusedKeys.length > MAX_UNUSED_KEYS) {
-      fail(`${unusedKeys.length} translation keys are never referenced by any literal call (max ${MAX_UNUSED_KEYS}) : une clé morte vient probablement d'être ajoutée, ou un nouveau mécanisme dynamique demande d'ajuster MAX_UNUSED_KEYS`);
+    // Une langue = un fichier source. Un fichier non déclaré ne serait jamais
+    // chargé par js/i18n.js ; une langue déclarée sans fichier casserait l'import.
+    const langDir = "i18n/lang";
+    const langFiles = exists(langDir)
+      ? fs.readdirSync(abs(langDir)).filter((f) => f.endsWith(".js")).map((f) => f.slice(0, -3))
+      : [];
+    const withoutFile = declared.filter((c) => !langFiles.includes(c));
+    const undeclared = langFiles.filter((c) => !declared.includes(c));
+    withoutFile.forEach((c) => fail(`${langDir}/${c}.js is missing: every language in ALL_LANGUAGES needs its own file`));
+    undeclared.forEach((c) => fail(`${langDir}/${c}.js is not declared in ALL_LANGUAGES (i18n/meta.js)`));
+    if (!withoutFile.length && !undeclared.length) {
+      pass(`${langDir}: one source file per declared language (${langFiles.length})`);
+    }
+
+    // Les pages chargent une seule langue via js/i18n.js : l'agrégateur (toutes
+    // les langues, ~700 Ko) est réservé au service worker. Un import depuis un
+    // module de page le ferait revenir à chaque ouverture du popup.
+    const walkJs = (dir) =>
+      fs.readdirSync(abs(dir), { withFileTypes: true }).flatMap((e) =>
+        e.isDirectory() ? walkJs(`${dir}/${e.name}`) : e.name.endsWith(".js") ? [`${dir}/${e.name}`] : [],
+      );
+    const pageModules = walkJs("js").filter((f) => !f.startsWith("js/sw/") && f !== "js/background.js");
+    const aggregatorImport = /(?:from\s+|import\(\s*)["'][^"']*i18n\/translations\.js["']/;
+    const leaking = pageModules.filter((f) => aggregatorImport.test(fs.readFileSync(abs(f), "utf8")));
+    if (leaking.length) {
+      leaking.forEach((f) => fail(`${f} imports i18n/translations.js: pages must use i18n/meta.js and js/i18n.js (one language)`));
     } else {
-      pass(`${unusedKeys.length} translation keys unreferenced, within the dynamic-tooling-and-shared allowance (max ${MAX_UNUSED_KEYS})`);
+      pass("extension pages load one language (no import of the i18n/translations.js aggregator outside the service worker)");
     }
 
     // Une langue publiée (ready: true) ne doit pas être un simple copier-coller
@@ -256,11 +328,14 @@ else {
 
     // Placeholders, noms de marque et codes de langue : trois choses que la
     // traduction automatique abime sans que ca se voie a la relecture. Le
-    // detail des regles est dans scripts/lib/i18n-audit.mjs.
-    const { auditTranslations } = await import(
-      new URL("./lib/i18n-audit.mjs", import.meta.url).href
-    );
-    const i18nProblems = auditTranslations(translations);
+    // detail des regles est dans scripts/i18n/lib/validate.mjs.
+    // Règles complètes : scripts/i18n/lib/validate.mjs (npm run i18n:validate).
+    const { measure } = await import(new URL("./i18n/commands/status.mjs", import.meta.url).href);
+    const i18nProblems = [];
+    for (const code of declared.filter((c) => c !== DEFAULT_LANGUAGE)) {
+      const m = await measure(code);
+      for (const p of [...m.errors, ...m.warnings]) i18nProblems.push({ ...p, message: `${code} ${p.key} [${p.rule}] ${p.message}` });
+    }
     const i18nErrors = i18nProblems.filter((p) => p.level === "error");
     const i18nWarnings = i18nProblems.filter((p) => p.level === "warning");
     if (i18nErrors.length) {
@@ -268,14 +343,14 @@ else {
       const rest = i18nErrors.length > 8 ? ` (+${i18nErrors.length - 8} more)` : "";
       fail(`translations.js has ${i18nErrors.length} integrity problem(s): ${preview}${rest}`);
     } else {
-      pass("translations.js: placeholders, brand names, language codes and site URLs intact in every language");
+      pass("translations.js: variables, HTML tags, protected terms, language codes and store limits intact in every language");
     }
     // Les libelles trop longs debordent de leur bouton, mais la limite relevant
     // du jugement, ils ne font pas echouer le build.
     if (i18nWarnings.length) {
       const preview = i18nWarnings.slice(0, 3).map((p) => p.message).join("; ");
       const rest = i18nWarnings.length > 3 ? ` (+${i18nWarnings.length - 3} more)` : "";
-      warn(`translations.js: ${i18nWarnings.length} label(s) much longer than English: ${preview}${rest}`);
+      warn(`translations: ${i18nWarnings.length} i18n warning(s), see npm run i18n:validate -- --verbose: ${preview}${rest}`);
     }
 
     // Every language declared here must also reach the content scripts, which
@@ -313,7 +388,7 @@ const walk = (dir, out = []) => {
   }
   return out;
 };
-const jsFiles = [...walk("js"), "config.js", "i18n/translations.js"].filter((f) => f.endsWith(".js"));
+const jsFiles = [...walk("js"), "config.js", ...walk("i18n")].filter((f) => f.endsWith(".js"));
 const checkAs = (file, ext) => {
   const dest = path.join(tmp, `check.${ext}`);
   fs.copyFileSync(abs(file), dest);
@@ -414,6 +489,37 @@ if (!syntaxFails) pass(`${jsFiles.length} JS files parse cleanly`);
   }
 }
 
+// ── 3ter. Imports de modules : tout spécificateur relatif doit exister ──────
+// 26.10.22 est partie avec js/sw/drops.js important ../badge-watch.js, fichier
+// jamais versionné : le service worker ES module refusait alors de charger
+// (« Status code: 3 », popup vide). build-zip.mjs construit sa liste depuis
+// `git ls-files` mais zipe le contenu de travail des fichiers suivis, donc un
+// fichier non versionné reste hors de l'archive pendant que les imports qui
+// le réclament partent bien. Ce contrôle relie les deux : chaque import JS
+// relatif doit exister sur le disque, y compris dans l'archive décompressée
+// que build-zip.mjs vérifie après coup (c'est ce second passage qui attrape
+// le fichier oublié dans `git add`).
+{
+  const SPECIFIER = /(?:^|[^\w$.])(?:from|import)\s*\(?\s*["'](\.[^"']*\.js)["']/g;
+  // Les lignes de commentaire sont ignorées : la prose peut citer un import
+  // depuis le point de vue d'un autre fichier (cf. js/inject/plus-rule.js,
+  // dont l'en-tête documente le `import "./inject/plus-rule.js"` de js/plus.js).
+  const isCommentLine = (line) => /^\s*(?:\/\/|\/\*|\*)/.test(line);
+  let importIssues = 0;
+  for (const f of jsFiles) {
+    if (!exists(f)) continue;
+    const code = fs.readFileSync(abs(f), "utf8").split("\n").filter((l) => !isCommentLine(l)).join("\n");
+    for (const m of code.matchAll(SPECIFIER)) {
+      const resolved = path.normalize(path.join(path.dirname(f), m[1]));
+      if (!exists(resolved)) {
+        importIssues++;
+        fail(`${f} imports "${m[1]}" but ${resolved} does not exist: an untracked file never reaches the zip (git add it)`);
+      }
+    }
+  }
+  if (!importIssues) pass(`every relative JS import across ${jsFiles.length} files resolves to an existing file`);
+}
+
 // ── 4. HTML assets + MV3 CSP ────────────────────────────────────────────────
 const htmlFiles = walk("html").filter((f) => f.endsWith(".html"));
 let htmlIssues = 0;
@@ -446,10 +552,13 @@ if (!htmlIssues) pass(`${htmlFiles.length} HTML files reference only existing lo
 // should be committed in config.js.
 const envPath = abs(".env");
 const packaged = [...jsFiles, ...htmlFiles, "manifest.json"];
+// Identifiants publics des fiches (visibles dans l'URL du store) : pas des secrets.
+const PUBLIC_ENV = /_(EXTENSION|PRODUCT|ADDON)_ID$/;
 if (fs.existsSync(envPath)) {
   const secrets = fs
     .readFileSync(envPath, "utf8")
     .split("\n")
+    .filter((l) => !PUBLIC_ENV.test(l.split("=")[0].trim()))
     .map((l) => l.split("=").slice(1).join("=").trim().replace(/^["']|["']$/g, ""))
     .filter((v) => v.length >= 12);
   let leaks = 0;
