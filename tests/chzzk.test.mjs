@@ -179,6 +179,8 @@ test("manifeste Firefox : la règle d'en-tête est obligatoire, sans demande", a
   const manifest = JSON.parse(await readFile(new URL("../manifest.json", import.meta.url), "utf8"));
   // Firefox : obligatoire (sans avertissement), car le navigateur la refuse en facultative.
   assert.ok(manifest.permissions.includes("declarativeNetRequestWithHostAccess"));
+  // identity (import des follows Twitch) : obligatoire aussi, Firefox ne la propose pas en facultative.
+  assert.ok(manifest.permissions.includes("identity"));
   assert.equal(manifest.optional_permissions, undefined);
   assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION]);
 });

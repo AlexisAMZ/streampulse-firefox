@@ -201,6 +201,101 @@ import { playNotificationSound } from "../notification-sound-player.js";`,
     ],
   },
   {
+    file: "js/twitch-follows-import.js",
+    why: "Firefox : identity ne peut pas etre facultative (declaree au manifeste) et la fenetre de connexion native de launchWebAuthFlow est lisible, contrairement a celle de Chrome.",
+    edits: [
+      {
+        find: `const REDIRECT_ORIGIN = "https://*.chromiumapp.org/*";
+const AUTH_WINDOW = { width: 560, height: 820 };
+
+/**
+ * Fenêtre de connexion Twitch à nous : celle de launchWebAuthFlow est minuscule
+ * sous Chrome et cache le bouton Autoriser. Rend l'adresse de retour (avec le
+ * jeton dans le fragment) dès que Twitch y redirige, puis referme la fenêtre.
+ */
+async function openAuthWindow(url, redirectUri) {
+  const win = await chrome.windows.create({ url, type: "popup", focused: true, ...AUTH_WINDOW });
+  const tabId = win.tabs?.[0]?.id;
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (settle, value) => {
+      if (settled) return;
+      settled = true;
+      chrome.tabs.onUpdated.removeListener(onUpdated);
+      chrome.windows.onRemoved.removeListener(onRemoved);
+      settle(value);
+    };
+    const onUpdated = (id, info, tab) => {
+      const current = info.url || tab?.url;
+      if (id !== tabId || !current?.startsWith(redirectUri)) return;
+      finish(resolve, current);
+      chrome.windows.remove(win.id).catch(() => {});
+    };
+    const onRemoved = (id) => {
+      if (id === win.id) finish(reject, typedError("denied"));
+    };
+    chrome.tabs.onUpdated.addListener(onUpdated);
+    chrome.windows.onRemoved.addListener(onRemoved);
+  });
+}
+
+/**
+ * Ouvre la fenêtre Twitch et rend le jeton. La demande de permission vient en
+ * premier : Chrome l'exige pendant le clic, avant toute attente.
+ */
+async function authorize() {
+  const granted = await chrome.permissions.request({ permissions: ["identity"], origins: [REDIRECT_ORIGIN] });
+  if (!granted) throw typedError("permission");
+  const config = await chrome.runtime.sendMessage({ type: "getConfig" });
+  const clientId = config?.clientId;
+  if (!clientId) throw typedError("config");
+  const state = randomState();
+  let redirect;
+  try {
+    const redirectUri = chrome.identity.getRedirectURL();
+    redirect = await openAuthWindow(buildAuthorizeUrl({ clientId, redirectUri, state }), redirectUri);
+  } catch {
+    throw typedError("denied");
+  }
+  const result = parseAuthRedirect(redirect, state);
+  if (!result.ok) throw typedError(result.reason);
+  return { token: result.token, clientId };
+}
+
+/** La permission ne sert qu'à ce moment-là : on la rend aussitôt. */
+function releaseIdentityPermission() {
+  chrome.permissions.remove({ permissions: ["identity"], origins: [REDIRECT_ORIGIN] }).catch(() => {});
+}`,
+        replace: `/**
+ * Ouvre la fenêtre Twitch du navigateur et rend le jeton. Firefox n'accepte pas
+ * "identity" en permission facultative : elle est déclarée au manifeste, donc
+ * rien à demander ni à rendre, et launchWebAuthFlow ouvre une fenêtre lisible.
+ */
+async function authorize() {
+  const config = await chrome.runtime.sendMessage({ type: "getConfig" });
+  const clientId = config?.clientId;
+  if (!clientId) throw typedError("config");
+  const state = randomState();
+  let redirect;
+  try {
+    redirect = await chrome.identity.launchWebAuthFlow({
+      url: buildAuthorizeUrl({ clientId, redirectUri: chrome.identity.getRedirectURL(), state }),
+      interactive: true,
+    });
+  } catch {
+    throw typedError("denied");
+  }
+  const result = parseAuthRedirect(redirect, state);
+  if (!result.ok) throw typedError(result.reason);
+  return { token: result.token, clientId };
+}
+
+/** Rien à rendre sur Firefox : la permission est au manifeste. */
+function releaseIdentityPermission() {}`,
+      },
+    ],
+  },
+  {
     file: "tests/chzzk.test.mjs",
     why: "Test de la divergence ci-dessus : l'identifiant Firefox est de la forme nom@domaine et la condition est tabIds -1.",
     edits: [
@@ -222,10 +317,17 @@ import { playNotificationSound } from "../notification-sound-player.js";`,
       },
       {
         find: `  assert.ok(!manifest.permissions.includes("declarativeNetRequestWithHostAccess"));
-  assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess"]);`,
+  // identity (import des follows Twitch) est facultative aussi : demandée au clic, jamais à l'installation.
+  assert.ok(!manifest.permissions.includes("identity"));
+  assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess", "identity"]);
+  // L'adresse de retour chromiumapp.org sert à lire la réponse de Twitch dans notre propre fenêtre de connexion.
+  assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION, "https://*.chromiumapp.org/*"]);`,
         replace: `  // Firefox : obligatoire (sans avertissement), car le navigateur la refuse en facultative.
   assert.ok(manifest.permissions.includes("declarativeNetRequestWithHostAccess"));
-  assert.equal(manifest.optional_permissions, undefined);`,
+  // identity (import des follows Twitch) : obligatoire aussi, Firefox ne la propose pas en facultative.
+  assert.ok(manifest.permissions.includes("identity"));
+  assert.equal(manifest.optional_permissions, undefined);
+  assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION]);`
       },
       {
         find: `test("manifeste : la règle d'en-tête est une permission facultative, jamais obligatoire"`,
