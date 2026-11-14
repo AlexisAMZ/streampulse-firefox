@@ -4,6 +4,8 @@
 // comme à l'onboarding.
 import { onLanguageChange, t } from "./i18n.js";
 import { getPlatformDefinition } from "./platforms.js";
+import { GTA6_EVENT_END } from "./gta6-launch.js";
+import { syncGta6Theme } from "./theme-gta6.js";
 
 const PLATFORMS = ["twitch", "kick", "youtube"];
 const ACCENTS = [
@@ -12,7 +14,14 @@ const ACCENTS = [
   { id: "ocean", color: "#2563eb", labelKey: "popup.profileCard.accentOcean" },
   { id: "ember", color: "#c2410c", labelKey: "popup.profileCard.accentEmber" },
   { id: "crimson", color: "#be123c", labelKey: "popup.profileCard.accentCrimson" },
+  // Thème événement : sortie de GTA VI le 19/11/2026. Offert à tous jusqu'au 30/11 inclus.
+  { id: "gta6", color: "#d81b7a", labelKey: "popup.profileCard.accentGta6", logo: "../images/gta6/vi.png", freeUntil: GTA6_EVENT_END.getTime() },
 ];
+
+/** Une teinte d'événement est libre pendant sa fenêtre, sinon elle suit StreamPulse+. */
+function isFreeAccent(entry) {
+  return entry.id === "violet" || (entry.freeUntil !== undefined && Date.now() < entry.freeUntil);
+}
 export const ACCENT_KEY = "popupAccent";
 const PREVIEW_DELAY_MS = 450;
 
@@ -27,7 +36,14 @@ function safeImage(raw) {
   }
 }
 
+/** Sans choix enregistré : le thème événement pendant sa fenêtre, sinon le violet de StreamPulse. */
+export function defaultAccent(now = Date.now()) {
+  const event = ACCENTS.find((entry) => entry.freeUntil !== undefined && now < entry.freeUntil);
+  return event ? event.id : "violet";
+}
+
 export function normalizeAccent(value) {
+  if (value === undefined || value === null) return defaultAccent();
   return ACCENTS.some((accent) => accent.id === value) ? value : "violet";
 }
 
@@ -35,6 +51,7 @@ export function applyAccent(value) {
   const accent = normalizeAccent(value);
   if (accent === "violet") delete document.body.dataset.accent;
   else document.body.dataset.accent = accent;
+  syncGta6Theme(accent);
   return accent;
 }
 
@@ -136,10 +153,18 @@ export function initProfileCard(options) {
       swatch.style.setProperty("--swatch", entry.color);
       swatch.setAttribute("role", "radio");
       swatch.setAttribute("aria-checked", String(entry.id === accent));
-      const locked = !unlocked && entry.id !== "violet";
+      const locked = !unlocked && !isFreeAccent(entry);
       swatch.classList.toggle("is-locked", locked);
       swatch.title = locked ? `${t(entry.labelKey)} · ${t("popup.plus.badge")}` : t(entry.labelKey);
       swatch.setAttribute("aria-label", swatch.title);
+      if (entry.logo) {
+        // Le vrai logo de l'événement plutôt qu'une pastille de couleur.
+        swatch.classList.add("has-logo");
+        const logo = document.createElement("img");
+        logo.src = entry.logo;
+        logo.alt = "";
+        swatch.append(logo);
+      }
       return swatch;
     }));
   }
@@ -219,7 +244,7 @@ export function initProfileCard(options) {
     const swatch = event.target.closest(".pager-swatch");
     if (!swatch) return;
     const id = swatch.dataset.accent;
-    if (id !== "violet" && !options.isPlus()) {
+    if (!options.isPlus() && !isFreeAccent(ACCENTS.find((entry) => entry.id === id))) {
       options.openPlus();
       return;
     }
