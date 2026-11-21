@@ -44,7 +44,9 @@
     "https://id.kick.com/*",
     "https://api.kick.com/*",
     "https://www.youtube.com/*",
-    "https://*.cloudfront.net/*"
+    "https://*.cloudfront.net/*",
+    "https://streampulse.tech/*",
+    "https://*.streampulse.tech/*"
   ],
   "author": "AlexisAMZ",
   "background": {
