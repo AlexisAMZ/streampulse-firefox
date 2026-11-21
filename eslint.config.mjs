@@ -67,6 +67,7 @@ const ES_MODULES = [
   "js/points-data.js",
   "js/points-store.js",
   "js/drops-data.js",
+  "js/kick-drops-data.js",
   "js/drop-alerts.js",
   "js/plus-value.js",
   "js/badges-data.js",
@@ -125,7 +126,7 @@ const ES_MODULES = [
 
 export default [
   {
-    ignores: ["js/vendor/**", "node_modules/**", "coverage/**", "stream-247/**", "DevKit/**", "promo/**", "localization/.cache/**"],
+    ignores: ["js/vendor/**", "node_modules/**", "coverage/**", "stream-247/**", "DevKit/**", "promo/**", "localization/.cache/**", "scripts/dev/.local/**"],
   },
   js.configs.recommended,
   {
