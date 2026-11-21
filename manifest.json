@@ -3,7 +3,7 @@
   "default_locale": "en",
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "26.11.20",
+  "version": "26.11.21",
   "browser_specific_settings": {
     "gecko": {
       "id": "streampulse@alexisamz.fr",
@@ -21,6 +21,7 @@
     "cookies",
     "notifications",
     "scripting",
+    "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
     "identity"
   ],
@@ -40,7 +41,8 @@
     "https://stream.kick.com/*",
     "https://id.kick.com/*",
     "https://api.kick.com/*",
-    "https://www.youtube.com/*"
+    "https://www.youtube.com/*",
+    "https://*.cloudfront.net/*"
   ],
   "author": "AlexisAMZ",
   "background": {
@@ -110,6 +112,7 @@
         "js/channelPointsClaimer.js",
         "js/twitchPlayerEnhancer.js",
         "js/twitchPlayerButtons.js",
+        "js/twitchVodUnmute.js",
         "js/chatFilter.js",
         "js/watchTimeTracker.js",
         "js/tabEnhancer.js",
