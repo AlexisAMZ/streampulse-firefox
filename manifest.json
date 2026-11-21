@@ -3,34 +3,26 @@
   "default_locale": "en",
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "26.11.26",
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "streampulse@alexisamz.fr",
-      "strict_min_version": "128.0",
-      "data_collection_permissions": {
-        "required": [
-          "personallyIdentifyingInfo"
-        ]
-      }
-    }
-  },
+  "version": "26.11.27",
   "permissions": [
     "storage",
     "alarms",
     "cookies",
     "notifications",
+    "offscreen",
     "scripting",
-    "declarativeNetRequest",
+    "declarativeNetRequest"
+  ],
+  "optional_permissions": [
     "declarativeNetRequestWithHostAccess",
     "identity"
   ],
   "optional_host_permissions": [
-    "https://*.chzzk.naver.com/*"
+    "https://*.chzzk.naver.com/*",
+    "https://*.chromiumapp.org/*"
   ],
   "host_permissions": [
     "https://api.twitch.tv/*",
-    "https://tmi.twitch.tv/*",
     "https://gql.twitch.tv/*",
     "https://www.twitch.tv/*",
     "https://clips.twitch.tv/*",
@@ -38,11 +30,6 @@
     "https://*.ttvnw.net/*",
     "https://kick.com/*",
     "https://*.kick.com/*",
-    "https://files.kick.com/*",
-    "https://images.kick.com/*",
-    "https://stream.kick.com/*",
-    "https://id.kick.com/*",
-    "https://api.kick.com/*",
     "https://www.youtube.com/*",
     "https://*.cloudfront.net/*",
     "https://streampulse.tech/*",
@@ -50,9 +37,7 @@
   ],
   "author": "AlexisAMZ",
   "background": {
-    "scripts": [
-      "js/background.js"
-    ],
+    "service_worker": "js/background.js",
     "type": "module"
   },
   "content_scripts": [
@@ -115,7 +100,6 @@
         "js/inject/chat-plus.js",
         "js/inject/sidebar-favorites.js",
         "js/inject/player-tip.js",
-        "js/inject/points-bonus-inline.js",
         "js/channelPointsClaimer.js",
         "js/twitchPlayerEnhancer.js",
         "js/twitchPlayerButtons.js",
@@ -123,7 +107,6 @@
         "js/watchTimeTracker.js",
         "js/tabEnhancer.js",
         "js/inject/predictionsOverlay.js",
-        "js/inject/predictions-data-inline.js",
         "js/inject/predictionsAssist.js"
       ],
       "css": [
@@ -143,7 +126,6 @@
       "all_frames": false,
       "js": [
         "js/inject/i18n-inline.js",
-        "js/vendor/hls.light.min.js",
         "js/previews/sources.js",
         "js/previews/card.js",
         "js/previews/targets-twitch.js",
@@ -179,7 +161,6 @@
         "js/inject/i18n-inline.js",
         "js/inject/quickFollowCore.js",
         "js/inject/quickFollowKick.js",
-        "js/vendor/hls.light.min.js",
         "js/previews/sources.js",
         "js/previews/targets-kick.js",
         "js/previews/card.js",
@@ -218,6 +199,18 @@
     "48": "images/photos/48px.png",
     "128": "images/photos/128px.png"
   },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "__MSG_openPopupDesc__"
+    }
+  },
+  "externally_connectable": {
+    "matches": [
+      "https://streampulse.tech/*",
+      "https://www.streampulse.tech/*"
+    ]
+  },
   "web_accessible_resources": [
     {
       "resources": [
@@ -250,14 +243,24 @@
         "https://www.twitch.tv/*",
         "https://clips.twitch.tv/*"
       ]
+    },
+    {
+      "resources": [
+        "js/predictions-data.js",
+        "js/points-bonus.js"
+      ],
+      "matches": [
+        "https://www.twitch.tv/*"
+      ]
+    },
+    {
+      "resources": [
+        "js/vendor/hls.light.min.js"
+      ],
+      "matches": [
+        "https://www.twitch.tv/*",
+        "https://clips.twitch.tv/*"
+      ]
     }
-  ],
-  "commands": {
-    "_execute_action": {
-      "suggested_key": {
-        "default": "Alt+Shift+S"
-      },
-      "description": "__MSG_openPopupDesc__"
-    }
-  }
+  ]
 }
