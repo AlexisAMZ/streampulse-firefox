@@ -7,4 +7,5 @@ backups/
 .claude/
 .agents/
 memory.md
+localization/usage.jsonl
 *.zip
