@@ -26,7 +26,7 @@ test("Kick Pusher : synchronisation, souscription et réception des événements
 
   globalThis.WebSocket = MockWebSocket;
   globalThis.chrome = {
-    runtime: { getManifest: () => ({ version: "26.11.25" }) },
+    runtime: { getManifest: () => ({ version: "26.11.20" }) },
     action: { setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {} },
     storage: {
       local: {

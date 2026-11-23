@@ -1,14 +1,17 @@
-// Vue Clips : import direct, détection d'onglet actif, données du clip
-// et passerelle directe vers le studio 9:16 de StreamPulse Clips.
+// Onglet Clips : liste des clips ouverts récemment (depuis le bouton du lecteur Twitch)
+// et lien de chacun vers le studio 9:16 de StreamPulse Clips.
 
 import { t } from "./i18n.js";
 
 const HISTORY_KEY = "spClipsHistory";
 const HANDOFF = globalThis.StreamPulseClipsHandoff;
+const UNDO_DELAY_MS = 6000;
 
 const $ = (id) => document.getElementById(id);
 
 let initialized = false;
+/** Dernier clip retiré, gardé quelques secondes pour pouvoir l'annuler. */
+let pendingUndo = null;
 
 function escapeHtml(str) {
   if (typeof str !== "string") return "";
@@ -18,34 +21,6 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-}
-
-function parseClip(input) {
-  if (HANDOFF && typeof HANDOFF.parseClipUrl === "function") {
-    return HANDOFF.parseClipUrl(input);
-  }
-  // Repli autonome
-  if (!input || typeof input !== "string") return null;
-  const trimmed = input.trim();
-  const twitchMatch = /(?:clips\.twitch\.tv\/|twitch\.tv\/[^/]+\/clip\/)([A-Za-z0-9_-]+)/i.exec(trimmed);
-  if (twitchMatch) {
-    return {
-      platform: "twitch",
-      slug: twitchMatch[1],
-      channel: null,
-      canonicalUrl: `https://clips.twitch.tv/${twitchMatch[1]}`,
-    };
-  }
-  const kickMatch = /kick\.com\/([^?]+)\?clip=([A-Za-z0-9_-]+)/i.exec(trimmed);
-  if (kickMatch) {
-    return {
-      platform: "kick",
-      slug: kickMatch[2],
-      channel: kickMatch[1],
-      canonicalUrl: `https://kick.com/${kickMatch[1]}?clip=${kickMatch[2]}`,
-    };
-  }
-  return null;
 }
 
 function buildEditorUrl(canonicalUrl, campaign = "popup_clips_tab") {
@@ -60,85 +35,92 @@ function buildEditorUrl(canonicalUrl, campaign = "popup_clips_tab") {
   return url.toString();
 }
 
-function formatRelativeTime(timestamp) {
+/** « il y a 12 min », « il y a 3 h », « il y a 2 j » : mêmes clés que l'onglet Historique. */
+function agoLabel(timestamp, now = Date.now()) {
   if (!timestamp) return "";
-  const diffSec = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
-  if (diffSec < 60) return "À l'instant";
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin} min`;
-  const diffHours = Math.floor(diffMin / 60);
-  if (diffHours < 24) return `${diffHours} h`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays} j`;
+  const minutes = Math.max(1, Math.round((now - timestamp) / 60000));
+  if (minutes < 60) return t("popup.history.agoMinutes", { count: minutes });
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return t("popup.history.agoHours", { count: hours });
+  return t("popup.history.agoDays", { count: Math.round(hours / 24) });
+}
+
+/** Ce qui identifie le clip dans la liste : son titre s'il en a un vrai, sinon la chaîne, sinon son identifiant. */
+function clipLabel(clip) {
+  const title = typeof clip.title === "string" ? clip.title.trim() : "";
+  if (title && title !== "Clip" && !/^Clip\s/.test(title)) return title;
+  return clip.channel ? `@${clip.channel}` : String(clip.slug || clip.id || "");
+}
+
+async function readHistory() {
+  const data = await chrome.storage.local.get([HISTORY_KEY]);
+  return Array.isArray(data?.[HISTORY_KEY]) ? data[HISTORY_KEY] : [];
+}
+
+function writeHistory(list) {
+  return chrome.storage.local.set({ [HISTORY_KEY]: list });
+}
+
+/** Logo de la plateforme : le vrai, en pastille. */
+function platformChipHtml(platform) {
+  const name = platform === "kick" ? "Kick" : "Twitch";
+  return `<span class="clips-card-platform clips-card-platform-${platform}" role="img" aria-label="${name}"><img src="../images/platforms/${platform}.svg" alt="" width="18" height="18" /></span>`;
+}
+
+/** Vignette du clip si l'historique en a gardé une (https seulement), avec le logo de la plateforme en coin. */
+function leadingVisualHtml(clip, platform) {
+  const thumb = typeof clip.thumbnailUrl === "string" && /^https:\/\//i.test(clip.thumbnailUrl) ? clip.thumbnailUrl : "";
+  if (!thumb) return platformChipHtml(platform);
+  return `<span class="clips-card-thumb"><img class="clips-card-thumb-img" src="${escapeHtml(thumb)}" alt="" loading="lazy" />${platformChipHtml(platform)}</span>`;
+}
+
+function clipRowHtml(clip) {
+  const platform = clip.platform === "kick" ? "kick" : "twitch";
+  const label = clipLabel(clip);
+  const editorUrl = buildEditorUrl(clip.url || clip.canonicalUrl || clip.id, "popup_clips_history");
+  const slug = String(clip.slug || clip.id || "");
+  const sub = [
+    clip.channel && label !== `@${clip.channel}` ? `@${clip.channel}` : "",
+    agoLabel(clip.openedAt || clip.createdAt),
+    slug && slug !== label ? slug : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const removeLabel = escapeHtml(t("popup.clips.remove"));
+  const openLabel = escapeHtml(t("popup.clips.openInSpLabel", { name: label }));
+  return `
+    <li class="clips-card" data-clip-id="${escapeHtml(String(clip.id))}">
+      ${leadingVisualHtml(clip, platform)}
+      <div class="clips-card-meta">
+        <strong class="clips-card-title">${escapeHtml(label)}</strong>
+        ${sub ? `<span class="clips-card-sub">${escapeHtml(sub)}</span>` : ""}
+      </div>
+      <div class="clips-card-actions">
+        <a href="${escapeHtml(editorUrl)}" target="_blank" rel="noopener" class="clips-card-open" aria-label="${openLabel}">${escapeHtml(t("popup.clips.openInSp"))}</a>
+        <button type="button" class="clips-card-remove" data-clip-id="${escapeHtml(String(clip.id))}" title="${removeLabel}" aria-label="${removeLabel}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </li>`;
 }
 
 export async function renderClipsPanel() {
   const container = $("clips-recent-list");
-  const emptyState = $("clips-recent-empty");
-  const clearBtn = $("clips-btn-clear");
+  const section = $("clips-recent-section");
+  const hint = $("clips-empty-hint");
   if (!container) return;
 
   try {
-    const data = await chrome.storage.local.get([HISTORY_KEY]);
-    const list = Array.isArray(data?.[HISTORY_KEY]) ? data[HISTORY_KEY] : [];
-
-    if (list.length === 0) {
-      container.innerHTML = "";
-      emptyState?.removeAttribute("hidden");
-      clearBtn?.setAttribute("hidden", "true");
-      return;
+    const list = await readHistory();
+    if (section) section.hidden = list.length === 0;
+    if (hint) hint.hidden = list.length > 0 || pendingUndo !== null;
+    container.innerHTML = list.map(clipRowHtml).join("");
+    // Les vignettes qui ne chargent pas laissent la place au logo seul.
+    for (const img of container.querySelectorAll(".clips-card-thumb-img")) {
+      img.addEventListener("error", () => img.remove(), { once: true });
     }
-
-    emptyState?.setAttribute("hidden", "true");
-    clearBtn?.removeAttribute("hidden");
-
-    container.innerHTML = list
-      .map((clip) => {
-        const title = escapeHtml(clip.title || clip.slug || "Clip");
-        const channel = escapeHtml(clip.channel || "");
-        const platform = escapeHtml(clip.platform || "twitch");
-        const editorUrl = escapeHtml(buildEditorUrl(clip.url || clip.canonicalUrl || clip.id, "popup_clips_history"));
-        const timeAgo = formatRelativeTime(clip.openedAt || clip.createdAt);
-
-        return `
-          <li class="clips-card" data-clip-id="${escapeHtml(clip.id)}">
-            <div class="clips-card-body">
-              <div class="clips-card-platform clips-card-platform-${platform}">
-                ${platform.toUpperCase()}
-              </div>
-              <div class="clips-card-meta">
-                <strong class="clips-card-title">${title}</strong>
-                <span class="clips-card-sub">${channel ? `@${channel} · ` : ""}${timeAgo}</span>
-              </div>
-            </div>
-            <div class="clips-card-actions">
-              <a href="${editorUrl}" target="_blank" rel="noopener" class="button button-accent button-sm" data-i18n="popup.clips.openInSp">
-                ${escapeHtml(t("popup.clips.openInSp") || "Monter en 9:16")}
-              </a>
-              <button type="button" class="icon-button clips-card-remove" data-clip-id="${escapeHtml(clip.id)}" title="Supprimer" aria-label="Supprimer">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-              </button>
-            </div>
-          </li>
-        `;
-      })
-      .join("");
-
-    // Écouteurs de suppression
-    container.querySelectorAll(".clips-card-remove").forEach((btn) => {
-      btn.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        const idToRemove = btn.dataset.clipId;
-        const current = await chrome.storage.local.get([HISTORY_KEY]);
-        const updated = (Array.isArray(current?.[HISTORY_KEY]) ? current[HISTORY_KEY] : []).filter(
-          (c) => c.id !== idToRemove
-        );
-        await chrome.storage.local.set({ [HISTORY_KEY]: updated });
-        renderClipsPanel();
-      });
-    });
   } catch (err) {
-    console.warn("StreamPulse: Erreur rendu panel clips", err);
+    console.warn("StreamPulse: impossible d'afficher les clips récents", err);
   }
 }
 
@@ -146,113 +128,63 @@ export function initClipsTab() {
   if (initialized) return;
   initialized = true;
 
-  const inputUrl = $("clips-input-url");
-  const convertBtn = $("clips-btn-convert");
-  const detectBtn = $("clips-btn-detect");
   const clearBtn = $("clips-btn-clear");
-  const errorEl = $("clips-input-error");
+  const confirmBox = $("clips-clear-confirm");
+  const container = $("clips-recent-list");
+  const undoBar = $("clips-undo");
 
-  function showError(msg) {
-    if (!errorEl) return;
-    if (!msg) {
-      errorEl.setAttribute("hidden", "true");
-      errorEl.textContent = "";
-    } else {
-      errorEl.removeAttribute("hidden");
-      errorEl.textContent = msg;
-    }
+  function setClearConfirm(open) {
+    if (confirmBox) confirmBox.hidden = !open;
+    if (clearBtn) clearBtn.hidden = open;
+    if (open) $("clips-clear-no")?.focus();
+    else clearBtn?.focus();
   }
 
-  async function processInputUrl() {
-    const raw = inputUrl?.value?.trim();
-    if (!raw) {
-      showError(t("popup.clips.errorEmpty") || "Veuillez coller un lien de clip Twitch ou Kick.");
-      return;
-    }
-    const parsed = parseClip(raw);
-    if (!parsed) {
-      showError(t("popup.clips.errorInvalid") || "Lien de clip non reconnu. Exemples : https://clips.twitch.tv/... ou https://kick.com/...clip=...");
-      return;
-    }
-    showError("");
-
-    // Sauvegarde dans l'historique
-    const item = {
-      id: parsed.slug,
-      url: parsed.canonicalUrl,
-      title: `Clip ${parsed.slug}`,
-      channel: parsed.channel || "",
-      platform: parsed.platform,
-      createdAt: Date.now(),
-    };
-    if (HANDOFF && typeof HANDOFF.saveClipToHistory === "function") {
-      await HANDOFF.saveClipToHistory(item);
-    } else {
-      const current = await chrome.storage.local.get([HISTORY_KEY]);
-      const list = Array.isArray(current?.[HISTORY_KEY]) ? current[HISTORY_KEY] : [];
-      const updated = [item, ...list.filter((c) => c.id !== item.id)].slice(0, 40);
-      await chrome.storage.local.set({ [HISTORY_KEY]: updated });
-    }
-
-    renderClipsPanel();
-
-    // Ouvre dans SP Clips
-    const editorUrl = buildEditorUrl(parsed.canonicalUrl, "popup_clips_input");
-    window.open(editorUrl, "_blank", "noopener");
+  function hideUndo() {
+    if (pendingUndo) clearTimeout(pendingUndo.timer);
+    pendingUndo = null;
+    if (undoBar) undoBar.hidden = true;
   }
 
-  convertBtn?.addEventListener("click", processInputUrl);
-  inputUrl?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      processInputUrl();
-    }
-  });
-
-  // Détection de l'onglet actif
-  detectBtn?.addEventListener("click", async () => {
-    showError("");
-    try {
-      if (typeof chrome === "undefined" || !chrome.tabs?.query) {
-        showError("Impossible d'accéder aux onglets du navigateur.");
-        return;
-      }
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!activeTab || !activeTab.url) {
-        showError("Aucun onglet actif détecté.");
-        return;
-      }
-      const parsed = parseClip(activeTab.url);
-      if (parsed) {
-        if (inputUrl) inputUrl.value = parsed.canonicalUrl;
-        showError("");
-      } else {
-        showError("L'onglet actif n'est pas un clip Twitch ou Kick reconnu.");
-      }
-    } catch (err) {
-      showError("Échec de la détection de l'onglet actif.");
-    }
-  });
-
-  // Effacer tout l'historique
-  clearBtn?.addEventListener("click", async () => {
-    await chrome.storage.local.set({ [HISTORY_KEY]: [] });
+  clearBtn?.addEventListener("click", () => setClearConfirm(true));
+  $("clips-clear-no")?.addEventListener("click", () => setClearConfirm(false));
+  $("clips-clear-yes")?.addEventListener("click", async () => {
+    hideUndo();
+    await writeHistory([]);
+    setClearConfirm(false);
     renderClipsPanel();
   });
-
-  // Bouton retour vers l'extension
-  const backBtn = $("clips-back-to-ext");
-  backBtn?.addEventListener("click", () => {
-    document.getElementById("tab-streamers")?.click();
-  });
-
-  window.addEventListener("keydown", (e) => {
+  confirmBox?.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      const universe = $("clips-universe");
-      if (universe && !universe.classList.contains("hidden")) {
-        document.getElementById("tab-streamers")?.click();
-      }
+      e.stopPropagation();
+      setClearConfirm(false);
     }
+  });
+
+  // Retrait d'un clip : immédiat, avec quelques secondes pour revenir en arrière.
+  container?.addEventListener("click", async (e) => {
+    const btn = e.target instanceof Element ? e.target.closest(".clips-card-remove") : null;
+    if (!btn) return;
+    const idToRemove = btn.dataset.clipId;
+    const list = await readHistory();
+    const index = list.findIndex((c) => String(c.id) === idToRemove);
+    if (index < 0) return;
+    hideUndo();
+    pendingUndo = { clip: list[index], index, timer: setTimeout(() => { hideUndo(); renderClipsPanel(); }, UNDO_DELAY_MS) };
+    await writeHistory(list.filter((_, i) => i !== index));
+    if (undoBar) undoBar.hidden = false;
+    renderClipsPanel();
+  });
+
+  $("clips-undo-btn")?.addEventListener("click", async () => {
+    const undo = pendingUndo;
+    hideUndo();
+    if (!undo) return;
+    const list = await readHistory();
+    if (list.some((c) => String(c.id) === String(undo.clip.id))) return;
+    const next = [...list.slice(0, undo.index), undo.clip, ...list.slice(undo.index)];
+    await writeHistory(next);
+    renderClipsPanel();
   });
 
   renderClipsPanel();

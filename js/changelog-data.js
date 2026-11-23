@@ -75,8 +75,8 @@ export const RELEASES = [
     },
     "changes": [
       {
-        "type": "feat",
-        "area": "player",
+        "type": "new",
+        "area": "interface",
         "text": {
           "fr": "Enregistrement vidéo direct du lecteur Twitch au format MP4 (H.264/AVC haute définition) et outils de flux : copie de l'adresse M3U8 du direct ou de la VOD et commande VLC prête à l'emploi.",
           "en": "Direct video recording from the Twitch player in MP4 format (high-definition H.264/AVC) and stream tools: copy live or VOD M3U8 link and ready-to-use VLC command.",
@@ -98,7 +98,7 @@ export const RELEASES = [
         }
       },
       {
-        "type": "feat",
+        "type": "new",
         "area": "interface",
         "text": {
           "fr": "Onglet dédié StreamPulse Clips reprenant entièrement l'univers Web et la DA Apple : convertisseur de lien 9:16, aperçu interactif smartphone et bouton direct pour revenir à l'extension.",
@@ -121,8 +121,8 @@ export const RELEASES = [
         }
       },
       {
-        "type": "feat",
-        "area": "player",
+        "type": "new",
+        "area": "interface",
         "text": {
           "fr": "Intégration du logo officiel StreamPulse Clips dans le lecteur Twitch avec clipage direct en un clic et passerelle vers l'éditeur 9:16.",
           "en": "Official StreamPulse Clips logo integration in the Twitch player with one-click direct clipping and 9:16 editor handoff.",
@@ -144,7 +144,7 @@ export const RELEASES = [
         }
       },
       {
-        "type": "feat",
+        "type": "new",
         "area": "plus",
         "text": {
           "fr": "Restauration audio VOD (Bêta expérimentale) : outil de détection et tentative de réintégration des segments audio muets dans les rediffusions Twitch, activable dans les Réglages.",
@@ -187,6 +187,29 @@ export const RELEASES = [
           "nl": "De live-geschiedenis is geïntegreerd in de Instellingen voor een overzichtelijkere interface, en het bètalabel is verwijderd bij Badges.",
           "sv": "Livehistoriken har flyttats till Inställningar för ett renare gränssnitt, och betamärkningen har tagits bort från Märken.",
           "cs": "Historie vysílání je integrována do Nastavení pro přehlednější rozhraní a štítek beta byl odebrán ze sekce Odznaky."
+        }
+      },
+      {
+        "type": "improved",
+        "area": "interface",
+        "text": {
+          "fr": "Onglet Clips repensé : la barre des onglets reste visible, StreamPulse Clips est présenté clairement et les clips récents s'affichent dans une liste claire avec les logos Twitch et Kick.",
+          "en": "Clips tab redesigned: the tab bar stays visible, StreamPulse Clips is clearly presented, and recent clips appear in a clean list with Twitch and Kick logos.",
+          "uk": "Вкладку «Clips» оновлено: панель вкладок залишається на місці, StreamPulse Clips чітко представлено, а нещодавні кліпи показано у списку з логотипами Twitch і Kick.",
+          "es": "Pestaña Clips rediseñada: la barra de pestañas sigue visible, StreamPulse Clips se presenta con claridad y los clips recientes aparecen en una lista clara con los logos de Twitch y Kick.",
+          "pt-BR": "Aba Clips redesenhada: a barra de abas continua visível, o StreamPulse Clips é apresentado com clareza e os clipes recentes aparecem em uma lista clara com os logotipos da Twitch e da Kick.",
+          "de": "Clips-Tab neu gestaltet: Die Tab-Leiste bleibt sichtbar, StreamPulse Clips wird klar vorgestellt und die letzten Clips stehen in einer übersichtlichen Liste mit Twitch- und Kick-Logos.",
+          "it": "Scheda Clips ridisegnata: la barra delle schede resta visibile, StreamPulse Clips è presentato con chiarezza e le clip recenti compaiono in un elenco chiaro con i loghi di Twitch e Kick.",
+          "pl": "Przeprojektowana karta Clips: pasek kart pozostaje widoczny, StreamPulse Clips jest czytelnie przedstawiony, a ostatnie klipy pojawiają się na przejrzystej liście z logo Twitch i Kick.",
+          "tr": "Clips sekmesi yeniden tasarlandı: sekme çubuğu görünür kalıyor, StreamPulse Clips net biçimde tanıtılıyor ve son klipler Twitch ile Kick logolarıyla sade bir listede görünüyor.",
+          "ru": "Вкладка «Clips» переработана: панель вкладок остаётся на виду, StreamPulse Clips понятно представлен, а недавние клипы показаны в списке с логотипами Twitch и Kick.",
+          "ja": "Clipsタブを刷新しました。タブバーは表示されたままになり、StreamPulse Clipsをわかりやすく紹介し、最近のクリップをTwitchとKickのロゴ付きの一覧で表示します。",
+          "ko": "Clips 탭을 새로 디자인했습니다. 탭 바가 계속 보이고, StreamPulse Clips를 명확하게 소개하며, 최근 클립을 Twitch와 Kick 로고가 있는 깔끔한 목록으로 보여 줍니다.",
+          "ar": "أُعيد تصميم تبويب Clips: يبقى شريط التبويبات ظاهرًا، ويُعرَّف بـ StreamPulse Clips بوضوح، وتظهر المقاطع الأخيرة في قائمة واضحة مع شعاري Twitch وKick.",
+          "id": "Tab Clips didesain ulang: bilah tab tetap terlihat, StreamPulse Clips dijelaskan dengan jelas, dan klip terbaru tampil dalam daftar rapi dengan logo Twitch dan Kick.",
+          "nl": "Clips-tab opnieuw ontworpen: de tabbalk blijft zichtbaar, StreamPulse Clips wordt duidelijk uitgelegd en recente clips staan in een overzichtelijke lijst met Twitch- en Kick-logo's.",
+          "sv": "Clips-fliken har gjorts om: flikfältet förblir synligt, StreamPulse Clips presenteras tydligt och senaste klipp visas i en tydlig lista med Twitch- och Kick-logotyper.",
+          "cs": "Karta Clips byla přepracována: lišta karet zůstává viditelná, StreamPulse Clips je přehledně představen a poslední klipy se zobrazují v přehledném seznamu s logy Twitch a Kick."
         }
       },
       {
@@ -277,7 +300,7 @@ export const RELEASES = [
     },
     "changes": [
       {
-            "type": "feat",
+            "type": "new",
             "text": {
                   "fr": "Récupération en un clic des badges et Drops par plateforme : choix possible entre Tout, Twitch uniquement ou Kick uniquement.",
                   "en": "One-click claiming of badges and Drops by platform: choose between All, Twitch only, or Kick only.",
@@ -299,7 +322,7 @@ export const RELEASES = [
             }
       },
       {
-        "type": "feat",
+        "type": "new",
         "text": {
           "fr": "Ajout d'un sélecteur de plateforme dans les Drops et les Badges pour basculer facilement entre Tous, Twitch et Kick.",
           "en": "Added a platform selector in Drops and Badges to easily switch between All, Twitch, and Kick.",
@@ -343,7 +366,7 @@ export const RELEASES = [
         }
       },
       {
-        "type": "feat",
+        "type": "new",
         "text": {
           "fr": "Notification des nouveaux coffres Kick prêts à déballer et option de déballage automatique en arrière-plan désactivée par défaut.",
           "en": "Notification for new Kick chests ready to unbox and optional background auto-unboxing disabled by default.",
@@ -365,7 +388,7 @@ export const RELEASES = [
         }
       },
       {
-        "type": "feat",
+        "type": "new",
         "text": {
           "fr": "Téléchargement direct en MP4 des clips Kick et bouton Picture-in-Picture sur le lecteur.",
           "en": "Direct MP4 download for Kick clips and Picture-in-Picture button on the player.",
@@ -387,7 +410,7 @@ export const RELEASES = [
         }
       },
       {
-        "type": "feat",
+        "type": "new",
         "text": {
           "fr": "Intégration automatique des rediffusions et VODs Kick dans l'onglet Historique à la fin d'un live.",
           "en": "Automatic integration of Kick replays and VODs in the History tab when a live stream ends.",
@@ -409,7 +432,7 @@ export const RELEASES = [
         }
       },
       {
-        "type": "feat",
+        "type": "new",
         "text": {
           "fr": "Connexion WebSockets Pusher directe pour des alertes Kick en temps réel à 0 seconde de délai.",
           "en": "Direct Pusher WebSockets connection for real-time Kick stream alerts with 0-second latency.",
@@ -431,7 +454,7 @@ export const RELEASES = [
         }
       },
       {
-        "type": "feat",
+        "type": "new",
         "text": {
           "fr": "Conversion et affichage automatique en heures (5 h, 10 h) et en jours (24 h+) des durées et temps restants des Drops et badges Kick.",
           "en": "Automatic conversion and display of Kick Drops and badges durations and time remaining in hours (5 hr, 10 hr) and days (24 hr+).",
@@ -453,7 +476,7 @@ export const RELEASES = [
         }
       },
       {
-        "type": "feat",
+        "type": "new",
         "text": {
           "fr": "Ajout d'un rappel dans les onglets Drops et Badges indiquant si le compte Twitch n'est pas connecté dans le navigateur.",
           "en": "Added a notice in the Drops and Badges tabs indicating when Twitch is not signed in on the browser.",

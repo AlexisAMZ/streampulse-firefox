@@ -321,13 +321,19 @@ function releaseIdentityPermission() {}`,
   assert.ok(!manifest.permissions.includes("identity"));
   assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess", "identity"]);
   // L'adresse de retour chromiumapp.org sert à lire la réponse de Twitch dans notre propre fenêtre de connexion.
-  assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION, "https://*.chromiumapp.org/*"]);`,
+  assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION, "https://*.cloudfront.net/*", "https://*.chromiumapp.org/*"]);
+  // La restauration audio VOD (bêta) demande son accès au clic : ni DNR ni CloudFront à l'installation.
+  assert.ok(!manifest.permissions.includes("declarativeNetRequest"));
+  assert.ok(!manifest.host_permissions.includes("https://*.cloudfront.net/*"));`,
         replace: `  // Firefox : obligatoire (sans avertissement), car le navigateur la refuse en facultative.
   assert.ok(manifest.permissions.includes("declarativeNetRequestWithHostAccess"));
   // identity (import des follows Twitch) : obligatoire aussi, Firefox ne la propose pas en facultative.
   assert.ok(manifest.permissions.includes("identity"));
   assert.equal(manifest.optional_permissions, undefined);
-  assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION]);`
+  assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION]);
+  // La restauration audio VOD : DNR et CloudFront sont obligatoires sur Firefox, donc déjà accordés.
+  assert.ok(manifest.permissions.includes("declarativeNetRequest"));
+  assert.ok(manifest.host_permissions.includes("https://*.cloudfront.net/*"));`
       },
       {
         find: `test("manifeste : la règle d'en-tête est une permission facultative, jamais obligatoire"`,

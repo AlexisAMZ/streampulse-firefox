@@ -183,4 +183,7 @@ test("manifeste Firefox : la règle d'en-tête est obligatoire, sans demande", a
   assert.ok(manifest.permissions.includes("identity"));
   assert.equal(manifest.optional_permissions, undefined);
   assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION]);
+  // La restauration audio VOD : DNR et CloudFront sont obligatoires sur Firefox, donc déjà accordés.
+  assert.ok(manifest.permissions.includes("declarativeNetRequest"));
+  assert.ok(manifest.host_permissions.includes("https://*.cloudfront.net/*"));
 });
