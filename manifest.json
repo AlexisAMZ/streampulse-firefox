@@ -3,7 +3,7 @@
   "default_locale": "en",
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "26.11.22",
+  "version": "26.11.24",
   "browser_specific_settings": {
     "gecko": {
       "id": "streampulse@alexisamz.fr",
@@ -34,6 +34,7 @@
     "https://gql.twitch.tv/*",
     "https://www.twitch.tv/*",
     "https://clips.twitch.tv/*",
+    "https://dashboard.twitch.tv/*",
     "https://kick.com/*",
     "https://*.kick.com/*",
     "https://files.kick.com/*",
@@ -59,7 +60,8 @@
       "all_frames": false,
       "js": [
         "js/inject/preventPause.js",
-        "js/inject/playerQuality.js"
+        "js/inject/playerQuality.js",
+        "js/inject/clipboard-tap.js"
       ],
       "run_at": "document_start",
       "world": "MAIN"

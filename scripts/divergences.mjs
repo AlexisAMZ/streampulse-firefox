@@ -321,10 +321,12 @@ function releaseIdentityPermission() {}`,
   assert.ok(!manifest.permissions.includes("identity"));
   assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess", "identity"]);
   // L'adresse de retour chromiumapp.org sert à lire la réponse de Twitch dans notre propre fenêtre de connexion.
-  assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION, "https://*.cloudfront.net/*", "https://*.chromiumapp.org/*"]);
+  assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION, "https://*.cloudfront.net/*", "https://dashboard.twitch.tv/*", "https://*.chromiumapp.org/*"]);
   // La restauration audio VOD (bêta) demande son accès au clic : ni DNR ni CloudFront à l'installation.
   assert.ok(!manifest.permissions.includes("declarativeNetRequest"));
-  assert.ok(!manifest.host_permissions.includes("https://*.cloudfront.net/*"));`,
+  assert.ok(!manifest.host_permissions.includes("https://*.cloudfront.net/*"));
+  // Le gestionnaire de clips du tableau de bord est facultatif aussi : demandé quand on active le réglage.
+  assert.ok(!manifest.host_permissions.includes("https://dashboard.twitch.tv/*"));`,
         replace: `  // Firefox : obligatoire (sans avertissement), car le navigateur la refuse en facultative.
   assert.ok(manifest.permissions.includes("declarativeNetRequestWithHostAccess"));
   // identity (import des follows Twitch) : obligatoire aussi, Firefox ne la propose pas en facultative.
@@ -333,11 +335,28 @@ function releaseIdentityPermission() {}`,
   assert.deepEqual(manifest.optional_host_permissions, [CHZZK_HOST_PERMISSION]);
   // La restauration audio VOD : DNR et CloudFront sont obligatoires sur Firefox, donc déjà accordés.
   assert.ok(manifest.permissions.includes("declarativeNetRequest"));
-  assert.ok(manifest.host_permissions.includes("https://*.cloudfront.net/*"));`
+  assert.ok(manifest.host_permissions.includes("https://*.cloudfront.net/*"));
+  // Le gestionnaire de clips du tableau de bord : obligatoire aussi sur Firefox, donc déjà accordé.
+  assert.ok(manifest.host_permissions.includes("https://dashboard.twitch.tv/*"));`
       },
       {
         find: `test("manifeste : la règle d'en-tête est une permission facultative, jamais obligatoire"`,
         replace: `test("manifeste Firefox : la règle d'en-tête est obligatoire, sans demande"`,
+      },
+    ],
+  },
+  {
+    file: "tests/clips-dashboard.test.mjs",
+    why: "Sur Firefox l'accès au tableau de bord est une permission d'hôte obligatoire (déjà accordée), pas une permission facultative.",
+    edits: [
+      {
+        find: `  assert.ok(manifest.optional_host_permissions.includes("https://dashboard.twitch.tv/*"));
+  assert.ok(!manifest.host_permissions.includes("https://dashboard.twitch.tv/*"));`,
+        replace: `  assert.ok(manifest.host_permissions.includes("https://dashboard.twitch.tv/*"));`,
+      },
+      {
+        find: `l'accès n'est pas obligatoire"`,
+        replace: `l'accès est accordé d'office sur Firefox"`,
       },
     ],
   },
